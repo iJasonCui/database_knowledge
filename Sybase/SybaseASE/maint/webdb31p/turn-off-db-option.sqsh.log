@@ -1,0 +1,190 @@
+=========================
+Msg_ad
+Database option 'dbo use only' turned OFF for database 'Msg_ad'.
+Running CHECKPOINT on database 'Msg_ad' for option 'dbo use only' to take
+effect.
+(return status = 0)
+Database option 'trunc log on chkpt' turned OFF for database 'Msg_ad'.
+Running CHECKPOINT on database 'Msg_ad' for option 'trunc log on chkpt' to take
+effect.
+(return status = 0)
+=========================
+Msg_ai
+Database option 'dbo use only' turned OFF for database 'Msg_ai'.
+Running CHECKPOINT on database 'Msg_ai' for option 'dbo use only' to take
+effect.
+(return status = 0)
+Database option 'trunc log on chkpt' turned OFF for database 'Msg_ai'.
+Running CHECKPOINT on database 'Msg_ai' for option 'trunc log on chkpt' to take
+effect.
+(return status = 0)
+=========================
+Msg_ar
+Database option 'dbo use only' turned OFF for database 'Msg_ar'.
+Running CHECKPOINT on database 'Msg_ar' for option 'dbo use only' to take
+effect.
+(return status = 0)
+Database option 'trunc log on chkpt' turned OFF for database 'Msg_ar'.
+Running CHECKPOINT on database 'Msg_ar' for option 'trunc log on chkpt' to take
+effect.
+(return status = 0)
+=========================
+Msg_md
+Database option 'dbo use only' turned OFF for database 'Msg_md'.
+Running CHECKPOINT on database 'Msg_md' for option 'dbo use only' to take
+effect.
+(return status = 0)
+Database option 'trunc log on chkpt' turned OFF for database 'Msg_md'.
+Running CHECKPOINT on database 'Msg_md' for option 'trunc log on chkpt' to take
+effect.
+(return status = 0)
+=========================
+Msg_mi
+Database option 'dbo use only' turned OFF for database 'Msg_mi'.
+Running CHECKPOINT on database 'Msg_mi' for option 'dbo use only' to take
+effect.
+(return status = 0)
+Database option 'trunc log on chkpt' turned OFF for database 'Msg_mi'.
+Running CHECKPOINT on database 'Msg_mi' for option 'trunc log on chkpt' to take
+effect.
+(return status = 0)
+=========================
+Msg_mr
+Database option 'dbo use only' turned OFF for database 'Msg_mr'.
+Running CHECKPOINT on database 'Msg_mr' for option 'dbo use only' to take
+effect.
+(return status = 0)
+Database option 'trunc log on chkpt' turned OFF for database 'Msg_mr'.
+Running CHECKPOINT on database 'Msg_mr' for option 'trunc log on chkpt' to take
+effect.
+(return status = 0)
+=========================
+Msg_wd
+Database option 'dbo use only' turned OFF for database 'Msg_wd'.
+Running CHECKPOINT on database 'Msg_wd' for option 'dbo use only' to take
+effect.
+(return status = 0)
+Database option 'trunc log on chkpt' turned OFF for database 'Msg_wd'.
+Running CHECKPOINT on database 'Msg_wd' for option 'trunc log on chkpt' to take
+effect.
+(return status = 0)
+=========================
+Msg_wi
+Database option 'dbo use only' turned OFF for database 'Msg_wi'.
+Running CHECKPOINT on database 'Msg_wi' for option 'dbo use only' to take
+effect.
+(return status = 0)
+Database option 'trunc log on chkpt' turned OFF for database 'Msg_wi'.
+Running CHECKPOINT on database 'Msg_wi' for option 'trunc log on chkpt' to take
+effect.
+(return status = 0)
+=========================
+Msg_wr
+Database option 'dbo use only' turned OFF for database 'Msg_wr'.
+Running CHECKPOINT on database 'Msg_wr' for option 'dbo use only' to take
+effect.
+(return status = 0)
+Database option 'trunc log on chkpt' turned OFF for database 'Msg_wr'.
+Running CHECKPOINT on database 'Msg_wr' for option 'trunc log on chkpt' to take
+effect.
+(return status = 0)
+=========================
+Profile_md
+Database option 'dbo use only' turned OFF for database 'Profile_md'.
+Running CHECKPOINT on database 'Profile_md' for option 'dbo use only' to take
+effect.
+(return status = 0)
+Database option 'trunc log on chkpt' turned OFF for database 'Profile_md'.
+Running CHECKPOINT on database 'Profile_md' for option 'trunc log on chkpt' to
+take effect.
+(return status = 0)
+=========================
+Profile_mi
+Database option 'dbo use only' turned OFF for database 'Profile_mi'.
+Running CHECKPOINT on database 'Profile_mi' for option 'dbo use only' to take
+effect.
+(return status = 0)
+Database option 'trunc log on chkpt' turned OFF for database 'Profile_mi'.
+Running CHECKPOINT on database 'Profile_mi' for option 'trunc log on chkpt' to
+take effect.
+(return status = 0)
+=========================
+Profile_mr
+Database option 'dbo use only' turned OFF for database 'Profile_mr'.
+Running CHECKPOINT on database 'Profile_mr' for option 'dbo use only' to take
+effect.
+(return status = 0)
+Database option 'trunc log on chkpt' turned OFF for database 'Profile_mr'.
+Running CHECKPOINT on database 'Profile_mr' for option 'trunc log on chkpt' to
+take effect.
+(return status = 0)
+=========================
+Profile_wd
+Database option 'dbo use only' turned OFF for database 'Profile_wd'.
+Running CHECKPOINT on database 'Profile_wd' for option 'dbo use only' to take
+effect.
+(return status = 0)
+Database option 'trunc log on chkpt' turned OFF for database 'Profile_wd'.
+Running CHECKPOINT on database 'Profile_wd' for option 'trunc log on chkpt' to
+take effect.
+(return status = 0)
+=========================
+Profile_wi
+Database option 'dbo use only' turned OFF for database 'Profile_wi'.
+Running CHECKPOINT on database 'Profile_wi' for option 'dbo use only' to take
+effect.
+(return status = 0)
+Database option 'trunc log on chkpt' turned OFF for database 'Profile_wi'.
+Running CHECKPOINT on database 'Profile_wi' for option 'trunc log on chkpt' to
+take effect.
+(return status = 0)
+=========================
+Profile_wr
+Database option 'dbo use only' turned OFF for database 'Profile_wr'.
+Running CHECKPOINT on database 'Profile_wr' for option 'dbo use only' to take
+effect.
+(return status = 0)
+Database option 'trunc log on chkpt' turned OFF for database 'Profile_wr'.
+Running CHECKPOINT on database 'Profile_wr' for option 'trunc log on chkpt' to
+take effect.
+(return status = 0)
+=========================
+SuccessStory
+Database option 'dbo use only' turned OFF for database 'SuccessStory'.
+Running CHECKPOINT on database 'SuccessStory' for option 'dbo use only' to take
+effect.
+(return status = 0)
+Database option 'trunc log on chkpt' turned OFF for database 'SuccessStory'.
+Running CHECKPOINT on database 'SuccessStory' for option 'trunc log on chkpt' to
+take effect.
+(return status = 0)
+=========================
+Tracking
+Database option 'dbo use only' turned OFF for database 'Tracking'.
+Running CHECKPOINT on database 'Tracking' for option 'dbo use only' to take
+effect.
+(return status = 0)
+Database option 'trunc log on chkpt' turned OFF for database 'Tracking'.
+Running CHECKPOINT on database 'Tracking' for option 'trunc log on chkpt' to
+take effect.
+(return status = 0)
+=========================
+Tracking1
+Database option 'dbo use only' turned OFF for database 'Tracking1'.
+Running CHECKPOINT on database 'Tracking1' for option 'dbo use only' to take
+effect.
+(return status = 0)
+Database option 'trunc log on chkpt' turned OFF for database 'Tracking1'.
+Running CHECKPOINT on database 'Tracking1' for option 'trunc log on chkpt' to
+take effect.
+(return status = 0)
+=========================
+Tracking2
+Database option 'dbo use only' turned OFF for database 'Tracking2'.
+Running CHECKPOINT on database 'Tracking2' for option 'dbo use only' to take
+effect.
+(return status = 0)
+Database option 'trunc log on chkpt' turned OFF for database 'Tracking2'.
+Running CHECKPOINT on database 'Tracking2' for option 'trunc log on chkpt' to
+take effect.
+(return status = 0)

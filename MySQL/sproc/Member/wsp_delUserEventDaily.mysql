@@ -1,0 +1,47 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_delUserEventDaily;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_delUserEventDaily ()
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         April 2006
+**   Description:  delete all UserEvent and UserEventMonitor rows
+**                 older than retention
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+BEGIN
+
+DECLARE at_userEventId          INT ;
+DECLARE at_numberOfDeletedRows  INT ;
+DECLARE at_eventTypeId          SMALLINT ;
+DECLARE at_eventRetention       INT ;
+DECLARE at_dateGMT              DATETIME ;
+
+CALL wsp_GetDateGMT(at_dateGMT);
+
+SET at_numberOfDeletedRows = 0 ;
+
+CREATE TEMPORARY TABLE tmpUserEvent
+SELECT userEventId 
+  FROM UserEvent e, UserEventType t 
+ WHERE e.eventTypeId = t.eventTypeId
+   -- AND t.eventRetention <= DATEDIFF(dd, e.dateCreated, at_dateGMT)
+   AND e.dateCreated <= DATEADD(dd, -1 * t.eventRetention, at_dateGMT) ;
+
+DELETE UserEventMonitor FROM UserEventMonitor
+INNER JOIN tmpUserEvent
+ON UserEventMonitor.userEventId = tmpUserEvent.userEventId ;
+
+DELETE UserEvent FROM UserEvent 
+INNER JOIN tmpUserEvent 
+ON UserEvent.userEventId = tmpUserEvent.userEventId ;
+
+END;;
+DELIMITER ;

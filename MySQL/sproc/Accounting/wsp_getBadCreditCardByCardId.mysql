@@ -1,0 +1,36 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getBadCreditCardByCardId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getBadCreditCardByCardId (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         Sept 9, 2003
+**   Description:  retrieves credit card for the specified creditCardId
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+at_creditCardId DECIMAL(12,0)
+)
+BEGIN
+
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+SELECT reasonContentId
+          ,reason
+          ,status
+          ,dateModified
+          ,dateCreated
+      FROM BadCreditCard
+     WHERE creditCardId = at_creditCardId;
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

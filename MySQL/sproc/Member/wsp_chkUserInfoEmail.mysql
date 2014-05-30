@@ -1,0 +1,43 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_chkUserInfoEmail;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_chkUserInfoEmail (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga/Jeff Yang
+**   Date:  June 4, 2002
+**   Description: check if email exists in user_info table 
+**
+** REVISION(S):
+**   Author:  Jeff Yang
+**   Date:  September 23 2002
+**   Description:  Added user_type in where clause
+**
+**   Author:  Jack Veiga 
+**   Date:  May 2003
+**   Description:  Added check of EmailReverify table
+**
+**   Author:  Andy Tran 
+**   Date:  June 2008
+**   Description:  Added returnVal as return value
+**
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_email CHAR(129)
+,at_userId DECIMAL(12,0) 
+)
+BEGIN
+
+     IF (SELECT 1  FROM user_info WHERE status != 'J'
+            AND user_id != at_userId AND email = LTRIM(RTRIM(UPPER(at_email))) AND user_type IN ('F', 'P')) IS NULL 
+     THEN
+	 SELECT 0 AS returnVal ;
+     ELSE
+         SELECT 1 AS returnVal ;
+     END IF;
+ 
+END;;
+DELIMITER ;

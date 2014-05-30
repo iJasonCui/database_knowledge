@@ -1,0 +1,98 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updUserSubscriptionAccount;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updUserSubscriptionAccount (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  November 25, 2004
+**   Description:  updates user account subscription info
+**
+**
+** REVISION(S):
+**   Author: Marc Henderson
+**   Date: January 21 2005
+**   Description: update so that GMT time is instead of passed in dateNow which will be timezone of app server - in our case EST time.
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date: January 21 2005
+**   Description: fixed app so it passes in correct GMT time, so when we reverse subscription we can make expiryDate = dateNow 
+**
+** REVISION(S):
+**   Author: Yan Liu 
+**   Date: Feb 26 2008
+**   Description: avoid duplication in UserSubscriptionAccountHistory 
+**
+** REVISION(S):
+**   Author: Yan Liu 
+**   Date: April 10 2008
+**   Description: adjust unique index of UserSubscriptionAccount. 
+**
+** REVISION(S):
+**   Author: Yan Liu
+**   Date: June 3 2008
+**   Description: Rewrite insert part to simplify business logic.
+**
+******************************************************************************/
+   at_userId                    DECIMAL(12,0),
+   at_subscriptionOfferDetailId SMALLINT,
+   at_subscriptionStatus        CHAR(1),
+   at_autoRenew                 CHAR(1),
+   at_dateExpiry                DATETIME,
+   at_dateNowGMT                DATETIME,
+   at_cancelCodeMask            INT,
+   at_userCancelReason          VARCHAR(255),
+   at_cardId                    INT
+)
+BEGIN
+
+DECLARE at_sOfferDetailId2 SMALLINT;
+DECLARE done INT DEFAULT FALSE;
+DECLARE at_premiumId SMALLINT;
+
+DECLARE CUR_UserSubAccount2 CURSOR FOR
+SELECT subscriptionOfferDetailId 
+  FROM UserSubscriptionAccount
+ WHERE userId = at_userId
+   AND subscriptionOfferDetailId <= 0;
+
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+OPEN CUR_UserSubAccount2;
+
+read_loop: LOOP
+    FETCH CUR_UserSubAccount2 INTO at_sOfferDetailId2;
+    IF done THEN
+      LEAVE read_loop;
+    END IF;
+
+    DELETE FROM UserSubscriptionAccount
+          WHERE userId = at_userId
+            AND subscriptionOfferDetailId = at_sOfferDetailId2;
+END LOOP read_loop;
+
+CLOSE CUR_UserSubAccount2;
+     
+IF (SELECT 1 FROM UserSubscriptionAccount WHERE userId = at_userId AND subscriptionOfferDetailId = at_subscriptionOfferDetailId) IS NULL 
+THEN
+   IF (at_subscriptionOfferDetailId > 0) 
+   THEN
+      SELECT premiumId INTO at_premiumId FROM SubscriptionOfferDetail WHERE subscriptionOfferDetailId = at_subscriptionOfferDetailId;
+   ELSE
+      SET at_premiumId = 0; 
+   END IF;
+
+   CALL wsp_cursorUserSubscriptionAccount(at_userId, at_premiumId);
+
+   CALL wsp_transInsUserSubscriptAccount (at_userId,at_subscriptionOfferDetailId,at_subscriptionStatus,at_autoRenew,at_dateExpiry,at_dateNowGMT,at_cancelCodeMask,at_userCancelReason,at_cardId);
+
+ELSE
+
+   CALL wsp_transUpdUserSubscriptAccount (at_userId,at_subscriptionOfferDetailId,at_subscriptionStatus,at_autoRenew,at_dateExpiry,at_dateNowGMT,at_cancelCodeMask,at_userCancelReason,at_cardId);
+
+END IF;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

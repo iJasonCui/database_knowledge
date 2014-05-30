@@ -1,0 +1,440 @@
+[re-initializing the standby ]
+
+
+#----------------- CLEAN UP MSA BEFORE SETUP -------------------------------------------------#
+
+--step 1: [c151rep01] drop db subscription for g151dbr07
+--[scripts]
+drop_db_sub_all.sql
+
+SELECT 'drop subscription "' + s.subname + '" for database replication definition "' + o.dbrepname 
+     + '" with primary at "' + p.dsname + '"."' + p.dbname
+     + '" with replicate at "' + d.dsname + '"."' + d.dbname + '" without purge' 
+FROM   c151rep01_RSSD..rs_subscriptions s, c151rep01_RSSD..rs_databases p, c151rep01_RSSD..rs_databases d, c151rep01_RSSD..rs_dbreps o
+WHERE  s.pdbid = p.dbid and s.dbid = d.dbid and s.pdbid  = o.dbid and s.subname like "g151dbr07%"
+
+--[c151dbp07pgs]
+select "create logical connection to LogicalSRV." + name from master..sysdatabases where dbid >= 4 and dbid < 1000 
+
+--step 2: [c151rep01]   drop MSA connections
+--[scripts]
+drop_db_connection_g151dbr07.sql
+
+select 'drop connection to "' + d.dsname + '"."' + d.dbname + '"' from c151rep01_RSSD..rs_databases d where d.dsname like "g151dbr07%"
+
+sqsh -Usa -Sc151rep01
+drop connection to [ws_server_name].[ws_db_name]  (for instance, v104db12.IVRPictures)
+
+--step 3: [c151rep01] drop database rep definition
+--[scripts]
+drop_db_rep_def.sql
+
+select "drop database replication definition " + r.dbrepname + "  with primary at " + d.dsname + "." + d.dbname
+from   c151rep01_RSSD..rs_dbreps r, c151rep01_RSSD..rs_databases d 
+where r.dbid = d.dbid 
+
+For instance,
+drop database replication definition IVROnWeb  with primary at LogicalSRV.IVROnWeb
+drop database replication definition Msg_ad  with primary at LogicalSRV.Msg_ad
+
+#-----------------THE END OF MSA CLEANING UP -----------------------------------------#
+
+
+#-----------------THE Warm Standby CLEAN UP -----------------------------------------#
+
+--step 1: [c151rep01]  drop connection of warm standby
+
+sqsh -Usa -Sc151rep01
+drop connection to c151dbp07pgs.IVRPictures
+
+select "drop connection to c151dbp07." + name from sysdatabases where dbid >= 4 and dbid < 1000
+
+drop connection to c151dbp07.ChargebackLoad
+drop connection to c151dbp07.LPortal
+drop connection to c151dbp07.crm
+
+drop connection to c151dbp07pgs.ContentMonitor
+drop connection to c151dbp07pgs.IVRMobile
+drop connection to c151dbp07pgs.TrialDb
+drop connection to c151dbp07pgs.audit
+drop connection to c151dbp07pgs.IVRPictures
+
+--step 2: [c151rep01]  drop connection of primary 
+
+sqsh -Usa -Sc151rep01
+drop connection to c151dbp06pgs.IVRPictures
+
+select "drop connection to c151dbp06pgs." + name from sysdatabases where dbid >= 4 and dbid < 1000
+
+drop connection to c151dbp06.ChargebackLoad
+drop connection to c151dbp06.LPortal
+drop connection to c151dbp06.crm
+
+drop connection to c151dbp06pgs.ContentMonitor
+drop connection to c151dbp06pgs.IVRMobile
+drop connection to c151dbp06pgs.TrialDb
+drop connection to c151dbp06pgs.audit
+drop connection to c151dbp06pgs.IVRPictures
+
+--step 3: [c151rep01]  drop logical connection
+
+sqsh -Usa -Sc151rep01
+drop logical connection to LogicalSRV.IVRPictures
+
+select "drop logical connection to LogicalSRV." + name from sysdatabases where dbid >= 4 and dbid < 1000
+
+drop logical connection to LogicalSRV.ChargebackLoad
+drop logical connection to LogicalSRV.LPortal
+drop logical connection to LogicalSRV.crm
+
+drop logical connection to LogicalSRV.ContentMonitor
+drop logical connection to LogicalSRV.IVRMobile
+drop logical connection to LogicalSRV.IVRPictures
+drop logical connection to LogicalSRV.TrialDb
+drop logical connection to LogicalSRV.audit
+
+--step 4: [c151dbp06pgs and g151dbr07] disable rep agent and ignore the ltm marker BOTH ON PRIMARY AND WARM STANDBY
+--[scripts] 
+--[path] jcui@gxcvs1:/home/jcui/web/javalife/db/scripts/RepServer
+./settrunc_rep_agent_disable_OnStandbySRV.sh c151dbp06 LPortal
+
+select "./settrunc_rep_agent_disable_OnStandbySRV.sh c151dbp06 " + name from sysdatabases where dbid >= 4 and dbid < 1000
+
+use IVRPictures
+dbcc gettrunc
+
+exec sp_stop_rep_agent IVRPictures
+dbcc settrunc('ltm', ignore)
+exec sp_config_rep_agent IVRPictures, disable
+
+--step 3: [on primary database, for instance, c151dbp06pgs] drop c151rep01_maint_user as alias on prim db 
+--[scripts] 
+--[path] jcui@gxcvs1:/home/jcui/web/javalife/db/scripts/RepServer
+./drop_Alias_OnActiveSRV.sh c151dbp06 c151rep01 LPortal
+
+select "./drop_Alias_OnActiveSRV.sh c151dbp06pgs c151rep01 " + name from sysdatabases where dbid >= 4 and dbid < 1000
+
+USE IVRPictures
+go
+IF EXISTS (SELECT * FROM sysalternates WHERE suid=SUSER_ID('c151rep01_maint_user'))
+BEGIN
+    EXEC sp_dropalias 'c151rep01_maint_user'
+    IF EXISTS (SELECT * FROM sysalternates WHERE suid=SUSER_ID('c151rep01_maint_user'))
+        PRINT '<<< FAILED DROPPING ALIAS c151rep01_maint_user >>>'
+    ELSE
+        PRINT '<<< DROPPED ALIAS c151rep01_maint_user >>>'
+END
+go
+
+========================================================
+Implementation warm standby 
+========================================================
+
+[new installation]
+--step 1: [c151rep44]
+
+create logical connection to LogicalSRV.IVRPictures
+admin logical_status
+
+--step 1.1 modify interfaces 
+
+--step 2:  [c151rep44, host name is webtheta] add primary db 
+
+--2.1 login [webtheta] host as the 'repserver' user and add primary database connection 
+
+--2.2 run this one to set up rep15 environment because webtheta has two rep server instances, REp12.6 and Rep 15
+
+. /ccs/repsrv15_0/SYBASE.sh
+
+--2.3 edit the resource file "/opt/repserver/REP-15_2/init/logs/c151dbp06pgs_IVRPictures.prim.rs"
+
+--2.4 run rs_init with resource file as follows:
+
+select "/opt/repserver/REP-15_2/install/rs_init -r /opt/repserver/REP-15_2/init/logs/c151dbp06pgs_" +  name + ".prim.rs" from sysdatabases where dbid >= 4 and dbid < 1000
+
+[repserver@webtheta:/opt/repserver/REP-15_2/init/logs]$ 
+/opt/repserver/REP-15_2/install/rs_init -r /opt/repserver/REP-15_2/init/logs/c151dbp06pgs_IVRPictures.prim.rs 
+
+admin who_is_down (no one should be down)
+
+--step 3:  set rep table/col and run sp_reptostandby
+
+--step 3.1: [on primary database, for instance, c151dbp06pgs]
+
+use IVRPictures
+sp_reptostandby crm, 'all'
+
+--step 3.2 set rep table/col
+
+[tips 1] figure out whether there is text column in the table
+
+select o.name as table_name, c.name as col_name, t.name as col_type
+from sysindexes i, sysobjects o, syscolumns c, systypes t 
+where i.indid = 255 and i.id = o.id and o.type = "U" and c.id = o.id and c.type = t.type and t.name = "text"
+
+if there is one, run exec sp_setreptable_text [table name], 'true','owner_off', 'replicate_if_changed'
+
+[tips 2] generate the sql of set rep tables
+
+select "exec sp_setreptable " +  name + " , true" from sysobjects where type = "U" and name not like "rs%"
+
+--step 4: [webtheta] add warm standby connection 
+
+--4.1 login [webtheta] host as the 'repserver' user and add ws database connection 
+
+--4.2 run this one to set up rep15 environment because webtheta has two rep server instances, REp12.6 and Rep 15
+
+. /ccs/repsrv15_0/SYBASE.sh
+
+--4.3 edit the resource file "/opt/repserver/REP-15_2/init/logs/g151dbr07_IVRPictures.ws.rs"
+
+--4.4 run rs_init with resource file as follows:
+
+[repserver@c151rep01:/opt/repserver/REP-15_2/init/logs]$ 
+/opt/repserver/REP-15_2/install/rs_init -r /opt/repserver/REP-15_2/init/logs/c151dbp07pgs_IVRPictures.ws.rs 
+
+select "/opt/repserver/REP-15_2/install/rs_init -r /opt/repserver/REP-15_2/init/logs/c151dbp07pgs_" +  name + ".ws.rs" from sysdatabases where dbid >= 4 and dbid < 1000
+
+--step 5: [c151dbp06pgs] dump primary db
+
+[sybase@c151dbp06pgs:/ccs/sybase12_5]$ cd /opt/etc/sybase/maint;  ./cron-dumpdb.sh IVRPictures a   
+
+--step 5.1: copy the db dump from source server to destination 
+
+[sybase@c151dbp06pgs:/opt/etc/sybase12_52/dump/IVRPictures]
+scp ./c151dbp06pgs/IVRPictures/IVRPictures_dba_1 sybase@c151dbp07:/data/dump/c151dbp07pgs/IVRPictures
+scp -p /data/dump/IVRPictures/IVRPictures-dba* sybase@g151dbr07:/data/dump/IVRPictures
+
+--step 6: load it into ws db
+
+[tips] ONLY For Sybase ASE 15, on warm standby server, after loading database, and then run
+dbcc dbrepair(dbname, ltmignore)
+
+[sybase@g151dbr07:~/maint]$ more Load_db_IVRPictures.sql 
+cd $SYBMAINT
+isql -Usa -Sg151dbr07 -i Load_db_IVRPictures.sql 
+
+AND THEN 1>  online database IVRPictures
+
+--step 7: add "c151rep44_maint_user" as dbo alias on BOTH WARM STANDBY and PRIMARY 
+
+USE IVRPictures
+go
+IF USER_ID('c151rep44_maint_user') IS NOT NULL
+BEGIN
+    EXEC sp_dropuser 'c151rep44_maint_user'
+    IF USER_ID('c151rep44_maint_user') IS NOT NULL
+        PRINT '<<< FAILED DROPPING USER c151rep44_maint_user >>>'
+    ELSE 
+        PRINT '<<< DROPPED USER c151rep44_maint_user >>>'
+END
+go
+
+USE IVRPictures
+go
+EXEC sp_addalias 'c151rep44_maint_user','dbo'
+go
+
+[NOte 1:] there is a handy shell script doing this task.
+
+jasonc@webccs:~/src/javalife/db/scripts/RepServer$ 
+--./drop_Alias_Add_as_user_OnActiveSRV.sh c151dbp06pgs c151rep44 IVRPictures
+./add_Alias_BothActiveStandbySRV.sh c151dbp06pgs c151rep44 IVRPictures
+
+-- step 7.1:  make sure that set "dbo use only" and "trunc log"  on STANDBY
+
+USE master
+go
+EXEC sp_dboption 'IVRPictures','dbo use only',true
+go
+USE master
+go
+EXEC sp_dboption 'IVRPictures','trunc log on chkpt',true
+go
+USE IVRPictures
+go
+CHECKPOINT
+go
+
+--step 8: [c151rep44] resume connection to ws db
+sqsh -Usa -Sw151rep01
+
+resume connection to g151dbr07.IVRPictures
+
+--step 9: test rep 
+
+If the table "RepTest" does not exist, please create it on the user database as follows 
+
+CREATE TABLE dbo.RepTest
+(
+    repTestId       int      NOT NULL,
+    dateTime        datetime NOT NULL,
+    defaultDateTime datetime DEFAULT GETDATE() NULL
+)
+LOCK ALLPAGES
+go
+
+SELECT T.repTestId, T.dateTime FROM IVRPictures..RepTest T
+delete  IVRPictures..RepTest where repTestId < 10
+INSERT INTO IVRPictures..RepTest ( repTestId, dateTime ) VALUES ( 1, getdate() )
+
+--step 10 : check the stable queue
+admin disk_space (on rep server)
+
+rs_helppartition (on rssd db)
+
+-- step 11: trouble shooting
+
+
+--##################################
+-- MSA portion
+--#################################
+
+===============================================================
+MSA (Multi-Site Availability) with using dump marker
+===============================================================
+
+step 1:
+
+[NAMING CONVENTION]
+
+1: [table rep def] prad_a_profile_dating which is {DB short name}_{full table name}. "prad" means "IVRPictures".
+2: [db rep def]    IVRPictures  which is {full_db_name}
+3: [db sub]        w151dbp03_IVRPictures which is {full_server_name}_{full_db_name}
+4: [table sub]     03prad_a_profile_dating  {short_server_name}{DB short name}_{full table name}
+
+step 1:
+
+[rep2p]://{1}# create database replication definition IVRPictures with primary at webdb29p.IVRPictures (wrong one)
+
+[####### wrong one, if you have logical connection, you have to use Logical server name ##########]
+[rep2p]://{2}# go
+Msg 15248, Level 12, State 0
+Server 'rep2d'
+Cannot use active or standby connection names when creating or altering replication definitions or function replication definitions.
+Must use logical connection name.
+
+[rep_server]://{1}# 
+create database replication definition IVRPictures with primary at LogicalSRV.IVRPictures
+
+create database replication definition ChargebackLoad with primary at LogicalSRV.ChargebackLoad
+create database replication definition LPortal with primary at LogicalSRV.LPortal
+create database replication definition crm with primary at LogicalSRV.crm
+
+create database replication definition ContentMonitor with primary at LogicalSRV.ContentMonitor
+create database replication definition IVRMobile with primary at LogicalSRV.IVRMobile
+create database replication definition TrialDb with primary at LogicalSRV.TrialDb
+create database replication definition audit with primary at LogicalSRV.audit
+
+###### handy script #############
+select "create database replication definition " + name  + " with primary at LogicalSRV." + name
+from sysdatabases where dbid >= 4 and dbid < 1000
+################################
+
+--step 2: modify copy_load.sh
+
+--step 3: [g151dbr07]: create database Msg_ad with same size as the primary db with dbo use only
+             
+--step 5: 
+rs_init to add db connection (regular)
+
+[repserver@webtheta:~/REP-12_6/install]$ 
+/opt/repserver/REP-15_2/install/rs_init -r /opt/repserver/REP-15_2/init/logs/g151dbr07_IVRPictures.MSA.rs
+
+--step 6:
+
+--step 6.1 define 
+/* using dump marker */
+[rep5p]://{1}# define subscription g151dbr07_IVRPictures for database replication definition IVRPictures with primary at LogicalSRV.IVRPictures 
+with replicate at g151dbr07.IVRPictures use dump marker
+
+##### drop subscription w151dbp03_IVRPictures for database replication definition IVRPictures with primary at webdb4p.IVRPictures with replicate at w151dbp03.IVRPictures_view without purge
+##### same sa password for primary db server, primary rep server and replicate rep server
+
+--step 6.2 
+check subscription g151dbr07_IVRPictures for database replication definition IVRPictures with primary at LogicalSRV.IVRPictures 
+with replicate at g151dbr07.IVRPictures
+
+--step 6.3
+activate subscription g151dbr07_IVRPictures for database replication definition IVRPictures with primary at LogicalSRV.IVRPictures 
+with replicate at g151dbr07.IVRPictures
+
+--at this point, the stable queue is established and could be verified by rs_helppartition
+-- dsi has been suspended on  g151dbr07.IVRPictures (HAVE TO BE DOWN, IF NOT, WAITING FOR IT) 
+-- IF g151dbr07.IVRPictures NOT SUSPENDED, JUST suspend connection to g151dbr07.IVRPictures
+
+step 7:
+
+dump db on active ### the db dump will suspend connection to g151dbr07.IVRPictures
+
+step 8:
+
+scp into BRP and load db g151dbr07.IVRPictures and then online db
+
+step 9:
+./add_Alias_BothActiveStandbySRV.sh g151dbr07 c151rep44 ChargebackLoad
+
+resume connection to g151dbr07.ChargebackLoad
+
+SELECT T.repTestId, T.dateTime FROM IVRPictures..RepTest T where repTestId < 10
+--delete  IVRPictures..RepTest where repTestId < 10
+INSERT INTO IVRPictures..RepTest ( repTestId, dateTime ) VALUES ( 2, getdate() )
+
+step 10:
+validate subscription g151dbr07_IVRPictures for database replication definition IVRPictures with primary at LogicalSRV.IVRPictures 
+with replicate at g151dbr07.IVRPictures
+
+step 11:
+--#####################
+--VIP!!!!!!!!!!!!!!!!!
+--only can remove the marker when the stable queue caught up
+--
+--#####################
+
+remove the marker on msa dbs 
+./settrunc_rep_agent_disable_OnStandbySRV.sh g151dbr07 ChargebackLoad
+
+########################
+USE ${DBName}
+go
+dbcc gettrunc
+dbcc settrunc('ltm', ignore)
+go
+
+sp_helpdb
+#########################
+
+--index maintenance on CCD c151dbp07
+
+[sybase@wxdbmaint maint]$ ./online_index_maint_ccd.sh.new c151dbp07pgs audit c151rep44
+
+
+
+#---------------------------#
+Tricks 1:
+select "define subscription w104dbr05_" + name + " for database replication definition " + name
++ " with primary at LogicalSRV." + name + " with replicate at w104dbr05." + name 
++ " use dump marker"
+from master..sysdatabases where name like "Profile%" or name like "Msg%"
+
+--#---------------------------#
+Trick 2: 
+--###########################
+sa password must be synched between ASE and REP 
+
+I. 2007/03/29 16:04:46. REPLICATE Replication Server: Defining subscription <w104dbr05_IVRPictures> for database replication definition <IVRPictures> with primary at <LogicalSRV.IVRPictures> with replicate at <w104dbr05.IVRPictures>
+I. 2007/03/29 16:04:46. PRIMARY Replication Server: Defining subscription <w104dbr05_IVRPictures> for database replication definition <IVRPictures> with primary at <LogicalSRV.IVRPictures> with replicate at <w104dbr05.IVRPictures>
+I. 2007/03/29 16:04:46. Placing marker in webdb31p.IVRPictures log
+I. 2007/03/29 16:04:50. Distributor for 'LogicalSRV.IVRPictures' received and proceessed enable marker. Distributing commands to replicates
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,70 @@
+/* user_info */
+--        "gender" char(1),
+--        "password" varchar(16),
+--        "email" varchar(129),
+
+create replication definition "Member_user_info"
+with primary at LogicalSRV.Member
+with all tables named "user_info"
+(
+        "user_id" numeric,
+        "user_type" char(1),
+        "username" varchar(129),
+        "signuptime" int,
+        "laston" int,
+        "preferred_units" char(1),
+        "gender" char(1),
+        "email" varchar(129),
+        "birthdate" smalldatetime,
+        "zipcode" varchar(10),
+        "lat_rad" int,
+        "long_rad" int,
+        "universal_id" numeric,
+        "universal_password" numeric,
+        "status" char(1),
+        "user_agent" varchar(80),
+        "firstpaytime" int,
+        "signup_adcode" varchar(30),
+        "firstidentitytime" int,
+        "onhold_greeting" varchar(1),
+        "signup_context" char(3),
+        "height_cm" tinyint,
+        "body_type" char(1),
+        "ethnic" char(1),
+        "religion" char(1),
+        "smoke" char(1),
+        "mail_dating" char(1),
+        "mail_romance" char(1),
+        "mail_intimate" char(1),
+        "suspendedon" int,
+        "pref_last_on" char(1),
+        "firstpicturetime" int,
+        "last_logoff" int,
+        "acceptnotify" char(1),
+        "emailStatus" char(1),
+        "pref_clubll_signup" char(1),
+        "localePref" tinyint,
+        "languagesSpokenMask" int,
+        "cityId" int,
+        "jurisdictionId" smallint,
+        "secondJurisdictionId" smallint,
+        "countryId" smallint,
+        "signupLocalePref" tinyint,
+        "searchLanguageMask" int,
+        "dateModified" datetime,
+        "pref_community_checkbox" char(3),
+        "mediaReleaseFlag" char(1),
+        "signupIP" numeric,
+        "messageOnHoldStatus" char(1),
+        "messageOnHoldDate" datetime,
+        "lat_rad1" int,
+        "long_rad1" int,
+        "userCellId" smallint,
+        "firstSession" tinyint,
+        "signupBrand" char(5)
+)
+primary key ( "user_id")
+replicate minimal columns
+/* No searchable columns */
+go
+

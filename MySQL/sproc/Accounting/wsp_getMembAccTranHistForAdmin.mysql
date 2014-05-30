@@ -1,0 +1,57 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getMembAccTranHistForAdmin;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getMembAccTranHistForAdmin (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Mark Jaeckle
+**   Date:         Sept 5, 2003
+**   Description:  retrieves account transactions for the specified user
+**
+**
+** REVISION(S):
+**   Author:       Andy Tran
+**   Date:         December 2005
+**   Description:  retrieves currency as well
+**                 re-suffle to make field orders the same with member history
+**
+******************************************************************************/
+
+     at_userId DECIMAL(12,0)
+    ,at_dateCreated DATETIME
+)
+
+BEGIN
+
+    SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+    SELECT a.xactionId
+          ,a.xactionTypeId
+          ,a.creditTypeId
+          ,a.contentId
+          ,a.credits
+          ,a.balance
+          ,a.dateCreated
+          ,p.cost
+          ,p.tax
+          ,a.description
+          ,p.billingLocationId
+          ,p.purchaseOfferDetailId
+          ,p.purchaseTypeId
+          ,p.currencyId
+          ,admin.adminUserId
+          ,p.paymentNumber
+          ,p.creditCardId
+       -- FROM AccountTransaction a ( INDEX XAK1AccountTransaction) , Purchase p, AdminAccountTransaction admin
+     FROM AccountTransaction a 
+          LEFT JOIN Purchase p ON a.xactionId = p.xactionId 
+          LEFT JOIN AdminAccountTransaction admin ON a.xactionId = admin.xactionId 
+     WHERE a.userId = at_userId
+       AND a.dateCreated >= at_dateCreated
+    ORDER BY xactionId;
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

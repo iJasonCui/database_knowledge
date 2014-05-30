@@ -1,0 +1,43 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getUserEventByActionCode;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getUserEventByActionCode (
+/***********************************************************************
+**
+** CREATION:
+**   Author:        Andy Tran
+**   Date:          December 2007
+**   Description:   Get distinct user event by a given action code
+**
+** REVISION(S):
+**   Author:        Andy Tran
+**   Date:          May 2008
+**   Description:   Change monitor to separate by products/communities
+**                  Application will decide if monitor is based on
+**                  products/communities by passing in the parameters
+**                  (null means combine)
+**
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+ at_userId             DECIMAL(12,0)
+,at_actionCode         CHAR(1)
+,at_eventTypeId        SMALLINT
+,at_productCode        CHAR(1)
+,at_communityCode      CHAR(1)
+,at_eventMonitorCutoff DATETIME
+)
+BEGIN
+    SELECT e.targetUserId, e.reasonTypeId
+      FROM UserEvent e, UserEventReasonType r
+     WHERE e.userId = at_userId
+       AND e.eventTypeId = at_eventTypeId
+       AND e.productCode = at_productCode
+       AND e.communityCode = at_communityCode
+       AND e.dateCreated >= at_eventMonitorCutoff
+       AND e.reasonTypeId = r.reasonTypeId
+       AND r.actionCode = at_actionCode ;
+
+END;;
+DELIMITER ;

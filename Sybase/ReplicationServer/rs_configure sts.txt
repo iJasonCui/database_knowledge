@@ -1,0 +1,11 @@
+exec rs_configure 'sts_cachesize              3000
+ sts_full_cache_rs_columns  "on"
+ sts_full_cache_rs_database "on"
+ sts_full_cache_rs_funcstri "on"
+ sts_full_cache_rs_function "on"
+ sts_full_cache_rs_idnames  "on"
+ sts_full_cache_rs_ids      "on"
+ sts_full_cache_rs_objects  "on"
+ sts_full_cache_rs_repdbs   "on"
+ sts_full_cache_rs_repobjs  "on"
+ sts_full_cache_rs_subscrip "on"

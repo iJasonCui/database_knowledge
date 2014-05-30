@@ -1,0 +1,27 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAllUserEventTypes;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAllUserEventTypes ()
+/***********************************************************************
+**
+** CREATION:
+**   Author:        Andy Tran
+**   Date:          April, 2006
+**   Description:   Retrieves all user event types
+**
+** REVISION(S):
+**   Author:
+**   Date:
+** Description:
+**
+*************************************************************************/
+BEGIN
+     SELECT eventTypeId
+           ,eventTypeDesc
+           ,eventMonitorLimit
+           ,eventMonitorDuration
+           ,eventMonitorUnit
+       FROM UserEventType
+      ORDER BY eventTypeId ;
+    
+END;;
+DELIMITER ;

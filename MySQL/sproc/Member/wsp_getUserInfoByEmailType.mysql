@@ -1,0 +1,29 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getUserInfoByEmailType;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getUserInfoByEmailType (
+/***********************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga
+**   Author:  Jeff Yang 
+**   Date:  September 23 2002
+**   Description:  Retrieves user info for a given user id
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+at_email VARCHAR(129)
+)
+BEGIN
+
+     SET at_email = UPPER(at_email) ;
+
+     SELECT username ,password
+       FROM user_info
+      WHERE email = at_email and status != 'J' and user_type != 'O' ;
+
+END;;
+DELIMITER ;

@@ -1,0 +1,36 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_chkUserInfoUsername;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_chkUserInfoUsername (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga/Jeff Yang
+**   Date:  June 4, 2002
+**   Description:  Check if username exists in user_info table 
+**
+** REVISION(S):
+**   Author:  Andy Tran
+**   Date:  June 2008
+**   Description:  Added returnVal as return value
+**
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_username CHAR(16)
+,at_userId DECIMAL(12,0) 
+)
+BEGIN
+     IF (SELECT 1  FROM user_info
+          WHERE status <> 'J'
+            AND user_id <> at_userId
+            AND username = LTRIM(RTRIM(UPPER(at_username))) ) IS NOT NULL
+     THEN
+         SELECT 1 AS returnVal ;
+     ELSE
+         SELECT 0 AS returnVal ;
+     END IF;
+ 
+END;;
+DELIMITER ;

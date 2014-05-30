@@ -1,0 +1,39 @@
+exec rs_configure 'cm_max_connections', '128'
+exec rs_configure 'memory_limit', '512'
+exec rs_configure 'num_client_connections',     '60'  
+exec rs_configure 'num_msgqueues',              '600'
+exec rs_configure 'num_stable_queues',          '128' 
+exec rs_configure 'num_threads',                '400'
+exec rs_configure 'smp_enable',                 'off'
+exec rs_configure 'sqt_max_cache_size',         '20971520'
+exec rs_configure 'sts_cachesize',              '200' 
+
+ num_msgqueues              600                    600                       
+ num_msgs                   45568                  45568                     
+ num_mutexes                1024                   1024                      
+ num_stable_queues          128                    128                       
+ num_threads                600                    600        
+
+
+Alter connection to w151dbp04.Profile_ad_prim set disk_affinity to 't151rep01_SD_01'
+Alter connection to w151dbp04.Profile_ar_prim set disk_affinity to 't151rep01_SD_02'
+Alter connection to w151dbp04.Profile_ai_prim set disk_affinity to 't151rep01_SD_03'
+Alter connection to w151dbp04.Profile_ad_rep set disk_affinity to 't151rep01_SD_01'
+Alter connection to w151dbp04.Profile_ar_rep set disk_affinity to 't151rep01_SD_02'
+Alter connection to w151dbp04.Profile_ai_rep set disk_affinity to 't151rep01_SD_03'
+
+[primary db server]
+
+exec sp_config_rep_agent Profile_ar_prim, "priority", "4"
+exec sp_config_rep_agent Profile_ar_prim, "scan_batch_size", "10000"
+exec sp_config_rep_agent Profile_ar_prim, "scan_timeout", "5"
+exec sp_config_rep_agent Profile_ar_prim, "send_buffer_size", "16K"
+exec sp_config_rep_agent Profile_ar_prim, "send_structured_oqids", "true"
+exec sp_config_rep_agent Profile_ar_prim, "short_ltl_keywords", "true"
+
+
+sp_stop_rep_agent Profile_ar_prim
+
+sp_start_rep_agent Profile_ar_prim
+
+sp_help_rep_agent Profile_ar_prim

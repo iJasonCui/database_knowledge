@@ -1,0 +1,30 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getOfferDetailsByXactionId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getOfferDetailsByXactionId (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:      Andy Tran
+**   Date:        November, 2005
+**   Description: Returns all purchase offer details by this xactionId
+**
+** REVISION(S):
+**   Author:        
+**   Date:          
+**   Description:   
+**
+******************************************************************************/
+
+ at_purchaseXactionId DECIMAL(12,0)
+)
+
+BEGIN
+    SELECT purchaseOfferDetailId, subscriptionOfferDetailId
+      FROM Purchase
+    WHERE xactionId = at_purchaseXactionId;
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

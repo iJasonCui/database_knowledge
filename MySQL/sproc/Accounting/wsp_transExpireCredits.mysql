@@ -1,0 +1,46 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_transExpireCredits;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_transExpireCredits (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs/Jack Veiga
+**   Date:  October 2003
+**   Description:
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+at_xactionId		INT,
+at_userId 		DECIMAL(12,0),
+at_creditTypeId		SMALLINT,
+at_credits		SMALLINT,
+at_balance              SMALLINT,
+at_dateNow 		DATETIME
+)
+BEGIN
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+	ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+	ROLLBACK;
+END;
+
+START TRANSACTION;
+
+INSERT INTO AccountTransaction (xactionId,userId,xactionTypeId,creditTypeId,contentId,credits,balance,dateCreated)
+    	VALUES (at_xactionId,at_userId,11,at_creditTypeId,26,at_credits * -1,at_balance,at_dateNow);
+DELETE FROM CreditBalance WHERE userId = at_userId AND creditTypeId = at_creditTypeId;
+
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

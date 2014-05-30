@@ -1,0 +1,30 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getNewMembersListGender;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getNewMembersListGender (
+/******************************************************************************
+**
+** CREATION:
+**   Author: 
+**   Date:  
+**   Description:  gets list of new users within time range 
+**          
+******************************************************************************/
+    at_startSeconds INT,
+    at_endSeconds   INT
+)
+BEGIN
+    SELECT user_id,
+           signuptime,
+           firstidentitytime,
+           signup_adcode,
+           user_type,
+           email,
+           zipcode,
+           gender 
+      FROM user_info 
+     WHERE user_type IN('F', 'P')
+       AND signuptime >= at_startSeconds 
+       AND signuptime <  at_endSeconds ;
+
+END;;
+DELIMITER ;

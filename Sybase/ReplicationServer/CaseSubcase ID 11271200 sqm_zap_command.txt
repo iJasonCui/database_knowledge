@@ -1,0 +1,27 @@
+Sent: Tuesday, July 18, 2006 5:45 PM
+To: Jason Cui
+Subject: Case/Subcase ID: 11271200
+
+
+You can zap this bad transaction
+
+sysadmin hibernate_on
+go
+
+sysadmin sqm_zap_command, 326,0,56424,51,21
+go
+
+sysadmin sqm_zap_command,326,0,56424,51,22
+go
+
+sysadmin hibernate_off
+go
+
+ After this then resume connection to see if it helps
+
+
+Bin
+
+
+***** regarding case number: 11271200.
+*****

@@ -1,0 +1,208 @@
+<?php
+/* 
+ * Author: KMJ
+ * craig-proof.php
+ * Copyright (c) FMG Inc. 2012
+ * Created on: 24-Apr-2012
+ * Description:  script that will: 
+ *	    - turn the slave on
+ *	    - wait for the slave to catch up to master (secs behind=0)
+ *	    - turn slave off
+ *	    - quit
+ * 
+ * This will require a cron job to run this script every X secs or mins so it can catch up.
+ * The purpose of this is to keep a relatively fresh live backup copy so if someone issues a 
+ * 'delete from table' command we have a fairly recent backup and dont have to rely on the 
+ * actual period backups we do.  Once the slave is caught up and turned off again we should
+ * do a mysql dump to save a snapshot
+ */
+
+// set up these global values //
+define('ADMIN_EMAIL','youvend@gmail.com,kjohnson@fmginc.com');
+define('MAIL',TRUE);  // do we want to mail ADMIN_EMAIL when this happens every time
+define('SYSTEM_NAME','f151-Slave-2-1');
+define('LOG_PATH','/root/mysql-backups/craig-proof/logs/');   // must have trailing slash
+define('BAK_PATH','/root/mysql-backups/craig-proof/baks/');   // must have trailing slash
+define('DEF_DB_HOST','localhost');
+define('DEF_DB_NAME','IvrDb');
+define('DEF_DB_USER','ivr');
+define('DEF_DB_PASS','d1al0g1c');
+
+date_default_timezone_set('America/Toronto');
+set_time_limit(3600);
+
+// check to see if running... only let run once at a time
+if (linux_am_i_running()) {
+    logit("Already running");
+    exit;
+} else {
+    logit("STARTING NEW PROCESS");
+}
+
+$hd=connect_to_db();
+if ($hd===false) {
+    $msg='Unable to connect to database - exiting';
+    logit($msg);
+    send_msg($msg);
+    exit;
+}
+
+// start the slave
+if (start_slave($hd)!==true) {
+    exit;  // nothing further to do here email already sent below
+}
+
+logit('slave started');
+sleep(3);
+
+$secs=9999;
+while (is_numeric($secs) && $secs>0) {  // let it catch up
+    $secs=get_secs_behind($hd);
+    logit('Seconds Behind = '.$secs);
+    if ($secs===false) {
+	$msg='Seconds behind fn returned false! stopping slave and exiting';
+	logit($msg);
+	send_msg($msg);	
+	stop_slave($hd);
+	exit;
+    } else if ($secs==0) { // done!
+	// stop slave again and quit!
+	if (stop_slave($hd)!==FALSE) {
+	    logit('Slave stopped OK - about to dump to file');
+	    // now take a mysqldump snapshot of the db
+	    $bakfile=BAK_PATH.date("Ymd-His").'-f151-slave2-1-bak.sql.gz';
+	    $cmd="mysqldump -u root -pnewnk4cash --routines IvrDb | gzip > $bakfile";
+	    shell_exec($cmd);
+	    logit('Mysql dump file '.$bakfile.' should have been created');
+	} else {
+	    $msg='Slave caught up ok but could not STOP SLAVE! Exiting with error - no dump performed.';
+	    logit($msg);
+	    send_msg($msg);
+	}
+	exit;
+    } 
+    
+    sleep(30);
+}
+
+logit('exiting');
+exit;
+
+#
+# funcs
+#
+
+/**
+ * issue the stop slave command
+ * @param mysql-handle $hd
+ * @return boolean whether successful
+ */
+function stop_slave($hd) {
+    $result=mysql_query("stop slave", $hd);
+    if (!$result) {
+	$msg='could not stop the slave! err='. mysql_error($hd);
+	logit($msg);
+	send_msg($msg);
+	return false;
+    }    
+    return true;
+}
+
+/**
+ * issue the start slave command
+ * @param mysql-handle $hd
+ * @return boolean whether successful
+ */
+function start_slave($hd) {
+    $result=mysql_query("start slave", $hd);
+    if (!$result) {
+	$msg='could not start the slave! err='. mysql_error($hd);
+	logit($msg);
+	send_msg($msg);	
+	return false;
+    }    
+    return true;
+}
+
+/**
+ * get the seconds behind master field from show slave status
+ * @param mysql-handle $hd
+ * @return false | #secs
+ */
+function get_secs_behind($hd) {
+    $result=mysql_query("show slave status", $hd);
+    if (!$result) {
+	$msg='could not get slave status! err='. mysql_error($hd);
+	logit($msg);
+	send_msg($msg);	
+	return false;
+    }    
+    $row=mysql_fetch_assoc($result);
+    if (isset($row['Seconds_Behind_Master'])) {
+	if ($row['Seconds_Behind_Master']===null) {
+	    return false;
+	} else {
+	    return $row['Seconds_Behind_Master'];
+	}
+    } else {
+	$msg.="Seconds_Behind_Master field not set!";
+	logit($msg);
+	send_msg($msg);	
+	return false;
+    }
+}
+
+
+function linux_am_i_running() {
+    $file=basename(__FILE__);
+    $pids=array();
+    // have to take out the grep line AND the cronjob line
+    // this will work as long as you > NULL in crontab
+    exec("ps axl | grep  '$file' | grep -v grep | grep -v NULL", $pids);
+    // will always find itself, so count of one means just me running
+    //logit(print_r($pids,true)." count=".count($pids));
+    if (count($pids) > 1) {
+	//echo "running ".count($pids)." times - quitting!!";
+	return true;
+    }
+    //else echo "not running - so we are now running... ";
+    // save to file current pid for reference
+    $filename=$file.'.pid';
+    $fp=fopen(LOG_PATH.$filename,'w');
+    fwrite($fp, getmypid());
+    fclose($fp);
+    return false;
+}
+
+function logit($txt) {
+    $str=date("Y-m-d H:i:s").' '.$txt."\r\n";
+    $file=date("Y-m-d").'-log.txt';
+    $fp=fopen(LOG_PATH.$file,'a');
+    fwrite($fp, $str);
+    fclose($fp);
+}
+
+/**
+ * open a db connection with globally defined values
+ * @return bool | mysql_resource
+ */
+function connect_to_db() {
+    $hd = mysql_connect(DEF_DB_HOST, DEF_DB_USER, DEF_DB_PASS);
+    if ($hd===false) return false;
+    $rc = mysql_select_db (DEF_DB_NAME, $hd);
+    if ($rc===false) return false;
+    return $hd;
+}
+
+
+/**
+ * send an error email out
+ * @param string $message the message to log
+ */
+function send_msg($message='') {
+    if (MAIL) {
+	mail(ADMIN_EMAIL, SYSTEM.' craig-proof.php message. ', $message, "From: craig-proof@fmginc.com");
+    } else {
+	echo $message.'  ';
+    }
+}

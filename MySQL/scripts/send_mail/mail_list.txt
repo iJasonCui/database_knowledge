@@ -1,0 +1,8 @@
+check_ase_log.sh                failure                 jcui@fmginc.com
+check_ase_log.sh                notification            jcui@fmginc.com
+dump_copy_load_run.sh           success                 jcui@fmginc.com
+dump_copy_load_run.sh           failure                 jcui@fmginc.com
+check_ase_log.sh                failure                 tkchan@fmginc.com
+check_ase_log.sh                notification            tkchan@fmginc.com
+dump_copy_load_run.sh           success                 tkchan@fmginc.com
+dump_copy_load_run.sh           failure                 tkchan@fmginc.com

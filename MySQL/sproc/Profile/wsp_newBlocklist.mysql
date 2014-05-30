@@ -1,0 +1,32 @@
+DELIMITER ;;
+
+DROP PROCEDURE IF EXISTS  wsp_newBlocklist;
+
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newBlocklist (
+ at_productCode CHAR(1)
+,at_communityCode CHAR(1)
+,at_userId DECIMAL(12,0)
+,at_targetUserId DECIMAL(12,0)
+)
+BEGIN
+
+  DECLARE at_dateCreated DATETIME;
+  CALL wsp_GetDateGMT (at_dateCreated);
+
+  INSERT INTO Blocklist (userId ,targetUserId ,initiator ,dateCreated) VALUES
+                        (at_userId ,at_targetUserId ,'Y' ,at_dateCreated);
+  INSERT INTO Blocklist (userId ,targetUserId ,initiator ,dateCreated) VALUES
+                        (at_targetUserId ,at_userId ,'N' ,at_dateCreated);
+
+  DELETE FROM Hotlist WHERE userId = at_userId AND targetUserId = at_targetUserId;
+  DELETE FROM Hotlist WHERE userId = at_targetUserId AND targetUserId = at_userId;
+  DELETE FROM Pass WHERE userId = at_userId AND targetUserId = at_targetUserId;
+  DELETE FROM Pass WHERE userId = at_targetUserId AND targetUserId = at_userId;
+  DELETE FROM Smile WHERE userId = at_userId AND targetUserId = at_targetUserId;
+  DELETE FROM Smile WHERE userId = at_targetUserId AND targetUserId = at_userId;
+  DELETE FROM ViewedMe WHERE userId = at_userId AND targetUserId = at_targetUserId;
+  DELETE FROM ViewedMe WHERE userId = at_targetUserId AND targetUserId = at_userId;
+
+END;;
+
+DELIMITER ;

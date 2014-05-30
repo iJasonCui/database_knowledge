@@ -1,0 +1,217 @@
+--First
+--New Extra prem Alert on T2C.sql
+select  *
+from
+(
+select  AccountYYYY,
+        AccountMM,
+        PurchaseYYYY,
+        PurchaseMM,
+        carrierId,
+        networkOperator,
+        --applicationId,
+        --applicationName,
+        --Adcode,
+        
+        count(distinct(accountId)) as Num_Member,
+        sum(TotalAmount) as Total
+from
+(
+select  datepart(year,A.dateCreated) as AccountYYYY,
+        datepart(month,A.dateCreated) as AccountMM,
+        datepart(year,P.dateCreated) as PurchaseYYYY,
+        datepart(month,P.dateCreated) as PurchaseMM,
+        M.memberId,
+        M.carrierId,
+        A.accountId,
+        C.networkOperator,
+        A.applicationId,
+        AP.applicationName,
+        A.Adcode,
+        sum(P.cost) as TotalAmount
+from    arch_Mobile.Member M
+        inner join arch_Mobile.Carrier C on M.carrierId = C.carrierId
+        inner join arch_Mobile.Account A on M.memberId = A.memberId
+        inner join arch_Mobile.Application AP on A.applicationId = AP.applicationId
+        inner join arch_Mobile.Purchase P on A.accountId = P.accountId
+where   (A.dateCreated >= 'Aug 1, 2008' and A.dateCreated < getdate())
+        and (A.applicationId = 2 and A.productId = 0)
+        --and M.carrierId = 406
+group by datepart(year,A.dateCreated),
+        datepart(month,A.dateCreated),
+        datepart(year,P.dateCreated),
+        datepart(month,P.dateCreated),
+        M.memberId,
+        M.carrierId,
+        A.accountId,
+        C.networkOperator,
+        A.applicationId,
+        AP.applicationName,
+        A.Adcode
+)TT
+group by AccountYYYY,
+        AccountMM,
+        PurchaseYYYY,
+        PurchaseMM,
+        carrierId,
+        networkOperator--,
+        --applicationId,
+        --applicationName,
+        --Adcode
+        )TT2
+where   (TT2.AccountYYYY = TT2.PurchaseYYYY and TT2.AccountMM = TT2.PurchaseMM)
+
+--================================================================================
+--New Alerts (Nathan Bomb Alerts)
+
+
+--set rowcount 100
+--select * from arch_Mobile.Carriercommunication
+select  date(TT.dateCreated) as DT,
+        TT.carrierId,
+        CA.networkOperator,
+        TT.Status,
+        TT.ErrorCode,
+        case 
+        when (TT.carrierId = 388 and TT.ErrorCode = '004') then 'Yes'
+        when (TT.carrierId = 389 and TT.ErrorCode = '004') then 'Yes'
+        when (TT.carrierId = 406 and TT.ErrorCode = '004') then 'Yes'
+        when (TT.carrierId = 410 and TT.ErrorCode = '004') then 'Yes'
+        when (TT.carrierId = 408 and TT.ErrorCode = '004') then 'Yes'
+        when (TT.carrierId = 400 and TT.ErrorCode = '006') then 'Yes'
+        when (TT.carrierId = 385 and TT.ErrorCode = '006') then 'Yes'
+        when (TT.carrierId = 393 and TT.ErrorCode = '006') then 'Yes'
+        when (TT.carrierId = 383 and TT.ErrorCode = '006') then 'Yes'
+        when (TT.carrierId = 379 and TT.ErrorCode = '006') then 'Yes'
+        when (TT.carrierId not in (388,389,406,410,408,385,393,383,379) and TT.ErrorCode = '006') then 'Yes'
+        else 'No' end as Success_Flag,
+        count(distinct(TT.carriercommunicationId)) as Num_Msg,
+        sum(P.cost) as TotalCost
+from
+(
+select  C.carriercommunicationId,
+        C.carrierOrigin,
+        C.carrierId,
+        substring(substring(C.carrierMsgStatusDetail,2,999),1,charindex('''', substring(C.carrierMsgStatusDetail,2,999))-1) as Status,
+        right(C.carrierMsgStatusDetail,(length(C.carrierMsgStatusDetail)-1-charindex(':', C.carrierMsgStatusDetail))) as ErrorCode,
+        C.carrierMsgData,
+        C.purchaseId,
+        C.dateCreated
+from    arch_Mobile.Carriercommunication C 
+where   (C.dateCreated >= 'Oct 1, 2008' and C.dateCreated < 'Jan 30, 2010')
+        and C.direction = 1
+        and (C.applicationId = 2 and C.productId = 0)
+        and (C.carrierMsgData like '%Hot Search at txt2CLICK! Reply: S Over 300+ sexy singles join txt2CLICK every day!%'
+        or C.carrierMsgData like 'Hot Search at txt2CLICK! Reply:S Over 300+ sexy singles join txt2CLICK everyday! Search%'
+        or C.carrierMsgData like 'Chat to local sexy singles! Reply: S Over 300+ singles daily at txt2CLICK sign-up today!%'
+        or C.carrierMsgData like 'Chat with Real Sexy Singles with txt2click! Reply: S Search for new people everyday! Joi%'
+        or C.carrierMsgData like 'Browse hundreds of exciting, sexy profiles! Reply: S  Join txt2CLICK and talk to as many%'
+        or C.carrierMsgData like 'Flirt with SEXY SINGLES! Reply: S Who are interested in YOU! Join txt2CLICK NOW! Reply%' 
+        or C.carrierMsgData like 'Chat, Flirt, Talk! Reply: S The choice is yours, real sexy singles waiting to talk to yo%'
+        or C.carrierMsgData like 'Flirt with NEW people daily! Reply: S Or talk to someone you met before! Join txt2CLICK!%'
+        or C.carrierMsgData like 'DO IT! Reply: S Anywhere, anytime you like! Join txt2CLICK and meet hot, exciting, singl%'
+        or C.carrierMsgData like 'Text Chat Flirting! Reply: S The NEW WAY to meet hot singles in your area! They want wha%'
+        or C.carrierMsgData like 'Search Profiles of sexy singles! Reply: S Join txt2click and talk to 1000s of flirty sin%'
+        or C.carrierMsgData like 'Text message exciting singles! Reply: S Anytime you want, whenever you want! Join txt2CL%'
+        or C.carrierMsgData like 'Sexy, text flirting! Reply: S Its fun, its safe and there are 1000s of singles to choose%'
+        or C.carrierMsgData like 'Connect with people like YOU! Reply: S Join txt2CLICK and talk to 1000s of singles. 300+%'
+        or C.carrierMsgData like 'Interests: Writing, drawing, photography. Indoor gardening! Reply: S Come find me on txt%'
+        or C.carrierMsgData like 'Interests: Guitar, automobiles, horticulture, sculpture, photography, art, architecture,%')
+)TT        
+    inner join arch_Mobile.Purchase P on (TT.purchaseId = P.purchaseId)
+    inner join arch_Mobile.Carrier CA on TT.carrierId = CA.carrierId
+group by date(TT.dateCreated),
+        TT.carrierId,
+        CA.networkOperator,
+        TT.Status,
+        TT.ErrorCode
+
+--=========================================================================================================
+--Reply Yes - Message 52 Revenue
+
+declare @ToTime datetime
+declare @FromTime datetime
+set @FromTime = 'Aug 1, 2008'
+set @ToTime = 'Jan 1, 2010'
+
+select  date(C.dateCreated) as DT,
+        --TT2.memberId,
+        C.carrierId,
+        CA.networkOperator,
+       -- A.accountId,
+        A.applicationId,
+        A.productId,
+        A.advisedOfCharge,
+        C.carrierMsgStatusDetail,
+        sum(P.cost) as Revenue
+from
+    (
+    select  memberId,sum(Num_Msg52) as Num_Msg52
+    from
+    (
+    select  C.memberId,
+            count(C.carriercommunicationId) as Num_Msg52
+    from    arch_Mobile.Carriercommunication C
+    where   (C.dateCreated >= 'Aug 7, 2008' and C.dateCreated < @ToTime) and (C.messageTypeId = 52 and C.direction = 1 and C.applicationId = 2 and C.productId = 0 and C.memberId > 0)
+    group by C.memberId
+
+    union all
+
+    select  M.memberId,
+            count(C.carriercommunicationId)
+    from    arch_Mobile.Carriercommunication C
+            inner join arch_Mobile.Member M on (C.messageTypeId = 52 and C.carrierDestination = M.phoneNumber and C.direction = 1)
+    where   ((C.dateCreated >= 'Aug 7, 2008' and C.dateCreated < @ToTime) and C.memberId = 0)
+    group by M.memberId
+    )TT
+    group by memberId
+    )TT2
+    inner join arch_Mobile.Account A on (TT2.memberId = A.memberId and A.applicationId = 2 and A.productId = 0)
+    --inner join arch_Mobile.Member M on TT2.memberId = M.memberId
+    inner join arch_Mobile.Carriercommunication C on (TT2.memberId = C.memberId and C.applicationId = 2 and C.productId = 0)               --((M.phoneNumber = C.carrierDestination and C.direction = 1 and C.applicationId = 2 and C.productId = 0) or (M.phoneNumber = C.carrierOrigin and C.direction = 0 and C.applicationId = 2 and C.productId = 0))
+    inner join arch_Mobile.Purchase P on C.purchaseId = P.purchaseId
+    inner join arch_Mobile.Carrier CA on C.carrierId = CA.carrierId
+where   (C.dateCreated >= @FromTime and C.dateCreated < @ToTime)
+group by date(C.dateCreated),
+        --TT2.memberId,
+        C.carrierId,
+        CA.networkOperator,
+        --A.accountId,
+        A.applicationId,
+        A.productId,
+        A.advisedOfCharge,
+        C.carrierMsgStatusDetail
+
+--===============================================================================================================================
+--Retries Revenue - Part 1
+
+select datepart(mm,a.datecreated), datepart(dd,a.datecreated),count(distinct mtMessageId) from arch_Mobile.NowSMSRetryMessages a,arch_Mobile.NowSMSInLog b    
+where a.dateCreated > 'Feb 1 2009'  
+and a.nowSmsId=b.origMsgId 
+and b.returnCode in ('004', '006','0')
+group by datepart(mm,a.datecreated), datepart(dd,a.datecreated)
+
+--Retries Revenue - Part 2
+select datepart(mm,a.datecreated), datepart(dd,a.datecreated),count(distinct mtMessageId) from arch_Mobile.NowSMSRetryMessages a,arch_Mobile.NowSMSInLog b    
+where a.dateCreated > 'Feb 1 2009'  
+and a.nowSmsId=b.origMsgId 
+and b.returnCode not in ('004', '006','0')
+group by datepart(mm,a.datecreated), datepart(dd,a.datecreated)
+
+----Retries Revenue - Part 3
+--TOTAL PREMIUM COUNT:
+
+select datepart(mm,dateCreated), datepart(dd,dateCreated), count(*) from arch_Mobile.NowSMSMtMessages
+where mtMessageId in (
+select distinct mtMessageId from arch_Mobile.NowSMSRetryMessages a,arch_Mobile.NowSMSInLog b    
+where a.dateCreated > 'Feb 1 2009'  
+and a.nowSmsId=b.origMsgId 
+and b.returnCode in ('004', '006','0')) and optTariff != '0'
+group by datepart(mm,dateCreated), datepart(dd,dateCreated)
+order by datepart(mm,dateCreated), datepart(dd,dateCreated)
+
+
+ 
+
+
+

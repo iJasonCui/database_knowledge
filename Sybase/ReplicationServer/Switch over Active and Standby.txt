@@ -1,0 +1,71 @@
+===============================================================
+Switch over Active and Standby
+===============================================================
+
+Step 1: disconnect all client application 
+
+USE master
+go
+EXEC sp_dboption '[activeDB]','dbo use only',true
+go
+USE [activeDB]
+go
+CHECKPOINT
+go
+
+
+Step 2: Stop the active Rep Agent 
+
+[activeDB] sp_stop_rep_agent '[activeDB]'
+
+Step 3: switch active 
+
+[syntax] switch active for logical_server.logical_database to dataserver.database [with suspension]
+
+Step 4: Start rep agent on the new active
+
+[NewActiveDB] sp_start_rep_agent '[NewActiveDB]'
+
+Step 5: reconnect the client application to the new active
+
+USE master
+go
+EXEC sp_dboption '[NewActiveDB]','dbo use only',false
+go
+USE [NewActiveDB]
+go
+CHECKPOINT
+go
+
+Step 6: reconnect the new standby database
+        [syntax] resume connection to new standby
+
+
+
+[Note]
+
+1. For USI
+
+[webdb0r] 
+
+#####Prepopulate USI data
+0 17 * * 0,1,2,3,5,6 (cd /opt/etc/sybase/maint/USI; ./cron-prepopulate-USIUser.sh 2>&1 )
+#
+##### purge USIUser on webdb25p
+0 10 * * * (cd /opt/etc/sybase/maint/USI; ./cron-delUSIUserByUsiIdDate.sh.all )
+#
+##### arch USI
+00 5 * * * (cd /opt/etc/sybase/maint/arch_USI; ./arch_USI.sh webdb28p USI webdb0r arch_USI 1> ./arch_USI.sh.log 2>&1)
+#
+
+[websrvr-115]
+
+###############################################################################
+# archive inactive USIUser data (status = 'I')  from USIUser to USIUserHisotry 
+# Author: Jason C.
+# Date:  Sep 20 2004 
+###############################################################################
+cd /opt/sybase-11.9.2/scripts/maint; ./cron-delUSIUser.sh
+
+
+

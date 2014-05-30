@@ -1,0 +1,48 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_cursorSuspendCCTransaction;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_cursorSuspendCCTransaction (
+
+/*******************************************************************
+**
+** CREATION:
+**   Author:      Hunter Qian 
+**   Date:        June 5 2008 
+**   Description: suspend cc transactions pending for settlement to Settlement queue
+**
+** REVISION(S):
+**   Author: 
+**   Date:
+**   Description:
+**
+*******************************************************************/
+at_userId	DECIMAL(12,0),
+at_productId	INT,
+at_dateNow	DATETIME
+)
+BEGIN
+
+DECLARE at_xactionId     INT;
+DECLARE done INT DEFAULT FALSE;
+DECLARE CUR_SuspentTrans CURSOR FOR SELECT c.xactionId FROM CreditCardTransaction c,Purchase p 
+  	  		   	      WHERE c.xactionId=p.xactionId AND p.userId=at_userId AND c.CCTranStatusId=1 AND c.dateCreated >= TIMESTAMPADD(DAY,-2, at_dateNow);
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+OPEN CUR_SuspentTrans;
+
+read_loop: LOOP
+
+  FETCH CUR_SuspentTrans INTO at_xactionId;
+
+  IF done THEN
+     LEAVE read_loop;
+  END IF;
+
+  CALL wsp_transSuspendCCTransaction (at_xactionId, at_productId, at_dateNow);
+
+END LOOP;
+
+CLOSE CUR_SuspentTrans;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

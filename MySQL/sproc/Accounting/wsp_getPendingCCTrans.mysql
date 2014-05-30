@@ -1,0 +1,54 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getPendingCCTrans;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getPendingCCTrans (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         Feb 24 2011
+**   Description:  Return list of pending credit card transactions to be settled.
+**                 This procedure returns only the xactionId of the transactions.
+**                 It does not join with the request/response tables which are
+**                 different for different payment processor.
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+)
+BEGIN
+
+DECLARE at_batchId              INT;
+DECLARE at_dateGMT              DATETIME;
+DECLARE at_xactionId            INT;
+ 
+DECLARE done INT DEFAULT FALSE;
+DECLARE CUR_CCTrans CURSOR FOR SELECT xactionId FROM CreditCardTransaction WHERE CCTranStatusId=1; -- 1 MEANS 'NEW/PENDING'
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+SET at_dateGMT = UTC_TIMESTAMP();
+CALL wsp_BatchId (at_batchId);
+  
+OPEN CUR_CCTrans;
+
+read_loop: LOOP
+
+  FETCH CUR_CCTrans INTO at_xactionId;
+
+  IF done THEN
+     LEAVE read_loop;
+  END IF;
+
+  UPDATE CreditCardTransaction SET batchId = at_batchId, dateExtracted = at_dateGMT, CCTranStatusId = 3 WHERE xactionId = at_xactionId;
+
+END LOOP;
+
+CLOSE CUR_CCTrans;
+
+SELECT xactionId,renewalFlag FROM CreditCardTransaction WHERE CCTranStatusId = 3;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,54 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_saveTwitterFeed;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_saveTwitterFeed (
+/***********************************************************************
+**
+** CREATION:
+**   Author:        Mark Jaeckle
+**   Date:          March, 2011
+**   Description:   Creates/update TwitterFeed record, relating a llUserId
+*    to a twitterFeedId.
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+  at_llUserId  DECIMAL(12,0)
+ ,at_twitterFeedId  VARCHAR(24)
+ ,at_profileFeedEnabled bit
+)
+BEGIN
+
+DECLARE at_dateNow            DATETIME ;
+
+CALL wsp_GetDateGMT( at_dateNow);
+
+IF (SELECT 1 FROM TwitterFeed WHERE llUserId = at_llUserId) IS NULL
+THEN
+    INSERT INTO TwitterFeed (
+                 llUserId
+                ,twitterFeedId
+                ,profileFeedEnabled
+                ,dateCreated
+                ,dateModified
+            )
+    VALUES (
+                 at_llUserId
+                ,at_twitterFeedId
+                ,at_profileFeedEnabled
+                ,at_dateNow
+                ,at_dateNow
+            ) ;
+ELSE
+    UPDATE TwitterFeed
+       SET twitterFeedId = at_twitterFeedId,
+           profileFeedEnabled = at_profileFeedEnabled,
+           dateModified = at_dateNow
+     WHERE llUserId = at_llUserId ;
+
+END IF;
+
+END;;
+DELIMITER ;

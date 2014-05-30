@@ -1,0 +1,114 @@
+===============================================================
+MSA (Multi-Site Availability) without using dump marker
+===============================================================
+
+step 1:
+
+[NAMING CONVENTION]
+
+1: [table rep def] prad_a_profile_dating which is {DB short name}_{full table name}. "prad" means "LPortal".
+2: [db rep def]    LPortal  which is {full_db_name}
+3: [db sub]        w151dbr06_LPortal which is {full_server_name}_{full_db_name}
+4: [table sub]     03prad_a_profile_dating  {short_server_name}{DB short name}_{full table name}
+
+
+#-------------------------------------#
+# The dump db solution 
+#-------------------------------------#
+
+step 1:  [rep server] create database replication definition 
+
+[v151rep01]://{1}# create database replication definition LPortal with primary at LogicalSRV.LPortal
+
+###### handy script #############
+select "create database replication definition " + name  + " with primary at LogicalSRV." + name
+from sysdatabases where dbid >= 4 and dbid < 1000
+################################
+
+step 2: modify interfaces files accordingly
+
+step 3: [rep server] rs_init to add db connection (regular)
+
+--3.1 login [v151rep01] host as the 'repserver' user and add MSA database connection 
+
+--3.2 edit the resource file "/ccs/repsrv15_0/REP-15_0/init/logs/w151dbr06_LPortal.msa.rs"
+
+--3.2 run rs_init with resource file as follows:
+
+[repserver@v151rep01:/ccs/repsrv15_0/REP-15_0/init/logs]$ 
+/ccs/repsrv15_0/REP-15_0/install/rs_init -r /ccs/repsrv15_0/REP-15_0/init/logs/w151dbr06_LPortal.MSA.rs 
+
+step 4: [rep server] define subscription
+
+/* without using dump marker */
+
+[v151rep01]: 
+define subscription w151dbr06_LPortal for database replication definition LPortal with primary at LogicalSRV.LPortal with replicate at w151dbr06.LPortal 
+check  subscription w151dbr06_LPortal for database replication definition LPortal with primary at LogicalSRV.LPortal with replicate at w151dbr06.LPortal 
+
+#####/* using dump marker */
+#####[v151rep01]://{1}# define subscription w151dbr06_LPortal for database replication definition LPortal with primary at LogicalSRV.LPortal with replicate at w151dbr06.LPortal use dump marker
+##### drop subscription w151dbr06_LPortal for database replication definition LPortal with primary at LogicalSRV.LPortal with replicate at w151dbr06.LPortal without purge
+##### same sa password for primary db server, primary rep server and replicate rep server
+#####/* the end           */
+
+step 5:  /*  suspend log transfer from primary db*/
+
+suspend log transfer from c104dbp01.LPortal
+
+step 6: wait for 2 minutes until stable queue is quiesce
+
+step 7:  [rep server]
+
+[v151rep01] activate and validate the subscription
+
+activate subscription w151dbr06_LPortal for database replication definition LPortal with primary at LogicalSRV.LPortal with replicate at w151dbr06.LPortal 
+check  subscription w151dbr06_LPortal for database replication definition LPortal with primary at LogicalSRV.LPortal with replicate at w151dbr06.LPortal 
+validate subscription w151dbr06_LPortal for database replication definition LPortal with primary at LogicalSRV.LPortal with replicate at w151dbr06.LPortal 
+check  subscription w151dbr06_LPortal for database replication definition LPortal with primary at LogicalSRV.LPortal with replicate at w151dbr06.LPortal 
+
+
+step 8:  dump database on WARM STANDBY db server
+
+[v151dbp02csc] isql -Ucron_sa -Sv151dbp02csc
+
+dump database LPortal
+
+step 10: scp to MSA db server and load it
+
+--step 10.1: scp
+[sybase@v151dbp02:/data/dump/v151dbp02csc/LPortal]$ scp -p LPortal-d* sybase@w151dbr06:/data/dump/LPortal
+
+--step 10.2: suspend connection to msa db
+[v151rep01] suspend connection to w151dbr06.LPortal
+
+--step 10.3:  load database
+
+[sybase@w151dbr06:/data/dump/LPortal]$ isql -Usa -Sw151dbr06 -i  load-db-LPortal.sql 
+
+step 11: VERIFY maint_user as alias of dbo ON MSA DB SERVER
+
+[w151dbr06]
+
+--USE LPortal
+--go
+--EXEC sp_addalias 'v151rep01_maint_user','dbo'
+--go
+
+
+step 12: [rep server] resume connections
+
+[v151rep01]
+resume connection to w151dbr06.LPortal
+resume log transfer from c104dbp01.LPortal
+
+STEP 13: [MSA DB SERVER] VERIFY the ltm marker has been removed 
+
+[w151dbr06] 
+
+use LPortal
+dbcc gettrunc
+
+
+#--------------------------------#
+

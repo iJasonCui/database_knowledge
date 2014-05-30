@@ -1,0 +1,101 @@
+start_asiq @IQDB1.cfg
+
+ 
+
+ 
+
+Starting server IQDB1 on webdbiq at port 4100 (04/21 09:26:49)
+
+ 
+
+Run Directory       : /data/db/IQDB1
+
+Server Executable   : /opt/sybase/ASIQ-12_6/bin/asiqsrv12
+
+Server Output Log   : /opt/sybase/ASIQ-12_6/logfiles/IQDB1.032.srvlog
+
+Server Version      : 12.6.0/ESD 1
+
+Open Client Version : 12.5.1/P-EBF11982 ESD #4
+
+User Parameters     : '@IQDB1.cfg'
+
+Default Parameters  : -gn 105 
+
+ 
+
+I. 04/21 09:26:52.      Adaptive Server IQ
+
+I. 04/21 09:26:52.       Version 12.6
+
+I. 04/21 09:26:52.        (64bit mode)
+
+I. 04/21 09:26:52. Copyright 1992-2005 by Sybase, Inc. All rights reserved
+
+I. 04/21 09:26:52. 
+
+I. 04/21 09:26:52. Running on SunOS 5.8 Generic_108528-23 
+
+I. 04/21 09:26:52. 49152K of memory used for caching
+
+I. 04/21 09:26:52. Minimum cache size: 49152K, maximum cache size: 262008K
+
+I. 04/21 09:26:52. Using a maximum page size of 4096 bytes
+
+I. 04/21 09:26:52. Starting database "IQDB1" (/data/db/IQDB1/IQDB1.db) at Fri Apr 21 2006 09:26
+
+I. 04/21 09:26:52. Database recovery in progress
+
+I. 04/21 09:26:52.     Last checkpoint at Fri Apr 21 2006 04:04
+
+I. 04/21 09:26:52.     Checkpoint log...
+
+ 
+
+ 
+
+=============================================================
+
+IQ server starting with:
+
+    100 connections         (       -gm )
+
+     18 cmd resources       ( -iqgovern )
+
+    445 threads             (     -iqmt )
+
+    350 Kb thread stack size   (   -iqtss  )
+
+  155750 Kb thread memory size ( -iqmt * -iqtss )
+
+      4 IQ number of cpus  ( -iqnumbercpus )
+
+=============================================================
+
+ 
+
+I. 04/21 09:26:54.     Transaction log: IQDB1.log...
+
+pstack: cannot examine 15195: program is _LP64, self is not
+
+Wrapping iqmsg: Disabled.
+
+ 
+
+*********** (Possibly Duplicate Msg) **********************
+
+ 
+
+*** SybaseIQ Abort at s_blockmap.cxx:2304 for PID: 15195 ***
+
+ 
+
+  Internal Error
+
+DBSPAWN ERROR:  -80
+
+Unable to start database server
+
+ 
+
+Server started successfully

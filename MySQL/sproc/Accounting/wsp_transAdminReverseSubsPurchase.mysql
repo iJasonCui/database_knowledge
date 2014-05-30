@@ -1,0 +1,91 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_transAdminReverseSubsPurchase;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_transAdminReverseSubsPurchase (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  November 26, 2004
+**   Description:  reverses  subscription purchase for user
+**
+**
+** REVISION(S):
+**   Author: Marc Henderson
+**   Date: February 02 2005
+**   Description: fixed bugs - proc obviously never tested prior to this
+**
+**   Author: Mike Stairs
+**   Date: July 7, 2005
+**   Description: pass in card processor
+**
+**   Author: Andy Tran
+**   Date: December, 2007
+**   Description: negate duration - proc obviously never tested prior to this
+**
+**   Author: Yan Liu 
+**   Date: April, 2008
+**   Description: add subscriptioOfferDetailId 
+**
+**   Author: Andy Tran 
+**   Date: April, 2010
+**   Description: added taxCountryId and taxJurisdictionId
+**
+******************************************************************************/
+   at_userId             DECIMAL(12,0),
+   at_xactionId          DECIMAL(12,0),
+   at_refXactionId       DECIMAL(12,0),
+   at_contentId          SMALLINT,
+   at_xactionTypeId      TINYINT,
+   at_cardProcessor      CHAR(1),
+   at_adminUserId        INT,
+   at_adminNote          VARCHAR(255),
+   at_subOfferDetailId   SMALLINT,
+   at_creditCardId       INT, 
+   at_subscriptionTypeId SMALLINT,
+   at_duration           SMALLINT,
+   at_dateNow            DATETIME,
+   at_durationUnits      CHAR(1),
+   at_purchaseTypeId     TINYINT, 
+   at_billingLocationId  SMALLINT, 
+   at_currencyId         TINYINT, 
+   at_cost               DECIMAL(10, 2), 
+   at_costUSD            DECIMAL(5, 2), 
+   at_tax                DECIMAL(10, 2), 
+   at_taxUSD             DECIMAL(5, 2), 
+   at_taxCountryId       SMALLINT,
+   at_taxJurisdictionId  INT
+)
+BEGIN
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+        ROLLBACK;
+END;
+
+DECLARE EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+        ROLLBACK;
+END;
+
+START TRANSACTION;
+
+INSERT INTO SubscriptionTransaction(xactionId, subscriptionOfferDetailId, cardId, userId, subscriptionTypeId,
+                                              duration, xactionTypeId, contentId, description, dateCreated, durationUnits)
+          VALUES(at_xactionId, at_subOfferDetailId, at_creditCardId, at_userId, at_subscriptionTypeId,
+                 -at_duration, at_xactionTypeId, at_contentId, at_adminNote, at_dateNow, at_durationUnits);
+
+IF (SELECT 1 FROM AdminAccountTransaction WHERE xactionId = at_xactionId) IS NULL 
+THEN 
+   INSERT INTO AdminAccountTransaction(xactionId, adminUserId, userId, dateCreated)
+             VALUES(at_xactionId, at_adminUserId, at_userId, at_dateNow);
+END IF;
+
+INSERT INTO Purchase(xactionId, purchaseTypeId, billingLocationId, subscriptionOfferDetailId, currencyId, cost, costUSD,
+             tax, taxUSD, userId, dateCreated, creditCardId, cardProcessor, xactionTypeId, refXactionId, taxCountryId, taxJurisdictionId)
+       VALUES(at_xactionId, at_purchaseTypeId, at_billingLocationId, at_subOfferDetailId, at_currencyId, -at_cost, -at_costUSD,
+             -at_tax, -at_taxUSD, at_userId, at_dateNow, at_creditCardId, at_cardProcessor, at_xactionTypeId, at_refXactionId, at_taxCountryId, at_taxJurisdictionId);
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

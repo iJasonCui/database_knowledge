@@ -1,0 +1,44 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]
+then
+   echo "Usage: "${0}" <serverName> <repServer> "
+   exit 1
+else
+   serverName=${1}
+   repServer=${2}
+fi
+
+Password=`cat $HOME/.sybpwd | grep -w ${serverName} | awk '{print $2}'`
+CurrentDate=`date '+%Y%m%d_%H%M%S'`
+LogFile=./output/${0}.${serverName}.${CurrentDate}
+
+date > ${LogFile}
+
+sqsh -Ucron_sa -S${serverName} -P${Password} << EOQ1 >> ${LogFile}
+
+select name from master..sysdatabases where name not in ('master', 'tempdb', 'model', 'sybsystemprocs', 'sybsystemdb') and name not
+like "%view"
+
+\do
+   \echo "use #1_view"
+   use #1_view
+   go
+   select db_name()
+   go
+   checkpoint
+   go
+
+   EXEC sp_addalias "${repServer}_maint_user",'dbo'
+   go
+\done
+
+
+go
+
+EOQ1
+
+
+exit 0
+
+

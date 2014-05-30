@@ -1,0 +1,61 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newFacebookConnect;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newFacebookConnect (
+/***********************************************************************
+**
+** CREATION:
+**   Author:        Andy Tran
+**   Date:          January, 2011
+**   Description:   Creates new FacebookConnect record.
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+ at_fbUserId  VARCHAR(24)
+,at_llUserId  DECIMAL(12,0)
+)
+BEGIN
+
+DECLARE at_dateNow  DATETIME;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+UPDATE FacebookConnect 
+   SET status = 'I', dateModified = at_dateNow 
+ WHERE llUserId = at_llUserId ;
+
+UPDATE FacebookConnect 
+   SET status = 'I', dateModified = at_dateNow 
+ WHERE fbUserId = at_fbUserId ;
+
+-- case facebook connect record is not present
+IF (SELECT 1 FROM FacebookConnect WHERE fbUserId = at_fbUserId AND llUserId = at_llUserId) IS NULL
+THEN    
+    INSERT INTO FacebookConnect (
+                 fbUserId
+                ,llUserId
+                ,status
+                ,dateCreated
+                ,dateModified
+            )
+    VALUES (
+                 at_fbUserId
+                ,at_llUserId
+                ,'A'
+                ,at_dateNow
+                ,at_dateNow
+            ) ;
+
+ELSE
+    UPDATE FacebookConnect
+       SET status = 'A',
+           dateModified = at_dateNow
+     WHERE fbUserId = at_fbUserId AND llUserId = at_llUserId ;
+
+END IF;
+
+END;;
+DELIMITER ;

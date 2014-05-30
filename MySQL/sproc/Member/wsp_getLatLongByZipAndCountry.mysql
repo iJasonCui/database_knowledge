@@ -1,0 +1,14 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getLatLongByZipAndCountry;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getLatLongByZipAndCountry (
+at_zipcode VARCHAR(10),
+at_countryId SMALLINT
+)
+BEGIN
+    SELECT lat_rad, long_rad
+      FROM PostalZipCode
+     WHERE zipcode = at_zipcode
+       AND countryId = at_countryId ;
+
+END;;
+DELIMITER ;

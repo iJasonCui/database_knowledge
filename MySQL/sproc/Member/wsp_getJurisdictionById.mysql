@@ -1,0 +1,13 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getJurisdictionById;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getJurisdictionById (
+at_id int
+)
+begin
+   select a.parentId, a.countryId, leg.legacyLocation
+   from   Jurisdiction a 
+   left join LegacyLocationMap leg  on leg.newLocation = a.jurisdictionName
+   where jurisdictionId = at_id ;
+
+END;;
+DELIMITER ;

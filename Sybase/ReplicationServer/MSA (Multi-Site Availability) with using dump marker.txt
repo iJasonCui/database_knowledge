@@ -1,0 +1,121 @@
+===============================================================
+MSA (Multi-Site Availability) with using dump marker
+===============================================================
+
+step 1:
+
+[NAMING CONVENTION]
+
+1: [table rep def] prad_a_profile_dating which is {DB short name}_{full table name}. "prad" means "Profile_ad".
+2: [db rep def]    Profile_ad  which is {full_db_name}
+3: [db sub]        w151dbp03_Profile_ad which is {full_server_name}_{full_db_name}
+4: [table sub]     03prad_a_profile_dating  {short_server_name}{DB short name}_{full table name}
+
+step 1:
+
+[rep2p]://{1}# create database replication definition Profile_ad with primary at webdb29p.Profile_ad (wrong one)
+
+[####### wrong one, if you have logical connection, you have to use Logical server name ##########]
+[rep2p]://{2}# go
+Msg 15248, Level 12, State 0
+Server 'rep2d'
+Cannot use active or standby connection names when creating or altering replication definitions or function replication definitions.
+Must use logical connection name.
+[rep_server]://{1}# create database replication definition Profile_ad with primary at LogicalSRV.Profile_ad
+
+[rep2p]://{1}# create database replication definition Profile_ad with primary at webdb4p.Profile_ad (good one)
+[rep2p]://{2}# go
+Database replication definition 'Profile_ad' for webdb4p.Profile_ad is created.
+
+###### handy script #############
+select "create database replication definition " + name  + " with primary at LogicalSRV." + name
+from sysdatabases where dbid >= 4 and dbid < 1000
+################################
+
+step 2: modify copy_load.sh
+
+step 3: [w151dbp02]: create database Msg_ad with same size as the primary db with dbo use only
+             
+step 5: 
+rs_init to add db connection (regular)
+
+[repserver@webtheta:~/REP-12_6/install]$ /opt/etc/repserver126/REP-12_6/install/rs_init -r /opt/etc/repserver126/REP-12_6/init/logs/resource.Profile_ad_view.msa
+
+USE Profile_ar_view
+go
+IF USER_ID('rep5p_maint_user') IS NOT NULL
+BEGIN
+    EXEC sp_dropuser 'rep5p_maint_user'
+    IF USER_ID('rep5p_maint_user') IS NOT NULL
+        PRINT '<<< FAILED DROPPING USER rep5p_maint_user >>>'
+    ELSE
+        PRINT '<<< DROPPED USER rep5p_maint_user >>>'
+END
+go
+
+EXEC sp_addalias 'rep5p_maint_user','dbo'
+
+step 6:
+
+/* using dump marker */
+[rep5p]://{1}# define subscription w151dbp02_Msg_mr for database replication definition Msg_mr with primary at LogicalSRv.Msg_mr with replicate at w151dbp02.Msg_mr use dump marker
+activate it
+
+
+##### drop subscription w151dbp03_Profile_ad for database replication definition Profile_ad with primary at webdb4p.Profile_ad with replicate at w151dbp03.Profile_ad_view without purge
+##### same sa password for primary db server, primary rep server and replicate rep server
+/* the end           */
+
+[rep5p]://{2}# go
+
+######## dsi has been suspended on  w151dbp03.Profile_ad_view (HAVE TO BE DOWN, IF NOT, WAITING FOR IT) 
+
+### IF w151dbp02.Msg_ai NOT SUSPENDED, JUST suspend connection to w151dbp02.Msg_ai
+
+step 7:
+
+dump db on active ### the db dump will suspend connection to w151dbp02.Msg_ai
+
+step 8:
+
+scp into BRP and load db w151dbp02.Msg_md and then online db
+
+step 9:
+
+resume connection 
+
+step 10:
+validate subscription
+
+step 11:
+
+remove the marker on msa dbs 
+
+########################
+USE ${DBName}
+go
+
+dbcc settrunc('ltm', ignore)
+go
+#########################
+
+#---------------------------#
+Tricks 1:
+select "define subscription w104dbr05_" + name + " for database replication definition " + name
++ " with primary at LogicalSRV." + name + " with replicate at w104dbr05." + name 
++ " use dump marker"
+from master..sysdatabases where name like "Profile%" or name like "Msg%"
+
+#---------------------------#
+
+
+Trick 2: 
+
+sa password must be synched between ASE and REP 
+
+I. 2007/03/29 16:04:46. REPLICATE Replication Server: Defining subscription <w104dbr05_Msg_md> for database replication definition <Msg_md> with primary at <LogicalSRV.Msg_md> with replicate at <w104dbr05.Msg_md>
+I. 2007/03/29 16:04:46. PRIMARY Replication Server: Defining subscription <w104dbr05_Msg_md> for database replication definition <Msg_md> with primary at <LogicalSRV.Msg_md> with replicate at <w104dbr05.Msg_md>
+I. 2007/03/29 16:04:46. Placing marker in webdb31p.Msg_md log
+I. 2007/03/29 16:04:50. Distributor for 'LogicalSRV.Msg_md' received and proceessed enable marker. Distributing commands to replicates
+
+

@@ -1,0 +1,34 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getNavLocales;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getNavLocales ()
+/***********************************************************************
+**
+** CREATION:
+**   Author:  Valeri Popov
+**   Date:  Apr. 8, 2004
+**   Description:  Retrieves all the languages
+**
+** REVISION(S):
+**   Author:  Valeri Popov
+**   Date: Sep. 08, 2004
+**   Description: added resourceLocale column
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date: Feb 3, 2005
+**   Description: added localMiles
+**
+*************************************************************************/
+BEGIN
+    select NavigateLocale.localeId, 
+           NavigateLocale.languageId, 
+           Country.countryCodeIso, 
+           NavigateLocale.resourceLocale,
+           NavigateLocale.localMiles,
+           NavigateLocale.localizedSearchFlag
+      from NavigateLocale 
+	   left join Country on NavigateLocale.countryId = Country.countryId
+     order by NavigateLocale.localeId ;
+
+END;;
+DELIMITER ;

@@ -1,0 +1,43 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updMsgOnHoldStatusByUsrId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updMsgOnHoldStatusByUsrId (
+/***********************************************************************
+ **
+ ** CREATION:
+ **   Author:	Sean Dwyer
+ **   Date:	Dec 2008
+ **   Description:	Updates the message on hold status within the
+ **			user_info table 
+ **
+ *************************************************************************/
+at_userId DECIMAL (12,0),
+at_messageOnHoldStatus char(1),
+OUT at_messageOnHoldDate DATETIME 
+)
+BEGIN
+
+IF at_messageOnHoldStatus='A'
+/*   The on hold date has already been set, so just retrieve it */
+THEN
+    SELECT messageOnHoldDate INTO at_messageOnHoldDate 
+      FROM user_info 
+     WHERE user_id = at_userId ;
+ELSE
+    CALL wsp_GetDateGMT(at_messageOnHoldDate);
+END IF;
+   
+IF at_messageOnHoldStatus='A'
+THEN
+    UPDATE user_info
+       SET messageOnHoldStatus = at_messageOnHoldStatus
+     WHERE user_id = at_userId ;   
+ELSE 
+    /*--'H'*/
+    UPDATE user_info
+       SET messageOnHoldStatus = at_messageOnHoldStatus, 
+           messageOnHoldDate = at_messageOnHoldDate
+     WHERE user_id = at_userId ;   
+END IF;
+
+END;;
+DELIMITER ;

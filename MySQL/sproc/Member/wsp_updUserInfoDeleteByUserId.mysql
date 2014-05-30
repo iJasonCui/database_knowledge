@@ -1,0 +1,26 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updUserInfoDeleteByUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updUserInfoDeleteByUserId (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yahya Kola
+**   Date:  March 12 2004
+**   Description:  Log deletion reason when member deletening the account
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+at_userId        DECIMAL(12,0)
+,at_deleteReasonId INT 
+)
+BEGIN 
+
+INSERT INTO UserInfoDelete (userId,deleteReasonId,dateCreated)
+VALUES (at_userId,at_deleteReasonId, now());
+
+END;;
+DELIMITER ;

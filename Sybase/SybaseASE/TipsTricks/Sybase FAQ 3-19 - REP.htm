@@ -1,0 +1,721 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<TITLE>Sybase FAQ: 3/19 - REP</TITLE>
+<script language="JavaScript1.2">
+function edc(s,s2)
+{document.write("<font face=\"Arial\"><A href=\"",s,"\" target=\"_blank\" onclick=\"window.open('",s,"','Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=720,height=530,left=30,top=43');return false;\" )>Not finding the answers you need?&nbsp;",s2,"Submit your question for others to see.</A></font>");}
+//-->
+</script>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<DIV ALIGN=CENTER>
+<SMALL>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  Part3 -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A>
+</SMALL>
+<BR><HR SIZE=2 WIDTH=600 NOSHADE>
+<P><H1>Sybase FAQ: 3/19 - REP</H1>
+<table border="0" cellpadding="4" cellspacing="4" width="35%">
+<tr><td width="100%" align="center" bgcolor="#D6D6C0">
+<p align=center><small>
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part3/index.html","<br>");
+// --></script>
+</small></p>
+</td></tr>
+</table>
+ <br>
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="40%">
+<tr><td width="100%" align="center" bgcolor="#CCCCFF"><font face="Arial">There are reader questions on this topic!<a href="#ct"><br>Help
+others by sharing your knowledge</a></font></td></tr>
+</table></center></div>
+<HR SIZE=2 WIDTH=600 NOSHADE>
+</DIV>
+<PRE>
+Message-ID: &lt;databases/sybase-faq/part3_1074677126@rtfm.mit.edu&gt;
+X-Last-Updated: 2003/03/02
+From: dowen@midsomer.org (David Owen)
+Newsgroups: <A HREF="http://groups.google.com/groups?group=comp.databases.sybase" target="new">comp.databases.sybase</A>
+Subject: Sybase FAQ: 3/19 - REP
+Reply-To: <A HREF="mailto:dowen@midsomer.org">dowen@midsomer.org</A> (David Owen)
+Keywords: FAQ, DATABASES, SYBASE, ASA, ASE, REP
+Date: 21 Jan 2004 09:26:02 GMT
+
+Archive-name: databases/sybase-faq/part3
+URL: <A HREF="http://www.isug.com/Sybase_FAQ">http://www.isug.com/Sybase_FAQ</A>
+Version: 1.7
+Maintainer: David Owen
+Last-modified: 2003/03/02
+Posting-Frequency: posted every 3rd month
+   A how-to-find-the-FAQ article is posted on the intervening months.
+
+                       Sybase Frequently Asked Questions                       
+
+                                                                               
+Sybase FAQ Home PageAdaptive Server Enterprise FAQAdaptive Server Anywhere FAQ 
+                          Repserver FAQSearch the FAQ                          
+                                     [bar]                                     
+
+                           Sybase Replication Server                           
+                                                                               
+ 
+
+        1.    Introduction to Replication Server
+        2.    Replication Server Administration
+        3.    Troubleshooting Replication Server
+        4.    Additional Information/Links
+       
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                      Introduction to Replication Server                       
+                                                                               
+ 
+
+    1.1    Introduction
+    1.2    Replication Server Components
+    1.3    What is the Difference Between SQL Remote and Replication Server?
+   
+ 
+
+Thanks go to Manish I Shah for major help with this introduction. 
+
+next prev ASE FAQ
+
+-------------------------------------------------------------------------------
+
+1.1    Introduction
+
+-------------------------------------------------------------------------------
+
+What is Replication Server
+
+Replication Server moves transactions (insert, updates and deletes) at the
+table level from a source dataserver to one or more destination dataservers. 
+The dataserver could be ASE or other major DBMS flavour (including DB2,
+Informix, Oracle). The source and destinations need not be of the same type.
+
+What can it do ?
+
+  * Move data from one source to another.
+  * Move only a subset of data from source to destination. So, you can  
+    subscribe  to a subset of data, or a subset of the columns, in the source
+    table, e.g. select * from clients where state =  NY 
+  * Manipulation/transformation of data when moving from source to destination.
+    E.g. it can map data from a data-type in DB2 to an equivalent in Sybase.*
+  * Provide a warm-standby system.  Can be incorporated with Open Switch to
+    provide a fairly seamless fail-over environment.
+  * Merge data from several source databases into one destination database
+    (could be for a warehouse type environment for example).
+  * Move data through a complicated network down to branch offices, say, only
+    sending the relevant data to each branch.
+
+(* This is one of Sybase replication's real strengths, the ability to define
+function string classes which allow the conversion of statements from one SQL
+dialect to match the dialect of the destination machine.  Ed)
+
+How soon does the data move
+
+The data moves asynchronously. The time it takes to reach the destination
+depends on the size of your transaction, level of activity in that particular
+database (a database as in Sybase systems), the length of the chain (one or
+more replication servers that the transaction has to pass through to reach the
+destination), the thickness of pipe (network), how busy your replication server
+is etc. Usually, on a LAN, for small transactions, this is about a second.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+1.2    Replication Server Components
+
+-------------------------------------------------------------------------------
+
+Basic
+
+Primary Dataserver
+
+The source of data where client applications enter/delete and modify data.  As
+mentioned before, this need not be ASE, it can be Microsoft SQL Server, Oracle,
+DB2, Informix.  (I know that I should get a complete list.)
+
+Replication Agent/Log Transfer Manager
+
+Log Transfer Manager (LTM) is a separate program/process which reads
+transaction log from the source server and transfers them to the replication
+server for further processing. With ASE 11.5, this has become part of ASE and
+is now called the Replication Agent.  However, you still need to use an LTM for
+non-ASE sources.  I imagine there is a version of LTM for each kind of source
+(DB2, Informix, Oracle etc).  When replication is active, you see one
+connection per each replicated database in the source dataserver (sp_who).
+
+Replication Server (s)
+
+The replication server is an Open Server/Open Client application.  The server
+part receives transactions being sent by either the source ASE or the source
+LTM.  The client part sends these transactions to the target server which could
+be another replication server or the final dataserver.  As far as I know, the
+server does not include the client component of any of the other DBMSes out of
+the box.
+
+Replicate (target) Dataserver
+
+Server in which the final replication server (in the queue) will repeat the
+transaction done on the primary. You will see a connection, one for each target
+database, in the target dataserver when the replication server is actively
+transferring data (when idle, the replication server disconnects or fades out
+in replication terminology).
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+1.3    What is the Difference Between Replication Server and SQL Remote?
+
+-------------------------------------------------------------------------------
+
+Both SQL Remote and Replication Server perform replication.  SQL Remote was
+originally part of the Adaptive Server Anywhere tool kit and is intended for
+intermittent replication.  (The classic example is that of a salesman
+connecting on a daily basis to upload sales and download new prices and
+inventory.)  Replication Server is intended for near real-time replication
+scenarios.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+next prev ASE FAQ
+
+                       Replication Server Administration                       
+                                                                               
+ 
+
+    2.1    How can I improve throughput?
+    2.2    Where should I install replication server?
+    2.3    Using large raw partitions with Replication Server on Unix.
+    2.4    How to replicate col = col + 1
+    2.5    What is the difference between an LTMs an a RepAgent?
+    2.6    Which Should I choose, RepAgent or LTM?
+   
+next prev ASE FAQ
+
+-------------------------------------------------------------------------------
+
+2.1    How can I improve throughput?
+
+-------------------------------------------------------------------------------
+
+Check the Obvious
+
+First, ensure that you are only replicating those parts of the system that need
+to be replicated.  Some of this is obvious.  Don't replicate any table that
+does not need to be replicated.  Check that you are only replicating the
+columns you need.  Replication is very sophisticated and will allow you to
+replicate both a subset of the columns as well as a subset of the rows.
+
+Replicate Minimum Columns
+
+Once the replication is set up and synchronised, it is only necessary to
+replicate those parts of the primary system that actually change.  You are only
+replicating those rows and columns that need to be replicated, but you only
+need to replicate the actual changes.  Check that each replication definition
+is defined using the clause:
+
+create replication definition rep_def_name
+with primary...
+...
+replicate minimal columns
+
+Second Replication Server
+
+This might be appropriate in a simple environment on systems with spare cycles
+and limited space on the network.  When Sybase replicates from a primary to a
+replicate using only one replication server the data is transferred across the
+network uncompressed.  However, the communication between two replication
+servers is compressed.  By installing a second replication server it is
+possible to dramatically reduce the bandwidth needed to replicate your data.
+
+Dedicated Network Card
+
+Obviously, if replication is sharing the same network resources that all of the
+clients are using, there is the possibility for a bottleneck if the network
+bandwidth is close to saturation.  If a second replication server is not going
+to cut it since you already have one or there are no spare cycles, then a
+second network card may be the answer.
+
+First, you will need to configure ASE to listen on two network connections. 
+This is relatively straightforward.  There is no change to the client
+configuration.  They all continue to talk to Sybase using the same connection. 
+When defining the replication server, ensure that the interfaces/sql.ini entry
+that it uses only has the second connection in it.  This may involve some
+jiggery pokery with environment variables, but should be possible, even on NT! 
+You need to be a little careful with network configuration.  Sybase will
+communicate with the two servers on the correct address, but if the underlying
+operating system believes that both clients and repserver can be serviced by
+the same card, then it will use the first card that it comes to.  So, if you
+had the situation that all of the clients, ASE and the replication server were
+on 192.168.1.0, and the host running ASE had two cards onto this same segment,
+then it would choose to route all packets through the first card.  OK, so this
+is a very simplistic error to correct, but similar things can happen with more
+convoluted and, superficially, better thought out configurations. 
+
++---------+                                +-----------+   +-----------+
+|         |--&gt; NE(1) --&gt; All Clients...    |           |   |           |
+| Primary |                                | repserver |   | replicate |
+|         |--&gt; NE(2) ---------------------&gt;|           |--&gt;|           |
+|         |                                |           |   |           |
++---------+                                +-----------+   +-----------+
+
+So, configure NE(1) to be on 192.168.1.0, say, and NE(2) to be on 192.168.2.0
+and all should be well.  OK, so my character art is not perfect, but I think
+that you get the gist!
+
+No Network Card
+
+If RepServer resides on the same physical machine as either the primary or the
+replicate, it is possible to use the localhost or loopback network device.  The
+loopback device is a network interface that connects back to itself without
+going through the network interface card.  It is almost always uses the IP
+address 127.0.0.1.  So, by applying the technique described above, but instead
+of using a dedicated network card, you use the loopback device.  Obviously, the
+two servers have to be on the same physical machine or it won't work! 
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+2.2    Where should I install replication server?
+
+-------------------------------------------------------------------------------
+
+A seemingly trivial question, but one that can cause novices a bit of worry.
+
+There are three answers: on the primary machine, on the replicate machine or on
+a completely separate machine.  There is no right answer, and if you are doing
+an initial install it probably pays to consider the future, consider the
+proposed configuration and have a look at the load on the available machines.
+
+It is probably fair to say that replication is not power hungry but neither is
+it free.  If the primary is only just about coping with its current load, then
+it might be as well looking into hosting it on another machine.  The argument
+applies to the replicate.  If you think that network bandwidth may be an issue,
+and you may have to add a second replication server, you may be better off
+starting with repserver running on the primary.  It is marginally easier to add
+a repserver to an existing configuration if the first repserver is on the
+primary.
+
+Remember that a production replication server on Unix will require raw devices
+for the stable devices and that these can be more than 2GB in size.  If you are
+restricted in the number of raw partitions you have available on a particular
+machine, then this may have a bearing.  See Q2.3. 
+
+Installing replication server on its own machine will, of course, introduce all
+sorts of problems of its own, as well as answering some.  The load on the
+primary or the replicate is reduced considerably, but you are definitely going
+to add some load to the network.  Remember that ASE-&gt;Rep and Rep-&gt;ASE is
+uncompressed.  It is only Rep-&gt;Rep that is compressed.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+2.3    Using large raw partitions with Replication Server on Unix.
+
+-------------------------------------------------------------------------------
+
+It is a good practice with production installations of Replication Server on
+Unix that you use raw partitions for the stable devices.  This is for just the
+same reason that production ASE's use raw partitions.  Raw devices can be a
+maximum of 2GB with replication server up to release 11.5.  (I have not checked
+12.)
+
+In order to utilise a raw partition that is greater than 2GB in size you can do
+the following (remember all of the cautionary warnings about trying this sort
+of stuff out in development first!):
+
+add partition firstpartition on '/dev/rdsk/c0t0d0s0' with size 2024
+go
+add partition secondpartition on '/dev/rdsk/c0t0d0s0' with size 2024
+starting at 2048
+go
+
+Notice that the initial partition is sized at 2024MB and not 2048.  I have not
+found this in the documentation, but replication certainly seems to have a
+problem allocating a full 2GB.  Interestingly, do the same operation through
+Rep Server Manager and Sybase central caused no problems at all.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+2.4    How to replicate col = col + 1
+
+-------------------------------------------------------------------------------
+
+Firstly.  While the rule that you never update a primary key may be a
+philosophical choice in a non-replicated system, it is an architectural
+requirement of a replicated system.
+
+If you use simple data replication, and your primary table is:
+
+id
+---
+1
+2
+3
+
+and you issue a:
+
+update table set id=id+1
+
+Rep server will do this in the replicate:
+
+begin tran
+update table set id=2 where id=1
+update table set id=3 where id=2
+update table set id=4 where id=3
+commit tran
+
+Hands up all who can see a bit of a problem with this!  Remember, repserver
+doesn't replicate statements, it replicates the results of statements.
+
+One way to perform this update is to build a stored procedure on both sides
+that executes the necessary update and replicate the stored procedure call.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+2.5    What is the difference between an LTM and a RepAgent?
+
+-------------------------------------------------------------------------------
+
+As described in Section 1.2, Log Transfer Managers (LTMs) and RepAgents are the
+processes that transfer data between ASE and the Replication Server. 
+
+LTMs were delivered with the first releases of Replication Server.  Each LTM is
+a separate process at the operating system level that runs along side ASE and
+Replication Server.  As with ASE and Replication Server, a RUN_&lt;ltm_server&gt; and
+configuration file is required for each LTM.  One LTM is required for each
+database being replicated.
+
+Along with ASE 11.5 a new concept was introduced, that of RepAgent.  I am not
+sure if you needed to use RepServer 11.5 as well, or whether the RepAgents
+could talk to earlier versions of Replication Server.  Each RepAgent is, in
+effect, a slot-in replacement for an LTM.  However, instead of running as
+separate operating system process, it runs as a thread within ASE.  Pretty much
+all of the requirements for replication using an LTM apply to the RepAgents. 
+One per database being replicated, etc. but now you do not need to have
+separate configuration files.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+2.6    Which should I use, RepAgent or LTM?
+
+-------------------------------------------------------------------------------
+
+The differences between RepAgents and LTMs are discussed in  Section 2.5. 
+Which then to choose.  There are pros and cons to both, however, I think that
+it should be stated up front that RepAgents are the latest offering and I
+believe that Sybase would expect you you to use that.  Certainly the
+documentation for LTMs is a little buried implying that they do not consider it
+to be as current as LTMs.
+
+LTM Cons:
+
+  * Older technology.  Not sure if it is being actively supported.
+  * Not integrated within ASE, so there is a (small) performance penalty.
+  * Separate processes, so need additional monitoring in production
+    environments.
+
+LTM Pros:
+
+  * Possible to restart LTM without having to restart ASE.
+
+RepAgent Cons
+
+  * If it crashes it is possible that you will have to restart ASE in order to
+    restart RepAgent.
+
+RepAgent Pros
+
+  * Latest, and presumably greatest, offering.
+  * Tightly integrated with ASE so good performance.
+  * Less to manage, no extra entries in the interfaces file.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+next prev ASE FAQ
+
+                      Replication Server Trouble Shooting                      
+                                                                               
+ 
+
+    3.1    Why am I running out of locks on the replicate side?
+    3.2    Someone was playing with replication and now the transaction log on
+    OLTP is filling.
+   
+next prev ASE FAQ
+
+-------------------------------------------------------------------------------
+
+3.1    Why am I running out of locks on the replicate side?
+
+-------------------------------------------------------------------------------
+
+Sybase replication works by taking each transaction that occurs in the primary
+dataserver and applying to the replicate.  Since replication works on the
+transaction log, a single, atomic, update on the primary side that updates a
+million rows will be translated into a million single row updates.  This may
+seem very strange but is a simple consequence of how it works.  On the primary,
+this million row update will attempt to escalate the locks that it has taken
+out to an exclusive table lock.  However, on the replicate side each row is
+updated individually, much as if they were being updated within a cursor loop. 
+Now, Sybase only tries to escalate locks from a single atomic statement (see
+ASE Qx.y), so it will never try to escalate the lock.  However, since the
+updates are taking place within a single transaction, Sybase will need to take
+out enough page locks to lock the million rows.
+
+So, how much should you increase the locks parameter on the replicate side?  A
+good rule of thumb might be double it or add 40,000 whichever is the larger. 
+This has certainly worked for us.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+3.2    Someone was playing with replication and now the transaction log on OLTP
+is filling.
+
+-------------------------------------------------------------------------------
+
+Once replication has been configured, ASE adds another marker to the
+transaction log.  The first marker is the conventional one that marks which
+transactions have had their data written to disk.  The second is there to
+ensure that the transactions have also been replicated.  Clearly, if someone
+installed replication and did not clean up properly after themselves, this
+marker will still be there and consequently the transaction log will be filling
+up.  If you are certain that replication is not being used on your system, you
+can disable the secondary truncation marker with the following commands:
+
+1&gt; use &lt;database&gt;
+2&gt; go
+1&gt; dbcc settrunc(ltm, ignore)
+2&gt; go
+
+The above code is the normal mechanism for disabling the trucation point.  I
+have never had a problem with it.  However, an alternative mechanism for
+disabling the truncation point is given below.  I do not know if it will work
+in situations that the previous example won't, or if it works for databases
+that are damaged or what.  If someone knows when you use it and why, please let
+me know (<A HREF="mailto:dowen@midsomer.org">mailto:dowen@midsomer.org</A>).  
+
+1&gt; sp_role "grant", sybase_ts_role, sa
+2&gt; go
+1&gt; set role sybase_ts_role on
+2&gt; go
+1&gt; dbcc dbrepair(dbname, ltmignore)
+2&gt; go
+1&gt; sp_role "revoke", sybase_ts_role, sa
+2&gt; go
+
+This scenario is also very common if you load a copy of your replicated
+production database into development.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+next prev ASE FAQ
+
+                         Additional Information/Links                          
+                                                                               
+     
+   
+    4.1    Links
+    4.2    Newsgroups
+   
+next prev ASE FAQ
+
+-------------------------------------------------------------------------------
+
+4.1    Links
+
+-------------------------------------------------------------------------------
+
+Thierry Antinolfi  has a replication FAQ at his site <A HREF="http://pro.wanadoo.fr/">http://pro.wanadoo.fr/</A>
+dbadevil that covers a lot of good stuff. 
+
+Rob Verschoor has a 'Replication Server Tips &amp; Tricks' section on his site, as
+well as an indispensible quick reference guide!
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+4.2    Newsgroups
+
+-------------------------------------------------------------------------------
+
+There are a number of newsgroups that can deal with questions.  Sybase have
+several in their own forums area.
+
+For Replication Server:
+
+    sybase.public.rep-server
+    sybase.public.rep-agent
+   
+for SQL Remote and the issues of replicating with ASA:
+
+    sybase.public.sqlanywhere.replication
+   
+and of course, there is always the ubiquitous
+
+    comp.databases.sybase.
+   
+Back to top
+
+-------------------------------------------------------------------------------
+
+next prev ASE FAQ
+
+</PRE>
+<DIV ALIGN=CENTER>
+<SMALL>
+<P><HR WIDTH=1900 NOSHADE><BR>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  Part3 -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A></SMALL>
+<P>
+<div align="center">
+
+<center>
+<form method="post" action="rateit.php">
+<table border="1" cellpadding="0" cellspacing="0" width="150" bgcolor="#ffcccc" style="WIDTH: 150px">
+<tr><td width="100%">
+<div align="center">
+<table border="0" cellpadding="2" width="100%" bgcolor="#ffcccc">
+<tr><td width="100%" height="14">
+<p align="center"><font face="Arial">Rate this FAQ</font></p>
+</td></tr>
+<tr><td width="100%" height="14">
+<p align="center">
+<INPUT TYPE=HIDDEN NAME="pid" VALUE="databases/sybase-faq/part3/index.html">
+<select size="1" name="D1" style="COLOR: darkmagenta; BACKGROUND-COLOR: cornsilk">
+<option selected value="0">N/A</option>
+<option value="1">Worst</option>
+<option value="2">Weak</option>
+<option value="3">OK</option>
+<option value="4">Good</option>
+<option value="5">Great</option>
+</select>
+</p>
+</td></tr>
+<tr><td width="100%" height="27">
+<p align="center">
+<IMG onclick="mystr='/frate.php?pid='+pid.value+'&vote='+D1.value;
+Popup=window.open(mystr,'Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=380,height=270,left=230,top=43'); 
+ return false;" height=28 src="/images/vote.gif" alt="Vote" width=83 border=0 ></p>
+</td></tr>
+</table>
+</div>
+</td></tr>
+</table>
+<font size="-1" face="Arial"><br><a href="/topRated.html">Current Top-Rated FAQs</a><br></font>
+</form>
+</center>
+
+</div>
+
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="100%">
+<tr><td width="100%" bgcolor="#D6D6C0">
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part3/index.html"," ");
+// --></script>
+<p><font face="Arial"><a name="ct">Are you an expert in this area?</a> Share your knowledge and earn expert points by giving answers or rating people's questions and answers! This section of FAQS.ORG is not sanctioned in any way by FAQ authors or maintainers.</font></p>
+<p><font face="Arial">Questions strongly related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-6730.html">How can I display the table sizes of ALL tables in a database?   </a> by Caspar (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9594.html">how to use nested cursors in a stored procedure in ASE ? is there any template to use !...</a> by nino (12/18/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3265.html">to connect sybase and c++,how to connect and access the data </a> by kumaran (9/2/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6741.html">how do u tell the last time update statistics has been run on a table (11.0.3) </a> by yujo (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11075.html">I need to Execute an SP & set its output to the insert statement. This will be occured for...</a> by rose (1/14/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9435.html">I wanted to know EXACT technical details about what ACTUALLY happens when u fire a simple...</a> by anu (12/15/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-8395.html">Is there anyway to start dataserver in ASE 11.9.2 with only the master and tempdb online...</a> by steve_2000g (11/28/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-854.html">i get an error on the "convert" when i try to run this line of code, why is this?   print...</a> by shugarhi (7/14/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11834.html">Hi  &nbsp; We're using Sybase ASE 12.0 running on SUN 4500 Cluster server. We cannot...</a> by KK (1/26/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6297.html">I am creating a stored proc to create a report of dependencies. &nbsp;We are creating...</a> by RR (10/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7388.html">How is this hazardous if we do not close a cursor? </a> by amar (11/11/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9827.html">How can i reduce my tempdb size once i have increased it by creating a device also? </a> by rajs (12/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12835.html">how can i transfer a table from cybase to db2? &nbsp;please sendme step by step method if...</a> by maulik (2/9/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3213.html">My database is in bypass recovery mode. How do I put it in normal mode? </a> by Lach (9/1/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-1435.html">Hi ,  &nbsp;We are using Sybase ASE 11.9.2 with SCO Unix 7.1.1 &nbsp;as the operating ...</a> by gowri (7/27/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-2412.html">were is a database that will bring up  a person address without there last name </a> by travis (8/15/2003)</font></li>
+</ul>
+<p><font face="Arial">Questions somewhat related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-2221.html">Guys!   See the Sybase query below: select convert(float,substring(&lt;field1&gt;,3,...</a> by pathfinder (8/12/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7790.html">What are the side-effects of turning-on the built-in auditing capabilities of sybase? </a> by Choy (11/17/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12136.html">When ever i execute select property('PROCESSCPU') i get the value 189 and whenever i...</a> by anilkumarsh (1/29/2004)</font></li>
+</ul>
+<p><font face="Arial">Other questions awaiting answers:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/related.html">10088 questions</a> related to other FAQs<br></font></li>
+<li><font face="Arial"><a href="/qa/unrelated.html">1765 general questions</a></font></li>
+<li><font face="Arial"><a href="/qa/answered.html">4091 answered questions</a><br></font></li>
+</ul>
+</td></tr></table> <br></center></div>
+<HR NOSHADE SIZE=2 WIDTH=450>
+[ <a href="/faqs/">Usenet FAQs</a> | <a href="/faqs/faqsearch.html">Search</a> | <a href="/contrib/">Web FAQs</a> | <a href="/docs/">Documents</a> | <a href="/rfcs/">RFC Index</a> ]
+<BR><HR NOSHADE SIZE=2 WIDTH=450>
+<P>
+<ADDRESS>
+Send corrections/additions to the FAQ Maintainer: <BR>dowen@midsomer.org (David Owen)
+</ADDRESS>
+<P>
+<SMALL>
+<STRONG>Last Update February 12 2004 @ 00:28 AM</STRONG>
+<BR>
+</SMALL>
+</DIV>
+</BODY>
+</HTML>
+

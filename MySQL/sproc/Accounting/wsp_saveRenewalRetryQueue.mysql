@@ -1,0 +1,62 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_saveRenewalRetryQueue;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_saveRenewalRetryQueue (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu 
+**   Date:  July 25 2008 
+**   Description:  save RenewalRetryQueue 
+**
+** REVISION(S):
+**   Author: 
+**   Date: 
+**   Description:
+**
+******************************************************************************/
+   at_userId        DECIMAL(12, 0),
+   at_status        CHAR(1),
+   at_origXactionId DECIMAL(12, 0),
+   at_retryCounter  INT,
+   at_nextRetryDate DATETIME,
+   at_subscriptionOfferDetailId INT
+)
+BEGIN
+   DECLARE at_dateNowGMT DATETIME;
+
+   SET at_dateNowGMT = UTC_TIMESTAMP();
+
+   IF (SELECT 1 FROM RenewalRetryQueue WHERE userId = at_userId and subscriptionOfferDetailId = at_subscriptionOfferDetailId) IS NOT NULL THEN
+         UPDATE RenewalRetryQueue
+            SET status        = at_status,
+                origXactionId = at_origXactionId,
+                retryCounter  = at_retryCounter,
+                nextRetryDate = at_nextRetryDate,
+                dateModified  = at_dateNowGMT,
+                subscriptionOfferDetailId = at_subscriptionOfferDetailId
+          WHERE userId = at_userId AND subscriptionOfferDetailId = at_subscriptionOfferDetailId;
+
+   ELSE
+         INSERT INTO RenewalRetryQueue(userId,
+                                       status,
+                                       origXactionId,
+                                       subscriptionOfferDetailId,
+                                       retryCounter,
+                                       nextRetryDate,
+                                       dateCreated,
+                                       dateModified)
+         VALUES(at_userId, 
+                at_status,
+                at_origXactionId,
+                at_subscriptionOfferDetailId,
+                at_retryCounter,
+                at_nextRetryDate,
+                at_dateNowGMT,
+                at_dateNowGMT);
+
+   END IF;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

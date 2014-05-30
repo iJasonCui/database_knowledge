@@ -1,0 +1,145 @@
+[re-initializing the standby ]
+
+--step 1: [v104dbrep] 
+sqsh -Usa -Sv104dbrep
+
+drop connection to [ws_server_name].[ws_db_name]  (for instance, v104db12.parLL)
+
+admin logical_status
+
+admin who_is_down (no one should be down)
+
+--step 2: [on primary database, for instance, sipdb-12]
+
+use parLL
+sp_reptostandby parLL, 'all'
+
+--step 3: [on primary database, for instance, sipdb-12]
+
+drop v104dbrep_maint_user as alias on prim db and add it back as regular db user
+
+USE parLL
+go
+IF EXISTS (SELECT * FROM sysalternates WHERE suid=SUSER_ID('v104dbrep_maint_user'))
+BEGIN
+    EXEC sp_dropalias 'v104dbrep_maint_user'
+    IF EXISTS (SELECT * FROM sysalternates WHERE suid=SUSER_ID('v104dbrep_maint_user'))
+        PRINT '<<< FAILED DROPPING ALIAS v104dbrep_maint_user >>>'
+    ELSE
+        PRINT '<<< DROPPED ALIAS v104dbrep_maint_user >>>'
+END
+go
+
+USE parLL
+go
+EXEC sp_adduser 'v104dbrep_maint_user','v104dbrep_maint_user','public'
+go
+
+[NOte 1:] there is a handy shell script doing this task.
+
+jasonc@webccs:~/src/javalife/db/scripts/RepServer$ 
+./drop_Alias_Add_as_user_OnActiveSRV.sh sipdb-12 v104dbrep parLL
+
+--step 4: [v104dbrep] 
+
+--4.1 login [v104dbrep] host as the 'repserver' user and add ws database connection 
+
+--4.2 edit the resource file "/ccs/repsrv15_0/REP-15_0/init/logs/v151dbp01ivr_parLL.ws.rs"
+
+--4.3 run rs_init with resource file as follows:
+
+[repserver@V104dbrep:/ccs/repsrv15_0/REP-15_0/init/logs]$ 
+/ccs/repsrv15_0/REP-15_0/install/rs_init -r /ccs/repsrv15_0/REP-15_0/init/logs/v151dbp01ivr_parLL.ws.rs 
+
+
+--step 5: [on primary db server,  for instance, sipdb-12]
+dump primary db
+
+[sybase@sipdb-12:/opt/etc/sybase12_52/conf/maint]$ 
+isql -Ucron_sa -Ssipdb-12 dump_db_parLL.sql
+
+--step 6: copy the db dump from source server to destination 
+
+[sybase@sipdb-12:/opt/etc/sybase12_52/dump/parLL]
+scp -p /opt/etc/sybase12_52/dump/parLL/parLL-Fri-fullDump.dmp sybase@v151dbp01:/data/dump/v151dbp01ivr/parLL
+
+
+--step 7: load it into ws db server and online database
+
+--7.1 load database
+
+[sybase@v151dbp01:/data/dump/v151dbp01ivr/torLL]$ isql -Usa -Sv151dbp01ivr
+Password: 
+1> load database torLL from "/data/dump/v151dbp01ivr/torLL/torLL-Fri-fullDump.dmp"
+2> go
+
+--7.2 move ltm marker
+
+dbcc dbrepair(torLL, ltmignore)
+
+--7.3 online database 
+
+1> online database torLL
+2> go
+
+--step 8: add "v104dbrep_maint_user" as dbo alias on BOTH WARM STANDBY and PRIMARY 
+
+USE parLL
+go
+IF USER_ID('v104dbrep_maint_user') IS NOT NULL
+BEGIN
+    EXEC sp_dropuser 'v104dbrep_maint_user'
+    IF USER_ID('v104dbrep_maint_user') IS NOT NULL
+        PRINT '<<< FAILED DROPPING USER v104dbrep_maint_user >>>'
+    ELSE 
+        PRINT '<<< DROPPED USER v104dbrep_maint_user >>>'
+END
+go
+
+USE parLL
+go
+EXEC sp_addalias 'v104dbrep_maint_user','dbo'
+go
+
+[NOte 1:] there is a handy shell script doing this task.
+
+jasonc@webccs:~/src/javalife/db/scripts/RepServer$ 
+./drop_Alias_Add_as_user_OnActiveSRV.sh sipdb-12 v104dbrep parLL
+
+--step 9: make sure db options
+
+--dbo use only and trunc log on STANDBY
+
+if not, please run it in warm standby
+
+USE master
+go
+EXEC sp_dboption 'parLL','dbo use only',true
+go
+USE master
+go
+EXEC sp_dboption 'parLL','trunc log on chkpt',true
+go
+USE parLL
+go
+CHECKPOINT
+go
+
+--step 8: [v104dbrep] rep server
+
+resume connection to ws db
+
+resume connection to v151dbp01ivr.torLL
+
+--step 9: test rep 
+
+SELECT T.repTestId, T.dateTime FROM Msg_md..RepTest T
+INSERT INTO Msg_md..RepTest ( repTestId, dateTime ) VALUES ( 108, getdate() )
+
+--step 10 : check the stable queue
+admin disk_space (on rep server)
+
+rs_helppartition (on rssd db)
+
+-- step 11: trouble shooting
+

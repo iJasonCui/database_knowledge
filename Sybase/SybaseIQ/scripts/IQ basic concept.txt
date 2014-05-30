@@ -1,0 +1,28 @@
+To start the server, run the appropriate startup utility for your operating system:
+• On UNIX operating systems, use start_asiq.
+• On Windows operating systems, use start_asiq.exe.
+
+Catalog Store
+The portion of each IQ database that contains its metadata. The default
+name for this file is dbname.db.
+
+IQ database
+Databases that you create using Adaptive Server IQ databases are called IQ
+databases for short. IQ databases are specially indexed to take advantage of
+the query speed of Adaptive Server IQ. The default name for this dbspace is
+dbname.iq.
+Each IQ database that you create includes at least four dbspaces: an IQ Store
+(for data), a Catalog Store (for metadata), a Temporary Store (for temporary
+data) and an IQ message log.
+
+IQ message log
+A message log file created when the first user connects to an IQ database. The
+default name for this file is dbname.iqmsg. Adaptive Server IQ logs error
+messages, status messages and insert notification messages in this file.
+
+IQ Transaction Log
+The part of an IQ database that records changes to the database for use in
+recovery from a system failure. It includes information about versions and free
+space. The Transaction Log is created in the same directory as the Catalog
+Store. The default name for this file is dbname.log.
+

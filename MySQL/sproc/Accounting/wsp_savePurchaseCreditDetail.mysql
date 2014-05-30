@@ -1,0 +1,34 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_savePurchaseCreditDetail;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_savePurchaseCreditDetail (
+   at_xactionId                 INT,
+   at_purchaseOfferDetailId     SMALLINT,
+   at_cost                      DECIMAL(10,2),
+   at_tax                       DECIMAL(10,2),
+   at_costUSD                   DECIMAL(5,2),
+   at_taxUSD                    DECIMAL(5,2)
+)
+
+BEGIN
+   DECLARE at_dateNowGMT DATETIME;
+
+   SET at_dateNowGMT = UTC_TIMESTAMP();
+
+   INSERT INTO PurchaseCreditDetail(xactionId,
+                                          purchaseOfferDetailId,
+                                          cost,
+                                          costUSD,
+                                          tax,
+                                          taxUSD,
+                                          dateCreated)
+   VALUES(at_xactionId,
+          at_purchaseOfferDetailId,
+          at_cost,
+          at_costUSD,
+          at_tax,
+          at_taxUSD,
+          at_dateNowGMT);
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

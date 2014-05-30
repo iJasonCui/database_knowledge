@@ -1,0 +1,35 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getSubEligByOfferId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getSubEligByOfferId (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Marc Henderson
+**   Date:  December 2004
+**   Description:  retrieves all subscription types by offerId
+**
+**
+******************************************************************************/
+at_subscriptionOfferId int
+)
+BEGIN  
+	SELECT 
+          eligibilityId,
+          subscriptionOfferId,
+          localeId,
+          cityId,
+          jurisdictionId,
+          secondJurisdictionId,
+          countryId,
+          billingLocationId,
+          product,
+          community,
+          userType,
+          brand,
+          gender
+        FROM SubscriptionEligibility
+        WHERE subscriptionOfferId = at_subscriptionOfferId;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,102 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getQuickBuySubs;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getQuickBuySubs (
+/******************************************************************************
+** CREATION:
+**   Author:      Mark Jaeckle
+**   Date:        Feb 2011
+**   Description: Get subscription QuickBuy record for specified user.  Excludes
+**                upsells.
+**  
+**   Note: Cloned and then modified from wsp_getQuickBuyByUserId.
+**
+******************************************************************************/
+ at_userId DECIMAL(12,0)
+)
+BEGIN
+
+DECLARE at_maxDateCreated        DATETIME;
+DECLARE at_subscriptionOfferId       SMALLINT;
+DECLARE at_creditCardId          INT;
+DECLARE at_subscriptionOfferDetailId SMALLINT;
+DECLARE at_dateCreated           DATETIME;
+DECLARE at_ordinal               TINYINT;
+
+SELECT subscriptionOfferId INTO at_subscriptionOfferId 
+  FROM UserAccount 
+ WHERE userId = at_userId;
+
+SELECT MAX(dateCreated) INTO at_maxDateCreated 
+  FROM Purchase 
+ WHERE userId = at_userId 
+   AND creditCardId > 0 
+   AND cost > 0
+   AND subscriptionOfferDetailId IN 
+      (SELECT subscriptionOfferDetailId 
+         FROM SubscriptionOfferDetail 
+        WHERE subscriptionOfferId = at_subscriptionOfferId 
+          AND ordinal > 0 
+          AND ( dateExpiry IS NULL OR dateExpiry = '00000000') 
+          AND masterOfferDetailId = 0);
+
+-- if previous purchase using default purchase offer, get last purchase details
+IF at_maxDateCreated IS NOT NULL 
+THEN 
+   SELECT creditCardId
+         ,subscriptionOfferDetailId
+         ,dateCreated
+     FROM Purchase
+    WHERE userId = at_userId
+      AND dateCreated = at_maxDateCreated;
+ELSE
+   SELECT MAX(dateCreated) INTO at_maxDateCreated 
+     FROM Purchase 
+    WHERE userId = at_userId 
+      AND creditCardId > 0 
+      AND cost > 0
+      AND subscriptionOfferDetailId IN 
+          (SELECT subscriptionOfferDetailId 
+             FROM SubscriptionOfferDetail 
+            WHERE ordinal > 0 
+              AND ( dateExpiry IS NULL OR dateExpiry = '00000000') 
+              AND masterOfferDetailId = 0);  ## not web 900 purchase
+
+   ##-- get last successful credit card purchase, we get ordinal of offer detail and map to current default
+   ##-- for this user
+   IF at_maxDateCreated IS NOT NULL 
+   THEN 
+      SELECT creditCardId, subscriptionOfferDetailId, dateCreated 
+        INTO at_creditCardId, at_subscriptionOfferDetailId, at_dateCreated 
+        FROM Purchase
+       WHERE userId = at_userId
+         AND dateCreated = at_maxDateCreated;
+                
+      IF at_subscriptionOfferDetailId IS NOT NULL 
+      THEN 
+         SELECT ordinal INTO at_ordinal 
+           FROM SubscriptionOfferDetail
+          WHERE subscriptionOfferDetailId = at_subscriptionOfferDetailId
+            AND ( dateExpiry IS NULL OR dateExpiry = '00000000');
+                     
+         IF at_ordinal IS NOT NULL 
+         THEN 
+            SELECT subscriptionOfferDetailId INTO at_subscriptionOfferDetailId  
+              FROM SubscriptionOfferDetail
+             WHERE subscriptionOfferId = at_subscriptionOfferId
+               AND ordinal = at_ordinal
+               AND ( dateExpiry IS NULL OR dateExpiry = '00000000') ;
+                       
+            SELECT at_creditCardId, at_subscriptionOfferDetailId, at_dateCreated;
+         ELSE
+            SELECT repTestId FROM RepTest where 1=2 ;          
+         END IF;
+      ELSE
+         SELECT repTestId FROM RepTest where 1=2;
+      END IF;
+   ELSE
+      SELECT repTestId FROM RepTest where 1=2;
+   END IF;
+END IF;
+        
+END;;
+DELIMITER ;

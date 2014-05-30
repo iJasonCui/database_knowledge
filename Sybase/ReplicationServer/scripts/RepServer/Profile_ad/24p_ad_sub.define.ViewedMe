@@ -1,0 +1,2 @@
+define subscription "244pad_ViewedMe" for "4pad_ViewedMe" with replicate at webdb24p.Profile_ad
+go

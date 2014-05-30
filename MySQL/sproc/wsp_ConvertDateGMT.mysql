@@ -1,0 +1,52 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS `wsp_ConvertDateGMT`;
+
+CREATE DEFINER=`root`@`10.10.26.21` PROCEDURE `wsp_ConvertDateGMT`(
+     IN   getdate_in DATETIME, 
+     OUT  getDateGMT_in DATETIME 
+)
+BEGIN
+
+   DECLARE date_year_in  	CHAR(4);
+   DECLARE date_dow_in 	        INT; 	   
+   DECLARE date_dst_start_char  VARCHAR(30) ; 
+   DECLARE date_dst_end_char    VARCHAR(30) ; 
+   DECLARE date_dst_start_in    DATETIME ; 
+   DECLARE date_dst_end_in      DATETIME ; 
+   DECLARE gmt_offset_in 	INT ;      
+
+   SET date_year_in = CONVERT(YEAR(getdate_in), CHAR(4)) ;
+
+   SET date_dst_start_char = date_year_in + '-03-08 2:00 ' ;
+   SET date_dst_start_in   = CONVERT(date_dst_start_char, DATETIME) ;
+
+   SET date_dow_in = DAYOFWEEK(date_dst_start_in);
+   
+   IF date_dow_in != 1
+   THEN
+      SET date_dst_start_in = DATE_ADD( date_dst_start_in , INTERVAL 8-date_dow_in DAY) ;
+   END IF;
+
+   
+   SET date_dst_end_char = date_year_in + '-11-01 1:59:59:999' ; 
+   SET date_dst_end_in   = CONVERT(date_dst_end_char,  DATETIME ) ;
+   SET date_dow_in = DAYOFWEEK( date_dst_end_in);
+
+   IF date_dow_in != 1
+   THEN
+      SET date_dst_end_in = DATE_ADD(date_dst_end_in, INTERVAL 8-date_dow_in DAY) ;
+   END IF; 
+
+   
+   IF getdate_in BETWEEN date_dst_start_in AND date_dst_end_in
+   THEN
+      SET gmt_offset_in = 4 ;
+   ELSE
+      SET gmt_offset_in = 5 ;
+   END IF;
+
+   SET getDateGMT_in = DATE_ADD(getdate_in, INTERVAL gmt_offset_in HOUR) ;
+
+END;;
+
+DELIMITER ;

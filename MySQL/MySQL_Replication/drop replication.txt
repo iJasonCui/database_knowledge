@@ -1,0 +1,14 @@
+### On the slave server(s):
+
+1. Run "stop slave" to stop replication.
+
+2. Run "reset slave" to tell the slave server to forget it's position in the binary log retrieved from the master server.
+
+3. Add "skip-slave-start" to my.cnf to prevent replication from starting when you restart MySQL.
+
+4. There's no need to restart MySQL on either the master or the slave. Complete documentation can be found 
+in section 19 of the MySQL Reference Manual.
+
+I'd recommend leaving the rest of the replication settings in place in case you decide to revert to your previous 
+configuration. That way you'd just have to push the data over and reset the slave position 
+(don't forget to remove skip-slave-start) rather than recreating the setup whole-cloth.

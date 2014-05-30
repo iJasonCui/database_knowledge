@@ -1,0 +1,35 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_inactivateCardByUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_inactivateCardByUserId (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Mike Stairs
+**   Date:         Oct, 2004
+**   Description:  mark all credit card to inactive.
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+
+    at_userId            DECIMAL(12,0)
+)
+BEGIN
+
+DECLARE at_GetDateGMT  DATETIME;
+
+SET at_GetDateGMT = UTC_TIMESTAMP();
+
+UPDATE CreditCard
+               SET 
+                  status = 'I'
+                  ,dateModified = at_GetDateGMT
+             WHERE userId = at_userId;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

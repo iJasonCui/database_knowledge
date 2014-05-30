@@ -1,0 +1,1 @@
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway

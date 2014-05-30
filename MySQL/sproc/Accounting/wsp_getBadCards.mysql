@@ -1,0 +1,36 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getBadCards;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getBadCards (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Mike Stairs
+**   Date:         Feb 23, 2004
+**   Description:  retrieves all bad cards
+**
+** REVISION(S):
+**   Author:       Andy Tran
+**   Date:         February, 2008
+**   Description:  added encodedCardId
+**
+******************************************************************************/
+)
+BEGIN
+    SELECT cc.creditCardId
+          ,cc.userId
+          ,cc.cardTypeId
+          ,cc.encodedCardNum
+          ,cc.partialCardNum
+          ,cc.nameOnCard
+          ,bcc.reasonContentId
+          ,bcc.reason
+          ,cc.encodedCardId
+      FROM BadCreditCard bcc, CreditCard cc
+      WHERE bcc.creditCardId = cc.creditCardId AND bcc.status = 'B'
+      ORDER BY cc.userId;
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

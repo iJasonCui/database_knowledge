@@ -1,0 +1,1351 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<TITLE>Sybase FAQ: 11/19 - Issues, dbccs, isql, bcp</TITLE>
+<script language="JavaScript1.2">
+function edc(s,s2)
+{document.write("<font face=\"Arial\"><A href=\"",s,"\" target=\"_blank\" onclick=\"window.open('",s,"','Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=720,height=530,left=30,top=43');return false;\" )>Not finding the answers you need?&nbsp;",s2,"Submit your question for others to see.</A></font>");}
+//-->
+</script>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<DIV ALIGN=CENTER>
+<SMALL>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  Part11 -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A>
+</SMALL>
+<BR><HR SIZE=2 WIDTH=600 NOSHADE>
+<P><H1>Sybase FAQ: 11/19 - Issues, dbccs, isql, bcp</H1>
+<table border="0" cellpadding="4" cellspacing="4" width="35%">
+<tr><td width="100%" align="center" bgcolor="#D6D6C0">
+<p align=center><small>
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part11/index.html","<br>");
+// --></script>
+</small></p>
+</td></tr>
+</table>
+ <br>
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="40%">
+<tr><td width="100%" align="center" bgcolor="#CCCCFF"><font face="Arial">There are reader questions on this topic!<a href="#ct"><br>Help
+others by sharing your knowledge</a></font></td></tr>
+</table></center></div>
+<HR SIZE=2 WIDTH=600 NOSHADE>
+</DIV>
+<PRE>
+Message-ID: &lt;databases/sybase-faq/part11_1074677126@rtfm.mit.edu&gt;
+X-Last-Updated: 2003/03/02
+From: dowen@midsomer.org (David Owen)
+Newsgroups: <A HREF="http://groups.google.com/groups?group=comp.databases.sybase" target="new">comp.databases.sybase</A>
+Subject: Sybase FAQ: 11/19 - Issues, dbccs, isql, bcp
+Reply-To: <A HREF="mailto:dowen@midsomer.org">dowen@midsomer.org</A> (David Owen)
+Keywords: FAQ, DATABASES, SYBASE, ASA, ASE, REP
+Date: 21 Jan 2004 09:26:06 GMT
+
+Archive-name: databases/sybase-faq/part11
+URL: <A HREF="http://www.isug.com/Sybase_FAQ">http://www.isug.com/Sybase_FAQ</A>
+Version: 1.7
+Maintainer: David Owen
+Last-modified: 2003/03/02
+Posting-Frequency: posted every 3rd month
+   A how-to-find-the-FAQ article is posted on the intervening months.
+
+                      Platform Specific Issues - Solaris                       
+                                                                               
+ 
+
+    2.1.1    Should I run 32 or 64 bit ASE with Solaris?
+    2.1.2    What is Intimate Shared Memory or ISM?
+   
+Platform Specific Issues - NT Performance and Tuning ASE FAQ
+
+-------------------------------------------------------------------------------
+
+2.1.1: Should I run 32 or 64 bit ASE with Solaris?
+
+-------------------------------------------------------------------------------
+
+Sybase' first forray into 64-bit was with release 11.9.3. I do not know much
+about that release, but I seem to remember that it was always lagging behind
+its sister release of 11.9.2.
+
+With ASE 12, Sybase have both 32-bit and 64-bit versions at the same release
+level. This is a big improvement, since it cuts out some concern that was
+prevelant with 11.9.3 as to why they were on different numbers. The releases
+are supposed to be identical in terms of functionality, save the fact that the
+64-bit version can address more memory.
+
+So, why not just be done with it and have just the one version? Firstly, I
+suppose that not everyone who can run Solaris has the capability to run the
+64-bit version. There are still a lot of 32-bit Sparc chips around and a lot of
+people use them. It is also possible to run 32-bit Solaris on a 64-bit machine.
+In order to be able to run 64-bit Sybase you will have to be running 64-bit
+Solaris.
+
+If you have a 64-bit environment, you still need to choose between which Sybase
+version to run. If you have more than 4G bytes of memory on your machine and
+you would like Sybase to take advantage of it, then the 64-bit version is for
+you. If not, then the word on the street, and from Sybase themselves, is that
+in identical environments, the 32-bit version runs slightly faster. I have
+heard a couple of explanations as to why this is so, but nothing that I find
+100% convincing.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+2.1.2: What is Intimate Shared Memory or ISM?
+
+-------------------------------------------------------------------------------
+
+Intimate Shared Memory or ISM is a specific feature of Sun Solaris. The feature
+was developed so that when multiple processes (at OS level) try to access a
+shared memory region, they do not use multiple TLBs (Transalation Lookaside
+Buffers) at OS kernel level. This saves lot of kernel memory space.
+
+I don't think that does a whole lot for Sybase, more for Oracle I suppose.
+However, there is a side effect that is useful. If there is engough memory
+available on the machine, typically Solaris will not swap out process memory
+marked as ISM if it can possibly help it.
+
+Swapping in Solaris is done in three phases, reserved, allocated and used.
+Locking the shared memory has the advantage of increasing performance. Of
+course, if there are lot's of processes on the machine and if new processes
+starve for memory, there is a potential that ISM will get swapped.
+
+For performance reasons, it is worth ensuring that Sybase can allocated its
+shared memory segment using ISM. ASE tries by default to use ISM and will
+display an error message during start up if this is not possible. It is
+probably worth starting Sybase soon after a machine is rebooted to give it the
+best possible chance of using ISM.
+
+More details can be found on the Sunsolve web site. I don't have a URL, sorry.
+I am not even sure if this is a public site or not.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+Platform Specific Issues - NT Performance and Tuning ASE FAQ
+
+                      Platform Specific Issues - NT/2000                       
+                                                                               
+ 
+
+    2.2.1    How to Start ASE on Remote NT Servers
+    2.2.2    How to Configure More than 2G bytes of Memory for ASE on NT
+    2.2.3    Installation Issues
+   
+Platform Specific Issues - Linux Platform Specific Issues - Solaris ASE FAQ
+
+-------------------------------------------------------------------------------
+
+2.2.1: How to Start ASE on Remote NT Servers
+
+-------------------------------------------------------------------------------
+
+Currently, there is no method of starting ASE on a remote NT server using
+Sybase Central.  So how do you get ASE running on an NT server located in one
+city when you are currently located in another.  OK, OK, so flying there is an
+option, but let's try to stay within the realms of practicality &lt;g&gt;.
+
+One option is to buy a good telnet server and telnet onto the box and then
+start it using the "RUN_&lt;server&gt;.BAT" file.  This works, but depending on the
+telnet server can be a little troublesome.  NT does not have such a nice set of
+commands as Unix, so there is no "startserver" to run the server in the
+background.  This means that the telnet window that you use to start the server
+may have to stay open for the lifetime of the server.  This means that the
+health of ASE is now dependent upon two machines not crashing.  As I say, your
+mileage may vary, but I have certainly found this to be the case with at least
+one telnet server.
+
+Another option is to use SRVMGR.EXE from the Windows NT resource kit.  Roughly
+you issue
+
+srvmgr \\SERVER-TO-BE-MANAGED
+
+(obviously replacing SERVER-TO-BE-MANAGED with the name of the server you wish
+to start ASE on!)
+
+Select the "Services" option, and start ASE as if you were in the "Services"
+applet on a local NT server.
+
+Yet another option is to install PC Anywhere or VNC on both machines and use
+one of these tools to remotely control the system.  (VNC is a very good version
+of PC Anywhere, except that the clients and servers run on NT, Unix, Linux; the
+source code is available and it is free (in both senses of the word)!)
+
+If anyone knows of any better methods, please let me know and I will add them
+to this section.  Thanks.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+2.2.2: How to Configure More than 2G bytes of Memory for ASE on NT.
+
+-------------------------------------------------------------------------------
+
+The following was posted on news://forums.sybase.com/sybase.public.ase.nt ,
+taken directly from a Sybase SPS case notes.
+
+(I read recently that this is not needed, that Sybase does all of this for you
+before it leaves the factory. If anyone knows the real answer, I would be
+grateful for an update.)
+
+If you are using NT server enterprise, or Windows 2000 Advanced Server, you may
+be able to get up to 3gig:
+
+Here is what you need to do in order to configure greater than 2GB memory for
+ASE on NT:
+
+Step 1: Make a backup copy of sqlsrvr.exe in the sybase bin directory
+
+Step 2: Verify the current settings of sqlsrvr.exe using imagecfg.exe:
+
+imagecfg sqlsrvr.exe
+sqlsrvr.exe contains the following configuration information:
+   Subsystem Version of 4.0
+   Stack Reserve Size: 0x20000
+   Stack Commit Size: 0x4
+
+Step 3: Use imagecfg to switch on large addressing using the -l (lowercase L)
+switch:
+
+imagecfg -l sqlsrvr.exe
+sqlsrvr.exe contains the following configuration information:
+   Subsystem Version of 4.0
+   Stack Reserve Size: 0x20000
+   Stack Commit Size: 0x4
+
+sqlsrvr.exe updated with the following configuration information:
+
+   Subsystem Version of 4.0
+   Image can handle large (&gt;2GB) addresses
+   Stack Reserve Size: 0x20000
+   Stack Commit Size: 0x4
+
+Step 4: verify ASE is able to start
+
+Step 5: The NT machine must be booted with the /3GB flag and must have
+sufficient paging file space (e.g., if you want ASE to access 3G of memory then
+the paging file must be at least that size)
+
+Step 6: increase total memory to say 2.2 gb (anything &gt; 2gb)
+
+Step 7: increase starting virtual memory address to 23662592 decimal (which is
+1691000 hex) as shown:
+
+sp_configure 'shared memory starting address', 23662592
+
+Step 8: restart server
+
+Step 9: test to connect a lot of users (more than 240)
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+2.2.3: Installation issues.
+
+-------------------------------------------------------------------------------
+
+This is a list of items to be aware of when installing ASE onto NT/2000.
+
+  * Make sure that you install onto a local drive. This might not affect all
+    versions of ASE on NT/2000, but I could not get the software to install and
+    run from a network drive with the 12.5 developer edition. Try as I might,
+    it kept failing without really telling me why. I aborted the installation,
+    installed onto one of the local drives, and it worked a charm. My only NT/
+    2000 machine is my laptop with only one drive, so I do not know if this is
+    any drive other than "C" or whether it is just network mounted drives. Will
+    be happy to take advice and corrections from Sybase or anyone that can tell
+    me what I was doing wrong.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+Platform Specific Issues - Linux Platform Specific Issues - Solaris ASE FAQ
+
+                       Platform Specific Issues - Linux                        
+                                                                               
+ 
+
+    2.3.1    ASE on Linux FAQ
+   
+DBCCs Platform Specific Issues - NT ASE FAQ
+
+-------------------------------------------------------------------------------
+
+2.3.1: ASE on Linux FAQ
+
+-------------------------------------------------------------------------------
+
+There is an FAQ covering ASE on Linux at Michael Peppler's site.
+
+<A HREF="http://www.mbay.net/~mpeppler/Linux-ASE-FAQ.html">http://www.mbay.net/~mpeppler/Linux-ASE-FAQ.html</A>
+
+It contains a fair bit of information about running Sybase ASE on Linux and if
+you are interested in doing just that, then go read it. It certainly will
+answer your question about why, after a new install, you can connect from the
+server that ASE is installed on but no other client. (I am not going to tell
+you here, you will have to go and read it :-)
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+DBCCs Platform Specific Issues - NT ASE FAQ
+
+                                    DBCC's                                     
+                                                                               
+ 
+
+    3.1    How do I set TS Role in order to run certain DBCCs...?
+    3.2    What are some of the hidden/trick DBCC commands?
+    3.3    Other sites with DBCC information.
+    3.4    Fixing a Munged Log
+   
+    Performing any of the above may corrupt your ASE installation. Please do 
+    not call Sybase Technical Support after screwing up ASE. Remember, always
+    take a dump of the master database and any other databases that are to be
+    affected.
+   
+isql Platform Specific Issues - Linux ASE FAQ Index
+
+-------------------------------------------------------------------------------
+
+3.1: How to set TS Role
+
+-------------------------------------------------------------------------------
+
+Some DBCC commands require that you set TS Role in order to run them. Here's
+how to set it:
+
+Login to Server as sa and perform the following:
+
+    sp_role "grant", sybase_ts_role, sa
+    go
+    
+    set role "sybase_ts_role" on
+    go
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+3.2: DBCC Command Reference
+
+-------------------------------------------------------------------------------
+
+Here is the list of DBCC commands that have been sent into the FAQ.  If you
+know of any more or have more information, then please send it in to 
+dowen@midsomer.org, this is, after all, a resource for us all.
+
+As ASE develops, so some of the dbcc's change.  I have pointed out major
+changes from one release to another that I know about.  However, a couple of
+changes are so common that it will save a lot of space if I say it once.  Where
+there is an option to specify dbid or dbname, in previous releases only dbid
+would be accepted.
+
++--------------------------------------------------------------------------------------------------------------+
+|                  |                                                     |                          |Risk Level|
+|    DBCC Name     |                    Argument List                    |         Comments         |    /     |
+|                  |                                                     |                          |Supported?|
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|allocdump         |( dbid | dbname, page )                              |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|                  |( { print_bufs | no_print }, bucket_limit )          |Format prior to ASE 11.   |          |
+|                  |-----------------------------------------------------+--------------------------+----------|
+|bhash             |                                                     |Format prior to ASE 12.   |          |
+|                  |-----------------------------------------------------+--------------------------+----------|
+|                  |( cname [, clet_id [, { print_bufs | no_print        |Format ASE 12 and later.  |          |
+|                  |},bucket_limit]] )                                   |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|                  |( [ dbid ][, objid ][, nbufs ], printopt = {0 | 1 |  |Format prior to ASE 11.   |          |
+|                  |2},buftype)                                          |                          |          |
+|                  |-----------------------------------------------------+--------------------------+----------|
+|                  |[ (dbid | dbname [, objid | objname [, nbufs [,      |                          |          |
+|                  |printopt = { 0 | 1 | 2 }                             |Format prior to ASE 12.   |          |
+|                  |[, buftype = { kept | hashed | nothashed | ioerr} [, |                          |          |
+|buffer            |cachename ] ] ] ] ] ) ]                              |                          |          |
+|                  |-----------------------------------------------------+--------------------------+----------|
+|                  |[ (dbid | dbname [, objid | objname [, nbufs [,      |                          |          |
+|                  |printopt = { 0 | 1 | 2 }                             |                          |          |
+|                  |[, buftype = { kept | hashed | nothashed | ioerr} [, |Format ASE 12 and later.  |          |
+|                  |cachename [, cachelet_id ]                           |                          |          |
+|                  |] ] ] ] ] ) ]                                        |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|                  |( startaddress, length )                             |Format prior to ASE 12.   |          |
+|bytes             |-----------------------------------------------------+--------------------------+----------|
+|                  |(startaddress, length [, showlist | STRUCT_NAME])    |Format ASE 12 and later.  |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|                  |                                                     |Uninstall and Uncache     |          |
+|cacheremove       |(dbid|dbname, objid|objname)                         |descriptor for an object  |          |
+|                  |                                                     |from cache                |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|checkalloc        |[( dbname [, fix | nofix ] ) ]                       |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|checkcatalog      |[( dbname )]                                         |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|checkdb           |[( dbname [, skip_ncindex ] ) ]                      |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|checktable        |( tablename | tabid [, skip_ncindex ] )              |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|                  |                                                     |Error can take one of the |          |
+|                  |                                                     |following values:         |          |
+|                  |                                                     |                          |          |
+|                  |                                                     |  * 1133 error            |          |
+|                  |                                                     |    demonstrates that a   |          |
+|                  |                                                     |    page we think is an   |          |
+|                  |                                                     |    oam is not            |          |
+|                  |                                                     |  * 2502 error shows      |          |
+|                  |                                                     |    multiple references to|          |
+|                  |                                                     |    the same page         |          |
+|                  |                                                     |  * 2503 error shows a    |          |
+|                  |                                                     |    breakage in the page  |          |
+|                  |                                                     |    linkage               |          |
+|                  |                                                     |  * 2521 error shows that |          |
+|                  |                                                     |    the page is referenced|          |
+|                  |                                                     |    but is not allocated  |          |
+|                  |                                                     |    on the extent page    |          |
+|                  |                                                     |  * 2523 error shows that |          |
+|                  |                                                     |    the page number in the|          |
+|                  |                                                     |    page or catalog       |          |
+|                  |                                                     |    entries are           |          |
+|                  |                                                     |    out-of-range for the  |          |
+|                  |                                                     |    database              |          |
+|                  |                                                     |  * 2525 error shows that |          |
+|                  |                                                     |    an extent objid/indid |          |
+|                  |                                                     |    do not match what is  |          |
+|                  |                                                     |    on the page           |          |
+|                  |                                                     |  * 2529 error shows a    |          |
+|corrupt           |( tablename, indid, error )                          |    page number           |          |
+|                  |                                                     |    out-of-range for the  |          |
+|                  |                                                     |    database or a 605     |          |
+|                  |                                                     |    style scenario        |          |
+|                  |                                                     |  * 2540 error occurs when|          |
+|                  |                                                     |    a page is allocated on|          |
+|                  |                                                     |    an extent but the page|          |
+|                  |                                                     |    is not referenced in  |          |
+|                  |                                                     |    the page chain        |          |
+|                  |                                                     |  * 2546 error occurs when|          |
+|                  |                                                     |    an extent is found for|          |
+|                  |                                                     |    an object without an  |          |
+|                  |                                                     |    of its pages being    |          |
+|                  |                                                     |    referenced (a stranded|          |
+|                  |                                                     |    extent)               |          |
+|                  |                                                     |  * 7939 error occurs when|          |
+|                  |                                                     |    an allocation page    |          |
+|                  |                                                     |    which has extents for |          |
+|                  |                                                     |    an object are not     |          |
+|                  |                                                     |    reflected on the OAM  |          |
+|                  |                                                     |    page                  |          |
+|                  |                                                     |  * 7940 error occurs when|          |
+|                  |                                                     |    the total counts in   |          |
+|                  |                                                     |    the OAM page differ   |          |
+|                  |                                                     |    from the actual count |          |
+|                  |                                                     |    of pages in the chain |          |
+|                  |                                                     |  * 7949 error is similar |          |
+|                  |                                                     |    to a 7940 except that |          |
+|                  |                                                     |    the counts are on an  |          |
+|                  |                                                     |    allocation page basis |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|                  |                                                     |cursor_level - level of   |          |
+|cursorinfo        |(cursor_level, cursor_name)                          |nesting. -1 is all nesting|          |
+|                  |                                                     |levels                    |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|dbinfo            |( [ dbname ] )                                       |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|dbrepair          |( dbid, option = { dropdb | fixindex | fixsysindex },|                          |          |
+|                  |table, indexid )                                     |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|dbrepair          |( dbid, ltmignore)                                   |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|dbtable           |( dbid )                                             |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|delete_row        |( dbid, pageid, delete_by_row = { 1 | 0 }, rownum )  |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|des               |( [ dbid ][, objid ] )                               |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|                  |                                                     |eng func may be:          |          |
+|                  |                                                     |                          |          |
+|engine            |(eng_func)                                           |  * "online"              |          |
+|                  |                                                     |  * "offline", ["&lt;engine  |          |
+|                  |                                                     |    number&gt;"]             |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|extentcheck       |( dbid, objid, indexid, sort = {1|0} )               |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|extentdump        |( dbid, page )                                       |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|extentzap         |( dbid, objid, indexid, sort )                       |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|findnotfullextents|( dbid, objid, indexid, sort = { 1 | 0 } )           |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|fix_al            |( [ dbname ] )                                       |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|help              |( dbcc_command )                                     |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|ind               |( dbid, objid, printopt = { 0 | 1 | 2 } )            |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|indexalloc        |(tablename|tabid, indid, [full | optimized | fast],  |                          |          |
+|                  |[fix | nofix])                                       |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|listoam           |(dbid | dbname, tabid | tablename, indid)            |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|locateindexpgs    |( dbid, objid, page, indexid, level )                |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|lock              |                                                     |print out lock chains     |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|log               |( [dbid][,objid][,page][,row][,nrecords][,type=      |                          |          |
+|                  |{-1..36}],printopt={0|1} )                           |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|memusage          |                                                     |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|netmemshow        |( option = {1 | 2 | 3} )                             |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|netmemusage       |                                                     |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|newalloc          |( dbname, option = { 1 | 2 | 3 } )                   |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|page              |( dbid, pagenum [, printopt={0|1|2} ][, cache={0|1} ]|                          |          |
+|                  |[, logical={1|0} ] )                                 |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|pglinkage         |( dbid, start, number, printopt={0|1|2}, target,     |                          |          |
+|                  |order={1|0} )                                        |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|pktmemshow        |( option = {spid} )                                  |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|procbuf           |( dbid, objid, nbufs, printopt = { 0 | 1 } )         |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|prtipage          |( dbid, objid, indexid, indexpage )                  |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|pss               |( suid, spid, printopt = { 1 | 0 } )                 |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|rebuildextents    |( dbid, objid, indexid )                             |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|                  |                                                     |careful as this will cause|          |
+|rebuild_log       |( dbid, 1, 1)                                        |large jumps in your       |          |
+|                  |                                                     |timestamp values used by  |          |
+|                  |                                                     |log recovery.             |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|remap             |                                                     |Only available prior to   |          |
+|                  |                                                     |12.                       |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|resource          |                                                     |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|setkeepalive      |(# minutes)                                          |for use on Novell with TCP|          |
+|                  |                                                     |/IP.                      |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|                  |                                                     |Not needed with more      |          |
+|                  |                                                     |recent versions of ASE,   |          |
+|                  |                                                     |use the supplied stored   |          |
+|                  |                                                     |procs.  On older versions |          |
+|settrunc          |('ltm','ignore')                                     |of ASE (pre-11?) this     |          |
+|                  |                                                     |command may be useful for |          |
+|                  |                                                     |a dba who is dumping and  |          |
+|                  |                                                     |loading a database that   |          |
+|                  |                                                     |has replication set on for|          |
+|                  |                                                     |the original db.          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|                  |                                                     |Shows the sql that the    |          |
+|sqltext           |(spid)                                               |spid is currently         |          |
+|                  |                                                     |running.  Blank if idle.  |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|stacktrace        |(spid)                                               |Not Linux, yet :-)        |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|show_bucket       |( dbid, pageid, lookup_type )                        |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|tab               |( dbid, objid, printopt = { 0 | 1 | 2 } )            |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|tablealloc        |(tablename|tabid, [full | optimized | fast],[fix |   |                          |          |
+|                  |nofix])                                              |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|traceoff          |( tracenum [, tracenum ... ] )                       |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|traceon           |( tracenum [, tracenum ... ] )                       |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|                  |                                                     |Used to switch on/off     |          |
+|                  |                                                     |certain options.  Some are|          |
+|                  |                                                     |supported and listed in   |          |
+|                  |                                                     |the docs, others          |          |
+|                  |                                                     |correspond to the         |          |
+|                  |                                                     |buildmaster -yall name    |          |
+|                  |                                                     |minus the c prefix.       |          |
+|                  |                                                     |                          |          |
+|                  |                                                     |Supported:                |          |
+|                  |                                                     |                          |          |
+|                  |                                                     |  * ascinserts ('value' is|          |
+|                  |                                                     |    again two values, 1|0 |          |
+|                  |                                                     |    for on or off and the |          |
+|                  |                                                     |    table name).          |          |
+|                  |                                                     |  * cpuaffinity           |          |
+|                  |                                                     |    ('value' in this case |          |
+|tune              |( option, value )                                    |    is two values, the    |          |
+|                  |                                                     |    starting cpu number   |          |
+|                  |                                                     |    and "on" or "off".)   |          |
+|                  |                                                     |  * maxwritedes           |          |
+|                  |                                                     |                          |          |
+|                  |                                                     |Unsupported:              |          |
+|                  |                                                     |                          |          |
+|                  |                                                     |  * indextrips            |          |
+|                  |                                                     |  * oamtrips              |          |
+|                  |                                                     |  * datatrips             |          |
+|                  |                                                     |  * schedspins            |          |
+|                  |                                                     |  * bufwashsize           |          |
+|                  |                                                     |  * sortbufsize           |          |
+|                  |                                                     |  * sortpgcount           |          |
+|                  |                                                     |  * maxscheds             |          |
+|                  |                                                     |  * max_retries           |          |
+|                  |                                                     |                          |          |
+|                  |                                                     |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|undo              |( dbid, pageno, rowno )                              |                          |          |
+|------------------+-----------------------------------------------------+--------------------------+----------|
+|                  |( dbid|dbname, type = {0|1}, display_opts = {0|1} [, |If sp_helpdb is returning |          |
+|usedextents       |bypiece = {0|1}])                                    |negative free space, try: |          |
+|                  |                                                     |usedextents(dbid, 0, 1, 1)|          |
++--------------------------------------------------------------------------------------------------------------+
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+3.3: Other Sites with DBCC information
+
+-------------------------------------------------------------------------------
+
+  * <A HREF="http://user.icx.net/~huntley/dbccinfo.htm">http://user.icx.net/~huntley/dbccinfo.htm</A>, Al Huntley's site contains a
+    comprehensive including discussion on some and example output.
+  * <A HREF="http://www.kaleidatech.com/dbcc1.htm">http://www.kaleidatech.com/dbcc1.htm</A>, From KaleidaTech Associates, Inc. has
+    another fairly complete list.
+  * <A HREF="http://www.sypron.nl">http://www.sypron.nl</A>, as you would expect, Rob Verschoor has a list of
+    DBCC's in his ASE Quick Reference Supplement.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+3.4: Fixing a Munged Log
+
+-------------------------------------------------------------------------------
+
+   
+    Sybase Technical Support states that this is extremely dangerous as it
+    "jacks up the value of the timestamp" which is used for recovery purposes.
+    This may cause potential database corruption if the system fails while the
+    timestamp rolls over.
+   
+    In 4.9.2, you could only run the dbcc rebuild_log command once and after
+    that you would have to use bcp to rebuild the database
+   
+    In System 10, you can run this command about 10 times.
+   
+    In System 11 I (Pablo, previous editor) tried it about 20 times and no
+    problem.
+   
+1&gt; use master
+2&gt; go
+1&gt; select count(*) from your_database..syslogs
+2&gt; go
+
+ -----------
+ some number
+
+1&gt; sp_configure "allow updates",1
+2&gt; go
+1&gt; reconfigure with override  /* for system 10 and below only*/
+2&gt; go
+
+1&gt; begin tran
+2&gt; go
+
+/* Save the following status to be used later... */
+1&gt; select saved_status=status from sysdatabases where name = "your_database"
+2&gt; go
+1&gt; update sysdatabases set status = -32768 where name = "your_database"
+2&gt; go
+1&gt; commit tran
+2&gt; go
+1&gt; shutdown
+2&gt; go
+
+1&gt; dbcc rebuild_log (your_database, 0, 0)
+2&gt; go
+DB-LIBRARY error (severity 9):
+   Unexpected EOF from SQL Server.
+
+1&gt; dbcc rebuild_log (your_database, 1, 1)
+2&gt; go
+DBCC execution completed. If DBCC printed error messages, see your System
+Administrator.
+
+
+1&gt; use your_database
+2&gt; go
+1&gt; select count(*) from syslogs
+2&gt; go
+
+ -----------
+           1
+
+1&gt; begin tran
+2&gt; go
+1&gt; update sysdatabases set status = saved_status where name = "your_database"
+2&gt; go
+(1 row affected)
+1&gt; commit tran
+2&gt; go
+1&gt; shutdown
+2&gt; go
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+isql Platform Specific Issues - Linux ASE FAQ Index
+
+                                     isql                                      
+                                                                               
+ 
+
+    4.1    How do I hide my password using isql?
+    4.2    How do I remove row affected and/or dashes when using isql?
+    4.3    How do I pipe the output of one isql to another?
+    4.4    What alternatives to isql exist?
+    4.5    How can I make isql secure?
+   
+bcp DBCCs ASE FAQ
+
+-------------------------------------------------------------------------------
+
+4.1: Hiding your password to isql
+
+-------------------------------------------------------------------------------
+
+Here are a menagerie (I've always wanted to use that word) of different methods
+to hide your password. Pick and choose whichever fits your environment best:
+
+Single ASE on host
+
+Script #1
+
+Assuming that you are using bourne shell sh(1) as your scripting language you
+can put the password in a file and substitute the file where the password is
+needed.
+
+#!/bin/sh
+
+# invoke say ISQL or something...
+(cat $HOME/dba/password_file
+ cat &lt;&lt; EOD
+dbcc ...
+go
+EOD ) | $SYBASE/bin/isql -Usa -w1000
+
+Script #2
+
+#!/bin/sh
+umask 077
+cat &lt;&lt;-endOfCat | isql -Umyuserid -Smyserver
+        mypassword
+        use mydb
+        go
+        sp_who
+        go
+        endOfCat
+
+Script #3
+
+#!/bin/sh
+umask 077
+cat &lt;&lt;-endOfCat | isql -Umyuserid -Smyserver
+        `myScriptForGeneratingPasswords myServer`
+        use mydb
+        go
+        sp_who
+        go
+        endOfCat
+
+Script #3
+
+ 
+#!/bin/sh
+umask 077
+isql -Umyuserid -Smyserver &lt;&lt;-endOfIsql
+        mypassword
+        use mydb
+        go
+        sp_who
+        go
+        endOfIsql
+
+Script #4
+
+ 
+#!/bin/sh
+umask 077
+isql -Umyuserid -Smyserver &lt;&lt;-endOfIsql
+        `myScriptForGeneratingPasswords myServer`
+        use mydb
+        go
+        sp_who
+        go
+        endOfIsql
+
+Script #5
+
+ 
+#!/bin/sh
+echo 'mypassword
+use mydb
+go
+sp_who
+go' | isql -Umyuserid -Smyserver
+
+Script #6
+
+ 
+#!/bin/sh
+echo "`myScriptForGeneratingPasswords myServer`
+use mydb
+go
+sp_who
+go" | isql -Umyuserid -Smyserver
+
+Script #7
+
+#!/bin/sh
+echo "Password :\c "
+stty -echo
+read PASSWD
+stty echo
+
+echo "$PASSWD
+waitfor delay '0:1:00'
+go
+" | $SYBASE/bin/isql -Usa -S${DSQUERY}
+
+Multiple ASEs on host
+
+Again, assuming that you are using bourne shell as your scripting language, you
+can do the following:
+
+ 1. Create a global file. This file will contain passwords, generic functions,
+    master device for the respective DSQUERY.
+ 2. In the actual scripts, source in the global file.
+
+Global File
+
+SYBASE=/usr/sybase
+
+my_password()
+{
+   case $1 in
+      SERVER_1)  PASSWD="this";;
+      SERVER_2)  PASSWD="is";;
+      SERVER_3)  PASSWD="bogus;;
+      *) return 1;;
+   esac
+
+   return 0
+}
+
+Generic Script
+
+#!/bin/sh -a
+
+#
+# Use "-a" for auto-export of variables
+#
+
+# "dot" the file - equivalent to csh() "source" command
+. $HOME/dba/global_file
+
+DSQUERY=$1
+
+# Determine the password:  sets PASSWD
+my_password $DSQUERY
+if [ $? -ne 0 ] ; then # error!
+   echo "&lt;do some error catching&gt;"
+   exit 1
+fi
+
+# invoke say ISQL or something...
+echo "$PASSWD
+dbcc ...
+go" | $SYBASE/bin/isql -U sa -S $DSQUERY -w1000
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+4.2: How to remove row affected and dashes
+
+-------------------------------------------------------------------------------
+
+If you pipe the output of isql then you can use sed(1) to remove this
+extraneous output:
+
+echo "$PASSWD
+      sp_who
+      go" | isql -U sa -S MY_SERVER | sed -e '/affected/d'
+-e '/---/d'
+
+If you simply wish to eliminate the row affected line use the set nocount on
+switch.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+4.3: How do I pipe the output of one isql to another?
+
+-------------------------------------------------------------------------------
+
+The following example queries sysdatabases and takes each database name and
+creates a string of the sort sp_helpdb dbname and sends the results to another
+isql. This is accomplished using bourne shell sh(1) and sed(1) to strip
+unwanted output (see Q4.2):
+
+#!/bin/sh
+
+PASSWD=yuk
+DSQUERY=GNARLY_HAIRBALL
+
+echo "$PASSWD print \"$PASSWD\"
+      go
+      select 'sp_helpdb ' + name + char(10) + 'go'
+        from sysdatabases
+      go" | isql -U sa -S $DSQUERY -w 1000 | \
+sed -e '/affected/d' -e '/---/d' -e '/Password:/d' | \
+isql -U sa -S $DSQUERY -w 1000 
+
+To help you understand this you may wish to comment out any series of pipes and
+see what output is being generated.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+4.4: Are there any alternatives to isql?
+
+-------------------------------------------------------------------------------
+
+sqsh
+
+In my opinion, and that of quite a lot of others, this is the most useful
+(direct) replacement for isql that exists. It combines the usefulness of a good
+shell with database interaction. Looking for the ability to page the output of
+a long command? Look no further. Need to search a result set using a regular
+expression? This is the tool for you.
+
+Like isql, sqsh is a command line tool. It supports all of the features and
+switches of isql with myriad of its own. There is one feature that isql has the
+sqsh does not, and that is the ability to read the password as the first line
+of an input file. If you look at a lot of the examples above, the password is
+piped in, sqsh does not support this with the latest release. I am not sure if
+this is a deliberate feature or not.
+
+A quick summary of its features:
+
+ 1. command line editing;
+ 2. command history;
+ 3. ability to pipe to standard filters;
+ 4. ability to redirect output to X window;
+ 5. shell variables
+ 6. background execution;
+
+Like all good modern shells, sqsh supports command line editing. You need to
+have the GNU readline library available on your machine, but that is now
+becoming common. If you have the bash shell, you have it by default I believe.
+
+Sqsh behaves very well if run in an X Windows environment. There is the direct
+support by way of an output switch to go that sends the results to an X Window,
+but it is much better than that. If you resize the screen sqsh also resizes its
+internal width to take advantage of the new size, just like any well behave X
+application. Doesn't sound like a lot, but when you want to see the results
+from a query and understand the output easily, much better if the columns all
+line up and don't wrap. With isql you would have to exit the program, run it
+again with an adjust '-w' flag and rerun the query.
+
+Enough said. You need to try it! You can grab it from the official SQSH website
+<A HREF="http://www.sqsh.org">http://www.sqsh.org</A>.
+
+There are a host of others that I have heard about, but can no longer get to.
+Some are mentioned in various sites, mainly the sqsh site. If any of them are
+important, still being maintained, are actively supported, and are available
+somewhere, then let me know and I will update this list.
+
+  * dsql
+  * asql
+  * ctsql
+  * qisql
+
+However, I suspect that provided we have sqsh, no other command line version is
+needed!!
+
+SQL Advantage
+
+This was Sybase's second attempt at a true GUI based SQL editor. It was only
+available for W86 platforms. Quite a lot of people liked it, it came free with
+Sybase and did just about the minimum necessary for an SQL Editor. Sadly, I
+cannot find my copy any more, since 12.5 for NT no longer has it. I have heard
+several unofficial channels say that Sybase will let you have a copy if you
+ask. I do not know since I have not asked.
+
+Not having a copy, and having a bad memory, I cannot tell you all of its
+features. I cannot remember syntax highlighting or anything fancy like that,
+but that does not mean that it was not there. I know that there are some true
+devotees and if one of you cares to send me some words, I will slap them in
+here.
+
+There was a GUI before SQL Advantage, but it is/was too dire to mention.
+
+jisql
+
+This is the latest release from Sybase for the desktop interactive shell. It
+uses Java, but you probably guessed that from the name. It works fine and is a
+little like SQL Advantage (which was a little like Data Work Bench, which was a
+...), from what I remember of that tool. Correct me if I am wrong Anthony!!
+
+The best thing about it is that it is available for all platforms that support
+Java.
+
+The worst thing about it, and this is not so much a fault of jisql as a fault
+of Java in general, is that it is unable to use the interfaces file. I know
+that Java is intended to be truly multi-platform and that your average
+photocopier does not have access to environment variables, but how many
+photocopiers run Sybase? In most installations I can find my way totally
+painlessly from ASE server to ASE server, not worrying about ports etc. If you
+start using jisql regularly you will soon know the port numbers, since it is
+the only way that you can connect. Personally, until this is solved, I will not
+use the bloody tool.
+
+tsql
+
+This is the command line client that comes with FreeTDS. It comes with the
+FreeTDS client (<A HREF="http://www.freetds.org">http://www.freetds.org</A>). It is a very simple client, but it
+works.
+
+ASSE
+
+Developed by Manish I Shah to be a direct replacement for Data Workbench, but
+in Java. It is still in alpha, I believe, at Sourceforge. Suffers the same pros
+and cons as jisql simply because of its Java heritage.
+
+wisqlite
+
+This is similar to jisql in its functionality, but is written in Tcl/Tk. I am
+not 100% sure of the status, but will update this paragraph when I am. Try Tom
+Poindexter's site for a starting point.
+
+ntquery
+
+This is a very lightweight SQL Editor that is someway between Sybase's original
+offering (whose name I have had cleaned from my brain using hypnosis) and SQL
+Advantage. I am not sure who wrote it but it is free, runs on W86 platforms
+only and is available from <A HREF="ftp://ftp.midsomer.org/pub/ntquery.zip">ftp://ftp.midsomer.org/pub/ntquery.zip</A>
+
+DWB
+
+The father of them all. I am not sure if this is officially allowed to
+circulate, but I know some people that still use it and like it. I am
+petitioning Sybase to allow me to make it available. It is only available for
+Sun, or at least the version that I have is Sun only, but it is quite a nice
+tool all the same.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+4.4: How do I make isql secure?
+
+-------------------------------------------------------------------------------
+
+Isql uses the open/client libraries, which have no built in means of securing
+the packets that I know of. However, it is possible to use ssh to do all of the
+work for you. It is really quite straightforward. I saw this first published on
+the Sybase-L list by Tim Ellis, so all of the credit gos to him.
+
+ 1. You will need a server running sshd that you have access to, which also has
+    access to the ASE server.
+ 2. Choose a port that you are going to make your secure connection from. Just
+    like all ASE port selections it is totally arbitrary, but you if you were
+    setting up a number of these, then you might want to think about a
+    strategy. Regular server + 100 or something. Just make sure that it does
+    not, and will not, clash with any of your regular servers.
+ 3. Edit the interfaces file on the client side and set up a new server with an
+    IP address of localhost and the port number you chose in the previous
+    point. You might want to call it SERVER_SSH just to make sure that you know
+    that it is the secure one.
+ 4. Run the following ssh command:
+    ssh -2 -N -f -L port_chosen_above:remote_server:remote_port
+    <A HREF="mailto:user@ssh.server.com">user@ssh.server.com</A>
+ 5. Connect to the server using isql -Uuser -SSERVER_SSH
+
+In the ssh line, the -2 means use that version of the protocol (obviously it
+must be supported by your client and server). -f forces the ssh into the
+background. Not supported by version 1 only clients. -N means do not prompt for
+input. Again, this is not supported by version 1 clients.
+
+The user@ssh.server.com refers to the sshd server that you have access to.
+
+Let us look at an example. You have a server running ASE on port 4100. (Make
+sure that this port is *not* visible from the outside world, otherwise it is
+wide open to people attacking it directly.) I have not tried all of the ins and
+outs of this, I am happy to take advice, but on this same machine you have a
+copy of sshd running that you can see from the outside world.
+
+Choose another port that you are going to have as your secure port. Let's call
+it 5100 for the sake of argument. Edit the interfaces file on the client
+machine (which is presumably somewhere in untrusted land, say a client site)
+and add a new server, lets call it MYSERVER_SSH and have it listen on
+localhost,5100.
+
+Now execute the ssh magic, again from the client machine:
+
+  ssh -2 -N -f -L 5100:myserver.com:4100 <A HREF="mailto:sybase@myserver.com">sybase@myserver.com</A>
+
+Now connect to it using
+
+  isql -Usa -SMYSERVER_SSH
+
+and you should get the familiar 1&gt; prompt. All traffic to and from the server
+is going via an SSH tunnel, and so can be considered relatively secure.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+bcp DBCCs ASE FAQ
+
+                                      bcp                                      
+                                                                               
+ 
+
+    5.1    How do I bcp null dates?
+    5.2    Can I use a named pipe to bcp/dump data out or in?
+    5.3    How do I exclude a column?
+   
+next prev ASE FAQ
+
+-------------------------------------------------------------------------------
+
+5.1: How do I bcp null dates?
+
+-------------------------------------------------------------------------------
+
+As long as there is nothing between the field delimiters in your data, a null
+will be entered. If there's a space, the value will be Jan 1, 1900.
+
+You can use sed(1) to squeeze blanks out of fields:
+
+sed -e 's/|[ ]*|/||/g' old_file &gt; new_file 
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+5.2: Can I use a named pipe to bcp/dump data out or in?
+
+-------------------------------------------------------------------------------
+
+System 10 and above.
+
+If you would like to bcp copy from one table to a named pipe and compress:
+
+ 1. %mknod bcp.pipe p
+ 2. %compress sysobjects.Z &amp;
+ 3. %bcp master..sysobjects out bcp.pipe -c -U .. &gt; bcp.pipe
+ 4. Use ps(1) to determine when the compress finishes.
+
+To bcp from my1db..dummy_table_1 to my2db..dummy_table_2:
+
+ 1. %mknod bcp.pipe p
+ 2. %bcp my2db..dummy_table_2 in bcp.pipe -c -U .. &amp;
+   
+       
+        To avoid confusion between the above bcp and the next, you may choose
+        to either use a separate window or redirect the output to a file.
+       
+ 3. %bcp my1db..dummy_table_1 out bcp.pipe -c -U ..
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+5.3: How do I exclude a column?
+
+-------------------------------------------------------------------------------
+
+Open/Client 11.1.1
+
+Create a view based on the table that you want to exclude a column from and
+then bcp out from the view.
+
+Open/Client Versions Older Than 11.1.1
+
+The documentation Utility programs for Unix describes the use of format files,
+including the field Server Column Order. Server Column Order must equal the
+colid of the column, or 0 if the host file field will not be loaded into any
+table column.
+
+I don't know if anyone has got this feature to work. So, here is another way of
+removing the column. In your example, you want to remove the last column. I am
+going to include another example to remove the second column and include a
+fourth column. Why? Because it is harder. First example will deal with removing
+the last column.
+
+Removing the Last Column
+
+Edit your bcpout.fmt file and look for the changes I made below. Using the
+following bcpout.fmt file to dump the data:
+
+--- bcpout.fmt
+10.0
+2 &lt;------------------ Changed number of columns to BCP to two
+1 SYBINT4 0 4 "&lt;**&gt;" 1 counter
+2 SYBCHAR 1 512 "\n" 2 text1 &lt;--- Replaced &lt;**&gt; with \n
+3 SYBCHAR 1 512 "\n" 3 text2 &lt;--- DELETE THIS LINE
+
+Now recreate the table with the last column removed and use the same bcpout.fmt
+file to BCP back in the data.
+
+Now let's try removing the second column out four columns on a table.
+
+Removing the Second out of Four Columns
+
+Edit the bcpout.fmt file and look for the changes I made below. Using the
+following bcpout.fmt file to dump the data:
+
+--- bcpout.fmt
+10.0
+3 &lt;------------------ Changed number of columns to BCP to three
+1 SYBINT4 0 4   "&lt;**&gt;" 1 counter
+2 SYBCHAR 1 512 "&lt;**&gt;" 2 text1 &lt;--- DELETE THIS LINE
+2 SYBCHAR 1 512 "&lt;**&gt;" 3 text2 &lt;--- Changed number items to 2
+3 SYBCHAR 1 512 "\n"   4 text3 &lt;--- Changed number items to 3
+
+Including the Fourth Column
+
+Now copy the bcpout.fmt to bcpin.fmt, recreate table with col 2 removed, and
+edit bcpin.fmt file:
+
+--- bcpin.fmt
+10.0
+3
+1 SYBINT4 0 4   "&lt;**&gt;" 1 counter
+2 SYBCHAR 1 512 "&lt;**&gt;" 2 text2 &lt;-- Changed column id to 2
+3 SYBCHAR 1 512 "\n"   3 text3 &lt;-- Changed column id to 3
+
+-------------------------------------------------------------------------------
+
+Back to top
+
+next prev ASE FAQ
+
+</PRE>
+<DIV ALIGN=CENTER>
+<SMALL>
+<P><HR WIDTH=1900 NOSHADE><BR>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  Part11 -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A></SMALL>
+<P>
+<div align="center">
+
+<center>
+<form method="post" action="rateit.php">
+<table border="1" cellpadding="0" cellspacing="0" width="150" bgcolor="#ffcccc" style="WIDTH: 150px">
+<tr><td width="100%">
+<div align="center">
+<table border="0" cellpadding="2" width="100%" bgcolor="#ffcccc">
+<tr><td width="100%" height="14">
+<p align="center"><font face="Arial">Rate this FAQ</font></p>
+</td></tr>
+<tr><td width="100%" height="14">
+<p align="center">
+<INPUT TYPE=HIDDEN NAME="pid" VALUE="databases/sybase-faq/part11/index.html">
+<select size="1" name="D1" style="COLOR: darkmagenta; BACKGROUND-COLOR: cornsilk">
+<option selected value="0">N/A</option>
+<option value="1">Worst</option>
+<option value="2">Weak</option>
+<option value="3">OK</option>
+<option value="4">Good</option>
+<option value="5">Great</option>
+</select>
+</p>
+</td></tr>
+<tr><td width="100%" height="27">
+<p align="center">
+<IMG onclick="mystr='/frate.php?pid='+pid.value+'&vote='+D1.value;
+Popup=window.open(mystr,'Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=380,height=270,left=230,top=43'); 
+ return false;" height=28 src="/images/vote.gif" alt="Vote" width=83 border=0 ></p>
+</td></tr>
+</table>
+</div>
+</td></tr>
+</table>
+<font size="-1" face="Arial"><br><a href="/topRated.html">Current Top-Rated FAQs</a><br></font>
+</form>
+</center>
+
+</div>
+
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="100%">
+<tr><td width="100%" bgcolor="#D6D6C0">
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part11/index.html"," ");
+// --></script>
+<p><font face="Arial"><a name="ct">Are you an expert in this area?</a> Share your knowledge and earn expert points by giving answers or rating people's questions and answers! This section of FAQS.ORG is not sanctioned in any way by FAQ authors or maintainers.</font></p>
+<p><font face="Arial">Questions strongly related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-6730.html">How can I display the table sizes of ALL tables in a database?   </a> by Caspar (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9594.html">how to use nested cursors in a stored procedure in ASE ? is there any template to use !...</a> by nino (12/18/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3265.html">to connect sybase and c++,how to connect and access the data </a> by kumaran (9/2/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6741.html">how do u tell the last time update statistics has been run on a table (11.0.3) </a> by yujo (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11075.html">I need to Execute an SP & set its output to the insert statement. This will be occured for...</a> by rose (1/14/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9435.html">I wanted to know EXACT technical details about what ACTUALLY happens when u fire a simple...</a> by anu (12/15/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-8395.html">Is there anyway to start dataserver in ASE 11.9.2 with only the master and tempdb online...</a> by steve_2000g (11/28/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-854.html">i get an error on the "convert" when i try to run this line of code, why is this?   print...</a> by shugarhi (7/14/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11834.html">Hi  &nbsp; We're using Sybase ASE 12.0 running on SUN 4500 Cluster server. We cannot...</a> by KK (1/26/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6297.html">I am creating a stored proc to create a report of dependencies. &nbsp;We are creating...</a> by RR (10/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7388.html">How is this hazardous if we do not close a cursor? </a> by amar (11/11/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9827.html">How can i reduce my tempdb size once i have increased it by creating a device also? </a> by rajs (12/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12835.html">how can i transfer a table from cybase to db2? &nbsp;please sendme step by step method if...</a> by maulik (2/9/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3213.html">My database is in bypass recovery mode. How do I put it in normal mode? </a> by Lach (9/1/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-1435.html">Hi ,  &nbsp;We are using Sybase ASE 11.9.2 with SCO Unix 7.1.1 &nbsp;as the operating ...</a> by gowri (7/27/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-2412.html">were is a database that will bring up  a person address without there last name </a> by travis (8/15/2003)</font></li>
+</ul>
+<p><font face="Arial">Questions somewhat related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-2221.html">Guys!   See the Sybase query below: select convert(float,substring(&lt;field1&gt;,3,...</a> by pathfinder (8/12/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7790.html">What are the side-effects of turning-on the built-in auditing capabilities of sybase? </a> by Choy (11/17/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12136.html">When ever i execute select property('PROCESSCPU') i get the value 189 and whenever i...</a> by anilkumarsh (1/29/2004)</font></li>
+</ul>
+<p><font face="Arial">Other questions awaiting answers:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/related.html">10088 questions</a> related to other FAQs<br></font></li>
+<li><font face="Arial"><a href="/qa/unrelated.html">1765 general questions</a></font></li>
+<li><font face="Arial"><a href="/qa/answered.html">4091 answered questions</a><br></font></li>
+</ul>
+</td></tr></table> <br></center></div>
+<HR NOSHADE SIZE=2 WIDTH=450>
+[ <a href="/faqs/">Usenet FAQs</a> | <a href="/faqs/faqsearch.html">Search</a> | <a href="/contrib/">Web FAQs</a> | <a href="/docs/">Documents</a> | <a href="/rfcs/">RFC Index</a> ]
+<BR><HR NOSHADE SIZE=2 WIDTH=450>
+<P>
+<ADDRESS>
+Send corrections/additions to the FAQ Maintainer: <BR>dowen@midsomer.org (David Owen)
+</ADDRESS>
+<P>
+<SMALL>
+<STRONG>Last Update February 12 2004 @ 00:28 AM</STRONG>
+<BR>
+</SMALL>
+</DIV>
+</BODY>
+</HTML>
+

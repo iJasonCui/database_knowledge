@@ -1,0 +1,33 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_cntNewPaidMember;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_cntNewPaidMember (
+/***************************************************************************
+***
+**
+** CREATION:
+**   Author:  Yan Liu
+**   Date:  April 5 2005
+**   Description:  
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+    at_signupAdcode   VARCHAR(30),
+    at_startTimestamp INT,
+    at_endTimestamp   INT 
+)
+BEGIN
+    SELECT gender, 
+           COUNT(*)
+      FROM user_info 
+     WHERE status = 'A'
+       AND user_type = 'P'
+       AND signup_adcode = at_signupAdcode
+       AND firstpaytime >= at_startTimestamp
+       AND firstpaytime <  at_endTimestamp
+     GROUP BY gender ;
+END;;
+DELIMITER ;

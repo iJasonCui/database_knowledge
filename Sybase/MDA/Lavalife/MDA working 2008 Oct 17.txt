@@ -1,0 +1,9 @@
+
+
+--1. Most I/O intensive statement
+
+select * into #ts from master..monSysStatement
+
+select KPID, BatchID, LineNumber, LogicalReads, Elapsed = datediff(ms,StartTime, EndTime) 
+from #ts where LogicalReads > 10000
+order by 4 desc

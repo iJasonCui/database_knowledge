@@ -1,0 +1,7 @@
+opsdb1p
+./example.sh started at Fri Nov 12 14:20:19 EST 2004
+
+Step 1 - sp_whoo sql ...
+failed at Fri Nov 12 14:20:19 EST 2004, /dumps/scripts/maint/run_sql.sh returned error 11.
+
+./example.sh failed at Fri Nov 12 14:20:19 EST 2004.

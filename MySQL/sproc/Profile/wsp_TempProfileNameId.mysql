@@ -1,0 +1,23 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_TempProfileNameId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_TempProfileNameId (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga
+**   Date:  May 8 2002
+**   Description:  Generation of DECIMAL portion of temporary myidentity
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+OUT at_tempProfileNameId INT
+)
+BEGIN 
+    UPDATE TempProfileNameId SET tempProfileNameId = tempProfileNameId + 1;
+    SELECT tempProfileNameId INTO at_tempProfileNameId FROM TempProfileNameId;
+END;;
+DELIMITER ;

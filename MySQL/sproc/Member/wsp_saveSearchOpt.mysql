@@ -1,0 +1,72 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_saveSearchOpt;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_saveSearchOpt (
+/***********************************************************************
+**
+** CREATION:
+** Author:  Yan Liu 
+** Date:  June 28 2007
+** Description:  Either inserts / updates search options for a customer.
+** revised by adding community,searchGender,seekingOption May 2010
+**
+*************************************************************************/
+    at_userId        DECIMAL(12, 0),
+    at_fromAge       INT,
+    at_toAge         INT,
+    at_searchWithin  SMALLINT,
+    at_onlineFlag    CHAR(1),
+    at_pictureFlag   CHAR(1), 
+    at_videoFlag     CHAR(1), 
+    at_newFlag       CHAR(1),
+    at_community    CHAR(1),
+    at_searchGender CHAR(1),
+    at_seekingOption INT
+)
+BEGIN
+    DECLARE at_dateNow DATETIME ;
+    CALL wsp_GetDateGMT(at_dateNow);
+
+    IF (SELECT 1 FROM SearchOption WHERE userId = at_userId) IS NOT NULL
+    THEN    
+        UPDATE SearchOption 
+           SET fromAge      = at_fromAge,
+               toAge        = at_toAge,
+               searchWithin = at_searchWithin,
+               onlineFlag   = at_onlineFlag,
+               pictureFlag  = at_pictureFlag,
+               videoFlag    = at_videoFlag,
+               newFlag      = at_newFlag,
+               community  = at_community,
+               searchGender=at_searchGender,
+               seekingOption=at_seekingOption,
+               dateModified = at_dateNow
+         WHERE userId = at_userId ;
+
+    ELSE 
+        INSERT INTO SearchOption(userId, 
+                                 fromAge, 
+                                 toAge, 
+                                 searchWithin,  
+                                 onlineFlag, 
+                                 pictureFlag,
+                                 community,
+                                 searchGender,
+                                 seekingOption,
+                                 dateCreated,
+                                 dateModified)
+        VALUES(at_userId,  
+               at_fromAge, 
+               at_toAge, 
+               at_searchWithin, 
+               at_onlineFlag, 
+               at_pictureFlag,
+               at_community,
+               at_searchGender,
+               at_seekingOption,
+               at_dateNow, 
+               at_dateNow) ;
+
+    END IF;
+
+END;;
+DELIMITER ;

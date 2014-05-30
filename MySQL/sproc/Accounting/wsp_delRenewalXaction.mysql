@@ -1,0 +1,30 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_delRenewalXaction;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_delRenewalXaction (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Andy Tran
+**   Date:  June 2008
+**   Description:  delete all RenewalTransaction rows older than cutoff
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_cutoffMinute              SMALLINT
+)
+BEGIN
+
+DECLARE at_dateNow DATETIME;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+DELETE FROM RenewalTransaction WHERE TIMESTAMPDIFF(minute,  dateCreated, at_dateNow) >= at_cutoffMinute;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

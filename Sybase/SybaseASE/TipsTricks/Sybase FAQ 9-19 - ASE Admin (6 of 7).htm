@@ -1,0 +1,678 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<TITLE>Sybase FAQ: 9/19 - ASE Admin (6 of 7)</TITLE>
+<script language="JavaScript1.2">
+function edc(s,s2)
+{document.write("<font face=\"Arial\"><A href=\"",s,"\" target=\"_blank\" onclick=\"window.open('",s,"','Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=720,height=530,left=30,top=43');return false;\" )>Not finding the answers you need?&nbsp;",s2,"Submit your question for others to see.</A></font>");}
+//-->
+</script>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<DIV ALIGN=CENTER>
+<SMALL>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  Part9 -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A>
+</SMALL>
+<BR><HR SIZE=2 WIDTH=600 NOSHADE>
+<P><H1>Sybase FAQ: 9/19 - ASE Admin (6 of 7)</H1>
+<table border="0" cellpadding="4" cellspacing="4" width="35%">
+<tr><td width="100%" align="center" bgcolor="#D6D6C0">
+<p align=center><small>
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part9/index.html","<br>");
+// --></script>
+</small></p>
+</td></tr>
+</table>
+ <br>
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="40%">
+<tr><td width="100%" align="center" bgcolor="#CCCCFF"><font face="Arial">There are reader questions on this topic!<a href="#ct"><br>Help
+others by sharing your knowledge</a></font></td></tr>
+</table></center></div>
+<HR SIZE=2 WIDTH=600 NOSHADE>
+</DIV>
+<PRE>
+Message-ID: &lt;databases/sybase-faq/part9_1074677126@rtfm.mit.edu&gt;
+X-Last-Updated: 2003/03/02
+From: dowen@midsomer.org (David Owen)
+Newsgroups: <A HREF="http://groups.google.com/groups?group=comp.databases.sybase" target="new">comp.databases.sybase</A>
+Subject: Sybase FAQ: 9/19 - ASE Admin (6 of 7)
+Reply-To: <A HREF="mailto:dowen@midsomer.org">dowen@midsomer.org</A> (David Owen)
+Keywords: FAQ, DATABASES, SYBASE, ASA, ASE, REP
+Date: 21 Jan 2004 09:26:04 GMT
+
+Archive-name: databases/sybase-faq/part9
+URL: <A HREF="http://www.isug.com/Sybase_FAQ">http://www.isug.com/Sybase_FAQ</A>
+Version: 1.7
+Maintainer: David Owen
+Last-modified: 2003/03/02
+Posting-Frequency: posted every 3rd month
+   A how-to-find-the-FAQ article is posted on the intervening months.
+
+1.5.7: How much memory to configure?
+
+-------------------------------------------------------------------------------
+
+System 10 and below.
+
+Overview
+
+At some point you'll wonder if your ASE has been configured with sufficient
+memory. We hope that it's not during some crisis but that's probably when it'll
+happen.
+
+The most important thing in setting up memory for a ASE is that it has to be
+large enough to accommodate:
+
+  * concurrent user connections
+  * active procedures
+  * and concurrent open databases.
+
+By not setting the ASE up correctly it will affect the performance of it. A
+delicate balance needs to be struck where your ASE is large enough to
+accommodate the users but not too large where it adversely affects the CPU
+Server (such as causing swapping).
+
+Assumptions made of the reader:
+
+  * The reader has some experience administering ASEs.
+  * All queries have been tuned and that there are no unnecessary table scans.
+
+Preface
+
+As the ASE starts up, it pre-allocates its structures to support the
+configuration. The memory that remains after the pre-allocation phase is the 
+available cache.
+
+The available cache is partitioned into two pieces:
+
+ 1. buffer cache - data pages to be sent to a user connection or flushed to
+    disk.
+ 2. procedure cache - where query plans live.
+
+The idea is to determine if the buffer cache and the procedure cache are of
+adequate size. As a DBA you can use dbcc memusage to ascertain this.
+
+The information provided from a dbcc memusage, daunting at first, but taken in
+sections, is easy to understand and provides the DBA with the vital information
+that is necessary to determine if more memory is required and where it is
+required.
+
+If the procedure cache is too small, user connections will get sporadic 701's:
+
+    There is insufficient system memory to run this query.
+   
+If the buffer cache is too small, response time may be poor or spiky.
+
+The following text describes how to interpret the output of dbcc memusage and
+to correlate this back to the fundamental question:
+
+    Does my ASE have enough memory?
+   
+Definitions
+
+Before delving into the world of dbcc memusage some definitions to get us
+through.
+
+Buffer Cache (also referred to as the Data Cache)
+    Area of memory where ASE stores the most recently used data pages and index
+    pages in 2K page units. If ASE finds a data page or index page in the
+    buffer cache, it doesn't need to perform a physical I/O (it is reported as
+    a logical I/O). If a user connection selects data from a database, the ASE
+    loads the 2K data page(s) here and then hands the information off to the
+    user connection. If a user connection updates data, these pages are
+    altered, and then they are flushed out to disk by the ASE.
+   
+       
+        This is a bit simplistic but it'll do. Read on for more info though.
+       
+        The cache is maintained as a doubly linked list. The head of the list
+        is where the most recently used pages are placed. Naturally towards the
+        tail of the chain are the least recently used pages. If a page is
+        requested and it is found on the chain, it is moved back to the front
+        of the chain and the information is relayed, thus saving a physical I/
+        O.
+       
+        But wait! this recycling is not done forever. When a checkpoint occurs
+        any dirty pages are flushed. Also, the parameter cbufwashsize
+        determines how many times a page containing data can be recycled before
+        it has to be flushed out to disk. For OAM and index pages the following
+        parameters apply coamtrips and cindextrips respectively.
+       
+Procedure Cache
+    Area of memory where ASE stores the most recently used query plans of
+    stored procedures and triggers. This procedure cache is also used by the
+    Server when a procedure is being created and when a query is being
+    compiled. Just like the buffer cache, if SQL Server finds a procedure or a
+    compilation already in this cache, it doesn't need to read it from the
+    disk.
+   
+    The size of procedure cache is determined by the percentage of remaining
+    memory configured for this Server parameter after ASE memory needs are met.
+   
+Available Cache
+
+When the ASE starts up it pre-allocates its data structures to support the
+current configuration. For example, based on the number of user connections, 
+additional netmem, open databases and so forth the dataserver pre-allocates how
+much memory it requires to support these configured items.
+
+What remains after the pre-allocation is the available cache. The available
+cache is divided into buffer cache and procedure cache. The sp_configure
+"procedure cache" parameter determines the percentage breakdown. A value of 20
+would read as follows:
+
+    20% of the available cache is dedicated to the procedure cache and 80% is
+    dedicated to the buffer cache.
+   
+Your pal: dbcc memusage
+
+dbcc memusage takes a snapshot of your ASE's current memory usage and reports
+this vital information back to you. The information returned provides
+information regarding the use of your procedure cache and how much of the 
+buffer cache you are currently using.
+
+An important piece of information is the size of the largest query plan. We'll
+talk about that more below.
+
+It is best to run dbcc memusage after your ASE has reached a working set. For
+example, at the end of the day or during lunch time.
+
+    Running dbcc memusage will freeze the dataserver while it does its work.
+    The more memory you have configured for the ASE the longer it'll take. Our
+    experience is that for a ASE with 300MB it'll take about four minutes to
+    execute. During this time, nothing else will execute: no user queries, no
+    sp_who's...
+   
+In order to run dbcc memusage you must have sa privileges. Here's a sample
+execution for discussion purposes:
+
+1&gt; /* send the output to the screen instead of errorlog */
+2&gt; dbcc traceon(3604)
+3&gt; go
+1&gt; dbcc memusage
+2&gt; go
+Memory Usage:
+
+                            Meg.         2K Blks           Bytes
+
+      Configured Memory:300.0000          153600        314572800
+
+              Code size:  2.6375            1351         2765600
+      Kernel Structures: 77.6262           39745        81396975
+      Server Structures: 54.4032           27855        57045920
+             Page Cache:129.5992           66355        135894640
+           Proc Buffers:  1.1571             593         1213340
+           Proc Headers: 25.0840           12843        26302464
+
+Number of page buffers:    63856
+Number of proc buffers:    15964
+
+Buffer Cache, Top 20:
+
+           DB Id         Object Id      Index Id        2K Buffers
+
+               6         927446498             0            9424
+               6         507969006             0            7799
+               6         959446612             0            7563
+               6         116351649             0            7428
+               6        2135014687             5            2972
+               6         607445358             0            2780
+               6         507969006             2            2334
+               6        2135014687             0            2047
+               6         506589013             0            1766
+               6        1022066847             0            1160
+               6         116351649           255             987
+               6         927446498             8             897
+               6         927446498            10             733
+               6         959446612             7             722
+               6         506589013             1             687
+               6         971918604             0             686
+               6         116351649             6             387
+
+Procedure Cache, Top 20:
+
+Database Id: 6
+Object Id: 1652357121
+Object Name: lp_cm_case_list
+Version: 1
+Uid: 1
+Type: stored procedure
+Number of trees: 0
+Size of trees: 0.000000 Mb, 0.000000 bytes, 0 pages
+Number of plans: 16
+Size of plans: 0.323364 Mb, 339072.000000 bytes, 176 pages
+----
+Database Id: 6
+Object Id: 1668357178
+Object Name: lp_cm_subcase_list
+Version: 1
+Uid: 1
+Type: stored procedure
+Number of trees: 0
+Size of trees: 0.000000 Mb, 0.000000 bytes, 0 pages
+Number of plans: 10
+Size of plans: 0.202827 Mb, 212680.000000 bytes, 110 pages
+----
+Database Id: 6
+Object Id: 132351706
+Object Name: csp_get_case
+Version: 1
+Uid: 1
+Type: stored procedure
+Number of trees: 0
+Size of trees: 0.000000 Mb, 0.000000 bytes, 0 pages
+Number of plans: 9
+Size of plans: 0.149792 Mb, 157068.000000 bytes, 81 pages
+----
+Database Id: 6
+Object Id: 1858261845
+Object Name: lp_get_last_caller_new
+Version: 1
+Uid: 1
+Type: stored procedure
+Number of trees: 0
+Size of trees: 0.000000 Mb, 0.000000 bytes, 0 pages
+Number of plans: 2
+Size of plans: 0.054710 Mb, 57368.000000 bytes, 30 pages
+...
+
+1&gt; /* redirect output back to the errorlog */
+2&gt; dbcc traceoff(3604)
+3&gt; go
+
+Dissecting memusage output
+
+The output may appear overwhelming but it's actually pretty easy to parse.
+Let's look at each section.
+
+Memory Usage
+
+This section provides a breakdown of the memory configured for the ASE.
+
+Memory Usage:
+
+                            Meg.         2K Blks           Bytes
+
+      Configured Memory:300.0000          153600        314572800
+
+              Code size:  2.6375            1351         2765600
+      Kernel Structures: 77.6262           39745        81396975
+      Server Structures: 54.4032           27855        57045920
+             Page Cache:129.5992           66355        135894640
+           Proc Buffers:  1.1571             593         1213340
+           Proc Headers: 25.0840           12843        26302464
+
+Number of page buffers:    63856
+Number of proc buffers:    15964
+
+   
+    The Configured Memory does not equal the sum of the individual components.
+    It does in the sybooks example but in practice it doesn't always. This is
+    not critical and it is simply being noted here.
+   
+The Kernel Structures and Server structures are of mild interest. They can be
+used to cross-check that the pre-allocation is what you believe it to be. The
+salient line items are Number of page buffers and Number of proc buffers.
+
+The Number of proc buffers translates directly to the number of 2K pages
+available for the procedure cache.
+
+The Number of page buffers is the number of 2K pages available for the buffer
+cache.
+
+As a side note and not trying to muddle things, these last two pieces of
+information can also be obtained from the errorlog:
+
+    ... Number of buffers in buffer cache: 63856.
+    ... Number of proc buffers allocated: 15964.
+
+In our example, we have 15,964 2K pages (~32MB) for the procedure cache and
+63,856 2K pages (~126MB) for the buffer cache.
+
+Buffer Cache
+
+The buffer cache contains the data pages that the ASE will be either flushing
+to disk or transmitting to a user connection.
+
+If this area is too small, the ASE must flush 2K pages sooner than might be
+necessary to satisfy a user connection's request.
+
+For example, in most database applications there are small edit tables that are
+used frequently by the application. These tables will populate the buffer cache
+and normally will remain resident during the entire life of the ASE. This is
+good because a user connection may request validation and the ASE will find the
+data page(s) resident in memory. If however there is insufficient memory
+configured, then these small tables will be flushed out of the buffer cache in
+order to satisfy another query. The next time a validation is requested, the
+tables will have to be re-read from disk in order to satisfy the request. Your
+performance will degrade.
+
+Memory access is easily an order of magnitude faster than performing a physical
+I/O.
+
+In this example we know from the previous section that we have 63,856 2K pages
+(or buffers) available in the buffer cache. The question to answer is, "do we
+have sufficient buffer cache configured?"
+
+The following is the output of the dbcc memusage regarding the buffer cache:
+
+Buffer Cache, Top 20:
+
+           DB Id         Object Id      Index Id        2K Buffers
+
+               6         927446498             0            9424
+               6         507969006             0            7799
+               6         959446612             0            7563
+               6         116351649             0            7428
+               6        2135014687             5            2972
+               6         607445358             0            2780
+               6         507969006             2            2334
+               6        2135014687             0            2047
+               6         506589013             0            1766
+               6        1022066847             0            1160
+               6         116351649           255             987
+               6         927446498             8             897
+               6         927446498            10             733
+               6         959446612             7             722
+               6         506589013             1             687
+               6         971918604             0             686
+               6         116351649             6             387
+         Index Legend          
+                        +-----------------------------+                        
+                        |       |                     |                        
+                        |-------+---------------------|                        
+                        | Value |     Definition      |                        
+                        |-------+---------------------|                        
+                        | 0     | Table data          |                        
+                        |-------+---------------------|                        
+                        | 1     | Clustered index     |                        
+                        |-------+---------------------|                        
+                        | 2-250 | Nonclustered        |                        
+                        |       | indexes             |                        
+                        |-------+---------------------|                        
+                        | 255   | Text pages          |                        
+                        +-----------------------------+                        
+
+  * To translate the DB Id use select db_name(#) to map back to the database
+    name.
+  * To translate the Object Id, use the respective database and use the select
+    object_name(#) command.
+
+It's obvious that the first 10 items take up the largest portion of the buffer
+cache. Sum these values and compare the result to the amount of buffer cache
+configured.
+
+Summing the 10 items nets a result of 45,263 2K data pages. Comparing that to
+the number of pages configured, 63,856, we see that this ASE has sufficient
+memory configured.
+
+When do I need more Buffer Cache?
+
+I follow the following rules of thumb to determine when I need more buffer
+cache:
+
+  * If the sum of all the entries reported is equal to the number of pages
+    configured and all entries are relatively the same size. Crank it up.
+  * Note the natural groupings that occur in the example. If the difference
+    between any of the groups is greater than an order of magnitude I'd be
+    suspicious. But only if the sum of the larger groups is very close to the
+    number of pages configured.
+
+Procedure Cache
+
+If the procedure cache is not of sufficient size you may get sporadic 701
+errors:
+
+    There is insufficient system memory to run this query.
+   
+In order to calculate the correct procedure cache one needs to apply the
+following formula (found in ASE Troubleshooting Guide - Chapter 2, Procedure
+Cache Sizing):
+
+    proc cache size = max(# of concurrent users) * (size of the largest plan) *
+    1.25
+   
+        The flaw with the above formula is that if 10% of the users are
+        executing the largest plan, then you'll overshoot. If you have distinct
+        classes of connections whose largest plans are mutually exclusive then
+        you need to account for that:
+       
+            ttl proc cache = proc cache size * x% + proc cache size * y% ...
+           
+The max(# of concurrent users) is not the number of user connections configured
+but rather the actual number of connections during the peak period.
+
+To compute the size of the largest [query] plan take the results from the dbcc
+memusage's, Procedure Cache section and apply the following formula:
+
+    query plan size = [size of plans in bytes] / [number of plans]
+   
+We can compute the size of the query plan for lp_cm_case_list by using the
+output of the dbcc memusage:
+
+...
+Database Id: 6
+Object Id: 1652357121
+Object Name: lp_cm_case_list
+Version: 1
+Uid: 1
+Type: stored procedure
+Number of trees: 0
+Size of trees: 0.000000 Mb, 0.000000 bytes, 0 pages
+Number of plans: 16
+Size of plans: 0.323364 Mb, 339072.000000 bytes, 176 pages
+----
+...
+
+Entering the respective numbers, the query plan size for lp_cm_case_list is
+21K:
+
+    query plan size = 339072 / 16
+    query plan size = 21192 bytes or 21K
+   
+The formula would be applied to all objects found in the procedure cache and
+the largest value would be plugged into the procedure cache size formula:
+
+         Query Plan Sizes         
+                      +--------------------------------+                       
+                      |                        |       |                       
+                      |------------------------+-------|                       
+                      |                        | Query |                       
+                      |         Object         | Plan  |                       
+                      |                        | Size  |                       
+                      |------------------------+-------|                       
+                      | lp_cm_case_list        | 21K   |                       
+                      |------------------------+-------|                       
+                      | lp_cm_subcase_list     | 21K   |                       
+                      |------------------------+-------|                       
+                      | csp_get_case           | 19K   |                       
+                      |------------------------+-------|                       
+                      | lp_get_last_caller_new | 28K   |                       
+                      +--------------------------------+                       
+
+The size of the largest [query] plan is 28K.
+
+Entering these values into the formula:
+
+    proc cache size = max(# of concurrent users) * (size of the largest plan) *
+    1.25
+    proc cache size = 491 connections * 28K * 1.25
+    proc cache size = 17,185 2K pages required
+   
+Our example ASE has 15,964 2K pages configured but 17,185 2K pages are
+required. This ASE can benefit by having more procedure cache configured.
+
+This can be done one of two ways:
+
+ 1. If you have some headroom in your buffer cache, then sp_configure
+    "procedure cache" to increase the ratio of procedure cache to buffer cache
+    or
+   
+        procedure cache =
+            [ proposed procedure cache ] /
+            ( [ current procedure cache ] + [ current buffer cache ] )
+       
+        The new procedure cache would be 22%:
+       
+            procedure cache = 17,185 / ( 15,964 + 63,856 )
+            procedure cache = .2152 or 22%
+           
+ 2. If the buffer cache cannot be shrunken, then sp_configure "memory" to
+    increase the total memory:
+   
+        mem size =
+            ([ proposed procedure cache ]) /
+            ([ current procedure cache ] / [ current configured memory ])
+       
+        The new memory size would be 165,399 2K pages, assuming that the
+        procedure cache is unchanged:
+       
+            mem size = 17,185 / ( 15,964 / 153,600 )
+            mem size = 165,399 2K pages
+           
+Back to top
+
+-------------------------------------------------------------------------------
+
+1.5.8: Why should I use stored procedures?
+
+-------------------------------------------------------------------------------
+
+There are many advantages to using stored procedures (unfortunately they do not
+handle the text/image types):
+
+  * Security - you can revoke access to the base tables and only allow users to
+    access and manipulate the data via the stored procedures.
+  * Performance - stored procedures are parsed and a query plan is compiled.
+    This information is stored in the system tables and it only has to be done
+    once.
+  * Network - if you have users who are on a WAN (slow connection) having
+    stored procedures will improve throughput because less bytes need to flow
+    down the wire from the client to ASE.
+  * Tuning - if you have all your SQL code housed in the database, then it's
+    easy to tune the stored procedure without affecting the clients (unless of
+    course the parameter change).
+  * Modularity - during application development, the application designer can
+    concentrate on the front-end and the DB designer can concentrate on the
+    ASE.
+  * Network latency - a client on a LAN may seem slower if it is sending large
+    numbers of separate requests to a database server, bundling them into one
+    procedure call may improve responsiveness. Also, servers handling large
+    numbers of small requests can spend a surprising amount of CPU time
+    performing network IO.
+  * Minimise blocks and deadlocks - it is a lot easier to handle a deadlock if
+    the entire transaction is performed in one database request, also locks
+    will be held for a shorter time, improving concurrency and potentially
+    reducing the number of deadlocks. Further, it is easier to ensure that all
+    tables are accessed in a consistent order if code is stored centrally
+    rather than dispersed among a number of apps.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+</PRE>
+<DIV ALIGN=CENTER>
+<SMALL>
+<P><HR WIDTH=1900 NOSHADE><BR>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  Part9 -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A></SMALL>
+<P>
+<div align="center">
+
+<center>
+<form method="post" action="rateit.php">
+<table border="1" cellpadding="0" cellspacing="0" width="150" bgcolor="#ffcccc" style="WIDTH: 150px">
+<tr><td width="100%">
+<div align="center">
+<table border="0" cellpadding="2" width="100%" bgcolor="#ffcccc">
+<tr><td width="100%" height="14">
+<p align="center"><font face="Arial">Rate this FAQ</font></p>
+</td></tr>
+<tr><td width="100%" height="14">
+<p align="center">
+<INPUT TYPE=HIDDEN NAME="pid" VALUE="databases/sybase-faq/part9/index.html">
+<select size="1" name="D1" style="COLOR: darkmagenta; BACKGROUND-COLOR: cornsilk">
+<option selected value="0">N/A</option>
+<option value="1">Worst</option>
+<option value="2">Weak</option>
+<option value="3">OK</option>
+<option value="4">Good</option>
+<option value="5">Great</option>
+</select>
+</p>
+</td></tr>
+<tr><td width="100%" height="27">
+<p align="center">
+<IMG onclick="mystr='/frate.php?pid='+pid.value+'&vote='+D1.value;
+Popup=window.open(mystr,'Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=380,height=270,left=230,top=43'); 
+ return false;" height=28 src="/images/vote.gif" alt="Vote" width=83 border=0 ></p>
+</td></tr>
+</table>
+</div>
+</td></tr>
+</table>
+<font size="-1" face="Arial"><br><a href="/topRated.html">Current Top-Rated FAQs</a><br></font>
+</form>
+</center>
+
+</div>
+
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="100%">
+<tr><td width="100%" bgcolor="#D6D6C0">
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part9/index.html"," ");
+// --></script>
+<p><font face="Arial"><a name="ct">Are you an expert in this area?</a> Share your knowledge and earn expert points by giving answers or rating people's questions and answers! This section of FAQS.ORG is not sanctioned in any way by FAQ authors or maintainers.</font></p>
+<p><font face="Arial">Questions strongly related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-6730.html">How can I display the table sizes of ALL tables in a database?   </a> by Caspar (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9594.html">how to use nested cursors in a stored procedure in ASE ? is there any template to use !...</a> by nino (12/18/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3265.html">to connect sybase and c++,how to connect and access the data </a> by kumaran (9/2/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6741.html">how do u tell the last time update statistics has been run on a table (11.0.3) </a> by yujo (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11075.html">I need to Execute an SP & set its output to the insert statement. This will be occured for...</a> by rose (1/14/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9435.html">I wanted to know EXACT technical details about what ACTUALLY happens when u fire a simple...</a> by anu (12/15/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-8395.html">Is there anyway to start dataserver in ASE 11.9.2 with only the master and tempdb online...</a> by steve_2000g (11/28/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-854.html">i get an error on the "convert" when i try to run this line of code, why is this?   print...</a> by shugarhi (7/14/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11834.html">Hi  &nbsp; We're using Sybase ASE 12.0 running on SUN 4500 Cluster server. We cannot...</a> by KK (1/26/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6297.html">I am creating a stored proc to create a report of dependencies. &nbsp;We are creating...</a> by RR (10/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7388.html">How is this hazardous if we do not close a cursor? </a> by amar (11/11/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9827.html">How can i reduce my tempdb size once i have increased it by creating a device also? </a> by rajs (12/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12835.html">how can i transfer a table from cybase to db2? &nbsp;please sendme step by step method if...</a> by maulik (2/9/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3213.html">My database is in bypass recovery mode. How do I put it in normal mode? </a> by Lach (9/1/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-1435.html">Hi ,  &nbsp;We are using Sybase ASE 11.9.2 with SCO Unix 7.1.1 &nbsp;as the operating ...</a> by gowri (7/27/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-2412.html">were is a database that will bring up  a person address without there last name </a> by travis (8/15/2003)</font></li>
+</ul>
+<p><font face="Arial">Questions somewhat related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-2221.html">Guys!   See the Sybase query below: select convert(float,substring(&lt;field1&gt;,3,...</a> by pathfinder (8/12/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7790.html">What are the side-effects of turning-on the built-in auditing capabilities of sybase? </a> by Choy (11/17/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12136.html">When ever i execute select property('PROCESSCPU') i get the value 189 and whenever i...</a> by anilkumarsh (1/29/2004)</font></li>
+</ul>
+<p><font face="Arial">Other questions awaiting answers:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/related.html">10088 questions</a> related to other FAQs<br></font></li>
+<li><font face="Arial"><a href="/qa/unrelated.html">1765 general questions</a></font></li>
+<li><font face="Arial"><a href="/qa/answered.html">4091 answered questions</a><br></font></li>
+</ul>
+</td></tr></table> <br></center></div>
+<HR NOSHADE SIZE=2 WIDTH=450>
+[ <a href="/faqs/">Usenet FAQs</a> | <a href="/faqs/faqsearch.html">Search</a> | <a href="/contrib/">Web FAQs</a> | <a href="/docs/">Documents</a> | <a href="/rfcs/">RFC Index</a> ]
+<BR><HR NOSHADE SIZE=2 WIDTH=450>
+<P>
+<ADDRESS>
+Send corrections/additions to the FAQ Maintainer: <BR>dowen@midsomer.org (David Owen)
+</ADDRESS>
+<P>
+<SMALL>
+<STRONG>Last Update February 12 2004 @ 00:28 AM</STRONG>
+<BR>
+</SMALL>
+</DIV>
+</BODY>
+</HTML>
+

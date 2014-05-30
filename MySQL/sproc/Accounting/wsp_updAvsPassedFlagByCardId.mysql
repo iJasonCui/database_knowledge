@@ -1,0 +1,35 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updAvsPassedFlagByCardId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updAvsPassedFlagByCardId (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         February 2011
+**   Description:  Update avsPassedFlag by cardId
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+     at_creditCardId      int
+    ,at_avsPassedFlag     CHAR(1)
+)
+BEGIN
+
+DECLARE at_GetDateGMT  DATETIME;
+
+SET at_GetDateGMT = UTC_TIMESTAMP();
+
+UPDATE CreditCard
+           SET avsPassedFlag = at_avsPassedFlag
+              ,dateModified = at_GetDateGMT
+              ,dateLastUsed = at_GetDateGMT
+         WHERE creditCardId = at_creditCardId;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

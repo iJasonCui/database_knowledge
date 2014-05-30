@@ -1,0 +1,70 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newBadCreditCard;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newBadCreditCard (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Mike Stairs
+**   Date:         Oct 3, 2003
+**   Description:  marks a card as bad
+**
+** REVISION(S):
+**   Author:		
+**   Date:		
+**   Description:	
+**
+******************************************************************************/
+
+     at_creditCardId      INT,
+     at_reasonContentId   SMALLINT,
+     at_reason            VARCHAR(255)
+)
+BEGIN
+
+DECLARE at_now  DATETIME;
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+   ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+   ROLLBACK;
+END;
+
+SET at_now = UTC_TIMESTAMP();
+
+IF (SELECT 1 FROM CreditCard WHERE creditCardId = at_creditCardId) IS NOT NULL THEN 
+   START TRANSACTION;
+   UPDATE CreditCard SET status = 'B',dateModified = at_now WHERE creditCardId = at_creditCardId;
+
+   IF (SELECT 1 FROM BadCreditCard WHERE creditCardId = at_creditCardId) IS NOT NULL THEN 
+      UPDATE BadCreditCard
+               SET reason = at_reason,
+                   reasonContentId = at_reasonContentId,
+                   dateModified = at_now,
+                   status = 'B'
+               WHERE creditCardId = at_creditCardId;
+   ELSE
+      INSERT INTO BadCreditCard
+               ( creditCardId,
+                 reason,
+                 reasonContentId,
+                 dateCreated,
+                 dateModified,
+                 status
+               ) VALUES
+               ( at_creditCardId,
+                 at_reason,
+                 at_reasonContentId,
+                 at_now,
+                 at_now,
+                 'B' );
+   END IF;
+   COMMIT;
+END IF;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,48 @@
+/* Blocklist */
+drop replication definition "ad_Blocklist"
+go
+/* Hotlist */
+drop replication definition "ad_Hotlist"
+/* No searchable columns */
+/* No minimal columns */
+go
+/* Pass */
+drop replication definition "ad_Pass"
+/* No searchable columns */
+/* No minimal columns */
+go
+/* RepTest */
+drop replication definition "ad_RepTest"
+/* No searchable columns */
+/* No minimal columns */
+go
+/* SavedSearch */
+drop replication definition "ad_SavedSearch"
+/* No searchable columns */
+/* No minimal columns */
+go
+/* Smile */
+drop replication definition "ad_Smile"
+/* No searchable columns */
+/* No minimal columns */
+go
+/* a_backgreeting_dating */
+drop replication definition "ad_a_backgreeting_dating"
+/* No searchable columns */
+/* No minimal columns */
+go
+/* a_dating */
+drop replication definition "ad_a_dating"
+/* No searchable columns */
+/* No minimal columns */
+go
+/* a_mompictures_dating */
+drop replication definition "ad_a_mompictures_dating"
+/* No searchable columns */
+/* No minimal columns */
+go
+/* a_profile_dating */
+drop replication definition "ad_a_profile_dating"
+go
+
+

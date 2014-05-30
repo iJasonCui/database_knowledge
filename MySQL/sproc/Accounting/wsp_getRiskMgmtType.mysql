@@ -1,0 +1,27 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getRiskMgmtType;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getRiskMgmtType (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu/Jack Veiga
+**   Date:  September 2003
+**   Description:  
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+)
+BEGIN
+
+SELECT riskMgmtTypeId,
+       riskMgmtTypeCode,
+       riskMgmtTypeName
+  FROM RiskMgmtType;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

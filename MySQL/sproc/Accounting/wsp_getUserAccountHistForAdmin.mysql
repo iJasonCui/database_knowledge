@@ -1,0 +1,37 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getUserAccountHistForAdmin;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getUserAccountHistForAdmin (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  November 17, 2004
+**   Description:  retrieves UserAccount history for the specified user
+**
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date: Feb 3, 2006
+**   Description: return subcriptionOfferId
+**
+******************************************************************************/
+ at_userId DECIMAL(12,0)
+,at_dateCreated DATETIME
+)
+BEGIN
+
+SELECT billingLocationId,
+accountType,
+purchaseOfferId,
+usageCellId,
+dateExpiry,
+dateModified,
+"N",  -- no idea why this is here, but am afraid to remove in case this proc is used somewhere else
+subscriptionOfferId
+FROM UserAccountHistory
+WHERE userId = at_userId 
+ORDER BY dateModified;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

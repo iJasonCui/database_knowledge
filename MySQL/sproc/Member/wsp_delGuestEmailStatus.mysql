@@ -1,0 +1,27 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_delGuestEmailStatus;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_delGuestEmailStatus (
+/******************************************************************************
+ **
+ ** CREATION:
+ **   Author:  Yan L 
+ **   Date:  November 13 2006
+ **   Description:  Delete GuestEmailStatus data
+ **
+ ** REVISION(S):
+ **   Author: 
+ **   Date:
+ **   Description: 
+ **
+******************************************************************************/
+    at_email VARCHAR(129)  
+)
+BEGIN
+    IF (SELECT 1 FROM GuestEmailStatus WHERE email = at_email) IS NOT NULL
+    THEN
+        DELETE FROM GuestEmailStatus
+         WHERE email = at_email ;
+    END IF;
+
+END;;
+DELIMITER ;

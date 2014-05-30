@@ -1,0 +1,23 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAllLanguages;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAllLanguages ()
+/***********************************************************************
+**
+** CREATION:
+**   Author:  Valeri Popov
+**   Date:  Apr. 8, 2004
+**   Description:  Retrieves all the languages
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date: May 25, 2004
+**   Description: force order by id
+**
+*************************************************************************/
+BEGIN
+	SELECT languageId, isoLanguage, languageLabelKey, languageMask, isSpoken, isProfile
+	  FROM Language
+         ORDER BY languageId ;
+
+END;;
+DELIMITER ;

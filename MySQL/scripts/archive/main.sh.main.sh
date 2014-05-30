@@ -1,0 +1,22 @@
+## main loop 
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-09-26 2013-09-27
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-09-27 2013-09-28
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-09-28 2013-09-29
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-09-29 2013-09-30
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-09-30 2013-10-01
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-10-01 2013-10-02
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-10-02 2013-10-03
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-10-03 2013-10-04
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-10-04 2013-10-05
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-10-05 2013-10-06
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-10-06 2013-10-07
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-10-07 2013-10-08
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-10-08 2013-10-09
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-10-09 2013-10-10
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-10-10 2013-10-11
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-10-11 2013-10-12
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-10-12 2013-10-13
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-10-13 2013-10-14
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-10-14 2013-10-15
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-10-15 2013-10-16
+./cron_arch_messages.sh vocomo_master2 sms_gateway arch_vocomo arch_sms_gateway 2013-10-16 2013-10-17

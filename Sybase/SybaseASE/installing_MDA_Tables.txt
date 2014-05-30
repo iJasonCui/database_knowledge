@@ -1,0 +1,150 @@
+-- First, ensure that the configuration parameter
+-- 'enable cis' is set to 1 (if not, an ASE 
+-- restart is needed)
+sp_configure 'enable cis', 1
+go
+
+
+-- Add 'loopback' server name alias (assuming @@servername 
+-- is also defined in the interfaces file)
+-- (NB: this step is no longer required in 15.0 ESD#2 or later)
+use master
+go
+sp_addserver loopback, null, @@servername
+go
+
+-- Test this configuration: 
+-- (NB: this step is no longer required in 15.0 ESD#2 or later)
+set cis_rpc_handling on
+go
+--
+-- Alternatively, run: 
+--     sp_configure 'cis rpc handling', 1 
+-- ...and disconnect/reconnect your session
+
+exec loopback...sp_who  -- note: 3 dots!
+go
+
+
+-- Install the MDA tables. Important: do NOT run this
+-- script with 'sqsh' as it'll give errors: 'sqsh' sees 
+-- a '$' as the start of a sqsh variable, and this messes
+-- up the native RPC names, since these start with a 
+-- '$' as well.
+-- Solution: either usq 'isql' as below, or run 'sqsh'
+-- with the '-Lexpand=0' option to disable sqsh's 
+-- variable expansion feature (thanks to Paul Harrington
+-- for this tip).
+-- (NB: as of ASE 15.0.2, this script is part of 'installmaster')
+isql -U sa -P yourpassword -S YOURSERVER \
+     -i $SYBASE/$SYBASE_ASE/scripts/installmontables
+
+
+-- Assign 'mon_role' to logins allowed MDA access 
+-- (this also applies to the 'sa' login!)
+use master
+go
+grant role mon_role to sa
+-- grant to other logins or roles here, as needed
+go
+
+-- Test basic MDA configuration: 
+-- (note: you may need to disconnect/reconnect first
+-- to activate 'mon_role' when you just granted this
+-- role to the login you're currently using)
+select * from master..monState
+go
+
+
+-- Now enable all configuration parameters; 
+-- these are all dynamic (except the last one)
+-- For all 'pipe' tables, the number of
+-- messages is set to 100 here, but you may want 
+-- to choose a large size.
+--
+sp_configure "enable monitoring", 1
+go
+sp_configure "sql text pipe active", 1
+go
+sp_configure "sql text pipe max messages", 100
+go
+sp_configure "plan text pipe active", 1
+go
+sp_configure "plan text pipe max messages", 100
+go
+sp_configure "statement pipe active", 1
+go
+sp_configure "statement pipe max messages", 100000
+go
+sp_configure "errorlog pipe active", 1
+go
+sp_configure "errorlog pipe max messages", 100
+go
+sp_configure "deadlock pipe active", 1
+go
+sp_configure "deadlock pipe max messages", 100
+go
+sp_configure "wait event timing", 1
+go
+sp_configure "process wait events", 1
+go
+sp_configure "object lockwait timing", 1
+go
+sp_configure "SQL batch capture", 1
+go
+sp_configure "statement statistics active", 1
+go
+sp_configure "per object statistics active", 1
+go
+
+-- 
+-- As of ASE 15.0.2, also run the following one:
+--
+sp_configure "enable stmt cache monitoring", 1
+go
+
+
+-- This is the only static parameter. Set to
+-- a higher value (the setting is in bytes
+-- per user connection) if you're expecting
+-- a lot of (or long) SQL batches
+sp_configure "max SQL text monitored", 2048
+go
+
+---
+-- create user mda_user on each server
+-- and grant user mon_role
+
+
+-- create mda_db on each server
+USE master
+go
+CREATE DATABASE mda_db
+    ON mon_db_data1=4096
+    LOG ON mon_db_log1=1024
+go
+USE master
+go
+EXEC sp_dboption 'mda_db','select into/bulkcopy/pllsort',true
+go
+EXEC sp_dboption 'mda_db','trunc log on chkpt',true
+go
+USE mda_db
+go
+CHECKPOINT
+go
+USE mda_db
+go
+EXEC sp_changedbowner 'sa'
+go
+IF DB_ID('mda_db') IS NOT NULL
+    PRINT '<<< CREATED DATABASE mda_db >>>'
+ELSE
+    PRINT '<<< FAILED CREATING DATABASE mda_db >>>'
+go
+
+
+--- add mda_user to mda_db and grant select/update permission
+
+-- create historical tables on mda_db
+

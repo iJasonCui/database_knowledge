@@ -1,0 +1,42 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getVoiceWaitResponse;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getVoiceWaitResponse (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Frank Qi
+**   Date:         June 2010
+**   Description:  Get waiting response voice call(s)
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_userId DECIMAL(12,0),
+ at_targetUserId DECIMAL(12,0),
+ at_product    CHAR(1),
+ at_community    CHAR(1),
+ at_timeOut int
+)
+BEGIN
+
+    declare at_gmt datetime ;
+    CALL wsp_GetDateGMT (at_gmt);
+   
+    SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;
+ 
+    SELECT dateCreated
+      FROM VoiceConnect
+     WHERE userId = at_userId 
+       AND targetUserId = at_targetUserId
+       AND targetPhoneNumber IS NULL
+       AND rejectReason IS NULL
+        AND product = at_product
+       AND community = at_community
+       AND dateCreated >= TIMESTAMPADD(minute,  -at_timeOut, at_gmt)
+    ORDER BY dateCreated DESC ;
+
+END;;
+DELIMITER ;

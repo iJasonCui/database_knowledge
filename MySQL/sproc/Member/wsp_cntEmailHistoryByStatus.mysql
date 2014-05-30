@@ -1,0 +1,30 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_cntEmailHistoryByStatus;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_cntEmailHistoryByStatus (
+/***************************************************************************
+***
+**
+** CREATION:
+**   Author:  Jack Veiga/Yan Liu
+**   Date:  June 2003
+**   Description:  
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_dateFrom DATETIME
+,at_dateTo   DATETIME
+)
+BEGIN
+
+SELECT status,COUNT(*)
+  FROM EmailHistory
+ WHERE dateModified >= at_dateFrom
+   AND dateModified <= at_dateTo
+ GROUP BY status ;
+ 
+END;;
+DELIMITER ;

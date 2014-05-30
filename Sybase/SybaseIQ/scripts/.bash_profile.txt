@@ -1,0 +1,43 @@
+# .bash_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+        . ~/.bashrc
+fi
+
+# User specific environment and startup programs
+
+PATH=$PATH:$HOME/bin:/ccs/vnc/vnc-4.0-x86_linux:/usr/lib
+
+export PATH
+
+#
+# Sybase Product Environment variables
+#
+SYBASE="/ccs/aseiq12_7"
+export SYBASE
+
+unset LANG
+
+. ${SYBASE}/ASIQ-12_7/ASIQ-12_7.sh
+
+SYBMAINT=/ccs/scripts/maint/iq
+export SYBMAINT
+
+SYBDUMP=/data/dump
+export SYBDUMP
+
+HOSTNAME=g104db01
+export HOSTNAME
+
+DSQUERY=c104iqdb01
+export DSQUERY
+
+SQLCONNECT='UID#DBA;PWD#63vette;ENG#g104iqdb01;DBN#g104iqdb01;links#tcpip(host=10.10.26.40:8150)'
+export SQLCONNECT
+iqcmd="/ccs/aseiq12_7/ASIQ-12_7/bin/dbisqlc -q "
+export iqcmd
+
+TZ=US/Eastern
+export TZ
+alias tailiq="tail -f /data/iqdb/g104iqdb01.iqmsg"

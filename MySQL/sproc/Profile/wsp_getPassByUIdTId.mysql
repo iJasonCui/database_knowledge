@@ -1,0 +1,27 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getPassByUIdTId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getPassByUIdTId (
+/******************************************************************************
+**
+** CREATION:
+**   Author: Yan Liu 
+**   Date:   October 23 2007  
+**   Description:  retrieves seen status of pass received 
+**        
+** REVISION(S):
+**   Author: 
+**   Date: 
+**   Description: 
+**
+******************************************************************************/
+   at_userId       DECIMAL(12, 0),
+   at_targetUserId DECIMAL(12, 0)
+)
+BEGIN
+   SELECT seen, 
+          dateCreated 
+     FROM Pass
+    WHERE userId = at_userId
+      AND targetUserId = at_targetUserId;
+END;;
+DELIMITER ;

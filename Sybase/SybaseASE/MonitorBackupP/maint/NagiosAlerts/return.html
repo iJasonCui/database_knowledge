@@ -1,0 +1,931 @@
+<HTML>
+<HEAD>
+<TITLE>#55932: SMS Block</TITLE>
+
+<link rel="shortcut icon" href="/NoAuth/images//favicon.png" type="image/png">
+<link rel="stylesheet" href="/NoAuth/webrt.css" type="text/css">
+<script>
+function hideshow(num) {
+    idstring = "element-" + num;
+    chunk = document.getElementById(idstring);
+    if ( chunk.style.display == "none")  {
+    chunk.style.display = chunk.style.tag;
+    } else {
+        chunk.style.tag = chunk.style.display;
+        chunk.style.display = "none";
+    }
+}   
+</script>
+
+</HEAD>
+<BODY BGCOLOR="#ffffff"
+ONLOAD="
+    var tmp = (document.getElementsByName('focus'));
+    if (tmp.length > 0) tmp[tmp.length-1].focus();
+"
+>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#FFFFFF">
+  <tr> 
+    <td colspan=2><a href="http://lavalife.com"><img src="/NoAuth/images//anxx-body-logo.gif" alt="Lavalife corporate logo" width="75" height="60"></a></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td width="50%" align="right">
+<SPAN STYLE="display: none"><A HREF="#skipnav">Skip Menu</A> |</SPAN>
+<A  HREF="/User/Prefs.html" >Preferences</A>
+
+| <A  HREF="/NoAuth/Logout.html">Logout</a>
+<BR>
+Logged in as <b>AALB</b>
+    </td>
+  </tr>
+</table>
+
+
+
+
+<table class="darkblue" border=0 cellspacing=0 cellpadding=0 width="100%">
+  <th class="titlebox" align="left"><span class="rtname">RT for lavalife.com</span>
+  </th>
+      <span class="topactions">
+        <td class="darkblueright">
+        <FORM ACTION="/Ticket/Create.html" NAME="CreateTicketInQueue">
+<input type="submit" value="New ticket in">&nbsp;<LABEL ACCESSKEY="9">
+<SELECT NAME ="Queue">
+<OPTION 
+    VALUE="3" 
+    0>
+151 BRP
+</OPTION>
+<OPTION 
+    VALUE="5" 
+    0>
+Backup
+</OPTION>
+<OPTION 
+    VALUE="30" 
+    0>
+Carrier {Level3/Allstream/Telco}
+</OPTION>
+<OPTION 
+    VALUE="7" 
+    0>
+CC
+</OPTION>
+<OPTION 
+    VALUE="8" 
+    0>
+CCD
+</OPTION>
+<OPTION 
+    VALUE="9" 
+    0>
+CSTA
+</OPTION>
+<OPTION 
+    VALUE="10" 
+    0>
+Emergency Change Log
+</OPTION>
+<OPTION 
+    VALUE="37" 
+    0>
+INFRASTRUCTURE Change Control
+</OPTION>
+<OPTION 
+    VALUE="16" 
+    0>
+IVR Application
+</OPTION>
+<OPTION 
+    VALUE="38" 
+    0>
+IVR Change Control
+</OPTION>
+<OPTION 
+    VALUE="17" 
+    0>
+IVR Database
+</OPTION>
+<OPTION 
+    VALUE="18" 
+    0>
+IVR Database Report
+</OPTION>
+<OPTION 
+    VALUE="19" 
+    0>
+IVR Inventory
+</OPTION>
+<OPTION 
+    VALUE="20" 
+    0>
+IVR Photo
+</OPTION>
+<OPTION 
+    VALUE="21" 
+    0>
+IVR Production &#40;PD&#41;
+</OPTION>
+<OPTION 
+    VALUE="24" 
+    0>
+Noc
+</OPTION>
+<OPTION 
+    VALUE="25" 
+    0>
+NTS
+</OPTION>
+<OPTION 
+    VALUE="27" 
+    0>
+SMS
+</OPTION>
+<OPTION 
+    VALUE="28" 
+    0>
+TEST
+</OPTION>
+<OPTION 
+    VALUE="29" 
+    0>
+VoIP IVR City Transition
+</OPTION>
+<OPTION 
+    VALUE="31" 
+    0>
+WEB
+</OPTION>
+<OPTION 
+    VALUE="39" 
+    0>
+Web Change Control
+</OPTION>
+<OPTION 
+    VALUE="32" 
+    0>
+WEB CM Admin
+</OPTION>
+<OPTION 
+    VALUE="34" 
+    0>
+WEB Database
+</OPTION>
+<OPTION 
+    VALUE="35" 
+    0>
+WEB Database Report
+</OPTION>
+</SELECT>
+</LABEL>
+
+
+
+
+</FORM>
+
+        </td>
+        <td class="darkblueright">
+        <form action="/index.html">
+<input size="12" name="q" autocomplete="off" accesskey="0">
+<input type="submit" value="Search">&nbsp;
+</form>
+
+        </td>
+      </span>
+</table>
+<table border=0 cellspacing=0 cellpadding=0 width="100%" height="100%">
+<TR height="100%">
+<TD valign="top" width="140" class="blue">
+          <ul class="topnav" >
+<li class="topnav-0-major"><A HREF="/" class="topnav-0" 
+ 
+accesskey='1'>Home</A>
+<li class="currenttopnav-0-major"><A HREF="/Search/Build.html" class="currenttopnav-0" 
+name='focus' 
+accesskey='2'>Tickets</A>
+        <ul class="topnav" >
+<li class="topnav-1-"><A HREF="/Search/Build.html?NewQuery=1" class="topnav-1" 
+ 
+>New Query</A>
+<li class="topnav-1-"><A HREF="/Search/Build.html" class="topnav-1" 
+ 
+>Query Builder</A>
+<li class="topnav-1-"><A HREF="/Search/Edit.html" class="topnav-1" 
+ 
+>Advanced</A>
+<li class="currenttopnav-1-minor"><A HREF="/Ticket/Display.html?id=55932" class="currenttopnav-1" 
+name='focus' 
+>#55932</A>
+        <ul class="topnav" >
+<li class="currenttopnav-2-"><A HREF="/Ticket/Display.html?id=55932" class="currenttopnav-2" 
+name='focus' 
+>Display</A>
+<li class="topnav-2-"><A HREF="/Ticket/History.html?id=55932" class="topnav-2" 
+ 
+>History</A>
+<li class="topnav-2-"><A HREF="/Ticket/Modify.html?id=55932" class="topnav-2" 
+ 
+>Basics</A>
+<li class="topnav-2-"><A HREF="/Ticket/ModifyDates.html?id=55932" class="topnav-2" 
+ 
+>Dates</A>
+<li class="topnav-2-"><A HREF="/Ticket/ModifyPeople.html?id=55932" class="topnav-2" 
+ 
+>People</A>
+<li class="topnav-2-"><A HREF="/Ticket/ModifyLinks.html?id=55932" class="topnav-2" 
+ 
+>Links</A>
+<li class="topnav-2-"><A HREF="/Ticket/ModifyAll.html?id=55932" class="topnav-2" 
+ 
+>Jumbo</A>
+</ul>
+
+
+</li>
+</ul>
+
+
+</li>
+<li class="topnav-0-major"><A HREF="/AssetTracker/index.html" class="topnav-0" 
+ 
+accesskey='3'>Assets</A>
+<li class="topnav-0-major"><A HREF="/Tools/Offline.html" class="topnav-0" 
+ 
+accesskey='4'>Tools</A>
+<li class="topnav-0-major"><A HREF="/User/Prefs.html" class="topnav-0" 
+ 
+accesskey='5'>Preferences</A>
+<li class="topnav-0-major"><A HREF="/Approvals/" class="topnav-0" 
+ 
+accesskey='6'>Approval</A>
+<li class="topnav-0-major"><A HREF="/RTx/Statistics/index.html" class="topnav-0" 
+ 
+accesskey='7'>RTx-Statistics</A>
+</ul>
+
+
+
+</TD>
+<td valign="top">
+<table width="100%" height="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+  <td class="blue" valign="top">
+    <span class="title">#55932: SMS Block</span>
+</td>
+</tr>
+<tr>
+<td class="blueright" valign="top">
+    <span class="nav"> 
+<a class="nav" href="/Ticket/Update.html?Action=Respond&id=55932">Reply</a> | <a class="nav" href="/Ticket/Update.html?Action=Comment&DefaultStatus=resolved&id=55932">Resolve</a> | <a class="nav" href="/Ticket/Display.html?Status=open&id=55932">Open</a> | <a class="nav" href="/Ticket/Display.html?Action=Take&id=55932">Take</a> | <a class="nav" href="/Ticket/Update.html?Action=Comment&id=55932">Comment</a>
+    </span>
+  </td>
+</tr>
+<TR valign="top">
+<TD valign="top" width="100%" height="100%" class="mainbody" >
+
+
+<a name="skipnav" id="skipnav" accesskey="8"></a>
+ 
+
+  
+
+
+<TABLE CLASS="box " 
+        BGCOLOR="#336699" 
+        CELLSPACING=0
+        BORDER=0
+        WIDTH="100%"
+        CELLPADDING="0">
+
+  <TR>
+    <TH 
+        style="color: #336699;"
+        class="titlebox">
+      <span class="titleboxclose">
+        <a href="#" onClick="hideshow('1309.87612738333')">X</A></span>&nbsp;
+      <span class="titleboxtitle">
+        <b>Results</b>
+      </span>
+    </TH>
+    <TH  
+         style="color: #336699;"
+         class="titleboxright">
+      <span class="titleboxright">&nbsp;</span>
+    </TH>
+  </TR>
+  <tr id="element-1309.87612738333">
+    <td bgcolor="#dddddd" colspan="3" class="">
+
+<UL>
+<LI>Ticket 55932 created in queue &#39;IVR Change Control&#39;</LI>
+</UL>
+    </TD>
+  </TR>
+</TABLE>
+
+
+
+<BR>
+
+
+<TABLE CLASS="box " 
+        BGCOLOR="#336699" 
+        CELLSPACING=0
+        BORDER=0
+        WIDTH="100%"
+        CELLPADDING="0">
+
+  <TR>
+    <TH 
+        style="color: #336699;"
+        class="titlebox">
+      <span class="titleboxclose">
+        <a href="#" onClick="hideshow('1142.62149536259')">X</A></span>&nbsp;
+      <span class="titleboxtitle">
+        <b>Ticket metadata</b>
+      </span>
+    </TH>
+    <TH  
+         style="color: #336699;"
+         class="titleboxright">
+      <span class="titleboxright">&nbsp;</span>
+    </TH>
+  </TR>
+  <tr id="element-1142.62149536259">
+    <td bgcolor="#ffffff" colspan="3" class="">
+
+      <TABLE WIDTH="100%" class="ticketsummary" >
+      <TR>
+	<TD VALIGN=TOP WIDTH="50%" class="boxcontainer">
+	  <TABLE CLASS="box " 
+        BGCOLOR="#993333" 
+        CELLSPACING=0
+        BORDER=0
+        WIDTH="100%"
+        CELLPADDING="0">
+
+  <TR>
+    <TH 
+        style="color: #993333;"
+        class="titlebox">
+      <span class="titleboxclose">
+        <a href="#" onClick="hideshow('1066.57214050818')">X</A></span>&nbsp;
+      <span class="titleboxtitle">
+        <b><A CLASS="inverse" HREF="/Ticket/Modify.html?id=55932">The Basics</A></b>
+      </span>
+    </TH>
+    <TH  
+         style="color: #993333;"
+         class="titleboxright">
+      <span class="titleboxright">&nbsp;</span>
+    </TH>
+  </TR>
+  <tr id="element-1066.57214050818">
+    <td bgcolor="#dddddd" colspan="3" class="">
+
+	        <table>
+  <tr>
+    <td class="label">Id:</td>
+    <td class="value">55932</td>
+  </tr>
+  <tr>
+    <td class="label">Status:</td>
+    <td class="value">new</td>
+  </tr>
+  <tr>
+    <td class="label">Left:</td>
+    <td class="value">0 min</td>
+  </tr>
+  <tr>
+    <td class="label">Priority:</td>
+    <td class="value">0/0</td>
+  </tr>
+  <tr>
+    <td class="label">Queue:</td>
+    <td class="value">IVR Change Control</td>
+  </tr>
+
+</table>
+
+	      </TD>
+  </TR>
+</TABLE>
+
+
+
+          <br>
+	  <TABLE CLASS="box " 
+        BGCOLOR="#993333" 
+        CELLSPACING=0
+        BORDER=0
+        WIDTH="100%"
+        CELLPADDING="0">
+
+  <TR>
+    <TH 
+        style="color: #993333;"
+        class="titlebox">
+      <span class="titleboxclose">
+        <a href="#" onClick="hideshow('1462.73886035867')">X</A></span>&nbsp;
+      <span class="titleboxtitle">
+        <b><A CLASS="inverse" HREF="/Ticket/Modify.html?id=55932">Custom Fields</A></b>
+      </span>
+    </TH>
+    <TH  
+         style="color: #993333;"
+         class="titleboxright">
+      <span class="titleboxright">&nbsp;</span>
+    </TH>
+  </TR>
+  <tr id="element-1462.73886035867">
+    <td bgcolor="#dddddd" colspan="3" class="">
+
+	        <table>
+  <tr>
+    <td class="label">Change Control Status:</td>
+    <td class="value">
+<ul>
+<li><i>(no value)</i></li>
+</ul>
+    </td>
+  </tr>
+  <tr>
+    <td class="label">Change Type:</td>
+    <td class="value">
+<ul>
+<li>
+Configuration Change
+</li>
+</ul>
+    </td>
+  </tr>
+  <tr>
+    <td class="label">City:</td>
+    <td class="value">
+<ul>
+<li>
+US/COL/LL
+</li>
+</ul>
+    </td>
+  </tr>
+  <tr>
+    <td class="label">Comment:</td>
+    <td class="value">
+<ul>
+<li>
+requested by Barry
+</li>
+</ul>
+    </td>
+  </tr>
+  <tr>
+    <td class="label">Developer:</td>
+    <td class="value">
+<ul>
+<li>
+Adrian Alb
+</li>
+</ul>
+    </td>
+  </tr>
+  <tr>
+    <td class="label">Impact to Business:</td>
+    <td class="value">
+<ul>
+<li><i>(no value)</i></li>
+</ul>
+    </td>
+  </tr>
+  <tr>
+    <td class="label">Impact to Finance:</td>
+    <td class="value">
+<ul>
+<li><i>(no value)</i></li>
+</ul>
+    </td>
+  </tr>
+  <tr>
+    <td class="label">Risk Assessment:</td>
+    <td class="value">
+<ul>
+<li><i>(no value)</i></li>
+</ul>
+    </td>
+  </tr>
+  <tr>
+    <td class="label">Security Risk:</td>
+    <td class="value">
+<ul>
+<li><i>(no value)</i></li>
+</ul>
+    </td>
+  </tr>
+  <tr>
+    <td class="label">Sensitive Data:</td>
+    <td class="value">
+<ul>
+<li><i>(no value)</i></li>
+</ul>
+    </td>
+  </tr>
+  <tr>
+    <td class="label">Testers:</td>
+    <td class="value">
+<ul>
+<li><i>(no value)</i></li>
+</ul>
+    </td>
+  </tr>
+  <tr>
+    <td class="label">Web:</td>
+    <td class="value">
+<ul>
+<li><i>(no value)</i></li>
+</ul>
+    </td>
+  </tr>
+  <tr>
+    <td class="label">IVR:</td>
+    <td class="value">
+<ul>
+<li>
+Database
+</li>
+</ul>
+    </td>
+  </tr>
+</table>
+
+
+	      </TD>
+  </TR>
+</TABLE>
+
+
+
+
+<br>
+	  <TABLE CLASS="box " 
+        BGCOLOR="#333399" 
+        CELLSPACING=0
+        BORDER=0
+        WIDTH="100%"
+        CELLPADDING="0">
+
+  <TR>
+    <TH 
+        style="color: #333399;"
+        class="titlebox">
+      <span class="titleboxclose">
+        <a href="#" onClick="hideshow('1605.93191833943')">X</A></span>&nbsp;
+      <span class="titleboxtitle">
+        <b><A CLASS="inverse" HREF="/Ticket/ModifyPeople.html?id=55932">People</A></b>
+      </span>
+    </TH>
+    <TH  
+         style="color: #333399;"
+         class="titleboxright">
+      <span class="titleboxright">&nbsp;</span>
+    </TH>
+  </TR>
+  <tr id="element-1605.93191833943">
+    <td bgcolor="#dddddd" colspan="3" class="">
+
+	  <table>
+  <tr>
+    <td class="label">Owner:</td>
+    <td class="value">
+Nobody
+
+</td>
+  </tr>
+  <tr>
+    <td class="labeltop">Requestors:</td>
+    <td class="value">
+
+AALB
+&lt;Adrian.Alb@lavalife.com&gt;
+
+<br>
+
+</td>
+  </tr>
+  <tr>
+    <td class="labeltop">Cc:</td>
+    <td class="value">
+
+</td>
+  </tr>
+  <tr>
+    <td class="labeltop">AdminCc:</td>
+    <td class="value">
+
+</td>
+  </tr>
+</table>
+
+	      </TD>
+  </TR>
+</TABLE>
+
+
+
+	<BR>
+	</TD>
+	<TD VALIGN=TOP WIDTH="50%" class="boxcontainer">
+
+	  <TABLE CLASS="box " 
+        BGCOLOR="#663366" 
+        CELLSPACING=0
+        BORDER=0
+        WIDTH="100%"
+        CELLPADDING="0">
+
+  <TR>
+    <TH 
+        style="color: #663366;"
+        class="titlebox">
+      <span class="titleboxclose">
+        <a href="#" onClick="hideshow('172.20219307228')">X</A></span>&nbsp;
+      <span class="titleboxtitle">
+        <b><A CLASS="inverse" HREF="/Ticket/ModifyDates.html?id=55932">Dates</A></b>
+      </span>
+    </TH>
+    <TH  
+         style="color: #663366;"
+         class="titleboxright">
+      <span class="titleboxright">&nbsp;</span>
+    </TH>
+  </TR>
+  <tr id="element-172.20219307228">
+    <td bgcolor="#dddddd" colspan="3" class="">
+
+	  <TABLE>
+  <TR>
+    <TD class="label">Created:</TD>
+    <TD class="value">Thu Jun 22 14:09:10 2006</TD>
+  </TR>
+  <TR>
+    <TD class="label">Starts:</TD>
+    <TD class="value">Wed Jun 21 00:00:00 2006</TD>
+  </TR>
+  <TR>
+    <TD class="label">Started:</TD>
+    <TD class="value">Not set</TD>
+  </TR>
+  <TR>
+    <TD class="label"><a href="/Ticket/Display.html?id=55932&Action=SetTold">Last Contact</a>:</TD>
+    <TD class="value">Not set</TD>
+  </TR>
+  <TR>
+    <TD class="label">Due:</TD>
+    <TD class="value">Wed Jun 21 00:00:00 2006</TD>
+  </TR>
+  <TR>
+    <TD class="label">Closed:</TD>
+    <TD class="value">Not set</TD>
+  </TR>
+  <TR>
+    <TD class="label">Updated:</TD>
+    <TD class="value"><A HREF="#lasttrans">Thu Jun 22 14:09:14 2006 by AALB</a></TD>
+  </TR>
+</TABLE>
+
+	      </TD>
+  </TR>
+</TABLE>
+
+
+
+	<BR>  
+	  <TABLE CLASS="box " 
+        BGCOLOR="#336633" 
+        CELLSPACING=0
+        BORDER=0
+        WIDTH="100%"
+        CELLPADDING="0">
+
+  <TR>
+    <TH 
+        style="color: #336633;"
+        class="titlebox">
+      <span class="titleboxclose">
+        <a href="#" onClick="hideshow('614.232105993857')">X</A></span>&nbsp;
+      <span class="titleboxtitle">
+        <b><A CLASS="inverse" HREF="/Ticket/ModifyLinks.html?id=55932">Links</A></b>
+      </span>
+    </TH>
+    <TH  
+         style="color: #336633;"
+         class="titleboxright">
+      <span class="titleboxright">&nbsp;</span>
+    </TH>
+  </TR>
+  <tr id="element-614.232105993857">
+    <td bgcolor="#dddddd" colspan="3" class="">
+
+	        <table>
+  <tr>
+    <td class="labeltop">Depends on:</td>
+    <td class="value">
+<ul>
+</ul>
+    </td>
+  </tr>
+  <tr>
+    <td class="labeltop">Depended on by:</td>
+    <td class="value">
+<ul>
+</ul>
+    </td>
+  </tr>
+  <tr>
+    <td class="labeltop">Parents:</td>
+    <td class="value">
+<ul>
+</ul>
+    </td>
+  </tr>
+  <tr>
+    <td class="labeltop">Children:</td>
+    <td class="value">
+
+</td>
+  </tr>
+  <tr>
+    <td class="labeltop">Refers to:</td>
+    <td class="value">
+<ul>
+</ul>
+    </td>
+  </tr>
+  <tr>
+    <td class="labeltop">Referred to by:</td>
+    <td class="value">
+    <ul>
+</ul>
+    </td>
+  </tr>
+
+
+</table>
+
+
+	    </TD>
+  </TR>
+</TABLE>
+
+
+
+        <BR>
+	  
+
+
+
+	  
+
+
+
+	</TD>
+      </TR>
+    </TABLE>
+
+
+
+
+
+    </TD>
+  </TR>
+</TABLE>
+
+
+
+
+<BR>
+
+
+
+<TABLE CLASS="box " 
+        BGCOLOR="#336699" 
+        CELLSPACING=0
+        BORDER=0
+        WIDTH="100%"
+        CELLPADDING="0">
+
+  <TR>
+    <TH 
+        style="color: #336699;"
+        class="titlebox">
+      <span class="titleboxclose">
+        <a href="#" onClick="hideshow('1371.65627698865')">X</A></span>&nbsp;
+      <span class="titleboxtitle">
+        <b>History</b>
+      </span>
+    </TH>
+    <TH  
+         style="color: #336699;"
+         class="titleboxright">
+      <span class="titleboxright">Display mode:<b>[Brief headers]</b> [<A HREF="/Ticket/Display.html?ShowHeaders=1&id=55932">Full headers</a>]</span>
+    </TH>
+  </TR>
+  <tr id="element-1371.65627698865">
+    <td bgcolor="#dddddd" colspan="3" class="">
+
+
+<TABLE WIDTH=100% CELLSPACING=0 CELLPADDING=2 BORDER=0>
+<TR class="oddline" >
+<TD rowspan="2" valign="top" bgcolor="#336699"><A NAME="txn-630529" href="/Ticket/Display.html?id=55932#txn-630529">#</A>&nbsp;</TD>
+<TD>&nbsp&nbsp;</TD>
+<TD><font size=-2>Thu&nbsp;Jun&nbsp;22&nbsp;14:09:13&nbsp;2006</font>&nbsp;</TD>
+<TD ALIGN="LEFT"><b>AALB -  Ticket created
+
+</b></TD>
+<TD>&nbsp;</TD>
+<TD ALIGN="RIGHT"><font size=-1>&nbsp;[<a href="/Ticket/Update.html?id=55932&QuoteTransaction=630529&Action=Respond">Reply</a>]&nbsp;[<a href="/Ticket/Update.html?id=55932&QuoteTransaction=630529&Action=Comment">Comment</a>]</font></TD>
+</TR>
+<TR class="oddline"><TD colspan=5>
+<table>
+<tr>
+<td align="right" class="message-header-key">Subject:</td>
+<td class="message-header-value">SMS Block</td>
+</tr>
+</table>
+ 
+<div class="downloadattachment">
+ 
+<A HREF="/Ticket/Attachment/630529/425332/">Download &#40;untitled&#41;</a> 
+<div class="downloadcontenttype">
+text/plain 154b 
+</div> 
+</div>
+<div class="messagebody">
+<font color="#000000">
+Adrian:<br>
+ <br>
+Please block ASAP:<br>Cleveland<br>
+<br>
+LL<br>
+<br>
+440 245 3968<br>
+<br>
+ <br>
+and let me know when this has been completed...<br>
+ <br>
+Thanks<br>
+ <br>
+---<br>
+barry van ommen <br>
+-- <br>
+Adrian Alb<br>
+</font>
+</div>
+</div>
+</TD>
+</TR>
+
+
+<TR class="evenline" >
+<TD rowspan="2" valign="top" bgcolor="#cccccc"><A NAME="txn-630530" href="/Ticket/Display.html?id=55932#txn-630530">#</A><a name="lasttrans">&nbsp;</a></TD>
+<TD>&nbsp&nbsp;</TD>
+<TD><font size=-2>Thu&nbsp;Jun&nbsp;22&nbsp;14:09:14&nbsp;2006</font>&nbsp;</TD>
+<TD ALIGN="LEFT"><b>RT_System -  Outgoing email recorded
+
+</b></TD>
+<TD>&nbsp;</TD>
+<TD ALIGN="RIGHT"><font size=-1>&nbsp;[<a target="_blank" href="/Ticket/ShowEmailRecord.html?id=55932&Transaction=630530&Attachment=425333">Show</a>]&nbsp;</font></TD>
+</TR>
+<TR class="evenline"><TD colspan=5>
+</TD>
+</TR>
+
+
+</TABLE>
+    </TD>
+  </TR>
+</TABLE>
+
+
+
+ 
+
+  
+
+</td>
+</tr>
+<tr>
+<td>
+
+<div class="bpscredits">
+&#187;&#124;&#171; RT 3.4.4 Copyright 1996-2005 <a href="http://www.bestpractical.com?rt=3.4.4">Best Practical Solutions, LLC</a>.<br>
+</div>
+<div class="page-stats">Time to display: 5.650866</div>
+</TD>
+</TR>
+</TABLE>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

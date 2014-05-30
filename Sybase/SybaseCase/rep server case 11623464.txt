@@ -1,0 +1,38 @@
+Sent:                               Friday, August 13, 2010 6:29 PM
+Subject:                          case 11623464
+
+
+
+Here is the general instructions on how to delete a large transaction from a WS queue if you cannot get 
+enough sqt_max_cache_size to replicate it. I recommend this only be done with a Sybase Technical Support Engineer 
+on the phone with you to make sure you do not make any mistakes while following this procedure. 
+
+In your Replication Server for the warmstandby that is hung up run: 
+
+admin who,sqm 
+go 
+
+admin who,sqt 
+go 
+
+In the admin who,sqt output, look for the inbound queue of the active connection for your stuck warmstandby and 
+examine the First Trans values. It should look like: 
+
+ST:O Cmds:124513 qid:145:15:5 
+
+This indicates an open transaction that has received  124513 commands so far that has it's begin trans statement 
+located at 145:15:5 of the stable queue. 
+
+execute 
+sysadmin hibernate_on 
+go 
+sysadmin sqm_zap_command,your_queue_number,the_queue_type,145,15,5   <--- from the first trans values 
+go 
+sysadmin hibernate_off 
+go 
+
+This procedure will not work unless all of the values are correct, so again, you should have Sybase Tech Support on the phone 
+to help you through this procedure.
+
+THANKS !!!
+

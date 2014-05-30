@@ -1,0 +1,813 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<TITLE>Sybase FAQ: 12/19 - ASE SQL (1 of 3)</TITLE>
+<script language="JavaScript1.2">
+function edc(s,s2)
+{document.write("<font face=\"Arial\"><A href=\"",s,"\" target=\"_blank\" onclick=\"window.open('",s,"','Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=720,height=530,left=30,top=43');return false;\" )>Not finding the answers you need?&nbsp;",s2,"Submit your question for others to see.</A></font>");}
+//-->
+</script>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<DIV ALIGN=CENTER>
+<SMALL>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  Part12 -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A>
+</SMALL>
+<BR><HR SIZE=2 WIDTH=600 NOSHADE>
+<P><H1>Sybase FAQ: 12/19 - ASE SQL (1 of 3)</H1>
+<table border="0" cellpadding="4" cellspacing="4" width="35%">
+<tr><td width="100%" align="center" bgcolor="#D6D6C0">
+<p align=center><small>
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part12/index.html","<br>");
+// --></script>
+</small></p>
+</td></tr>
+</table>
+ <br>
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="40%">
+<tr><td width="100%" align="center" bgcolor="#CCCCFF"><font face="Arial">There are reader questions on this topic!<a href="#ct"><br>Help
+others by sharing your knowledge</a></font></td></tr>
+</table></center></div>
+<HR SIZE=2 WIDTH=600 NOSHADE>
+</DIV>
+<PRE>
+Message-ID: &lt;databases/sybase-faq/part12_1074677126@rtfm.mit.edu&gt;
+X-Last-Updated: 2003/03/02
+From: dowen@midsomer.org (David Owen)
+Newsgroups: <A HREF="http://groups.google.com/groups?group=comp.databases.sybase" target="new">comp.databases.sybase</A>
+Subject: Sybase FAQ: 12/19 - ASE SQL (1 of 3)
+Reply-To: <A HREF="mailto:dowen@midsomer.org">dowen@midsomer.org</A> (David Owen)
+Keywords: FAQ, DATABASES, SYBASE, ASA, ASE, REP
+Date: 21 Jan 2004 09:26:06 GMT
+
+Archive-name: databases/sybase-faq/part12
+URL: <A HREF="http://www.isug.com/Sybase_FAQ">http://www.isug.com/Sybase_FAQ</A>
+Version: 1.7
+Maintainer: David Owen
+Last-modified: 2003/03/02
+Posting-Frequency: posted every 3rd month
+   A how-to-find-the-FAQ article is posted on the intervening months.
+
+                               SQL Fundamentals                                
+                                                                               
+ 
+
+    6.1.1    Are there alternatives to row at a time processing?
+    6.1.2    When should I execute an sp_recompile?
+    6.1.3    What are the different types of locks and what do they mean?
+    6.1.4    What's the purpose of using holdlock?
+    6.1.5    What's the difference between an update in place versus a deferred
+    update? - see Q1.5.9
+    6.1.6    How do I find the oldest open transaction?
+    6.1.7    How do I check if log truncation is blocked?  
+    6.1.8    The timestamp datatype
+    6.1.9    Stored Procedure Recompilation and Reresolution
+    6.1.10   How do I manipulate binary columns?
+    6.1.11   How do I remove duplicate rows from a table?
+   
+ 
+
+SQL Advanced bcp ASE FAQ
+
+-------------------------------------------------------------------------------
+
+6.1.1: Alternative to row at a time processing
+
+-------------------------------------------------------------------------------
+
+Someone asked how they could speed up their processing. They were batch
+updating/inserting gobs of information. Their algorithm was something as
+follows:
+
+    ... In another case I do:
+   
+    If exists (select record) then
+        update record
+    else
+        insert record
+   
+    I'm not sure which way is faster or if it makes a difference. I am doing
+    this for as many as 4000 records at a time (calling a stored procedure 4000
+    times!). I am interesting in knowing any way to improve this. The parameter
+    translation alone on the procedure calls takes 40 seconds for 4000 records.
+    I am using exec in DB-Lib.
+   
+    Would RPC or CT-Lib be better/faster?
+   
+A netter responded stating that it was faster to ditch their algorithm and to
+apply a set based strategy:
+
+    The way to take your approach is to convert the row at a time processing
+    (which is more traditional type of thinking) into a batch at a time (which
+    is more relational type of thinking). Now I'm not trying to insult you to
+    say that you suck or anything like that, we just need to dial you in to
+    think in relational terms.
+   
+    The idea is to do batches (or bundles) of rows rather than processing a
+    single one at a time.
+   
+    So let's take your example (since you didn't give exact values [probably
+    out of kindness to save my eyeballs] I'll use your generic example to
+    extend what I'm talking about):
+   
+    Before:
+   
+        if exists (select record) then
+           update record
+        else
+           insert record
+   
+    New way:
+     1. Load all your rows into a table named new_stuff in a separate work
+        database (call it work_db) and load it using bcp -- no third GL needed.
+         1. truncate new_stuff and drop all indexes
+         2. sort your data using UNIX sort and sort it by the clustered columns
+         3. load it using bcp
+         4. create clustered index using with sorted_data and any ancillary
+            non-clustered index.
+     2. Assuming that your target table is called old_stuff
+     3. Do the update in a single batch:
+           begin tran
+        
+             /* delete any rows in old_stuff which would normally
+             ** would have been updated... we'll insert 'em instead!
+             ** Essentially, treat the update as a delete/insert.
+             */
+        
+             delete old_stuff
+               from old_stuff,
+                    new_stuff
+              where old_stuff.key = new_stuff.key
+        
+            /* insert entire new table:  this adds any rows
+            ** that would have been updated before and
+            ** inserts the new rows
+            */
+             insert old_stuff
+                select * from new_stuff
+        
+           commit tran
+           
+   
+    You can do all this without writing 3-GL, using bcp and a shell script.
+   
+    A word of caution:
+   
+        Since these inserts/updates are batched orientated you may blow your
+        log if you attempt to do too many at a time. In order to avoid this use
+        the set rowcount directive to create bite-size chunks.
+       
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.1.2: When should I execute an sp_recompile?
+
+-------------------------------------------------------------------------------
+
+An sp_recompile should be issued any time a new index is added or an update
+statistics. Dropping an index will cause an automatic recompile of all objects
+that are dependent on the table.
+
+The sp_recompile command simply increments the schemacnt counter for the given
+table. All dependent object counter's are checked against this counter and if
+they are different the SQL Server recompiles the object.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.1.3: What are the different types of (All Page) locks?
+
+-------------------------------------------------------------------------------
+
+First off, just to get it out of the way, Sybase does now support row level
+locking! (See Q6.1.11 for a description of the new features.) OK, that said and
+sone, if you think you need row level locking, you probably aren't thinking set
+based -- see Q6.1.1 for set processing.
+
+The SQL Server uses locking in order to ensure that sanity of your queries.
+Without locking there is no way to ensure the integrity of your operation.
+Imagine a transaction that debited one account and credited another. If the
+transaction didn't lock out readers/writers then someone can potentially see
+erroneous data.
+
+Essentially, the SQL Server attempts to use the least intrusive lock possible,
+page lock, to satisfy a request. If it reaches around 200 page locks, then it
+escalates the lock to a table lock and releases all page locks thus performing
+the task more efficiently.
+
+There are three types of locks:
+
+  * page locks
+  * table locks
+  * demand locks
+
+Page Locks
+
+There are three types of page locks:
+
+  * shared
+  * exclusive
+  * update
+
+shared
+
+These locks are requested and used by readers of information. More than one
+connection can hold a shared lock on a data page.
+
+This allows for multiple readers.
+
+exclusive
+
+The SQL Server uses exclusive locks when data is to be modified. Only one
+connection may have an exclusive lock on a given data page. If a table is large
+enough and the data is spread sufficiently, more than one connection may update
+different data pages of a given table simultaneously.
+
+update
+
+A update lock is placed during a delete or an update while the SQL Server is
+hunting for the pages to be altered. While an update lock is in place, there
+can be shared locks thus allowing for higher throughput.
+
+The update lock(s) are promoted to exclusive locks once the SQL Server is ready
+to perform the delete/update.
+
+Table Locks
+
+There are three types of table locks:
+
+  * intent
+  * shared
+  * exclusive
+
+intent
+
+Intent locks indicate the intention to acquire a shared or exclusive lock on a
+data page. Intent locks are used to prevent other transactions from acquiring
+shared or exclusive locks on the given page.
+
+shared
+
+This is similar to a page level shared lock but it affects the entire table.
+This lock is typically applied during the creation of a non-clustered index.
+
+exclusive
+
+This is similar to a page level exclusive lock but it affects the entire table.
+If an update or delete affects the entire table, an exclusive table lock is
+generated. Also, during the creation of a clustered index an exclusive lock is
+generated.
+
+Demand Locks
+
+A demand lock prevents further shared locks from being set. The SQL Server sets
+a demand lock to indicate that a transaction is next to lock a table or a page.
+
+This avoids indefinite postponement if there was a flurry of readers when a
+writer wished to make a change.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.1.4: What's the purpose of using holdlock?
+
+-------------------------------------------------------------------------------
+
+All select/readtext statements acquire shared locks (see Q6.1.3) to retrieve
+their information. After the information is retrieved, the shared lock(s) is/
+are released.
+
+The holdlock option is used within transactions so that after the select/
+readtext statement the locks are held until the end of the transaction:
+
+  * commit transaction
+  * rollback transaction
+
+If the holdlock is not used within a transaction, the shared locks are
+released.
+
+Example
+
+Assume we have the following two transactions and that each where-clause
+qualifies a single row:
+
+    tx #1
+   
+    begin transaction
+    /* acquire a shared lock and hold it until we commit */
+    1: select col_1 from table_a holdlock where id=1
+    2: update table_b set col_3 = 'fiz' where id=12
+    commit transaction
+   
+    tx #2
+   
+    begin transaction
+    1: update table_a set col_2 = 'a' where id=1
+    2: update table_c set col_3 = 'teo' where id=45
+    commit transaction
+
+If tx#1, line 1 executes prior to tx#2, line 1, tx#2 waits to acquire its
+exclusive lock until tx#1 releases the shared level lock on the object. This
+will not be done until the commit transaction, thus slowing user throughput.
+
+On the other hand, if tx#1 had not used the holdlock attribute, tx#2 would not
+have had to wait until tx#1 committed its transaction. This is because shared
+level locks are released immediately (even within transactions) when the
+holdlock attribute is not used.
+
+Note that the holdlock attribute does not stop another transaction from
+acquiring a shared level lock on the object (i.e. another reader). It only
+stops an exclusive level lock (i.e. a writer) from being acquired.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.1.6: How do I find the oldest open transaction?
+
+-------------------------------------------------------------------------------
+select h.spid, u.name, p.cmd, h.name, h.starttime,
+       p.hostname, p.hostprocess, p.program_name
+from master..syslogshold  h,
+     master..sysprocesses p,
+     master..sysusers     u
+where h.spid  = p.spid
+  and p.suid  = u.suid
+  and h.spid != 0 /* not replication truncation point */
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.1.7: How do I check if log truncation is blocked?
+
+-------------------------------------------------------------------------------
+
+System 11 and beyond:
+
+select h.spid, convert(varchar(20), h.name), h.starttime
+  from master..syslogshold h,
+       sysindexes          i
+ where h.dbid  = db_id()
+   and h.spid != 0
+   and i.id    = 8 /* syslogs */
+   and h.page in (i.first, i.first+1) /* first page of log = page of oldest xact */
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.1.8: The timestamp datatype
+
+-------------------------------------------------------------------------------
+
+The timestamp datatype is user-defined datatype supplied by Sybase, defined as:
+
+    varbinary(8) NULL
+   
+It has a special use when used to define a table column. A table may have at
+most one column of type timestamp, and whenever a row containing a timestamp
+column is inserted or updated the value in the timestamp column is
+automatically updated. This much is covered in the documentation.
+
+What isn't covered is what the values placed in timestamp columns actually
+represent. It is a common misconception that timestamp values bear some
+relation to calendar date and/or clock time. They don't - the datatype is
+badly-named. SQL Server keeps a counter that is incremented for every write
+operation - you can see its current value via the global variable @@DBTS
+(though don't try and use this value to predict what will get inserted into a
+timestamp column as every connection shares the same counter.)
+
+The value is maintained between server startups and increases monotonically
+over time (though again you cannot rely on it this behaviour). Eventually the
+value will wrap, potentially causing huge problems, though you will be warned
+before it does - see Sybase Technical News Volume 5, Number 1 (see Q10.3.1).
+You cannot convert this value to a datetime value - it is simply an 8-byte
+integer.
+
+    Note that the global timestamp value is used for recovery purposes in the
+    event of an RDMBS crash. As transactions are committed to the log each
+    transaction gets a unique timestamp value. The checkpoint process places a
+    marker in the log with its unique timestamp value. If the RDBMS crashes,
+    recovery is the process of looking for transactions that need to be rolled
+    forward and/or backward from the checkpoint event. If a transaction spans
+    across the checkpoint event and it never competed it too needs to be rolled
+    back.
+   
+    Essentially, this describes the write-ahead log protocol described by C.J.
+    Date in An Introduction to Database Systems.
+   
+So what is it for? It was created in order to support the browse-mode functions
+of DB-Library (and for recovery as mentioned above). This enables an
+application to easily support optimistic locking (See Q1.5.4) by guaranteeing a
+watch column in a row will change value if any other column in that row is
+updated. The browse functions checked that the timestamp value was still the
+same as when the column was read before attempting an update. This behaviour is
+easy to replicate without necessarily using the actual client browse-mode
+functions - just read the timestamp value along with other data retrieved to
+the client, and compare the stored value with the current value prior to an
+update.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.1.9: Stored Procedure Recompilation and Reresolution
+
+-------------------------------------------------------------------------------
+
+When a stored procedure is created, the text is placed in syscomments and a
+parse tree is placed in sysprocedures. At this stage there is no compiled query
+plan.
+
+A compiled query plan for the procedure only ever exists in memory (that is, in
+the procedure cache) and is created under the following conditions:
+
+ 1. A procedure is executed for the first time.
+ 2. A procedure is executed by a second or subsequent user when the first plan
+    in cache is still in use.
+ 3. The procedure cache is flushed by server restart or cache LRU flush
+    procedure.
+ 4. The procedure is executed or created using the with recompile option.
+
+If the objects the procedure refers to change in some way - indexes dropped,
+table definition changed, etc - the procedure will be reresolved - which
+updates sysprocedures with a modified tree. Before 10.x the tree grows and in
+extreme cases the procedure can become too big to execute. This problem
+disappears in Sybase System 11. This reresolution will always occur if the
+stored procedure uses temporary tables (tables that start with "#").
+
+There is apparently no way of telling if a procedure has been reresolved.
+
+Traceflag 299 offers some relief, see Q1.3.3 for more information regarding
+traceflags.
+
+The Official Explanation -- Reresolution and Recompilation Explained
+
+When stored procedures are created, an entry is made in sysprocedures that
+contains the query tree for that procedure. This query tree is the resolution
+of the procedure and the applicable objects referenced by it. The syscomments
+table will contain the actual procedure text. No query plan is kept on disk.
+Upon first execution, the query tree is used to create (compile) a query plan
+(execution plan) which is stored in the procedure cache, a server memory
+structure. Additional query plans will be created in cache upon subsequent
+executions of the procedure whenever all existing cached plans are in use. If a
+cached plan is available, it will be used.
+
+Recompilation is the process of using the existing query tree from
+sysprocedures to create (compile) a new plan in cache. Recompilation can be
+triggered by any one of the following:
+
+  * First execution of a stored procedure,
+  * Subsequent executions of the procedure when all existing cached query plans
+    are in use,
+  * If the procedure is created with the recompile option, CREATE PROCEDURE
+    sproc WITH RECOMPILE
+  * If execution is performed with the recompile option, EXECUTE sproc WITH
+    RECOMPILE
+
+Re-resolution is the process of updating the query tree in sysprocedures AND
+recompiling the query plan in cache. Re-resolution only updates the query tree
+by adding the new tree onto the existing sysprocedures entry. This process
+causes the procedure to grow in size which will eventually cause an execution
+error (Msg 703 - Memory request failed because more than 64 pages are required
+to run the query in its present form. The query should be broken up into
+shorter queries if possible). Execution of a procedure that has been flagged
+for re-resolution will cause the re-resolution to occur. To reduce the size of
+a procedure, it must be dropped which will remove the entries from
+sysprocedures and syscomments. Then recreate the procedure.
+
+Re-resolution can be triggered by various activities most of which are
+controlled by SQL Server, not the procedure owner. One option is available for
+the procedure owner to force re-resolution. The system procedure, sp_recompile,
+updates the schema count in sysobjects for the table referenced. A DBA usually
+will execute this procedure after creating new distribution pages by use of
+update statistics. The next execution of procedures that reference the table
+flagged by sp_recompile will have a new query tree and query plan created.
+Automatic re-resolution is done by SQL Server in the following scenarios:
+
+  * Following a LOAD DATABASE on the database containing the procedure,
+  * After a table used by the procedure is dropped and recreated,
+  * Following a LOAD DATABASE of a database where a referenced table resides,
+  * After a database containing a referenced table is dropped and recreated,
+  * Whenever a rule or default is bound or unbound to a referenced table.
+
+Forcing automatic compression of procedures in System 10 is done with trace
+flag 241. System 11 should be doing automatic compression, though this is not
+certain.
+
+When are stored procedures compiled?
+
+Stored procedures are in a database as rows in sysprocedures, in the form of
+parse trees. They are later compiled into execution plans.
+
+A stored procedures is compiled:
+
+ 1. with the first EXECute, when the parse tree is read into cache
+ 2. with every EXECute, if CREATE PROCEDURE included WITH RECOMPILE
+ 3. with each EXECute specifying WITH RECOMPILE
+ 4. if the plans in cache for the procedure are all in use by other processes
+ 5. after a LOAD DATABASE, when all procedures in the database are recompiled
+ 6. if a table referenced by the procedure can not be opened (using object id),
+    when recompilation is done using the table's name
+ 7. after a schema change in any referenced table, including:
+     1. CREATE INDEX or DROP INDEX to add/delete an index
+     2. ALTER TABLE to add a new column
+     3. sp_bindefault or sp_unbindefault to add/delete a default
+     4. sp_bindrule or sp_unbindrule to add/delete a rule
+ 8. after EXECute sp_recompile on a referenced table, which increments
+    sysobjects.schema and thus forces re-compilation
+
+What causes re-resolution of a stored procedure?
+
+When a stored procedure references an object that is modified after the
+creation of the stored procedure, the stored procedure must be re-resolved.
+Re-resolution is the process of verifying the location of referenced objects,
+including the object id number. Re-resolution will occur under the following
+circumstances:
+
+ 1. One of the tables used by the stored procedure is dropped and re-created.
+ 2. A rule or default is bound to one of the tables (or unbound).
+ 3. The user runs sp_recompile on one of the tables.
+ 4. The database the stored procedure belongs to is re-loaded.
+ 5. The database that one of the stored procedure's tables is located in is
+    re-loaded.
+ 6. The database that one of the stored procedure's tables is located in is
+    dropped and re-created.
+
+What will cause the size of a stored procedure to grow?
+
+Any of the following will result in a stored procedure to grow when it is
+recompiled:
+
+ 1. One of the tables used in the procedure is dropped and re-created.
+ 2. A new rule or default is bound to one of the tables or the user runs
+    sp_recompile on one of the tables.
+ 3. The database containing the stored procedure is re-loaded.
+
+Other things causing a stored procedure to be re-compiled will not cause it to
+grow. For example, dropping an index on one of the tables used in the procedure
+or doing EXEC WITH RECOMPILE.
+
+The difference is between simple recompilation and re-resolution. Re-resolution
+happens when one of the tables changes in such a way that the query trees
+stored in sysprocedures may be invalid. The datatypes, column offsets, object
+ids or other parts of the tree may change. In this case, the server must
+re-allocate some of the query tree nodes. The old nodes are not de-allocated
+(there is no way to do this within a single procedure header), so the procedure
+grows. In time, trying to execute the stored procedure will result in a 703
+error about exceeding the 64 page limit for a query.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.1.10: How do I manipulate varbinary columns?
+
+-------------------------------------------------------------------------------
+
+The question was posed - How do we manipulate varbinary columns, given that
+some portion - like the 5th and 6th bit of the 3rd byte - of a (var)binary
+column, needs to be updated? Here is one approach, provided by Bret Halford (
+<A HREF="mailto:bret@sybase.com">bret@sybase.com</A>), using stored procedures to set or clear certain bits of a
+certain byte of a field of a row with a given id:
+
+    drop table demo_table
+    drop procedure clear_bits
+    drop procedure set_bits
+    go
+    create table demo_table (id numeric(18,0) identity, binary_col
+    binary(20))
+    go
+    insert demo_table values (0xffffffffffffffffffffffffffffffffffffffff)
+    insert demo_table values (0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa)
+    insert demo_table values (0x0000000000000000000000000000000000000000)
+    go
+
+    create procedure clear_bits (
+            @id numeric(18,0),   -- primary key of row to be changed
+            @bytenum tinyint,    -- specifies which byte of binary_col to change
+            @mask binary(1)      -- bits to be cleared are zeroed,
+                                 -- bits left alone are turned on
+                                 -- so 0xff = clear all, 0xfb = clear bit 3
+    )
+    as
+    update demo_table set binary_col =
+    substring(binary_col,1,@bytenum-1)+
+    convert(binary(1),
+    convert(tinyint,substring(binary_col,@bytenum,1)) &amp;
+    convert(tinyint,@mask)
+    )+
+    substring(binary_col,@bytenum+1,20)
+    from demo_table
+    where id = @id
+    go
+
+    create procedure set_bits (
+    @id numeric(18,0),      -- primary key of row to be changed
+    @bytenum tinyint,       -- specifies which byte of binary_col to change
+    @mask binary(1))        -- bits to be set are turned on
+                            -- bits left alone are zeroed
+                            -- so 0xff = set all, 0xfb = set all but 3
+    )
+    as
+    update demo_table set binary_col =
+    substring(binary_col,1,@bytenum-1)+
+    convert(binary(1),
+    convert(tinyint,substring(binary_col,@bytenum, 1)) |
+    convert(tinyint,@mask)
+    )+
+    substring(binary_col,@bytenum+1,20)
+    from demo_table
+    where id = @id
+    go
+
+    select * from demo_table
+    -- clear bits 2,4,6,8 of byte 1 of row 1
+    exec clear_bits 1,1,0xAA
+
+    -- set bits 1-8 of byte 20 of row 3
+    exec set_bits 3,20,0xff
+
+    -- clear bits 1-8 of byte 4 of row 2
+    exec clear_bits 2,4,0xff
+
+    -- clear bit 3 of byte 5 of row 2
+    exec clear_bits 2,5,0x08
+    exec clear_bits 2,6,0x0f
+    exec set_bits 2,10,0xff
+    go
+
+    select * from demo_table
+    go
+    
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.1.11: How do I remove duplicate rows from a table?
+
+-------------------------------------------------------------------------------
+
+There are a number of different ways to achieve this, depending on what you are
+trying to achieve. Usually, you are trying to remove duplication of a certain
+key due to changes in business rules or recognition of a business rule that was
+not applied when the database was originally built.
+
+Probably the quickest method is to build a copy of the original table:
+
+select *
+  into temp_table
+  from base_table
+ where 1=0
+
+Create a unique index on the columns that covers the duplicating rows with the
+ignore_dup_key attribute. This may be more columns that the key for the table.
+
+create unique index temp_idx
+    on temp_table(col1, col2, ..., colN)
+  with ignore_dup_key
+
+Now, insert base_table into temp_table.
+
+insert temp_table
+  select * from base_table
+
+You probably want to ensure you have a very good backup of the base_table at
+this point, coz your going to clear it out! You will also want to check to
+ensure that the temp_table includes the rows you need. You also need to ensure
+that there are no triggers on the base table (remember to keep a copy!) or RI
+constraints. You probably do not want any of these to fire, or if they do, you
+are aware of the implications.
+
+Now you have a couple of choices. You can simply drop the original table and
+rename the temp table to the same name as the base table. Alternatively,
+truncate the table and insert from the temp_table into the original table. You
+would need to do this last if you did need the RI to fire on the table etc. I
+suspect that in most cases dropping and renaming will be the best option.
+
+If you want to simply see the duplicates in a table, the following query will
+help:
+
+select key1, key2, ...
+  from base_table
+ group by key1, key2, key3, key4, ...
+having count(*) &gt; 1
+
+Sybase will actually allow a "select *", but it is not guaranteed to work.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+SQL Advanced bcp ASE FAQ
+
+</PRE>
+<DIV ALIGN=CENTER>
+<SMALL>
+<P><HR WIDTH=1900 NOSHADE><BR>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  Part12 -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A></SMALL>
+<P>
+<div align="center">
+
+<center>
+<form method="post" action="rateit.php">
+<table border="1" cellpadding="0" cellspacing="0" width="150" bgcolor="#ffcccc" style="WIDTH: 150px">
+<tr><td width="100%">
+<div align="center">
+<table border="0" cellpadding="2" width="100%" bgcolor="#ffcccc">
+<tr><td width="100%" height="14">
+<p align="center"><font face="Arial">Rate this FAQ</font></p>
+</td></tr>
+<tr><td width="100%" height="14">
+<p align="center">
+<INPUT TYPE=HIDDEN NAME="pid" VALUE="databases/sybase-faq/part12/index.html">
+<select size="1" name="D1" style="COLOR: darkmagenta; BACKGROUND-COLOR: cornsilk">
+<option selected value="0">N/A</option>
+<option value="1">Worst</option>
+<option value="2">Weak</option>
+<option value="3">OK</option>
+<option value="4">Good</option>
+<option value="5">Great</option>
+</select>
+</p>
+</td></tr>
+<tr><td width="100%" height="27">
+<p align="center">
+<IMG onclick="mystr='/frate.php?pid='+pid.value+'&vote='+D1.value;
+Popup=window.open(mystr,'Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=380,height=270,left=230,top=43'); 
+ return false;" height=28 src="/images/vote.gif" alt="Vote" width=83 border=0 ></p>
+</td></tr>
+</table>
+</div>
+</td></tr>
+</table>
+<font size="-1" face="Arial"><br><a href="/topRated.html">Current Top-Rated FAQs</a><br></font>
+</form>
+</center>
+
+</div>
+
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="100%">
+<tr><td width="100%" bgcolor="#D6D6C0">
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part12/index.html"," ");
+// --></script>
+<p><font face="Arial"><a name="ct">Are you an expert in this area?</a> Share your knowledge and earn expert points by giving answers or rating people's questions and answers! This section of FAQS.ORG is not sanctioned in any way by FAQ authors or maintainers.</font></p>
+<p><font face="Arial">Questions strongly related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-6730.html">How can I display the table sizes of ALL tables in a database?   </a> by Caspar (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9594.html">how to use nested cursors in a stored procedure in ASE ? is there any template to use !...</a> by nino (12/18/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3265.html">to connect sybase and c++,how to connect and access the data </a> by kumaran (9/2/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6741.html">how do u tell the last time update statistics has been run on a table (11.0.3) </a> by yujo (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11075.html">I need to Execute an SP & set its output to the insert statement. This will be occured for...</a> by rose (1/14/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9435.html">I wanted to know EXACT technical details about what ACTUALLY happens when u fire a simple...</a> by anu (12/15/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-8395.html">Is there anyway to start dataserver in ASE 11.9.2 with only the master and tempdb online...</a> by steve_2000g (11/28/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-854.html">i get an error on the "convert" when i try to run this line of code, why is this?   print...</a> by shugarhi (7/14/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11834.html">Hi  &nbsp; We're using Sybase ASE 12.0 running on SUN 4500 Cluster server. We cannot...</a> by KK (1/26/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6297.html">I am creating a stored proc to create a report of dependencies. &nbsp;We are creating...</a> by RR (10/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7388.html">How is this hazardous if we do not close a cursor? </a> by amar (11/11/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9827.html">How can i reduce my tempdb size once i have increased it by creating a device also? </a> by rajs (12/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12835.html">how can i transfer a table from cybase to db2? &nbsp;please sendme step by step method if...</a> by maulik (2/9/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3213.html">My database is in bypass recovery mode. How do I put it in normal mode? </a> by Lach (9/1/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-1435.html">Hi ,  &nbsp;We are using Sybase ASE 11.9.2 with SCO Unix 7.1.1 &nbsp;as the operating ...</a> by gowri (7/27/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-2412.html">were is a database that will bring up  a person address without there last name </a> by travis (8/15/2003)</font></li>
+</ul>
+<p><font face="Arial">Questions somewhat related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-2221.html">Guys!   See the Sybase query below: select convert(float,substring(&lt;field1&gt;,3,...</a> by pathfinder (8/12/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7790.html">What are the side-effects of turning-on the built-in auditing capabilities of sybase? </a> by Choy (11/17/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12136.html">When ever i execute select property('PROCESSCPU') i get the value 189 and whenever i...</a> by anilkumarsh (1/29/2004)</font></li>
+</ul>
+<p><font face="Arial">Other questions awaiting answers:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/related.html">10088 questions</a> related to other FAQs<br></font></li>
+<li><font face="Arial"><a href="/qa/unrelated.html">1765 general questions</a></font></li>
+<li><font face="Arial"><a href="/qa/answered.html">4091 answered questions</a><br></font></li>
+</ul>
+</td></tr></table> <br></center></div>
+<HR NOSHADE SIZE=2 WIDTH=450>
+[ <a href="/faqs/">Usenet FAQs</a> | <a href="/faqs/faqsearch.html">Search</a> | <a href="/contrib/">Web FAQs</a> | <a href="/docs/">Documents</a> | <a href="/rfcs/">RFC Index</a> ]
+<BR><HR NOSHADE SIZE=2 WIDTH=450>
+<P>
+<ADDRESS>
+Send corrections/additions to the FAQ Maintainer: <BR>dowen@midsomer.org (David Owen)
+</ADDRESS>
+<P>
+<SMALL>
+<STRONG>Last Update February 12 2004 @ 00:28 AM</STRONG>
+<BR>
+</SMALL>
+</DIV>
+</BODY>
+</HTML>
+

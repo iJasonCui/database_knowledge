@@ -1,0 +1,149 @@
+[sybase@webdb20p:/data/dump/Profile_ad]$ /usr/platform/`uname -m`/sbin/prtdiag -v
+ld.so.1: /usr/platform/sun4u/sbin/prtdiag: fatal: libpicl.so.1: open failed: No such file or directory
+System Configuration:  Sun Microsystems  sun4u Sun Fire 880
+System clock frequency: 150 MHz
+Memory size: 32768 Megabytes
+
+========================= CPUs =========================
+
+                    Run   Ecache   CPU    CPU
+Brd  CPU   Module   MHz     MB    Impl.   Mask
+---  ---  -------  -----  ------  ------  ----
+ 0     0     0      750     8.0   US-III   3.4
+ 0     1     1      750     8.0   US-III   3.4
+ 0     2     2      750     8.0   US-III   3.4
+ 0     3     3      750     8.0   US-III   3.4
+ 0     4     4      750     8.0   US-III   3.4
+ 0     5     5      750     8.0   US-III   3.4
+ 0     6     6      750     8.0   US-III   3.4
+ 0     7     7      750     8.0   US-III   3.4
+
+
+========================= IO Cards =========================
+
+[sybase@webdb21p] 750 mHz
+
+[sybase@webdb22p] 750 mHz
+
+[sybase@webdb23p] 750 mHz
+
+[sybase@webdb24p] 900 mHz
+
+[sybase@webdb25p] 900 mHz
+
+[sybase@webdb26p] 900 Mhz
+
+
+[sybase@webdb27p:~]$ /usr/platform/`uname -m`/sbin/prtdiag -v
+ld.so.1: /usr/platform/sun4u/sbin/prtdiag: fatal: libpicl.so.1: open failed: No such file or directory
+System Configuration:  Sun Microsystems  sun4u Sun Fire 880
+System clock frequency: 150 MHz
+Memory size: 16384 Megabytes
+
+========================= CPUs =========================
+
+                    Run   Ecache   CPU    CPU
+Brd  CPU   Module   MHz     MB    Impl.   Mask
+---  ---  -------  -----  ------  ------  ----
+ 0     0     0      900     8.0   US-III+   2.3
+ 0     1     1      900     8.0   US-III+   2.3
+ 0     2     2      900     8.0   US-III+   2.3
+ 0     3     3      900     8.0   US-III+   2.3
+ 0     4     4      900     8.0   US-III+   2.3
+ 0     5     5      900     8.0   US-III+   2.3
+ 0     6     6      900     8.0   US-III+   2.3
+ 0     7     7      900     8.0   US-III+   2.3
+
+
+[sybase@webdb28p:~]$ /usr/platform/`uname -m`/sbin/prtdiag -v
+ld.so.1: /usr/platform/sun4u/sbin/prtdiag: fatal: libpicl.so.1: open failed: No such file or directory
+System Configuration:  Sun Microsystems  sun4u Sun Fire 880
+System clock frequency: 150 MHz
+Memory size: 16384 Megabytes
+
+========================= CPUs =========================
+
+                    Run   Ecache   CPU    CPU
+Brd  CPU   Module   MHz     MB    Impl.   Mask
+---  ---  -------  -----  ------  ------  ----
+ 0     0     0      1050     8.0   US-III+   2.3
+ 0     1     1      1050     8.0   US-III+   2.3
+ 0     2     2      1050     8.0   US-III+   2.3
+ 0     3     3      1050     8.0   US-III+   2.3
+ 0     4     4      1050     8.0   US-III+   2.3
+ 0     5     5      1050     8.0   US-III+   2.3
+ 0     6     6      1050     8.0   US-III+   2.3
+ 0     7     7      1050     8.0   US-III+   2.3
+
+
+========================= IO Cards =========================
+
+[sybase@webdb29p:~]$ /usr/platform/`uname -m`/sbin/prtdiag -v
+ld.so.1: /usr/platform/sun4u/sbin/prtdiag: fatal: libpicl.so.1: open failed: No such file or directory
+System Configuration:  Sun Microsystems  sun4u Sun Fire 880
+System clock frequency: 150 MHz
+Memory size: 16384 Megabytes
+
+========================= CPUs =========================
+
+                    Run   Ecache   CPU    CPU
+Brd  CPU   Module   MHz     MB    Impl.   Mask
+---  ---  -------  -----  ------  ------  ----
+ 0     0     0      1050     8.0   US-III+   2.3
+ 0     1     1      1050     8.0   US-III+   2.3
+ 0     2     2      1050     8.0   US-III+   2.3
+ 0     3     3      1050     8.0   US-III+   2.3
+ 0     4     4      1050     8.0   US-III+   2.3
+ 0     5     5      1050     8.0   US-III+   2.3
+ 0     6     6      1050     8.0   US-III+   2.3
+ 0     7     7      1050     8.0   US-III+   2.3
+
+
+========================= IO Cards =========================
+
+
+[sybase@webdb30p:~]$ /usr/platform/`uname -m`/sbin/prtdiag -v
+ld.so.1: /usr/platform/sun4u/sbin/prtdiag: fatal: libpicl.so.1: open failed: No such file or directory
+System Configuration:  Sun Microsystems  sun4u Sun Fire 880
+System clock frequency: 150 MHz
+Memory size: 16384 Megabytes
+
+========================= CPUs =========================
+
+                    Run   Ecache   CPU    CPU
+Brd  CPU   Module   MHz     MB    Impl.   Mask
+---  ---  -------  -----  ------  ------  ----
+ 0     0     0      1200     8.0   US-III+   6.1
+ 0     1     1      1200     8.0   US-III+   6.1
+ 0     2     2      1200     8.0   US-III+   6.1
+ 0     3     3      1200     8.0   US-III+   6.1
+ 0     4     4      1200     8.0   US-III+   6.1
+ 0     5     5      1200     8.0   US-III+   6.1
+ 0     6     6      1200     8.0   US-III+   6.1
+ 0     7     7      1200     8.0   US-III+   6.1
+
+
+========================= IO Cards =========================
+
+[sybase@webdb31p:~]$ /usr/platform/`uname -m`/sbin/prtdiag -v
+ld.so.1: /usr/platform/sun4u/sbin/prtdiag: fatal: libpicl.so.1: open failed: No such file or directory
+System Configuration:  Sun Microsystems  sun4u Sun Fire 880
+System clock frequency: 150 MHz
+Memory size: 16384 Megabytes
+
+========================= CPUs =========================
+
+                    Run   Ecache   CPU    CPU
+Brd  CPU   Module   MHz     MB    Impl.   Mask
+---  ---  -------  -----  ------  ------  ----
+ 0     0     0      1200     8.0   US-III+   6.1
+ 0     1     1      1200     8.0   US-III+   6.1
+ 0     2     2      1200     8.0   US-III+   6.1
+ 0     3     3      1200     8.0   US-III+   6.1
+ 0     4     4      1200     8.0   US-III+   6.1
+ 0     5     5      1200     8.0   US-III+   6.1
+ 0     6     6      1200     8.0   US-III+   6.1
+ 0     7     7      1200     8.0   US-III+   6.1
+
+
+========================= IO Cards =========================

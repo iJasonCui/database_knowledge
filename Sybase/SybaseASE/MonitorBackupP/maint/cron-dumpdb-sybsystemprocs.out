@@ -1,0 +1,26 @@
+Backup Server session id is:  6.  Use this value when executing the
+'sp_volchanged' system stored procedure after fulfilling any volume change
+request from the Backup Server.
+Backup Server: 6.28.1.1: Dumpfile name 'emprocs140100396C' section number 1
+mounted on disk file '/dumps/sybsystemprocs/sybsystemprocs-db1'
+Backup Server: 4.58.1.1: Database sybsystemprocs: 14112 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database sybsystemprocs: 23706 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database sybsystemprocs: 50354 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database sybsystemprocs: 63020 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database sybsystemprocs: 63192 kilobytes DUMPed.
+Backup Server: 3.43.1.1: Dump phase number 1 completed.
+Backup Server: 3.43.1.1: Dump phase number 2 completed.
+Backup Server: 3.43.1.1: Dump phase number 3 completed.
+Backup Server: 4.58.1.1: Database sybsystemprocs: 63376 kilobytes DUMPed.
+Backup Server: 3.42.1.1: DUMP is complete (database sybsystemprocs).
+######################
+ EXECUTING FUNCTION   
+284,287,opsdb1p.sybsystemprocs daily dump FINISHED OK,1,1,/dumps/scripts/maint/cromdumpdb-sybsystemprocs.out
+######################
+(1 row affected)
+ RESULT      ROWCNT      PRIMKEY     
+ ----------- ----------- ----------- 
+           0           1     9382248 
+
+(1 row affected)
+(return status = 0)

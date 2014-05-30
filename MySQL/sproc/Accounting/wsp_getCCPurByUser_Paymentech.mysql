@@ -1,0 +1,55 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getCCPurByUser_Paymentech;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getCCPurByUser_Paymentech (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Mike Stairs
+**   Date:         June 3, 2005
+**   Description:  Returns all credit card purchases for the given user id (made through Paymentech).
+**
+**   Author:       Andy Tran
+**   Date:         February, 2008
+**   Description:  added encodedCardId
+**
+******************************************************************************/
+ at_userId DECIMAL(12,0)
+)
+BEGIN
+
+    SELECT
+    request.userId,
+    request.actionCode,
+    request.merchantId,
+    request.xactionId,
+    request.cardNumber,
+    request.cardExpiryMonth,
+    request.cardExpiryYear,
+    request.cardType,
+    request.cardHolderName,
+    request.amount,
+    request.userStreet,
+    request.userCity,
+    request.userState,
+    request.userPostalCode,
+    request.userCountryCode,
+    request.dateCreated,
+    response.responseCode,
+    response.approvalCode,
+    response.avsResponseCode,
+    response.securityResponseCode,
+    ctran.CCTranStatusId,
+    response.dateCreated,
+    request.encodedCardId
+
+    FROM PaymentechRequest request LEFT JOIN CreditCardTransaction ctran ON request.xactionId = ctran.xactionId, PaymentechResponse response
+    WHERE request.userId = at_userId
+    AND response.xactionId = request.xactionId 
+    AND response.dateCreated = (SELECT MIN(res2.dateCreated) 
+								FROM PaymentechResponse res2 
+								WHERE res2.xactionId = request.xactionId);
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

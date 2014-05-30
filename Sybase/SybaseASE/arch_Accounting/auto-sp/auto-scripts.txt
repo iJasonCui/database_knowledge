@@ -1,0 +1,157 @@
+1044)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+isql -Ucron_sa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+BatchId,
+dateCreated
+FROM BatchIdLog
+WHERE 
+    dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate)))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1045)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+isql -Ucron_sa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+CCTranStatusId,
+dateCreated,
+dateModified,
+CCTranStatusCode,
+CCTranStatusName
+FROM CCTranStatus
+WHERE 
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1046)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+isql -Ucron_sa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+xactionId,
+dateCreated,
+CCTranStatusId,
+batchId,
+dateVoided,
+dateExtracted,
+dateSettled,
+responseCode
+FROM CreditCardTransaction
+WHERE 
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateSettled >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateSettled < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1047)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+isql -Ucron_sa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+userId,
+xactionId,
+merchantId,
+actionCode,
+cardType,
+cardNumber,
+cardExpiryMonth,
+cardExpiryYear,
+amount,
+currencyCode,
+cardHolderName,
+userStreet,
+userCity,
+userState,
+userCountryCode,
+userPostalCode,
+cardSecurityValue,
+cardSecurityPresence,
+cardIssueNumber,
+cardStartMonth,
+cardStartYear,
+dateCreated
+FROM PaymentechRequest
+WHERE 
+    dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate)))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1048)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+isql -Ucron_sa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+xactionId,
+responseCode,
+responseDate,
+approvalCode,
+avsResponseCode,
+securityResponseCode,
+cardNumber,
+cardExpiryMonth,
+cardExpiryYear,
+cardType,
+recurringPaymentCode,
+cavvResponseCode,
+amount,
+errorMessage,
+dateCreated
+FROM PaymentechResponse
+WHERE 
+    dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate)))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1049)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+isql -Ucron_sa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+xactionId,
+responseCode,
+responseDate,
+cardNumber,
+partialCardNumber,
+cardType,
+amount,
+merchantId,
+currencyCode,
+dateCreated
+FROM SettlementResponse
+WHERE 
+    dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate)))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;

@@ -1,0 +1,27 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getWSCardsByUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getWSCardsByUserId (
+at_userId DECIMAL(12,0),
+at_status char(1) 
+)
+BEGIN 
+
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+ 
+IF at_status = 'X' THEN 
+    SELECT creditCardId as cardId, partialCardNum, cardNickname
+      FROM CreditCard 
+      	   LEFT JOIN DebitCard ON CreditCard.creditCardId = DebitCard.cardId 
+	   LEFT JOIN BankCard ON CreditCard.creditCardId = BankCard.cardId
+     WHERE CreditCard.userId = at_userId;
+ELSE
+    SELECT creditCardId as cardId, partialCardNum, cardNickname
+      FROM CreditCard 
+           LEFT JOIN DebitCard ON CreditCard.creditCardId = DebitCard.cardId
+           LEFT JOIN BankCard ON CreditCard.creditCardId = BankCard.cardId
+     WHERE CreditCard.userId = at_userId AND status = at_status;
+END IF;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,245 @@
+#--------------------------------------------------------------------------------------#
+# temp cron for mob rep, only for short-term solution in order to give NOC a good sleep
+#--------------------------------------------------------------------------------------#
+* * * * * (cd /opt/scripts/maint/mob; ./temp_resume_connection_skip_tran.sh > temp_resume_connection_skip_tran.sh.log  2>&1 )  
+#####################################################################
+#  IVR Crons
+#####################################################################
+#
+00 7  * * * (cd /opt/scripts/maint/NE_Triton; ./xferTritonNE.sh > xferTritonNE.sh.cron.log > /dev/null 2>&1 )
+#
+#----------------------------------------------------------------#
+# pound Blocked ANI 
+#----------------------------------------------------------------#
+0,10,20,30,40,50 * * * * (cd /opt/scripts/maint/ivr/BlockedANI; ./cron-loadBlockedANI.sh v151dbp01ivr 0 > /dev/null 2>&1 )
+#-----------------------------------------------------------------#
+# cron-delSMSGatewayReportat 4am every day 
+#----------------------------------------------------------------#
+0 4 * * * (cd /opt/scripts/maint/ivr/; ./cron-delSMSGatewayReport.sh > ./cron-delSMSGatewayReport.sh.out )
+#
+0 11 * * * (cd /opt/scripts/maint/ivr/; ./cron-delQHNCLByDate.sh > ./cron-delQHNCLByDate.sh.out )
+#
+#-----------------------------------------------------------------
+# Auditing online index maintenance 
+#----------------------------------------------------------------#
+* * * * * (cd /opt/scripts/maint; ./maint-index-grep-output.sh.Prod.all > /dev/null 2>&1 )
+#
+#-------------------------------------------------------------------------#
+# copy and parse JDBC log from web production, 5% of all production load 
+#-------------------------------------------------------------------------#
+0 4 * * * (cd /opt/scripts/maint/JDBCLog; ./cron_get_JDBCLog.sh > /dev/null 2>&1 )
+##6 16 13 3 * (cd /opt/scripts/maint/JDBCLog; ./cron_process_JDBCLog.sh > /dev/null 2>&1 )
+#
+##################################################################
+#  CCD Crons
+##################################################################
+#-----------------------------------------------------------------#
+#
+05 6 17 4 * (cd /opt/scripts/maint/updateStats; ./Online_update_index_statistics.sh c151dbp06pgs ContentMonitor > update_index_statistics.log 2>&1) 
+#
+##Report extracts
+# arch_CRM.sh is currently running verisign extracts. Ultimatly will replace processcrm.sh
+00 3 * * * (cd /opt/scripts/maint/ccd/arch_CRM; ./arch_CRM.sh c151dbp06  1> ./arch_CRM.log 2>&1)
+30 3 * * * (cd /opt/scripts/maint/ccd/arch_CRM; ./arch_CRM_BD.sh c151dbp06 1> ./arch_CRM_BD.log 2>&1)
+45 3 * * * (cd /opt/scripts/maint/ccd; ./processcrm.sh c151dbp06 > processcrm.sh.out 2>&1)
+##Pending Archive
+00 6 * * * (cd /opt/scripts/maint/ccd; ./cron_pending_arch.sh c151dbp06  > ./cron_pending_arch.sh.out 2>&1 )
+# Paymentech Download Batch
+#------------------------------------------------------------------------------------------------------------------------
+5 2 * * *  (cd /opt/scripts/maint/ccd/arch_CRM; ./arch_CRM_Paymentech.sh  c151dbp06 1> ./arch_CRM_Paymentech.log 2>&1)
+#------------------------------------------------------------------------------------------------------------------------
+##Activity sales summary -  daily job
+45 4 * * * (cd /opt/scripts/maint/ccd/agentSum; ./agentSum.sh  c151dbp06 1> ./agentSum.log 2>&1)
+#
+## Chargeback
+##45 4 * * * (cd /opt/scripts/maint/ccd; ./cron-load-chargebacksreason.sh w151dbp01 Chargeback c151dbp06 ChargebackLoad> cron-load-Chargebacks.sh.out)
+##05 5 * * * (cd /opt/scripts/maint/ccd/Chargeback; ./process_ChargeBacks.sh w151dbp01 Chargeback c151dbp06 ChargebackLoad> process_ChargeBacks.sh.out 2>&1)
+##45 10 * * * (cd /opt/scripts/maint/ccd; ./cron-load-chargebacksreason.sh w151dbp01 Chargeback c151dbp06 ChargebackLoad> cron-load-Chargebacks.sh.out)
+##05 11 * * * (cd /opt/scripts/maint/ccd/Chargeback; ./process_ChargeBacks.sh w151dbp01 Chargeback c151dbp06 ChargebackLoad> process_ChargeBacks.sh.out 2>&1)
+##45 14 * * * (cd /opt/scripts/maint/ccd; ./cron-load-chargebacksreason.sh w151dbp01 Chargeback c151dbp06 ChargebackLoad> cron-load-Chargebacks.sh.out)
+##05 15 * * * (cd /opt/scripts/maint/ccd/Chargeback; ./process_ChargeBacks.sh w151dbp01 Chargeback c151dbp06 ChargebackLoad> process_ChargeBacks.sh.out 2>&1)
+## sync_operator_table.sh - Disabled on 2010-03-01 requsted by Tk Chan
+##23 * * * * (cd /opt/scripts/maint/ccd/Chargeback; ./sync_operator_table.sh c151dbp06 crm w151dbp01 Chargeback > sync_operator_table.sh.out)
+#
+#------------------------------------------------------------------------------------------------------------------------
+# Purge all Expired data (older then 13 month)
+#  1.CreditCardActivity 2.SettementResponse 3.PaymentechResponce 4.PaymentechRequest 5.VerisingResponse 6.VerisingRequest
+#------------------------------------------------------------------------------------------------------------------------
+30 12 * * * (cd /opt/scripts/maint/ccd; ./crm_purge_13_month.sh c151dbp06 > crm_purge_13_month.sh.out 2>&1)
+#------------------------------------------------------------------------------------------------------------------------
+# Customer Purge Job deleting customer older than 8 years
+#------------------------------------------------------------------------------------------------------------------------
+30 5 * * * (cd /opt/scripts/maint/ccd/custPurg; ./custPurg.sh  c151dbp06 1> ./custPurg.log 2>&1)
+#------------------------------------------------------------------------------------------------------------------------
+#
+# Purge Credit Card transactions older than 13 months
+05 5 * * * (cd /opt/scripts/maint/ccd/custPurg; ./removeOldPayments.sh c151dbp06 1> ./removeOldPayments.sh.log 2>&1 )
+#
+# Purge data from some CRN Log Tables
+05 7 * * * (cd /opt/scripts/maint/ccd/custPurg; ./deleteCRMLogtables.sh c151dbp06 1> ./deleteCRMLogtables.sh.log 2>&1 )
+#
+# Delete Cheques from CashPaymentExcp older than six months
+#------------------------------------------------------------------------------------------------------------------------
+30 11 1 * * (cd /opt/scripts/maint/ccd;  ./update_stale_cheques.sh c151dbp06 > update_stale_cheques.sh.out 2>&1 )
+#
+#-----------------------------------------
+# cron tab entry for ivrCrons
+#-----------------------------------------
+0,5,10,15,20,25,30,35,40,45,50,55 6-23 * * * (cd /opt/scripts/maint/ccd/ivrCron; ./executeSQL.sh > ./executeSQL.sh.out 2>&1 )
+#=========================================================================================================================
+# CCD Crons (migrated from c151dbp02)
+05 3 * * * (cd /opt/scripts/maint/ccd/ContentMonitor; ./purge_ContentIn.sh c151dbp06pgs ContentMonitor > ./purge_ContentIn.sh.log 2>&1 )
+05 7 * * * (cd /opt/scripts/maint/ccd/ContentMonitor; ./purgeWhiteSpaceLog.sh  c151dbp06pgs ContentMonitor > ./purgeWhiteSpaceLog.sh.log 2>&1 )
+10 3 * * * (cd /opt/scripts/maint/ccd/ContentMonitor; ./purge_DeleteContentLog.sh c151dbp06pgs ContentMonitor > ./purge_DeleteContentLog.sh.log 2>&1 )
+##*/5 * * * * (cd /opt/scripts/maint/ccd/ContentMonitor; ./SimulateMonitoring.sh c151dbp06pgs ContentMonitor > ./SimulateMonitoring.sh.log 2>&1 )
+*/10 * * * * (cd /opt/scripts/maint/ccd/ContentMonitor; ./PoliceOnlineOperators.sh c151dbp06pgs ContentMonitor > ./PoliceOnlineOperators.sh.log 2>&1 )
+#execute sp to unlock older then 2 minutes content
+*/2 * * * * (cd /opt/scripts/maint/ccd/ContentMonitor; ./UnlockOldContent.sh c151dbp06pgs > ./UnlockOldContent.log 2>&1)
+# archieve CM table such as ContentIn and ContentLog and so on 
+03 0 * * * (cd /opt/scripts/maint/ccd/ContentMonitor; ./cm_dss_interface.sh c151dbp06pgs ContentMonitor 1 > ./cm_dss_interface.log 2>&1)
+30 3 * * * (cd /opt/scripts/maint/ccd/TrialDb; ./pgs_dss_interface.sh c151dbp06pgs TrialDb 1 > ./pgs_dss_interface.log 2>&1)
+#
+###################################################
+# WEB CRON 
+####################################################
+#
+#----------------------------------------------------
+# Group On code to Kennedy
+#----------------------------------------------------
+00 10 * * 1,4 (cd /opt/scripts/maint/GroupOn; ./xferGroupOn.sh > xferGroupOn.sh.log 2>&1)
+#-----------------------------------------------------
+# Auditing double billed transaction from LL.com
+#-----------------------------------------------------
+10 * * * * (cd /opt/scripts/maint/web/DoubleBilledAudit; ./DoubleBilledAudit.LL.com.sh 1 >./DoubleBilledAudit.LL.com.sh.log 2>&1)
+#------------------------------------------------
+# Auditing Declined transaction from LL.com
+#------------------------------------------------
+30 07 * * * (cd /opt/scripts/maint/web/RenewDecline; ./RenewDecline.LL.com.sh 1 >./RenewDecline.LL.com.sh.log 2>&1)
+#--------------------------------------#
+# arch_Accounting
+#--------------------------------------#
+45 2 * * * (cd /opt/etc/sybase/maint/arch_Accounting; ./cron-arch_Accounting.sh > ./cron-arch_Accounting.sh.log 2>&1)
+#----------------------------------#
+# arch_Member
+#----------------------------------#
+45 7 * * * (cd /opt/scripts/maint/web/arch_Member; ./arch_Member.sh g151dbr07 Member g151dbr07 arch_Member 1 0 > ./arch_Member.sh.log 2>&1)
+#-----------------------------------#
+# Session  
+#-----------------------------------#
+00 1 * * * (cd /opt/scripts/maint/web/Session; ./clean_SecureToken.sh w151dbp01 Session >./clean_SecureToken.sh.log 2>&1)
+#-----------------------------------#
+# Plus45   
+#-----------------------------------#
+10 1 * * * (cd /opt/scripts/maint/web/Plus45; ./clean_SessionHistory_Cookie.sh w151dbp02 Plus45 >./clean_SessionHistory_Cookie.sh.log 2>&1)
+#-----------------------------------#
+#---------ActivityReport-------
+0 5 * * * (cd /opt/scripts/maint/web/UserActivityReport; ./UserActivityDailyReport.sh g151dbr07 >./UserActivityDailyReport.sh.log 2>&1)
+#-------Mobile WAP activity report
+0 5 1 * * (cd /opt/scripts/maint/mobile; ./WapMonthlyActivityReport.sh g104iqdb01> ./WapMonthlyActivityReport.sh.log 2>&1)
+# House Keeping for web 
+#-----------------------------------#
+0 4 * * * (cd /opt/scripts/maint/web;./cron-HouseKeeper.sh )
+#
+#################################################
+# DB OPERATION
+#################################################
+#---------------------------------------------------------------------------#
+# This is the new method to measure rep latency by sending test transaction #  
+# Jason C. on Mar 20 2006                                                   #
+#---------------------------------------------------------------------------#
+0,5,10,15,20,25,30,35,40,45,50,55 * * * * (cd /opt/scripts/maint/repLatency; ./MeasureRepLatency_InsertPrimary.sh > /dev/null 2>&1)
+5,15,25,35,45,55 * * * * (cd /opt/scripts/maint/repLatency; ./MeasureRepLatency_SelectReplicate.sh > /dev/null 2>&1)
+#
+#--------------------------------------------#
+# check Rep server stable Q 
+#--------------------------------------------#
+0,10,20,30,40,50  * * * * (cd /opt/scripts/maint/repStats;   ./check_stableQ.sh > /dev/null 2>&1)
+#-----------------------------------------------------------------------#
+# check warm standby database option, it is supposed to be dbo use only 
+#-----------------------------------------------------------------------#
+*/2 * * * * (cd /opt/scripts/maint/repStats;   ./check_StandbyDB_Option.sh > /dev/null 2>&1)
+#
+#-----------------------------------------------------------------------------------------#
+# DATABASE SERVER STATS
+# run sp_sysmon every 5 minutes on db servers and parse the output, bcp in to g151opsdb02 
+#-----------------------------------------------------------------------------------------#
+# WEB DBs
+#------------------------------------------------------#
+#0,5,10,15,20,25,30,35,40,45,50,55  9-17 * * 1-5 (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh webdb1d  > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  9-17 * * 1-5 (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh webdb1g  > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh w151dbp01 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics2.sh w151dbp02 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics2.sh w151dbp07 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh w151dbp04 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh w151dbp05 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh w151dbp06 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh w151dbr01 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh w151dbr02 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh webdb0r  > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics2.sh ivrdb1r  > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh c151dbp01  > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh g151dbr07 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh g151dbr07sms  > /dev/null 2>&1)
+#--------------------------------#
+# CCD DBs
+#--------------------------------#
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics2.sh c151dbp06    > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics2.sh c151dbp06pgs > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics2.sh c151dbp07    > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics2.sh c151dbp07pgs > /dev/null 2>&1)
+#---------------------------------#
+# IVR Statistics
+#---------------------------------#
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh ausdb > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh v151db20 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics2.sh v151dbp01ivr > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics2.sh v151dbp03ivr > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics2.sh v151dbp03msa > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics2.sh v151dbp05ivr > /dev/null 2>&1)
+#------------------------------------------------------#
+# Mobile STATS
+#------------------------------------------------------#
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh v151dbp01mob  > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh v151dbp01sms  > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh v151dbp02mob  > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh v151dbp02sms  > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh v151dbp05mob  > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/scripts/maint/DBSrvStats; ./statistics.sh v151dbp05sms  > /dev/null 2>&1)
+#------------------------------------------------------#
+0 8 * * 1 (cd /opt/scripts/maint/DBSrvStats; ./getCPU.sh > getCPU.sh.log 2>&1)
+#
+#----------------------------------------#
+# Operator Weekly Reports
+#----------------------------------------#
+00 10 * * 1 (cd /opt/scripts/maint/opsdb/operatorEMAIL; ./operatorEMAIL_pos.sh POS > operatorEMAIL_pos.out 2>&1 )
+00 10 * * 1 (cd /opt/scripts/maint/opsdb/operatorEMAIL; ./operatorEMAIL_web.sh WEB > operatorEMAIL_web.out 2>&1 )
+#----------------------------------------#
+# DBA Login Weekly Reports
+#----------------------------------------#
+00 10 * * 1 (cd /opt/scripts/maint/opsdb/dbaLoginEMAIL; ./dbaLoginEMAIL.sh DBA > dbaLoginEMAIL_dba.out 2>&1 )
+###### Backup Monitor dev cron
+######* * * * * (cd /opt/scripts/maint/opsdb/NagiosAlerts; ./cron-AddAlerts_dev.sh > cron-AddAlerts_dev.out 2>&1 )
+###### Daily Backup Alert Reports
+00 10 * * * (cd /opt/scripts/maint/opsdb; ./failuresEmail.sh > failuresEmail_ALL.out 2>&1 )
+01 10 * * * (cd /opt/scripts/maint/opsdb; ./failuresEmail_by_group.sh DBM > failuresEmail_DBM.out 2>&1 )
+02 10 * * * (cd /opt/scripts/maint/opsdb; ./failuresEmail_by_group.sh NTS > failuresEmail_NTS.out 2>&1 )
+03 10 * * * (cd /opt/scripts/maint/opsdb; ./failuresEmail_by_group.sh BSI > failuresEmail_BSI.out 2>&1 )
+#
+#----------------------------------------------#
+# Backup Monitor Prod cron
+# moved from opsdb1p on Aug 5 2009 by Jason C.
+#----------------------------------------------#
+* * * * * (cd /opt/scripts/maint/opsdb/NagiosAlerts; ./cron-AddAlerts.sh > cron-AddAlerts.out 2>&1 )
+#------------------------------------------
+#
+#REFRESH 
+##50 11 29 04 * (cd /opt/scripts/maint/web/Refresh ; ./RefreshNotification.sh webdb1g  2>&1)
+##55 11 29 04 * (cd /opt/scripts/maint/web/Refresh ; ./RefreshTestDBServer.sh webdb1g  2>&1)
+##00 10 04 04 * (cd /opt/scripts/maint/web/Refresh ; ./RefreshNotification.sh webdb1d  2>&1)
+##10 10 04 04 * (cd /opt/scripts/maint/web/Refresh ; ./RefreshTestDBServer.sh webdb1d  2>&1)
+#
+#----------------------------------------------#
+# update statistics for specific server&database 
+#----------------------------------------------#
+00 07 * * * (cd /opt/scripts/maint/updateStats; ./Online_update_index_statistics.sh v151dbp01ivr Mailbox 2>&1)
+00 19 * * * (cd /opt/scripts/maint/updateStats; ./Online_update_index_statistics.sh v151dbp01ivr Mailbox 2>&1)

@@ -1,0 +1,58 @@
+
+Starting server IQDB1 on webdbiq at port 4100 (07/31 10:31:43)
+
+Run Directory       : /data/db/IQDB1
+Server Executable   : /opt/sybase/ASIQ-12_6/bin/asiqsrv12
+Server Output Log   : /opt/sybase/ASIQ-12_6/logfiles/IQDB1.081.srvlog
+Server Version      : 12.6.0/ESD 1
+Open Client Version : 12.5.1/P-EBF11982 ESD #4
+User Parameters     : '@/data/db/IQDB1/IQDB1.cfg'
+Default Parameters  : -gn 105
+
+I. 07/31 10:31:45.      Adaptive Server IQ
+I. 07/31 10:31:45.       Version 12.6
+I. 07/31 10:31:45.        (64bit mode)
+I. 07/31 10:31:45. Copyright 1992-2005 by Sybase, Inc. All rights reserved
+I. 07/31 10:31:45.
+I. 07/31 10:31:45. Running on SunOS 5.8 Generic_108528-23
+I. 07/31 10:31:45. 49152K of memory used for caching
+I. 07/31 10:31:45. Minimum cache size: 49152K, maximum cache size: 262008K
+I. 07/31 10:31:45. Using a maximum page size of 4096 bytes
+I. 07/31 10:31:46. Starting database "IQDB1" (/data/db/IQDB1/IQDB1.db) at Mon Jul 31 2006 10:31
+I. 07/31 10:31:46. Database recovery in progress
+I. 07/31 10:31:46.     Last checkpoint at Mon Jul 31 2006 04:40
+I. 07/31 10:31:46.     Checkpoint log...
+
+
+=============================================================
+IQ server starting with:
+    100 connections         (       -gm )
+     18 cmd resources       ( -iqgovern )
+    445 threads             (     -iqmt )
+    350 Kb thread stack size   (   -iqtss  )
+  155750 Kb thread memory size ( -iqmt * -iqtss )
+      4 IQ number of cpus  ( -iqnumbercpus )
+=============================================================
+
+Wrapping iqmsg: Disabled.
+
+*********** (Possibly Duplicate Msg) **********************
+
+*** SybaseIQ Abort thrown at hos_throw.cxx:314 for PID: 6088 ***
+
+*** Exception Thrown from s_db.cxx:2428 tid 443 origtid 443 ***
+
+
+
+hos_exception at 109a69600 type 1439859924
+tid 443 Original tid 443
+filename s_db.cxx line# 2428
+errnum 2 OSerrnum 0
+msgnum -1006000
+_numberOfSubstitutions = 1
+        substitution # 1
+-- (s_db.cxx 2428)
+
+pstack: cannot examine 6088: program is _LP64, self is not
+DBSPAWN ERROR:  -80
+Unable to start database server

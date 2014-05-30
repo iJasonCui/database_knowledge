@@ -1,0 +1,41 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newNonFinancialSubsTran;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newNonFinancialSubsTran (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Marc Henderson
+**   Date:  January 04, 2005
+**   Description:  add non financial subscription transaction for user
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+at_cardId              INT,
+at_userId              DECIMAL(12,0),
+at_contentId           SMALLINT,
+at_subscriptionTypeId  SMALLINT,
+at_duration            SMALLINT,
+at_dateCreated         DATETIME
+)
+BEGIN  
+
+  DECLARE at_returnId INT;
+  DECLARE at_dateNowGMT DATETIME;
+
+  SET at_dateNowGMT = UTC_TIMESTAMP();
+
+  CALL wsp_nonFinancialXActionId(at_returnId);
+
+  INSERT INTO SubscriptionNonfinancialTrans
+    (nonFinancialXActionId,cardId,userId,contentId,subscriptionTypeId,duration,dateCreated)
+    VALUES
+    (at_returnId,at_cardId,at_userId,at_contentId,at_subscriptionTypeId,at_duration,at_dateNowGMT);
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

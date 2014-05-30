@@ -1,0 +1,46 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getPass;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getPass (
+/***********************************************************************
+**
+** CREATION:
+**   Author:  possible Jeff Yang
+**   Date:  spring 2010
+**   Description: Get the 
+**
+** REVISION(S): 
+**   Author:  Francisc S
+**   Date:  Sept 29, 2010
+**   Description: This stored proc is used for displaying the date (and status) of the backstage passes
+**                received/sent within LL3.0 - Mailbox / Passes.
+**                The original implementation was switching users in the Java code in order to differentiate 
+**                between recevived and sent passes.
+**                Since passes have the messageOnHoldStatus, passes received are fetched using a different SQL criteria;
+**                at_type, with values 'PR' and 'PS' was added to support this new business rule.
+**
+*************************************************************************/
+    at_userId     DECIMAL(12, 0)
+   ,at_targetUserId DECIMAL(12, 0)
+   ,at_type VARCHAR(2)
+)
+BEGIN
+IF (at_type = 'PR')
+THEN
+    SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;
+    SELECT seen, 
+           dateCreated 
+      FROM Pass
+     WHERE userId = at_userId 
+       AND targetUserId=at_targetUserId
+       AND IFNULL(messageOnHoldStatus,'A') != 'H';
+ELSE /* covers everything else including at_type = 'PS'*/
+    SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;
+    SELECT seen, 
+           dateCreated 
+      FROM Pass
+     WHERE userId = at_userId 
+       AND targetUserId=at_targetUserId;
+
+END IF;
+END;;
+DELIMITER ;

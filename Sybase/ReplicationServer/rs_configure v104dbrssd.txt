@@ -1,0 +1,11 @@
+exec rs_configure 'cm_max_connections', '500'
+exec rs_configure 'memory_limit', '1700'
+exec rs_configure 'num_client_connections',     '200'  
+exec rs_configure 'num_msgqueues',              '800'
+exec rs_configure 'num_stable_queues',          '256' 
+exec rs_configure 'num_threads',                '800'
+exec rs_configure 'sqt_max_cache_size',         '100000000'
+exec rs_configure 'sts_cachesize',              '500' 
+
+
+

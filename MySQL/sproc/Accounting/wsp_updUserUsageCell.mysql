@@ -1,0 +1,72 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updUserUsageCell;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updUserUsageCell (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  May 21, 2003
+**   Description:  updates user offer
+**
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date: November 2004
+**   Description: added dateExpiry
+**
+******************************************************************************/
+at_userId            DECIMAL(12,0),
+at_usageCellId       SMALLINT,
+at_dateExpiry        DATETIME
+)
+BEGIN
+
+DECLARE  at_dateModified   DATETIME;
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+   ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+   ROLLBACK;
+END;
+
+SET at_dateModified = UTC_TIMESTAMP();
+
+START TRANSACTION;     
+     
+UPDATE UserAccount
+              SET usageCellId = at_usageCellId,
+                  dateModified = at_dateModified,
+                  dateExpiry = at_dateExpiry
+  WHERE userId = at_userId;
+
+INSERT INTO UserAccountHistory 
+                        (userId, 
+                         billingLocationId, 
+                         purchaseOfferId, 
+                         usageCellId, 
+                         accountType, 
+                         dateCreated, 
+                         dateModified, 
+                         dateExpiry, 
+                         subscriptionOfferId)
+                  SELECT userId, 
+                         billingLocationId, 
+                         purchaseOfferId, 
+                         usageCellId, 
+                         accountType, 
+                         dateCreated, 
+                         dateModified, 
+                         dateExpiry, 
+                         subscriptionOfferId 
+                  FROM UserAccount 
+                  WHERE userId = at_userId;	    
+
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

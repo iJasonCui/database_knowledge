@@ -1,0 +1,37 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getMediaByUserIdList;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getMediaByUserIdList (
+/******************************************************************************
+** 
+** CREATION:
+**Author:  Mark Jaeckle 
+**Date:  Dec 2003
+**Description:  retrieves all profile media filenames by userId for the given userId list
+** 
+** 
+** REVISION(S):
+**Author:  
+**Date:
+**Description: 
+**
+******************************************************************************/
+ at_productCode CHAR(1)
+,at_communityCode CHAR(1)
+,at_id1 DECIMAL (12,0)
+,at_id2 DECIMAL (12,0)
+,at_id3 DECIMAL (12,0)
+,at_id4 DECIMAL (12,0)
+,at_id5 DECIMAL (12,0)
+,at_id6 DECIMAL (12,0)
+,at_id7 DECIMAL (12,0)
+,at_id8 DECIMAL (12,0)
+,at_id9 DECIMAL (12,0)
+,at_id10 DECIMAL (12,0)
+) 
+
+BEGIN
+		SELECT userId, mediaId, mediaType, profileFlag, backstageFlag, slideshowFlag, galleryFlag, filename
+		FROM ProfileMedia
+		WHERE userId in (at_id1,at_id2,at_id3,at_id4,at_id5,at_id6,at_id7,at_id8,at_id9,at_id10);
+END;;
+DELIMITER ;

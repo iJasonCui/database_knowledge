@@ -1,0 +1,54 @@
+
+SELECT SRVName, count(*) 
+FROM   mda_user.proc_stats 
+WHERE
+       dateCreated >= 'nov 6 2008'
+GROUP BY SRVName
+ORDER BY SRVName;
+
+
+SELECT SRVName, convert(char(12), dateCreated, 109), count(*) 
+FROM   mda_user.proc_stats 
+WHERE
+       dateCreated >= 'nov 1 2008'
+AND    ElapsedTime > 200  --and DBID !=63 SMSGateway
+GROUP BY SRVName, convert(char(12), dateCreated, 109)
+ORDER BY SRVName, convert(char(12), dateCreated, 109);
+
+
+/*
+set rowcount 0
+select --* 
+max(ElapsedTime), count(*)
+from mda_user.proc_stats 
+where SRVName = 'v151dbp01ivr' 
+--SRVName = 'sipdb-18' 
+and DBID !=63  and dateCreated > 'nov 25 2008' 
+--and DBName = 'harLL' 
+--and DBName = 'nycLL' 
+--and ProcName = 'gsp_newSessid'
+--and ProcName = 'gsp_saveSearch'
+--and ProcName = 'gsp_getTrackDefaultRadius'
+--and ElapsedTime > 200
+--order by ElapsedTime desc
+;
+*/
+
+set rowcount 0
+select * --count(*) 
+from mda_user.proc_stats 
+where SRVName = 'v151dbp01ivr' 
+--SRVName = 'sipdb-11' and 
+and DBID !=63  and 
+dateCreated > 'nov 11 2008 15:50' 
+--and DBName = 'vanLL' 
+--and DBName = 'nycLL' 
+--and ProcName like 'inv_expOrphan%'
+--and ProcName like 'inv_%'
+--and ProcName like '%nycLL'
+--and ProcName = 'inv_listAd_nycLL'
+--and ProcName = 'gsp_saveSearch'
+--and ProcName = 'gsp_getTrackDefaultRadius'
+
+order by LogicalReads desc
+;

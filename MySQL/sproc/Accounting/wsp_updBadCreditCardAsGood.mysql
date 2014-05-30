@@ -1,0 +1,41 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updBadCreditCardAsGood;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updBadCreditCardAsGood (
+  /******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  Oct 6, 2003
+**   Description:
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_creditCardId int
+)
+BEGIN
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+   ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+   ROLLBACK;
+END;
+
+START TRANSACTION;
+
+UPDATE CreditCard SET status='I' WHERE creditCardId = at_creditCardId;
+
+UPDATE BadCreditCard SET status='I' WHERE creditCardId = at_creditCardId;
+
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,50 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_addPromoCredits;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_addPromoCredits (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  Sept 9, 2003
+**   Description:  adds some promo credits for user
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+at_userId DECIMAL(12,0),
+at_productCode CHAR(1),
+at_communityCode CHAR(1),
+at_credits SMALLINT,
+at_xactionTypeId TINYINT,
+at_creditTypeId TINYINT,
+at_contentId SMALLINT,
+at_dateExpiry DATETIME
+)
+proc_label:BEGIN
+
+DECLARE at_dateNow 		DATETIME;
+DECLARE at_xactionId 		INT;
+DECLARE at_balance              INT;
+
+SET at_dateNow = UTC_TIMESTAMP();
+CALL wsp_XactionId (at_xactionId);
+IF !(at_xactionId > 0) THEN
+   LEAVE proc_label;
+END IF;
+CALL wsp_getTotalCredits (at_userId, at_balance);
+
+SET at_balance = at_balance + at_credits;
+
+IF at_dateExpiry IS NULL THEN 
+   SET at_dateExpiry = '2052-12-31 00:00:00';
+END IF;
+
+CALL wsp_transAddPromoCredits (at_xactionId,at_userId,at_productCode,at_communityCode,at_creditTypeId,at_xactionTypeId,at_contentId,at_credits,at_balance,at_dateNow,at_dateExpiry);
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

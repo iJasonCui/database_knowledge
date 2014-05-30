@@ -1,0 +1,29 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getCouponTypeIdByNumber;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getCouponTypeIdByNumber (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Yan Liu 
+**   Date:         March 10, 2008
+**   Description:  retrieve coupon info by coupon number 
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+   at_couponNumber DECIMAL(10, 0)
+)
+BEGIN
+   SELECT couponTypeId, 
+          status,
+          dateCreated,
+          dateModified
+     FROM Coupon 
+    WHERE couponNumber = at_couponNumber;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

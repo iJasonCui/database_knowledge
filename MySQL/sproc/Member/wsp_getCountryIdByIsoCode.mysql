@@ -1,0 +1,26 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getCountryIdByIsoCode;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getCountryIdByIsoCode (
+/***********************************************************************
+**
+** CREATION:
+**   Author:        Andy Tran
+**   Date:          August, 2006
+**   Description:   Retrieves countryId by isoCode
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+ at_countryCodeIso CHAR(2)
+)
+BEGIN
+    SELECT countryId, 
+           countryLabel
+      FROM Country
+     WHERE countryCodeIso = at_countryCodeIso ;
+    
+END;;
+DELIMITER ;

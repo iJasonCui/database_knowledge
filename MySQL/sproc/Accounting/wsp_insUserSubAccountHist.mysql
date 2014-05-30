@@ -1,0 +1,57 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_insUserSubAccountHist;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_insUserSubAccountHist (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu 
+**   Date:  April 16, 2008
+**   Description:  save UserSubscriptionAccountHistory 
+**
+**
+** REVISION(S):
+**   Author: 
+**   Date: 
+**   Description: 
+**
+******************************************************************************/
+   at_userId                    DECIMAL(12,0),
+   at_cardId                    INT,
+   at_subscriptionOfferDetailId SMALLINT,
+   at_subscriptionStatus        CHAR(1),
+   at_subscriptionEndDate       DATETIME,
+   at_autoRenew                 CHAR(1),
+   at_cancelCodeId              TINYINT,
+   at_cancelCodeMask            INT,
+   at_userCancelReason          VARCHAR(255),
+   at_dateNow                   DATETIME
+)
+BEGIN
+
+   INSERT INTO UserSubscriptionAccountHistory(userId,
+                                              cardId,
+                                              subscriptionOfferDetailId,
+                                              subscriptionStatus,
+                                              autoRenew,
+                                              subscriptionEndDate,
+                                              cancelCodeId,
+                                              userCancelReason,
+                                              dateCreated,
+                                              dateModified,
+                                              cancelCodeMask) 
+   VALUES(at_userId,
+          at_cardId,
+          at_subscriptionOfferDetailId,
+          at_subscriptionStatus,
+          at_autoRenew,
+          at_subscriptionEndDate,
+          at_cancelCodeId,
+          at_userCancelReason,
+          at_dateNow,
+          at_dateNow,
+          at_cancelCodeMask);
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

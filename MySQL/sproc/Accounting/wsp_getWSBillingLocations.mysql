@@ -1,0 +1,30 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getWSBillingLocations;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getWSBillingLocations (
+/******************************************************************************
+**
+**
+******************************************************************************/
+)  
+BEGIN  
+	SELECT 
+          b.billingLocationId,
+          billingLocationCode,
+          billingLocationDesc,
+          currencyId,
+          displayTax,
+          rate,
+          merchantId,
+          displayInterac,
+          productId,
+          d.defaultPurchaseOfferId, 
+          d.defaultAccountType,
+          d.defaultUsageCellId,
+          d.defaultSubscriptionOfferId
+        FROM BillingLocation b,TaxRate t, DefaultUserAccount d
+        WHERE b.billingLocationId = t.billingLocationId AND b.billingLocationId = d.billingLocationId AND t.dateExpired IS NULL
+        ORDER BY billingLocationId ;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

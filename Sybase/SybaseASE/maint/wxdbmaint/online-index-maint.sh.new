@@ -1,0 +1,195 @@
+#!/bin/bash
+
+if [ $# -ne "3" ]
+then
+   echo "Usages: "${0}" <DB_SERVER> <DB_NAME> <REP_SERVER>; for instance, "${0}" webdb24p Profile_ad rep2p"
+   exit 1
+else 
+   DB_SERVER=${1}
+   DB_NAME=${2}
+   REP_SERVER=${3}
+fi
+
+ERROR_CODE=0
+REP_PASSWD=`cat $HOME/.sybpwd | grep -w ${REP_SERVER} | awk '{print $2}'`
+DB_PASSWD=`cat $HOME/.sybpwd | grep -w ${DB_SERVER} | awk '{print $2}'` 
+
+MONTH=`date '+%b %e'`
+
+MAIL_SCRIPT="${SYBMAINT}/send_mail/send_mail.sh"
+MAIL_LIST="${SYBMAINT}/send_mail/mail_list.txt"
+
+logFile=./output/${0}.${DB_SERVER}.${DB_NAME}.log
+
+echo "#-------------------------------------------#"            > ${logFile}
+echo "# Step 1: suspend connection to "${DB_SERVER}.${DB_NAME}    >> ${logFile} 
+echo "# Date: "`date`                                           >> ${logFile}
+echo "#-------------------------------------------#"            >> ${logFile}
+
+sqsh -Usa -S${REP_SERVER} -P${REP_PASSWD} <<EOQ1 >> ${logFile}
+suspend connection to "${DB_SERVER}"."${DB_NAME}"
+go
+
+EOQ1
+
+echo "#-------------------------------------------#"            >> ${logFile}
+echo "# Step 2: change database option for "${DB_SERVER}.${DB_NAME}    >> ${logFile}
+echo "# Date: "`date`                                           >> ${logFile}
+echo "#-------------------------------------------#"            >> ${logFile}
+
+sqsh -Ucron_sa -S${DB_SERVER} -P${DB_PASSWD} <<EOQ2 >> ${logFile}
+USE master
+go
+EXEC sp_dboption ${DB_NAME},'dbo use only',true
+go
+EXEC sp_dboption ${DB_NAME},'select into',true
+go
+USE ${DB_NAME} 
+go
+CHECKPOINT
+go
+
+EOQ2
+
+#### change db option of Profile database to provent incomming traffic ### Jan 19, 2011 ## by Hunter ##
+sqsh -Ucron_sa -S${DB_SERVER} -P${DB_PASSWD} <<EOQ21 >> ${logFile}
+USE master
+go
+EXEC sp_dboption Profile   ,'dbo use only',true
+go
+USE Profile 
+go
+CHECKPOINT
+go
+
+EOQ21
+
+sleep 120
+
+### add one more step to kill the current connections ### Jun 16, 2009 by Hunter
+echo "#-------------------------------------------#"            >> ${logFile}
+echo "# Step 3: kill current connections of web user "   >> ${logFile}
+echo "# Date: "`date`                                           >> ${logFile}
+echo "#-------------------------------------------#"            >> ${logFile}
+
+sqsh -Ucron_sa -S${DB_SERVER} -P${DB_PASSWD} <<EOQ3 >> ${logFile}
+USE master
+go
+exec sp_kill_process ${DB_NAME},web
+go
+
+EOQ3
+sleep 10
+### end of killing web user #############################
+
+echo "#-------------------------------------------#"            >> ${logFile}
+echo "# Step 4: re-create index "                                >> ${logFile}
+echo "# Date: "`date`                                           >> ${logFile}
+echo "#-------------------------------------------#"            >> ${logFile}
+
+cd /opt/scripts/maint/rec_index
+./run_rec_index.sh.Prod ${DB_SERVER} ${DB_NAME}
+
+cd /opt/scripts/maint
+
+#--------------------------------------------------#
+# error handling  
+#--------------------------------------------------#
+LOG_FILE=maint-index-grep-output.sh.${DB_SERVER}.${DB_NAME}
+LOG_FILE_FAIL="maint-index-grep-output.sh.${DB_SERVER}.${DB_NAME}.FAIL"
+
+./maint-index-grep-output.sh.Prod ${DB_SERVER} ${DB_NAME} > ${LOG_FILE} 
+
+grep "${MONTH}"  ${LOG_FILE} | grep FAIL > ${LOG_FILE_FAIL} 
+
+if [ -s ${LOG_FILE_FAIL}  ] 
+then
+   ERROR_CODE=99 
+   cat ${LOG_FILE_FAIL} >> ${logFile}
+fi
+
+echo "#-------------------------------------------------------#" >> ${LOG_FILE}
+
+if [ ${ERROR_CODE} -ne 0 ]; then
+   echo "# Step 4: resume connection to ${DB_SERVER}.${DB_NAME}, skipped." >>  ${logFile}
+else
+   echo "# Step 4: resume connection to ${DB_SERVER}.${DB_NAME}...  " >> ${logFile} 
+   echo "# Date: "`date`                                              >> ${logFile}
+   echo "#-------------------------------------------#"               >> ${logFile}
+
+sqsh -Usa -S${REP_SERVER} -P${REP_PASSWD} <<EOQ4 >> ${logFile}
+resume connection to "${DB_SERVER}"."${DB_NAME}"
+go
+
+EOQ4
+
+sleep 600
+
+fi
+
+echo "#-------------------------------------------------------#" >> ${logFile} 
+
+if [ ${ERROR_CODE} -ne 0 ]; then
+   echo "# Step 5: change database option for ${DB_SERVER}.${DB_NAME}, skipped." >>  ${logFile}
+else
+   echo "# Step 5: change database option for ${DB_SERVER}.${DB_NAME}...  " >> ${logFile}
+   echo "# Date: "`date`                                              >> ${logFile}
+   echo "#-------------------------------------------#"               >> ${logFile}
+
+sqsh -Ucron_sa -S${DB_SERVER} -P${DB_PASSWD} <<EOQ5 >> ${logFile}
+USE master
+go
+EXEC sp_dboption ${DB_NAME},'dbo use only',false
+go
+EXEC sp_dboption ${DB_NAME},'select into',false
+go
+USE ${DB_NAME}
+go
+CHECKPOINT
+go
+
+EOQ5
+
+#### restore db option of Profile database  ### Jan 19, 2011 ## by Hunter ##
+sqsh -Ucron_sa -S${DB_SERVER} -P${DB_PASSWD} <<EOQ51 >> ${logFile}
+USE master
+go
+EXEC sp_dboption Profile   ,'dbo use only',false
+go
+USE Profile 
+go
+CHECKPOINT
+go
+
+EOQ51
+
+fi
+
+
+#----------------------------------------#
+# send back email  
+#----------------------------------------#
+
+# write the final message to the mail file
+echo "#-------------------------------------------------------#" >> ${logFile} 
+
+if [ ${ERROR_CODE} -eq 0 ]; then
+    echo "$0 succeeded at `date`." >>  ${logFile} 
+else
+    echo "$0 failed at `date`." >> ${logFile} 
+fi
+
+# compose the message type
+if [ ${ERROR_CODE} -eq 0 ]; then
+    MESSAGE_TYPE='success'
+else
+    MESSAGE_TYPE='failure'
+fi
+
+# send back notification mail
+# ... invoke the mail script
+${MAIL_SCRIPT} ${logFile} $0 ${MESSAGE_TYPE} ${MAIL_LIST}
+
+
+exit ${ERROR_CODE} 
+

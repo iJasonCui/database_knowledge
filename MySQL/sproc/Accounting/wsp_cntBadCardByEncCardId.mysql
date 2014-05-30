@@ -1,0 +1,32 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_cntBadCardByEncCardId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_cntBadCardByEncCardId (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         February 2008
+**   Description:  Find if the credit card is marked as bad in our system
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+
+ at_encodedCardId INT
+)
+BEGIN
+
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+SELECT count(*)
+      FROM CreditCard
+     WHERE encodedCardId = at_encodedCardId
+       AND status = 'B';
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

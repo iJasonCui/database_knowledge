@@ -1,0 +1,33 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAllContents;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAllContents (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  May 21, 2003
+**   Description:  retrieves all content descriptions
+**
+**
+** REVISION(S):
+**   Author:  Yan Liu
+**   Date:  Janunary 28 2009
+**   Description: append dynamicalFlag to result set.
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+)
+BEGIN  
+   SELECT contentId,
+          contentDesc,
+          dynamicalFlag
+     FROM Content
+   ORDER BY contentId ;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

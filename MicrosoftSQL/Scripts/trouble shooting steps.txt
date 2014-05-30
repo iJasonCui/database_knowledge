@@ -1,0 +1,62 @@
+1. dbcc checkcatalog 
+
+no error
+
+2. dbcc checkdb (acumen) 
+
+
+--dbcc checkdb (archive)
+
+dbcc checktable ('archive.dm.Partnership')
+dbcc checktable ('archive.dm.Partnership',repair_allow_data_loss  )
+
+
+SELECT distinct [partnershipId]
+      ,[partnershipCode]
+      ,[partnershipName]
+      ,[parentPartnershipId]
+      ,[price]
+      ,[activeDate]
+      ,[useInReports]
+      ,[dateModified]
+into [archive].[dm].[Partnership_unique_2011Jun26]
+  FROM [archive].[dm].[Partnership]
+
+insert into [archive].[dm].[Partnership]
+select * from [archive].[dm].[Partnership_unique_2011Jun26]
+
+
+DBCC results for 'dim.tPaymentType'.
+Msg 2533, Level 16, State 2, Line 1
+Table error: page (4:139744) allocated to object ID 1913109906, index ID 0, partition ID 72057594084524032, alloc unit ID 72057594111787008 (type In-row data) was not seen. The page may be invalid or may have an incorrect alloc unit ID in its header.
+Msg 2533, Level 16, State 2, Line 1
+Table error: page (4:139745) allocated to object ID 1913109906, index ID 0, partition ID 72057594084524032, alloc unit ID 72057594111787008 (type In-row data) was not seen. The page may be invalid or may have an incorrect alloc unit ID in its header.
+There are 0 rows in 1 pages for object "dim.tPaymentType".
+CHECKDB found 0 allocation errors and 2 consistency errors in table 'dim.tPaymentType' (object ID 1913109906).
+
+
+--archive
+
+DBCC results for 'dm.PurchaseType'.
+Msg 2533, Level 16, State 2, Line 1
+Table error: page (1:9215160) allocated to object ID 1790629422, index ID 0, partition ID 72057594053722112, alloc unit ID 72057594098417664 (type In-row data) was not seen. The page may be invalid or may have an incorrect alloc unit ID in its header.
+There are 0 rows in 1 pages for object "dm.PurchaseType".
+CHECKDB found 0 allocation errors and 1 consistency errors in table 'dm.PurchaseType' (object ID 1790629422).
+
+DBCC results for 'dm.Partnership'.
+Msg 2533, Level 16, State 2, Line 1
+Table error: page (1:1949353) allocated to object ID 379864420, index ID 1, partition ID 72057594118144000, alloc unit ID 72057594527940608 (type In-row data) was not seen. The page may be invalid or may have an incorrect alloc unit ID in its header.
+Msg 8980, Level 16, State 1, Line 1
+Table error: Object ID 379864420, index ID 1, partition ID 72057594118144000, alloc unit ID 72057594527940608 (type In-row data). Index node page (0:0), slot 0 refers to child page (1:1949353) and previous child (0:0), but they were not encountered.
+Msg 8979, Level 16, State 1, Line 1
+Table error: Object ID 379864420, index ID 1, partition ID 72057594118144000, alloc unit ID 72057594527940608 (type In-row data). Page (3:4272988) is missing references from parent (unknown) and previous (page (1:194029)) nodes. Possible bad root entry in system catalog.
+Msg 8979, Level 16, State 1, Line 1
+Table error: Object ID 379864420, index ID 1, partition ID 72057594118144000, alloc unit ID 72057594527940608 (type In-row data). Page (5:289343) is missing references from parent (unknown) and previous (page (3:4272988)) nodes. Possible bad root entry in system catalog.
+There are 136 rows in 2 pages for object "dm.Partnership".
+CHECKDB found 0 allocation errors and 4 consistency errors in table 'dm.Partnership' (object ID 379864420).
+
+
+--check the schedule of ssis_masterloop
+
+
+from 1:07pm to 11am

@@ -1,0 +1,18 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getPassByUserIdDate;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getPassByUserIdDate (
+    at_userId     DECIMAL(12, 0),
+    at_dateCreated DATETIME
+)
+BEGIN
+    SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;
+    SELECT userId
+           ,targetUserId
+           ,seen
+           ,dateCreated
+           ,IFNULL(messageOnHoldStatus,'A') as messageOnHoldStatus 
+      FROM Pass 
+     WHERE userId = at_userId
+       AND dateCreated > at_dateCreated; 
+END;;
+DELIMITER ;

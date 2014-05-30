@@ -1,0 +1,190 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_purchaseCredit;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_purchaseCredit (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  Sept 10, 2003
+**   Description:  purchase credits for user
+**
+** REVISION(S):
+**   Author:  Mike Stairs
+**   Date:    Feb 27, 2006
+**   Description: also update dateLastUsed column in CreditCard table
+**
+**   Author: Andy Tran
+**   Date: May 5, 2010
+**   Description: add location tax IDs
+**
+******************************************************************************/
+at_userId DECIMAL(12,0),
+at_xactionId INT,
+at_xactionTypeId TINYINT,
+at_credits SMALLINT,
+at_cost    DECIMAL(10,2),
+at_tax     DECIMAL(10,2),
+at_costUSD DECIMAL (5,2),
+at_taxUSD  DECIMAL (5,2),
+at_creditTypeId TINYINT,
+at_userType CHAR(1),
+at_offerDetailId SMALLINT,
+at_dateExpiry DATETIME,
+at_contentId SMALLINT,
+at_purchaseTypeId TINYINT,
+at_billingLocationId SMALLINT,
+at_currencyId TINYINT,
+at_creditCardId INT,
+at_adminUserId INT,
+at_paymentNumber VARCHAR(40),
+at_cardProcessor CHAR(1),
+at_taxCountryId SMALLINT,
+at_taxJurisdictionId INT
+)
+proc_label:BEGIN
+
+DECLARE at_dateNow 			DATETIME;
+DECLARE at_balance                      INT;
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+   ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+   ROLLBACK;
+END;
+
+IF at_dateExpiry IS NULL 
+THEN 
+   SET at_dateExpiry = '20521231';
+END IF;
+
+SET at_dateNow = UTC_TIMESTAMP();
+	
+IF at_xactionId < 0 
+THEN 
+    CALL wsp_XactionId(at_xactionId);
+    IF !(at_xactionId > 0) THEN
+       LEAVE proc_label;
+    END IF;
+END IF;
+
+CALL wsp_getTotalCredits(at_userId, at_balance);
+
+SET at_balance = at_balance + at_credits;
+
+START TRANSACTION;
+
+IF at_adminUserId > 0 
+THEN 
+   INSERT INTO AdminAccountTransaction (xactionId, adminUserId, userId, dateCreated) VALUES (at_xactionId, at_adminUserId, at_userId, at_dateNow);
+END IF;
+        
+INSERT INTO AccountTransaction 
+        (   xactionId,
+            userId,
+            xactionTypeId,
+            creditTypeId,
+            contentId,
+            credits,
+            balance,
+            userType,
+            dateCreated
+        )
+        VALUES 
+        (   at_xactionId,
+            at_userId,
+            at_xactionTypeId,
+            at_creditTypeId,
+            at_contentId,
+            at_credits,
+            at_balance,
+            at_userType,
+            at_dateNow
+        );
+        
+INSERT INTO Purchase 
+            (   xactionId,
+                purchaseTypeId,
+                billingLocationId,
+                purchaseOfferDetailId,
+                currencyId,
+                cost,
+                costUSD,
+                tax,
+                taxUSD,
+                userId,
+                dateCreated,
+                creditCardId,
+                cardProcessor,
+                paymentNumber,
+                xactionTypeId,
+                taxCountryId,
+                taxJurisdictionId
+              )
+              VALUES (
+                at_xactionId,
+                at_purchaseTypeId,
+                at_billingLocationId,
+                at_offerDetailId,
+                at_currencyId,
+                at_cost,
+                at_costUSD,
+                at_tax,
+                at_taxUSD,
+                at_userId,
+                at_dateNow,
+                at_creditCardId,
+                at_cardProcessor,
+                at_paymentNumber,
+                at_xactionTypeId,
+                at_taxCountryId,
+                at_taxJurisdictionId
+              );
+
+-- update CreditCard dateLastUsed column
+IF at_creditCardId > 0 
+THEN 
+    UPDATE CreditCard SET dateLastUsed = at_dateNow WHERE creditCardId = at_creditCardId;
+END IF;
+
+-- check error level and credit total > 0 because declined purchases don't update creditBalance
+IF at_credits > 0 
+THEN 
+   IF (SELECT 1 FROM CreditBalance WHERE userId = at_userId AND creditTypeId = at_creditTypeId) IS NOT NULL 
+   THEN 
+      UPDATE CreditBalance 
+                            SET credits = credits + at_credits,
+                                dateModified = at_dateNow,
+                                dateExpiry = at_dateExpiry
+                            WHERE userId = at_userId AND creditTypeId = at_creditTypeId;
+   ELSE
+      INSERT INTO CreditBalance
+                            (   userId,
+                                creditTypeId,
+                                credits,
+                                dateExpiry,
+                                dateModified,
+                                dateCreated
+                            )
+                            VALUES 
+                            (   at_userId,
+                                at_creditTypeId,
+                                at_credits,
+                                at_dateExpiry,
+                                at_dateNow,
+                                at_dateNow
+                            );
+
+   END IF;
+END IF;
+
+COMMIT;
+     
+SELECT at_xactionId;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

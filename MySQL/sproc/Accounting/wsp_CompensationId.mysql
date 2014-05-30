@@ -1,0 +1,37 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_CompensationId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_CompensationId (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga, Mark Jaeckle
+**   Date:  September 22 2003
+**   Description:  Generation of compensationId
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+OUT at_compensationId INT
+)
+BEGIN
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+	ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+	ROLLBACK;
+END;
+START TRANSACTION;
+UPDATE CompensationId SET compensationId = compensationId + 1;
+
+SELECT compensationId INTO at_compensationId FROM CompensationId;
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

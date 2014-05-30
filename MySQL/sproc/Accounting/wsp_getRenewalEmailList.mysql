@@ -1,0 +1,53 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getRenewalEmailList;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getRenewalEmailList (
+/******************************************************************************
+        This procs is only for new subscription offer from 18 to 23
+        So for production we need following line 
+        --AND subscriptionOfferDetailId between 18 and 23 
+        --AND dateCreated>'March 1, 2007'
+******************************************************************************/
+    at_lastUserId                    INT,
+    at_blockSize                     INT,
+    at_day                           INT
+)
+
+BEGIN  
+
+DECLARE at_now  DATETIME;
+SET at_now = UTC_TIMESTAMP();
+
+/*
+  	    SELECT  userId, subscriptionEndDate
+        FROM UserSubscriptionAccount u
+        WHERE 
+        subscriptionStatus = 'I' AND 
+        autoRenew='N' AND 
+        subscriptionOfferDetailId between 18 and 23 AND 
+        dateCreated>'March 13, 2007' AND 
+        userId > at_lastUserId AND 
+        TIMESTAMPDIFF(DAY, subscriptionEndDate, at_now) >= at_day AND 
+           (not exists (select 1 from RenewalEmailLog where userId = u.userId) OR 
+                exists (select 1 from RenewalEmailLog where userId = u.userId and counter<3 and u.subscriptionEndDate > subscriptionEndDate))
+        ORDER BY userId LIMIT at_blockSize;
+
+*/
+
+  	  SELECT  u.userId, u.subscriptionEndDate
+        FROM UserSubscriptionAccount u  -- ( INDEX XPKUserSubscriptionAccount)
+        WHERE 
+              u.subscriptionStatus = 'I' AND 
+              u.autoRenew='N' AND 
+              u.subscriptionOfferDetailId between 18 and 23 AND 
+              u.dateCreated>'2007-03-13' AND 
+              u.userId > at_lastUserId AND 
+              u.subscriptionEndDate < TIMESTAMPADD(DAY, -at_day, at_now) AND 
+                   ((SELECT 1 FROM RenewalEmailLog r WHERE userId = u.userId AND userId > at_lastUserId AND r.subscriptionEndDate < TIMESTAMPADD(DAY, -at_day, at_now) IS NULL) OR 
+                (SELECT 1 FROM RenewalEmailLog r WHERE userId = u.userId AND counter<3 AND r.subscriptionEndDate < u.subscriptionEndDate AND r.subscriptionEndDate < TIMESTAMPADD(DAY, -at_day, at_now) 
+		AND userId > at_lastUserId) IS NOT NULL)
+        ORDER BY userId LIMIT at_blockSize;
+        
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

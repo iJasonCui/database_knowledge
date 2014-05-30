@@ -1,0 +1,28 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_delUserEmailStatusByUId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_delUserEmailStatusByUId (
+/******************************************************************************
+ **
+ ** CREATION:
+ **   Author:  Yan L 
+ **   Date:  November 13 2006
+ **   Description:  Delete UserEmailStatus data
+ **
+ ** REVISION(S):
+ **   Author: 
+ **   Date:
+ **   Description: 
+ **
+******************************************************************************/
+    at_userId DECIMAL(12, 0)
+)
+BEGIN
+    IF (SELECT 1 FROM UserEmailStatus WHERE userId = at_userId) IS NOT NULL
+    THEN
+        DELETE FROM UserEmailStatus
+         WHERE userId = at_userId ;
+
+    END IF;
+
+END;;
+DELIMITER ;

@@ -1,0 +1,362 @@
+
+##------------------------------------------
+## an example of Mysql store procedure
+##------------------------------------------
+##[jcui@gxcvs1 Plus45]$ more wsp_getChatProfileByUserId.mysql
+
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getChatProfileByUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getChatProfileByUserId (
+    in userId_in int
+)
+BEGIN
+
+   DECLARE mediaId_in INT ;
+   DECLARE mediaStatus_in CHAR(1) ;
+   DECLARE approvedMediaId_in INT ;
+   DECLARE fileName_in CHAR(255) ;
+
+   SELECT pp.mediaId, pp.status, pp.approvedMediaId  INTO mediaId_in, mediaStatus_in, approvedMediaId_in
+     FROM ProfilePicture AS pp
+     WHERE userId = userId_in ;
+
+   IF mediaStatus_in != 'A'
+   THEN
+      IF approvedMediaId_in > 0
+      THEN
+         SET mediaId_in = approvedMediaId_in ;
+      ELSE
+         SET mediaId_in = 0 ;
+      END IF;
+   END IF;
+
+   SELECT fileName INTO fileName_in 
+     FROM Media
+     WHERE mediaId = mediaId_in ;
+
+   SELECT  p.gender,
+           p.birthdate,
+           p.isOnline,
+           p.countryId,
+           p.stateId,
+           p.countyId,
+           p.cityId,
+           ltrim(rtrim(n.nickname)) as nickname,
+           ltrim(n.status) as nickStatus,
+           mediaId_in as pictureId,
+           mediaStatus_in as pictureStatus,
+           ltrim(rtrim(fileName_in)) as fileName
+     FROM Profile AS p, Nickname AS n
+     WHERE p.userId = userId_in AND
+           p.userId = n.userId ;
+
+
+END;;
+DELIMITER ;
+
+## NOte 1:  DECLARE
+
+Sybase: DECLARE @mediaId INT, @mediaStatus CHAR(1), @approvedMediaId INT, @fileName CHAR(255) 
+MySQL: 
+   DECLARE mediaId_in INT ;
+   DECLARE mediaStatus_in CHAR(1) ;
+   DECLARE approvedMediaId_in INT ;
+   DECLARE fileName_in CHAR(255) ;
+
+## Note 2:  SELECT INTO VARIABLE
+
+Sybase: 
+
+   SELECT @mediaId=mediaId, @mediaStatus=status, @approvedMediaId=approvedMediaId
+     FROM ProfilePicture
+     WHERE userId = @userId
+
+MySQL:
+   SELECT pp.mediaId, pp.status, pp.approvedMediaId  INTO mediaId_in, mediaStatus_in, approvedMediaId_in
+     FROM ProfilePicture AS pp
+     WHERE userId = userId_in ;
+
+## Note 3: IF statement
+
+Sybase:
+
+   IF @mediaStatus != 'A'
+     BEGIN
+
+     IF @approvedMediaId > 0
+     BEGIN
+       SELECT @mediaId = @approvedMediaId
+     END
+
+     ELSE
+     BEGIN
+       SELECT @mediaId = 0
+     END
+   END
+
+MYSQL:
+
+   IF mediaStatus_in != 'A'
+   THEN
+      IF approvedMediaId_in > 0
+      THEN
+         SET mediaId_in = approvedMediaId_in ;
+      ELSE
+         SET mediaId_in = 0 ;
+      END IF;
+   END IF;
+
+## Note 4: Format
+
+Sybase:
+
+CREATE PROCEDURE  wsp_getChatProfileByUserId
+    @userId int
+AS
+BEGIN
+
+
+END
+
+MySQL:
+
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getChatProfileByUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getChatProfileByUserId (
+    in userId_in int
+)
+BEGIN
+
+END;;
+DELIMITER ;
+
+## Note 5: Execute procedure
+
+Sybase: EXECUTE PROCEDURE wsp_getChatProfileByUserId
+
+mysql:  CALL wsp_getEntryRateByEntryId (1001, 30);
+
+
+## Note 6: AT ISOLATION READ UNCOMMITTED
+
+Sybase:    the unique index is a must 
+   SELECT top 1 userId, count(*) AS commentCount
+   FROM EntryComment
+   WHERE entryId = @entryId AND status='A'
+   order by dateCreated DESC
+   AT ISOLATION READ UNCOMMITTED
+
+MysQL:
+
+SET [GLOBAL | SESSION] TRANSACTION ISOLATION LEVEL
+  {
+       REPEATABLE READ
+     | READ COMMITTED
+     | READ UNCOMMITTED
+     | SERIALIZABLE
+   }
+
+
+  SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;
+  SELECT userId, count(*) AS commentCount
+  FROM EntryComment
+  WHERE entryId = @entryId AND status='A'
+  ORDER BY dateCreated DESC
+  LIMIT 1;
+
+## Note 7: when there is no input parameter for stored procedure
+
+Sybase: CREATE PROCEDURE  wsp_getForumCategories
+MySQL:  CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getForumCategories() 
+
+## Note 8: Sybase outer join and MySQL's LEFT JOIN
+
+SYBASE: a.userId *= b.userId
+
+MYSQL:
+
+Profile p LEFT JOIN CharteredUser cu ON p.userId = cu.userId  
+
+## Note 9: Store procedure with output
+
+   ## DOES NOT NEED TO DECLARE THE VARIABLE
+   ## declare currentTime_in  DATETIME;
+
+    CALL wsp_GetDateGMT(@currentTime_in) ;
+
+    SELECT t.userId,ltrim(rtrim(t.email)),ltrim(rtrim(n.nickname))
+    FROM   UserInfo t inner join Nickname n on n.userId=t.userId
+    WHERE  t.status='A'  and  t.dateCreated>dateadd(hh, 0 - hourAgo_in, @currentTime_in)
+      and t.dateCreated <=dateadd(hh, hourSpan_in - hourAgo_in, @currentTime_in)
+    ORDER BY userId ;
+
+## Note 10:  DATEDIFF VS. TIMESTAMPDIFF
+
+SYBASE:
+
+SELECT datediff(day, lastSentDate, @now)
+
+MYSQL:
+
+SELECT TIMESTAMPDIFF(year, "1800-01-01", now());
+
+## Note 10.2:  DATEADD VS. TIMESTAMPADD
+
+SYBASE:
+
+SELECT @from_date = dateadd(month, -@months, getdate())
+
+MYSQL:
+
+SET at_from_date = TIMESTAMPadd(month, -at_months, NOW()) ;
+
+## Note 11: temp table 
+
+sybase:
+
+select * into #temp_table from table_name
+
+MYsql:
+
+CREATE TEMPORARY TABLE profile_tmp AS
+(select userId,gender
+ from   Profile p
+ where  laston <= date_add( @now , INTERVAL 0-inactiveDays_in DAY)                     
+   and ( exists (select 1 from PrimeInactiveLog where userId = p.userId and counter<maxTimes_in
+                      and TIMESTAMPDIFF(day, lastSentDate, @now) >= inactiveDays_in) OR
+                      not exists (select 1 from PrimeInactiveLog where userId = p.userId))
+ LIMIT blockSize_in) ;
+
+## Note 12: DECLARE variable
+
+MYsql: have to declare all variable at the very begining
+
+## Note 13: Cursor
+
+MYSQL:
+
+CREATE PROCEDURE curdemo()
+BEGIN
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE a CHAR(16);
+  DECLARE b, c INT;
+  DECLARE cur1 CURSOR FOR SELECT id,data FROM test.t1;
+  DECLARE cur2 CURSOR FOR SELECT i FROM test.t2;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+  OPEN cur1;
+  OPEN cur2;
+
+  read_loop: LOOP
+    FETCH cur1 INTO a, b;
+    FETCH cur2 INTO c;
+    IF done THEN
+      LEAVE read_loop;
+    END IF;
+    IF b < c THEN
+      INSERT INTO test.t3 VALUES (a,b);
+    ELSE
+      INSERT INTO test.t3 VALUES (a,c);
+    END IF;
+  END LOOP;
+
+  CLOSE cur1;
+  CLOSE cur2;
+END;
+
+
+## NOte 14: IF EXISTS
+
+sYBASE:
+
+  if exists (select 1 from UserIdMap where userId = newUserId_in and llUserId=userId_in)
+
+mYsql:
+
+  IF (select 1 from UserIdMap where userId = newUserId_in and llUserId=userId_in) IS NOT NULL 
+  THEN
+     .....;
+  END IF;
+
+##note 15: CHARINDEX vs. LOCATE
+
+Sybase :
+SELECT wsIdx_in = CHARINDEX('.', sessionId_in) 
+
+mYSQL:
+select locate(",", "aaa,bbb");
+
+## NOTE 16: LEN() vs. CHAR_LENGTH()
+
+SYBASE: SELECT LEN(sessionId_in)
+MYSQL:  select char_length("aaa,bbb");
+
+## note 17: SUBSTRING() vs. SUBSTR()
+
+SYBASE: SUBSTRING(sessionId_in, wsIdx_in + 1, LEN(sessionId_in)) ;
+MYSQL : SET webServer_in = SUBSTR(sessionId_in, wsIdx_in + 1, CHAR_LENGTH(sessionId_in)) ;
+
+## note 18: DATETIME DEFAULT 
+
+SYBASE: GETDATE() CAN BE DEFAULT OF DATETIME TYPE COLUMNS
+
+MYSQL: NOW() CAN NOT be the default of datetime type columns
+
+
+Be Careful of stored procedure migrated from sybase to mysql, some datetime field is not listed explictly in sybase because of default getdate().
+it does not work on mysql.
+
+## note 19: WHILE LOOP 
+
+SYBASE:
+
+    WHILE (at_gender < 2)
+    BEGIN
+            IF at_gender = 0
+            BEGIN
+                SELECT at_genderChar = 'M'
+            END
+            ELSE
+            BEGIN
+                SELECT at_genderChar = 'F'
+            END
+
+            SELECT at_answer = 0
+            WHILE (at_answer < 4)
+            BEGIN
+                INSERT Vote (pollId, answerId, gender, counter) VALUES (at_publicationId, at_answer, at_genderChar, 0)
+                SELECT at_answer = at_answer + 1
+            END
+            SELECT at_gender = at_gender + 1
+        END
+    END
+
+MYSQL:
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS WhileLoopProc$$
+CREATE PROCEDURE WhileLoopProc()
+      BEGIN
+              DECLARE x  INT;
+              DECLARE str  VARCHAR(255);
+              SET x = 1;
+              SET str =  '';
+              WHILE x  <= 5 DO
+                          SET  str = CONCAT(str,x,',');
+                          SET  x = x + 1; 
+              END WHILE;
+              SELECT str;
+      END$$
+  DELIMITER ;
+
+#----------------------
+# note 20: CONVERT
+#----------------------
+
+
+
+
+
+
+
+

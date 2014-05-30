@@ -1,0 +1,1065 @@
++ . /opt/etc/sybase12_52/.profile
+++ SYBASE=/opt/etc/sybase12_52
+++ export SYBASE
+++ SYBASE_ASE=ASE-12_5
+++ export SYBASE_ASE
+++ SYBASE_OCS=OCS-12_5
+++ export SYBASE_OCS
+++ SYBASE_SYSAM=SYSAM-1_0
+++ export SYBASE_SYSAM
+++ PATH=.:/opt/sfw/bin/:/opt/etc/sybase12_52/ASE-12_5/bin:/opt/etc/sybase12_52/OCS-12_5/bin:/opt/etc/sybase12_52/ASE-12_5/install:/usr/bin:
+++ export PATH
+++ LM_LICENSE_FILE=/opt/etc/sybase12_52/SYSAM-1_0/licenses/license.dat
+++ export LM_LICENSE_FILE
+++ LD_LIBRARY_PATH=/opt/etc/sybase12_52/ASE-12_5/lib:/opt/etc/sybase12_52/OCS-12_5/lib:/usr/openwin/lib:/usr/lib/lwp/sparcv9:
+++ export LD_LIBRARY_PATH
+++ DSQUERY=ivrdb1r
+++ export DSQUERY
+++ SYBMAINT=/opt/etc/sybase12_52/maint
+++ export SYBMAINT
+++ SYBDUMP=/dumps
+++ export SYBDUMP
+++ EDITOR=vi
+++ export EDITOR
+++ LANG=
+++ export LANG
+++ CRMLOAD=/opt/etc/sybase12_52/maint/crmload
+++ export CRMLOAD
+++ ivrdataload=/opt/etc/sybase12_52/maint/ivrload
+++ IVRLOAD=/data/dumps/reporting/IVRLOAD
+++ export IVRLOAD
+++ CDRLOAD=/data/dumps/reporting/CDRLOAD
+++ export CDRLOAD
++ '[' 0 -gt 4 ']'
++ SRV_LIST_FILE=SqlServerInfo.ini.NE
++ MAIL_OUT_FLAG=1
+++ TZ=America/Toronto+24
+++ date +%Y%m%d
++ FROM_DATE=20101011
+++ date +%Y%m%d
++ TO_DATE=20101012
++ SOURCE_USER=cron_sa
++ TEMP_TABLE=DNIS_00084NE
++ DEST_USER=cron_sa
++ DEST_SRV=ivrdb1r
+++ cat /opt/etc/sybase12_52/.sybpwd
+++ grep -w ivrdb1r
+++ awk '{print $2}'
++ DEST_PASSWD=up4sale
++ DEST_DB=DR_IVRmonthly
++ WORK_DIR=/opt/etc/sybase12_52/maint/NE_Triton
++ OUT_DIR=/opt/etc/sybase12_52/maint/NE_Triton/output
++ LOG_DIR=/opt/etc/sybase12_52/maint/NE_Triton/logs
+++ date +%Y%m%d_%H%M%S
++ RUN_DATE_TIME=20101012_040000
++ LOG_FILE=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ MAIL_SCRIPT=/opt/etc/sybase12_52/maint/send_mail/send_mail.sh
++ MAIL_LIST=/opt/etc/sybase12_52/maint/send_mail/mail_list.txt
++ MAIL_FILE=/opt/etc/sybase12_52/maint/NE_Triton/output/20101011.mail
++ MAIL_DETAILS=/opt/etc/sybase12_52/maint/NE_Triton/output/20101011.details.mail
++ TMP_FILE=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ ERROR_CODE=0
++ echo '#-------------------------------------------------------#'
++ '[' 0 -ne 0 ']'
++ echo 'Step 1 - check batch log; retrive batchId based on FROM_DATE...  '
++ echo '     ... exec p_checkBatchLogNE 20101011, 20101012, @BatchId OUTPUT '
++ SQL_FILE=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step1
++ OUT_FILE=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step1
++ echo 'set nocount on'
++ echo go
++ echo 'use DR_IVRmonthly '
++ echo go
++ echo 'truncate table NECallLogSentBuffer  '
++ echo go
++ echo 'exec p_checkBatchLogNE 20101011, 20101012 '
++ echo go
++ run_sql isql ivrdb1r DR_IVRmonthly cron_sa up4sale /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step1 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step1 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=isql
++ SERVER=ivrdb1r
++ DB=DR_IVRmonthly
++ USER=cron_sa
++ PASSWORD=up4sale
++ SQL=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step1
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step1
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step1 ']'
++ isql -Sivrdb1r -DDR_IVRmonthly -Ucron_sa -Pup4sale -i/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step1 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step1 ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step1
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step1
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:00 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded exec p_checkBatchLogNE  at Tue Oct 12 04:00:00 EDT 2010.'
+++ cat /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step1
+++ grep -w BatchId
+++ awk '{print $2}'
++ BATCH_ID=1441
+++ cat /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step1
+++ grep -w ExistingBatchId
+++ awk '{print $2}'
++ EXISTING_BATCH_ID=0
++ '[' 0 -eq 0 ']'
++ echo '[BatchId] 1441'
++ echo '#-------------------------------------------------------#'
++ '[' 0 -ne 0 ']'
++ echo 'Step 2 - creating temp table DNIS_00084NE...  '
++ SQL_FILE=xferTritonNE.sql.step2
++ OUT_FILE=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2
++ read SRV_INFO
++ echo 1 5 v151dbp01ivr torNE 15
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $3}'
++ SOURCE_SRV=v151dbp01ivr
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $4}'
++ SOURCE_DB=torNE
+++ cat /opt/etc/sybase12_52/.sybpwd
+++ grep -w v151dbp01ivr
+++ awk '{print $2}'
++ SOURCE_PASSWD=Neverd0ne
++ run_sql isql v151dbp01ivr torNE cron_sa Neverd0ne xferTritonNE.sql.step2 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=isql
++ SERVER=v151dbp01ivr
++ DB=torNE
++ USER=cron_sa
++ PASSWORD=Neverd0ne
++ SQL=xferTritonNE.sql.step2
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2 ']'
++ isql -Sv151dbp01ivr -DtorNE -Ucron_sa -PNeverd0ne -ixferTritonNE.sql.step2 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2 ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:00 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ echo '#---------------------#'
++ echo v151dbp01ivr
++ echo torNE
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded create temp table DNIS_00084NE  at Tue Oct 12 04:00:00 EDT 2010.'
++ read SRV_INFO
++ echo 4 13 v151dbp01ivr mtlNEF 16
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $3}'
++ SOURCE_SRV=v151dbp01ivr
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $4}'
++ SOURCE_DB=mtlNEF
+++ cat /opt/etc/sybase12_52/.sybpwd
+++ grep -w v151dbp01ivr
+++ awk '{print $2}'
++ SOURCE_PASSWD=Neverd0ne
++ run_sql isql v151dbp01ivr mtlNEF cron_sa Neverd0ne xferTritonNE.sql.step2 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=isql
++ SERVER=v151dbp01ivr
++ DB=mtlNEF
++ USER=cron_sa
++ PASSWORD=Neverd0ne
++ SQL=xferTritonNE.sql.step2
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2
++ isql -Sv151dbp01ivr -DmtlNEF -Ucron_sa -PNeverd0ne -ixferTritonNE.sql.step2 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2 ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:01 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ echo '#---------------------#'
++ echo v151dbp01ivr
++ echo mtlNEF
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded create temp table DNIS_00084NE  at Tue Oct 12 04:00:01 EDT 2010.'
++ read SRV_INFO
++ echo 6 5 v151dbp01ivr sfoNE 15
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $3}'
++ SOURCE_SRV=v151dbp01ivr
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $4}'
++ SOURCE_DB=sfoNE
+++ cat /opt/etc/sybase12_52/.sybpwd
+++ grep -w v151dbp01ivr
+++ awk '{print $2}'
++ SOURCE_PASSWD=Neverd0ne
++ run_sql isql v151dbp01ivr sfoNE cron_sa Neverd0ne xferTritonNE.sql.step2 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=isql
++ SERVER=v151dbp01ivr
++ DB=sfoNE
++ USER=cron_sa
++ PASSWORD=Neverd0ne
++ SQL=xferTritonNE.sql.step2
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2
++ isql -Sv151dbp01ivr -DsfoNE -Ucron_sa -PNeverd0ne -ixferTritonNE.sql.step2 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2 ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:01 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ echo '#---------------------#'
++ echo v151dbp01ivr
++ echo sfoNE
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded create temp table DNIS_00084NE  at Tue Oct 12 04:00:01 EDT 2010.'
++ read SRV_INFO
++ echo 10 5 v151dbp01ivr nycNE 15
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $3}'
++ SOURCE_SRV=v151dbp01ivr
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $4}'
++ SOURCE_DB=nycNE
+++ cat /opt/etc/sybase12_52/.sybpwd
+++ grep -w v151dbp01ivr
+++ awk '{print $2}'
++ SOURCE_PASSWD=Neverd0ne
++ run_sql isql v151dbp01ivr nycNE cron_sa Neverd0ne xferTritonNE.sql.step2 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=isql
++ SERVER=v151dbp01ivr
++ DB=nycNE
++ USER=cron_sa
++ PASSWORD=Neverd0ne
++ SQL=xferTritonNE.sql.step2
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2
++ isql -Sv151dbp01ivr -DnycNE -Ucron_sa -PNeverd0ne -ixferTritonNE.sql.step2 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2 ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:01 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ echo '#---------------------#'
++ echo v151dbp01ivr
++ echo nycNE
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded create temp table DNIS_00084NE  at Tue Oct 12 04:00:01 EDT 2010.'
++ read SRV_INFO
++ echo '#-------------------------------------------------------#'
++ '[' 0 -ne 0 ']'
++ echo 'Step 2.1 - sqsh bcp DNIS_00084NE from destination to source IVR servers ...  '
++ SQL_FILE=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1
++ OUT_FILE=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ read SRV_INFO
++ echo 1 5 v151dbp01ivr torNE 15
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $3}'
++ SOURCE_SRV=v151dbp01ivr
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $4}'
++ SOURCE_DB=torNE
+++ cat /opt/etc/sybase12_52/.sybpwd
+++ grep -w v151dbp01ivr
+++ awk '{print $2}'
++ SOURCE_PASSWD=Neverd0ne
++ echo 'set nocount on'
++ echo go
++ echo 'TRUNCATE TABLE tempdb..DNIS_00084NE'
++ echo go
++ run_sql isql v151dbp01ivr torNE cron_sa Neverd0ne /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=isql
++ SERVER=v151dbp01ivr
++ DB=torNE
++ USER=cron_sa
++ PASSWORD=Neverd0ne
++ SQL=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 ']'
++ isql -Sv151dbp01ivr -DtorNE -Ucron_sa -PNeverd0ne -i/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:01 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ echo '#---------------------#'
++ echo v151dbp01ivr
++ echo torNE
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded TRUNCATE TABLE tempdb..DNIS_00084NE on source servers v151dbp01ivr at Tue Oct 12 04:00:01 EDT 2010.'
++ echo 'set nocount on'
++ echo go
++ echo 'select dnis, dnisPlatform, accessFee from DR_IVRmonthly..DNIS_00084NE '
++ echo '\bcp tempdb..DNIS_00084NE -Ucron_sa -Sv151dbp01ivr -PNeverd0ne '
++ echo go
++ run_sql sqsh ivrdb1r DR_IVRmonthly cron_sa up4sale /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=sqsh
++ SERVER=ivrdb1r
++ DB=DR_IVRmonthly
++ USER=cron_sa
++ PASSWORD=up4sale
++ SQL=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ sqsh -Sivrdb1r -DDR_IVRmonthly -Ucron_sa -Pup4sale -i/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:01 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ echo '#---------------------#'
++ echo v151dbp01ivr
++ echo torNE
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded sqsh bcp DNIS_00084NE from destination to source IVR servers at Tue Oct 12 04:00:01 EDT 2010.'
++ read SRV_INFO
++ echo 4 13 v151dbp01ivr mtlNEF 16
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $3}'
++ SOURCE_SRV=v151dbp01ivr
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $4}'
++ SOURCE_DB=mtlNEF
+++ cat /opt/etc/sybase12_52/.sybpwd
+++ grep -w v151dbp01ivr
+++ awk '{print $2}'
++ SOURCE_PASSWD=Neverd0ne
++ echo 'set nocount on'
++ echo go
++ echo 'TRUNCATE TABLE tempdb..DNIS_00084NE'
++ echo go
++ run_sql isql v151dbp01ivr mtlNEF cron_sa Neverd0ne /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=isql
++ SERVER=v151dbp01ivr
++ DB=mtlNEF
++ USER=cron_sa
++ PASSWORD=Neverd0ne
++ SQL=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ isql -Sv151dbp01ivr -DmtlNEF -Ucron_sa -PNeverd0ne -i/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:01 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ echo '#---------------------#'
++ echo v151dbp01ivr
++ echo mtlNEF
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded TRUNCATE TABLE tempdb..DNIS_00084NE on source servers v151dbp01ivr at Tue Oct 12 04:00:01 EDT 2010.'
++ echo 'set nocount on'
++ echo go
++ echo 'select dnis, dnisPlatform, accessFee from DR_IVRmonthly..DNIS_00084NE '
++ echo '\bcp tempdb..DNIS_00084NE -Ucron_sa -Sv151dbp01ivr -PNeverd0ne '
++ echo go
++ run_sql sqsh ivrdb1r DR_IVRmonthly cron_sa up4sale /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=sqsh
++ SERVER=ivrdb1r
++ DB=DR_IVRmonthly
++ USER=cron_sa
++ PASSWORD=up4sale
++ SQL=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ sqsh -Sivrdb1r -DDR_IVRmonthly -Ucron_sa -Pup4sale -i/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:02 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ echo '#---------------------#'
++ echo v151dbp01ivr
++ echo mtlNEF
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded sqsh bcp DNIS_00084NE from destination to source IVR servers at Tue Oct 12 04:00:02 EDT 2010.'
++ read SRV_INFO
++ echo 6 5 v151dbp01ivr sfoNE 15
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $3}'
++ SOURCE_SRV=v151dbp01ivr
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $4}'
++ SOURCE_DB=sfoNE
+++ cat /opt/etc/sybase12_52/.sybpwd
+++ grep -w v151dbp01ivr
+++ awk '{print $2}'
++ SOURCE_PASSWD=Neverd0ne
++ echo 'set nocount on'
++ echo go
++ echo 'TRUNCATE TABLE tempdb..DNIS_00084NE'
++ echo go
++ run_sql isql v151dbp01ivr sfoNE cron_sa Neverd0ne /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=isql
++ SERVER=v151dbp01ivr
++ DB=sfoNE
++ USER=cron_sa
++ PASSWORD=Neverd0ne
++ SQL=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ isql -Sv151dbp01ivr -DsfoNE -Ucron_sa -PNeverd0ne -i/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:02 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ echo '#---------------------#'
++ echo v151dbp01ivr
++ echo sfoNE
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded TRUNCATE TABLE tempdb..DNIS_00084NE on source servers v151dbp01ivr at Tue Oct 12 04:00:02 EDT 2010.'
++ echo 'set nocount on'
++ echo go
++ echo 'select dnis, dnisPlatform, accessFee from DR_IVRmonthly..DNIS_00084NE '
++ echo '\bcp tempdb..DNIS_00084NE -Ucron_sa -Sv151dbp01ivr -PNeverd0ne '
++ echo go
++ run_sql sqsh ivrdb1r DR_IVRmonthly cron_sa up4sale /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=sqsh
++ SERVER=ivrdb1r
++ DB=DR_IVRmonthly
++ USER=cron_sa
++ PASSWORD=up4sale
++ SQL=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ sqsh -Sivrdb1r -DDR_IVRmonthly -Ucron_sa -Pup4sale -i/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:02 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ echo '#---------------------#'
++ echo v151dbp01ivr
++ echo sfoNE
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded sqsh bcp DNIS_00084NE from destination to source IVR servers at Tue Oct 12 04:00:02 EDT 2010.'
++ read SRV_INFO
++ echo 10 5 v151dbp01ivr nycNE 15
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $3}'
++ SOURCE_SRV=v151dbp01ivr
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $4}'
++ SOURCE_DB=nycNE
+++ cat /opt/etc/sybase12_52/.sybpwd
+++ grep -w v151dbp01ivr
+++ awk '{print $2}'
++ SOURCE_PASSWD=Neverd0ne
++ echo 'set nocount on'
++ echo go
++ echo 'TRUNCATE TABLE tempdb..DNIS_00084NE'
++ echo go
++ run_sql isql v151dbp01ivr nycNE cron_sa Neverd0ne /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=isql
++ SERVER=v151dbp01ivr
++ DB=nycNE
++ USER=cron_sa
++ PASSWORD=Neverd0ne
++ SQL=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ isql -Sv151dbp01ivr -DnycNE -Ucron_sa -PNeverd0ne -i/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:02 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ echo '#---------------------#'
++ echo v151dbp01ivr
++ echo nycNE
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded TRUNCATE TABLE tempdb..DNIS_00084NE on source servers v151dbp01ivr at Tue Oct 12 04:00:02 EDT 2010.'
++ echo 'set nocount on'
++ echo go
++ echo 'select dnis, dnisPlatform, accessFee from DR_IVRmonthly..DNIS_00084NE '
++ echo '\bcp tempdb..DNIS_00084NE -Ucron_sa -Sv151dbp01ivr -PNeverd0ne '
++ echo go
++ run_sql sqsh ivrdb1r DR_IVRmonthly cron_sa up4sale /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=sqsh
++ SERVER=ivrdb1r
++ DB=DR_IVRmonthly
++ USER=cron_sa
++ PASSWORD=up4sale
++ SQL=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ sqsh -Sivrdb1r -DDR_IVRmonthly -Ucron_sa -Pup4sale -i/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step2.1 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1 ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step2.1
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:03 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ echo '#---------------------#'
++ echo v151dbp01ivr
++ echo nycNE
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded sqsh bcp DNIS_00084NE from destination to source IVR servers at Tue Oct 12 04:00:03 EDT 2010.'
++ read SRV_INFO
++ echo '#-------------------------------------------------------#'
++ '[' 0 -ne 0 ']'
++ echo 'Step 3 - sqsh bcp from source table CallLog to destination buffer table NECallLogSentBuffer ...  '
++ SQL_FILE=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step3
++ OUT_FILE=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3
++ read SRV_INFO
++ echo 1 5 v151dbp01ivr torNE 15
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $3}'
++ SOURCE_SRV=v151dbp01ivr
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $4}'
++ SOURCE_DB=torNE
+++ cat /opt/etc/sybase12_52/.sybpwd
+++ grep -w v151dbp01ivr
+++ awk '{print $2}'
++ SOURCE_PASSWD=Neverd0ne
++ echo 'set nocount on'
++ echo go
++ echo 'select c.start_time,c.ani,c.dnis,c.duration,c.gender, c.boxnum,c.accountnum, c.region, c.partnershipId, '
++ echo '       c.howMuchTimeUsed, c.account_region, c.accountId, c.adCode, c.closingBalance, 1441    '
++ echo 'from   tempdb..DNIS_00084NE t, torNE..CallLog c '
++ echo 'where  c.start_time >= convert(datetime, convert(varchar(40),20101011))   '
++ echo '  and  c.start_time <  convert(datetime, convert(varchar(40),20101012))     '
++ echo '  and  t.dnis = c.dnis '
++ echo '  and  c.adCode in (25, 114778,315489,751246,465412,331165,583957,374669,383674,315739,159487,941936,629433,277881,                                 123456,235479,219259)'
++ echo '\bcp DR_IVRmonthly..NECallLogSentBuffer -Ucron_sa -Sivrdb1r -Pup4sale -b 1000 '
++ echo go
++ echo 'select @@rowcount '
++ echo go
++ run_sql sqsh v151dbp01ivr torNE cron_sa Neverd0ne /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step3 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=sqsh
++ SERVER=v151dbp01ivr
++ DB=torNE
++ USER=cron_sa
++ PASSWORD=Neverd0ne
++ SQL=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step3
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3 ']'
++ sqsh -Sv151dbp01ivr -DtorNE -Ucron_sa -PNeverd0ne -i/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step3 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3 ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:04 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ echo '#---------------------#'
++ echo v151dbp01ivr
++ echo torNE
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded sqsh bcp at Tue Oct 12 04:00:04 EDT 2010.'
++ read SRV_INFO
++ echo 4 13 v151dbp01ivr mtlNEF 16
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $3}'
++ SOURCE_SRV=v151dbp01ivr
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $4}'
++ SOURCE_DB=mtlNEF
+++ cat /opt/etc/sybase12_52/.sybpwd
+++ grep -w v151dbp01ivr
+++ awk '{print $2}'
++ SOURCE_PASSWD=Neverd0ne
++ echo 'set nocount on'
++ echo go
++ echo 'select c.start_time,c.ani,c.dnis,c.duration,c.gender, c.boxnum,c.accountnum, c.region, c.partnershipId, '
++ echo '       c.howMuchTimeUsed, c.account_region, c.accountId, c.adCode, c.closingBalance, 1441    '
++ echo 'from   tempdb..DNIS_00084NE t, mtlNEF..CallLog c '
++ echo 'where  c.start_time >= convert(datetime, convert(varchar(40),20101011))   '
++ echo '  and  c.start_time <  convert(datetime, convert(varchar(40),20101012))     '
++ echo '  and  t.dnis = c.dnis '
++ echo '  and  c.adCode in (25, 114778,315489,751246,465412,331165,583957,374669,383674,315739,159487,941936,629433,277881,                                 123456,235479,219259)'
++ echo '\bcp DR_IVRmonthly..NECallLogSentBuffer -Ucron_sa -Sivrdb1r -Pup4sale -b 1000 '
++ echo go
++ echo 'select @@rowcount '
++ echo go
++ run_sql sqsh v151dbp01ivr mtlNEF cron_sa Neverd0ne /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step3 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=sqsh
++ SERVER=v151dbp01ivr
++ DB=mtlNEF
++ USER=cron_sa
++ PASSWORD=Neverd0ne
++ SQL=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step3
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3
++ sqsh -Sv151dbp01ivr -DmtlNEF -Ucron_sa -PNeverd0ne -i/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step3 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3 ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:05 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ echo '#---------------------#'
++ echo v151dbp01ivr
++ echo mtlNEF
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded sqsh bcp at Tue Oct 12 04:00:05 EDT 2010.'
++ read SRV_INFO
++ echo 6 5 v151dbp01ivr sfoNE 15
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $3}'
++ SOURCE_SRV=v151dbp01ivr
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $4}'
++ SOURCE_DB=sfoNE
+++ cat /opt/etc/sybase12_52/.sybpwd
+++ awk '{print $2}'
+++ grep -w v151dbp01ivr
++ SOURCE_PASSWD=Neverd0ne
++ echo 'set nocount on'
++ echo go
++ echo 'select c.start_time,c.ani,c.dnis,c.duration,c.gender, c.boxnum,c.accountnum, c.region, c.partnershipId, '
++ echo '       c.howMuchTimeUsed, c.account_region, c.accountId, c.adCode, c.closingBalance, 1441    '
++ echo 'from   tempdb..DNIS_00084NE t, sfoNE..CallLog c '
++ echo 'where  c.start_time >= convert(datetime, convert(varchar(40),20101011))   '
++ echo '  and  c.start_time <  convert(datetime, convert(varchar(40),20101012))     '
++ echo '  and  t.dnis = c.dnis '
++ echo '  and  c.adCode in (25, 114778,315489,751246,465412,331165,583957,374669,383674,315739,159487,941936,629433,277881,                                 123456,235479,219259)'
++ echo '\bcp DR_IVRmonthly..NECallLogSentBuffer -Ucron_sa -Sivrdb1r -Pup4sale -b 1000 '
++ echo go
++ echo 'select @@rowcount '
++ echo go
++ run_sql sqsh v151dbp01ivr sfoNE cron_sa Neverd0ne /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step3 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=sqsh
++ SERVER=v151dbp01ivr
++ DB=sfoNE
++ USER=cron_sa
++ PASSWORD=Neverd0ne
++ SQL=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step3
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3
++ sqsh -Sv151dbp01ivr -DsfoNE -Ucron_sa -PNeverd0ne -i/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step3 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3 ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:06 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ echo '#---------------------#'
++ echo v151dbp01ivr
++ echo sfoNE
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded sqsh bcp at Tue Oct 12 04:00:06 EDT 2010.'
++ read SRV_INFO
++ echo 10 5 v151dbp01ivr nycNE 15
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $3}'
++ SOURCE_SRV=v151dbp01ivr
+++ cat ./xferTritonNE.sh.SRV.ini
+++ awk '{print $4}'
++ SOURCE_DB=nycNE
+++ cat /opt/etc/sybase12_52/.sybpwd
+++ grep -w v151dbp01ivr
+++ awk '{print $2}'
++ SOURCE_PASSWD=Neverd0ne
++ echo 'set nocount on'
++ echo go
++ echo 'select c.start_time,c.ani,c.dnis,c.duration,c.gender, c.boxnum,c.accountnum, c.region, c.partnershipId, '
++ echo '       c.howMuchTimeUsed, c.account_region, c.accountId, c.adCode, c.closingBalance, 1441    '
++ echo 'from   tempdb..DNIS_00084NE t, nycNE..CallLog c '
++ echo 'where  c.start_time >= convert(datetime, convert(varchar(40),20101011))   '
++ echo '  and  c.start_time <  convert(datetime, convert(varchar(40),20101012))     '
++ echo '  and  t.dnis = c.dnis '
++ echo '  and  c.adCode in (25, 114778,315489,751246,465412,331165,583957,374669,383674,315739,159487,941936,629433,277881,                                 123456,235479,219259)'
++ echo '\bcp DR_IVRmonthly..NECallLogSentBuffer -Ucron_sa -Sivrdb1r -Pup4sale -b 1000 '
++ echo go
++ echo 'select @@rowcount '
++ echo go
++ run_sql sqsh v151dbp01ivr nycNE cron_sa Neverd0ne /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step3 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=sqsh
++ SERVER=v151dbp01ivr
++ DB=nycNE
++ USER=cron_sa
++ PASSWORD=Neverd0ne
++ SQL=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step3
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3
++ sqsh -Sv151dbp01ivr -DnycNE -Ucron_sa -PNeverd0ne -i/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step3 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3 ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step3
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:10 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ echo '#---------------------#'
++ echo v151dbp01ivr
++ echo nycNE
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded sqsh bcp at Tue Oct 12 04:00:10 EDT 2010.'
++ read SRV_INFO
++ echo '#-------------------------------------------------------#'
++ '[' 0 -ne 0 ']'
++ echo 'Step 4 - INSERT into NECallLogSent and then summarize into NECallLogSentSum...  '
++ echo '     ... exec p_insertNECallLogSent @BatchId '
++ SQL_FILE=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step4
++ OUT_FILE=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step4
++ echo 'set nocount on'
++ echo go
++ echo 'use DR_IVRmonthly '
++ echo go
++ echo 'exec p_insertNECallLogSent 1441, 20101011, 20101012 '
++ echo go
++ run_sql isql ivrdb1r DR_IVRmonthly cron_sa up4sale /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step4 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step4 /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=isql
++ SERVER=ivrdb1r
++ DB=DR_IVRmonthly
++ USER=cron_sa
++ PASSWORD=up4sale
++ SQL=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step4
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step4
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step4 ']'
++ isql -Sivrdb1r -DDR_IVRmonthly -Ucron_sa -Pup4sale -i/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step4 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step4 ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step4
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step4
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:11 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded exec p_insertNECallLogSent  at Tue Oct 12 04:00:11 EDT 2010.'
++ echo '#-------------------------------------------------------#'
++ '[' 0 -ne 0 ']'
++ echo 'Step 5 - compile mail from NECallLogSentSum...  '
++ SQL_FILE=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step5
++ OUT_FILE=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step5
++ echo 'set nocount on'
++ echo go
++ echo 'use DR_IVRmonthly '
++ echo go
++ echo 'select '\''[From_date (GMT)]'\'', convert(datetime, convert(varchar(20),20101011)) '
++ echo 'select '\''[To_date   (GMT)]'\'', convert(datetime, convert(varchar(20),20101012)) '
++ echo 'print '\''==================================='\'''
++ echo 'SELECT adCode as handShake,sum(totalMinutes) as totalMinutes, sum(totalCalls) as totalCalls '
++ echo 'FROM NECallLogSentSum WHERE batchId = 1441 and adCode!=25 GROUP BY adCode '
++ echo 'print '\''==================================='\'''
++ echo go
++ echo 'print '\''==================================='\'''
++ echo 'SELECT ani,adCode as handShake,totalMinutes,totalCalls '
++ echo 'FROM NECallLogSentSum WHERE batchId = 1441 and adCode=25 '
++ echo go
++ echo 'print '\''==================================='\'''
++ echo go
++ run_sql isql ivrdb1r DR_IVRmonthly cron_sa up4sale /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step5 /opt/etc/sybase12_52/maint/NE_Triton/output/20101011.mail /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=isql
++ SERVER=ivrdb1r
++ DB=DR_IVRmonthly
++ USER=cron_sa
++ PASSWORD=up4sale
++ SQL=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step5
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/output/20101011.mail
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/output/20101011.mail ']'
++ isql -Sivrdb1r -DDR_IVRmonthly -Ucron_sa -Pup4sale -i/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step5 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/output/20101011.mail ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/output/20101011.mail
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/output/20101011.mail
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:11 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded compile mail from NECallLogSentSum at Tue Oct 12 04:00:11 EDT 2010.'
++ echo '#-------------------------------------------------------#'
++ '[' 0 -ne 0 ']'
++ echo 'Step 6 - compile mail about detail call log from DR_IVRmonthly..NECallLogSent...  '
++ SQL_FILE=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step6
++ OUT_FILE=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.out.step6
++ echo 'set nocount on'
++ echo go
++ echo 'use DR_IVRmonthly '
++ echo go
++ echo 'print '\''==================================='\'''
++ echo 'print '\''Call Log Details '\'''
++ echo 'select '\''[From_date (GMT)]'\'', convert(datetime, convert(varchar(20),20101011)) '
++ echo 'select '\''[To_date   (GMT)]'\'', convert(datetime, convert(varchar(20),20101012)) '
++ echo 'print '\''==================================='\'''
++ echo 'SELECT     '
++ echo '    CONVERT(VARCHAR(30), start_time, 109) AS StartTime,        '
++ echo '    ani       AS ANI, '
++ echo '    dnis      AS DNIS, '
++ echo '    duration  AS DurationInSec,'
++ echo '    CASE WHEN gender = 1  THEN '\''Male'\'' ELSE '\''Unknown'\'' END AS Gender,'
++ echo '    CASE WHEN region = 1  THEN '\''Toronto'\'''
++ echo '         WHEN region = 4  THEN '\''Montreal'\'''
++ echo '         WHEN region = 6  THEN '\''SanFrancisco'\'''
++ echo '         WHEN region = 10 THEN '\''NewYork City'\'''
++ echo '         WHEN region = 13 THEN '\''Philidelphia'\'''
++ echo '         ELSE '\''OtherCity'\'''
++ echo '    END AS City,     '
++ echo '    '\''NightExchage'\'' as Product'
++ echo 'FROM NECallLogSent '
++ echo 'WHERE batchId = 1441'
++ echo 'print '\''==================================='\'''
++ echo go
++ run_sql isql ivrdb1r DR_IVRmonthly cron_sa up4sale /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step6 /opt/etc/sybase12_52/maint/NE_Triton/output/20101011.details.mail /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ UTILITY=isql
++ SERVER=ivrdb1r
++ DB=DR_IVRmonthly
++ USER=cron_sa
++ PASSWORD=up4sale
++ SQL=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step6
++ OUT=/opt/etc/sybase12_52/maint/NE_Triton/output/20101011.details.mail
++ TMP=/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ MAIL=/opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000
++ ERROR=0
++ WIDTH=1000
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/output/20101011.details.mail ']'
++ isql -Sivrdb1r -DDR_IVRmonthly -Ucron_sa -Pup4sale -i/opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.sql.step6 -w1000
++ ERROR=0
++ '[' 0 -ne 0 ']'
++ rm /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp
++ '[' -f /opt/etc/sybase12_52/maint/NE_Triton/output/20101011.details.mail ']'
++ grep -i 'Msg [0-9]\{1,\}' /opt/etc/sybase12_52/maint/NE_Triton/output/20101011.details.mail
++ grep -i error /opt/etc/sybase12_52/maint/NE_Triton/output/20101011.details.mail
++ '[' -s /opt/etc/sybase12_52/maint/NE_Triton/logs/20101011.tmp ']'
++ '[' 0 -eq 0 ']'
+++ date
++ echo 'succeeded at Tue Oct 12 04:00:11 EDT 2010.'
++ return 0
++ ERROR_CODE=0
++ '[' 0 -eq 0 ']'
+++ date
++ echo '  ... succeeded compile mail about detail call log from DR_IVRmonthly..NECallLogSent at Tue Oct 12 04:00:11 EDT 2010.'
++ echo '#-------------------------------------------------------#'
++ '[' 0 -eq 0 ']'
+++ date
++ echo './xferTritonNE.sh succeeded at Tue Oct 12 04:00:11 EDT 2010.'
++ '[' 0 -eq 0 ']'
++ MESSAGE_TYPE=success
++ /opt/etc/sybase12_52/maint/send_mail/send_mail.sh /opt/etc/sybase12_52/maint/NE_Triton/logs/./xferTritonNE.sh.20101011.20101012_040000 ./xferTritonNE.sh success /opt/etc/sybase12_52/maint/send_mail/mail_list.txt
++ MAIL_ERROR=0
++ '[' '(' 0 -eq 0 ')' -a '(' 0 -ne 0 ')' ']'
++ MESSAGE_TYPE=summary
++ '[' '(' '(' 0 -eq 0 ')' -a '(' 1 -eq 1 ')' ')' ']'
++ /opt/etc/sybase12_52/maint/send_mail/send_mail.sh /opt/etc/sybase12_52/maint/NE_Triton/output/20101011.mail ./xferTritonNE.sh summary /opt/etc/sybase12_52/maint/send_mail/mail_list.txt
++ MAIL_ERROR=0
++ '[' '(' 0 -eq 0 ')' -a '(' 0 -ne 0 ')' ']'
++ MESSAGE_TYPE=details
++ '[' '(' '(' 0 -eq 0 ')' -a '(' 1 -eq 1 ')' ')' ']'
++ /opt/etc/sybase12_52/maint/send_mail/send_mail.sh /opt/etc/sybase12_52/maint/NE_Triton/output/20101011.details.mail ./xferTritonNE.sh details /opt/etc/sybase12_52/maint/send_mail/mail_list.txt
++ MAIL_ERROR=0
++ '[' '(' 0 -eq 0 ')' -a '(' 0 -ne 0 ')' ']'
++ /usr/bin/find /opt/etc/sybase12_52/maint/NE_Triton/logs -name '*.sh.*' -mtime +10 -exec rm -f '{}' ';'
++ /usr/bin/find /opt/etc/sybase12_52/maint/NE_Triton/logs -name '*.sql.*' -mtime +10 -exec rm -f '{}' ';'
++ /usr/bin/find /opt/etc/sybase12_52/maint/NE_Triton/logs -name '*.out.*' -mtime +10 -exec rm -f '{}' ';'
++ exit 0

@@ -1,0 +1,26 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_delViewedMeByUsrIdTrgtId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_delViewedMeByUsrIdTrgtId (
+ /***********************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         February 2008
+**   Description:  Deletes a row from ViewedMe for a given user and target
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+ at_productCode   CHAR(1)
+,at_communityCode CHAR(1)
+,at_userId        DECIMAL(12,0)
+,at_targetUserId  DECIMAL(12,0)
+)
+BEGIN
+    DELETE FROM ViewedMe WHERE userId = at_targetUserId AND targetUserId = at_userId;
+
+END;;
+DELIMITER ;

@@ -1,0 +1,139 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]
+then
+   echo "Usage: "${0}" <serverName> "
+   exit 1  
+else
+   serverName=${1}
+fi
+
+Password=`cat $HOME/.sybpwd | grep -w ${serverName} | awk '{print $2}'`
+CurrentDate=`date '+%Y%m%d_%H:%M:%S'`
+LogFile=./output/${0}.${serverName}.${CurrentDate}
+
+date > ${LogFile}
+
+sqsh -Usa -S${serverName} -P${Password} << EOQ1 >> ${LogFile}
+
+USE master
+go
+EXEC sp_addlogin 'cron_sa','63vette','master','us_english',"CRON_Account",null,6,null
+go
+EXEC sp_role 'grant','sa_role','cron_sa'
+go
+EXEC sp_modifylogin cron_sa, 'add default role', sa_role
+go
+USE master
+go
+EXEC sp_adduser 'cron_sa','cron_sa','public'
+go
+IF SUSER_ID('cron_sa') IS NOT NULL
+    PRINT '<<< CREATED LOGIN cron_sa >>>'
+ELSE
+    PRINT '<<< FAILED CREATING LOGIN cron_sa >>>'
+go
+
+USE master
+go
+EXEC sp_addlogin 'hhelal','lava905','master','us_english',"Harry Helal",null,6,null
+go
+EXEC sp_role 'grant','sa_role','hhelal'
+go
+EXEC sp_role 'grant','sso_role','hhelal'
+go
+EXEC sp_modifylogin hhelal, 'add default role', sa_role
+go
+EXEC sp_modifylogin hhelal, 'add default role', sso_role
+go
+USE master
+go
+EXEC sp_adduser 'hhelal','hhelal','public'
+go
+IF SUSER_ID('hhelal') IS NOT NULL
+    PRINT '<<< CREATED LOGIN hhelal >>>'
+ELSE
+    PRINT '<<< FAILED CREATING LOGIN hhelal >>>'
+go
+
+USE master
+go
+EXEC sp_addlogin 'jcui','Netgear123','master','us_english',"Jason Cui",null,6,null
+go
+EXEC sp_role 'grant','sa_role','jcui'
+go
+EXEC sp_role 'grant','sso_role','jcui'
+go
+EXEC sp_modifylogin jcui, 'add default role', sa_role
+go
+EXEC sp_modifylogin jcui, 'add default role', sso_role
+go
+USE master
+go
+EXEC sp_adduser 'jcui','jcui','public'
+go
+IF SUSER_ID('jcui') IS NOT NULL
+    PRINT '<<< CREATED LOGIN jcui >>>'
+ELSE
+    PRINT '<<< FAILED CREATING LOGIN jcui >>>'
+go
+
+USE master
+go
+EXEC sp_addlogin 'aalb','lava905','master','us_english',"Adrian Alb",null,6,null
+go
+EXEC sp_role 'grant','sa_role','aalb'
+go
+EXEC sp_modifylogin aalb, 'add default role', sa_role
+go
+USE master
+go
+EXEC sp_adduser 'aalb','aalb','public'
+go
+IF SUSER_ID('aalb') IS NOT NULL
+    PRINT '<<< CREATED LOGIN aalb >>>'
+ELSE
+    PRINT '<<< FAILED CREATING LOGIN aalb >>>'
+go
+
+USE master
+go
+EXEC sp_addlogin 'jricha','lava905','master','us_english',"Jeffrey Richardson",null,6,null
+go
+EXEC sp_role 'grant','sa_role','jricha'
+go
+EXEC sp_role 'grant','sso_role','jricha'
+go
+EXEC sp_modifylogin jricha, 'add default role', sa_role
+go
+EXEC sp_modifylogin jricha, 'add default role', sso_role
+go
+USE master
+go
+EXEC sp_adduser 'jricha','jricha','public'
+go
+IF SUSER_ID('jricha') IS NOT NULL
+    PRINT '<<< CREATED LOGIN jricha >>>'
+ELSE
+    PRINT '<<< FAILED CREATING LOGIN jricha >>>'
+go
+
+
+USE master
+go
+EXEC sp_role 'revoke','sso_role','jcui'
+go
+EXEC sp_role 'revoke','sso_role','jricha'
+go
+EXEC sp_role 'revoke','sso_role','dibrah'
+go
+EXEC sp_role 'revoke','sso_role','esanch'
+go
+
+go
+
+EOQ1
+
+cat ${LogFile}
+
+exit 0

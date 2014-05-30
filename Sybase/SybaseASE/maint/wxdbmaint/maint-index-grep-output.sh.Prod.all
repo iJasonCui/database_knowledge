@@ -1,0 +1,57 @@
+#!/bin/sh
+set -x
+. /home/sybase/.bash_profile
+
+MONTH=`date '+%b'`
+DAY=`date '+%e'`
+LOG_FILE=${0}.log
+LOG_FILE_NOW=${0}.log.now
+
+MAIL_SCRIPT="${SYBMAINT}/send_mail/send_mail.sh"
+MAIL_LIST="${SYBMAINT}/send_mail/mail_list.txt"
+MAIL_FILE="${LOG_FILE}.FAIL"
+ERROR_CODE=0
+
+echo "=================================" > ${LOG_FILE}
+while read SERVER_NAME_DB_NAME
+do
+
+  echo ${SERVER_NAME_DB_NAME} > dbserver.online
+  SERVER_NAME=`cat dbserver.online | awk '{print $1}'`
+  DB_NAME=`cat dbserver.online | awk '{print $2}'`
+
+  ./maint-index-grep-output.sh.Prod ${SERVER_NAME} ${DB_NAME} >> ${LOG_FILE} 
+
+done < $SYBMAINT/dbserverNew.online
+
+grep "${MONTH}${DAY}"  ${LOG_FILE} > ${LOG_FILE_NOW}
+grep "${MONTH}${DAY}"  ${LOG_FILE} | grep FAIL > ${MAIL_FILE} 
+
+if [ -s ${MAIL_FILE}  ] 
+then
+   ERROR_CODE=99 
+fi
+
+# compose the message type
+if [ ${ERROR_CODE} -eq 0 ]; then
+    MESSAGE_TYPE='success'
+else
+    MESSAGE_TYPE='failure'
+fi
+
+# send back notification mail
+# ... invoke the mail script
+if [ ${ERROR_CODE} -eq 0 ]; then
+   cat  ${LOG_FILE_NOW}
+else
+   ${MAIL_SCRIPT} ${MAIL_FILE} $0 ${MESSAGE_TYPE} ${MAIL_LIST}
+   MAIL_ERROR=$?
+fi
+
+# handle mail error
+if [ \( ${ERROR_CODE} -eq 0 \) -a \( ${MAIL_ERROR} -ne 0 \) ]; then
+    ERROR_CODE=${MAIL_ERROR}
+fi
+
+
+exit 0

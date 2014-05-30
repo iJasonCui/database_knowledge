@@ -1,0 +1,141 @@
+--situation
+
+1. subscription was dropped from w151dbp03.Profile_ai_view
+
+
+-- step 1 :
+
+(w151rep01) suspend log transfer from w151dbp03.Profile_ai
+
+
+--step 2: stop rep agent and remove the 2nd marker
+
+(w151dbp03) use Profile_ai; dbcc gettrunc
+(w151dbp03) exec sp_stop_rep_agent Profile_ai
+(w151dbp03) use Profile_ai; dbcc settrunc ('ltm', ignore)
+
+--step 3: (must run, otherwise cause loss detected issue)
+
+(w151dbp03 Profile_ai_view) 
+select * into tempdb..rs_lastcommit_back from rs_lastcommit
+select * from  rs_lastcommit r where r.origin > 0
+delete from  rs_lastcommit where origin > 0
+
+--step 4: add subsciption back
+
+(rep5p)
+jasonc@webccs:~/src/javalife/db/scripts/RepServer/Profile_ai/define_sub_w151dbp03_Profile_ai_view.sql
+
+--loss detected
+
+(rep5p) ignore loss from webdb5p.Profile_ai to w151dbp03.Profile_ai_view
+
+As consequence, the connection of w151dbp03.Profile_ai_view is suspended and subscription is active
+
+--step 4: 
+
+(rep5p) suspend connection to w151dbp03.Profile_ai_view (it supposed to be down already)
+
+
+--step 5:
+(rep2p) suspend log transfer from webdb29p.Profile_ai
+
+--step 6:
+
+(webdb21p) USE master
+go
+EXEC sp_dboption 'Profile_ai','dbo use only',true
+go
+USE Profile_ai
+go
+CHECKPOINT
+go
+
+--step 7: 
+
+suspend connection to webdb28p.Profile_ai
+suspend connection to webdb21p.Profile_ai
+
+step 8: [rep5p] sysadmin hibernate_on 
+step 9: admin who to figure out the queue Id
+step 10: [rep5p] --sysadmin sqm_purge_queue, 326, 0
+step 11: [rep5p] admin disk_space to check the queue shrinked and then sysadmin hibernate_off
+
+--step 12:
+(rep5p) suspend connection to w151dbp03.Profile_ai_view 
+
+--step 13:
+(rep2p) resume log transfer from webdb29p.Profile_ai
+
+--step 14:
+(webdb21p) dump database Profile_ai 
+(webdb28p) dump database Profile_ai 
+
+
+--step 15:
+resume connection to webdb28p.Profile_ai
+resume connection to webdb21p.Profile_ai
+
+
+--step 16
+
+copy Profile_ai db dumps from webdb21p to w151dbr01/02/03/04/05
+copy Profile_ai db dumps from webdb28p to w151dbp03
+
+--step 17:
+(webdb21p) USE master
+go
+EXEC sp_dboption 'Profile_ai','dbo use only',false
+go
+USE Profile_ai
+go
+CHECKPOINT
+go
+
+--step 18:
+
+(w151dbp03/w151dbr01/02/03/04/05) load database Profile_ai
+
+--step 19: fix rep_maint_user and web user
+
+
+USE Profile_ai
+go
+EXEC sp_dropalias 'hhelal'
+go
+EXEC sp_addalias 'w151rep01_maint_user','dbo'
+go
+
+
+update sysusers set suid = 3 where name = "web"
+update sysusers set suid = 5 where name = "webmaint"
+select * from master..syslogins
+select * from sysusers
+
+--step 20:
+
+(rep01_RSSD on w151rssd01) rs_zeroltm w151dbp03, Profile_ai
+
+--step 21:
+(w151dbp03) use Profile_ai ; dbcc settrunc(‘ltm’,’valid’)
+
+(w151dbp03) use Profile_ai ; sp_config_rep_agent Profile_ai, 'rs_servername', 'w151rep01'
+(w151dbp03) use Profile_ai ; sp_config_rep_agent Profile_ai, 'rs_username' , 'w151rep01_ra_user'
+(w151dbp03) use Profile_ai ; sp_config_rep_agent Profile_ai, 'rs_password' , 'stickt0it'
+
+--step 22:
+
+(w151rep01) resume log transfer from w151dbp03.Profile_ai
+
+(w151dbp03) use Profile_ai; sp_start_rep_agent Profile_ai
+
+--step 23:
+
+(rep5p) resume connection to w151dbp03.Profile_ai_view
+
+
+
+
+
+
+

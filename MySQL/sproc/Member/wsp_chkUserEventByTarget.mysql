@@ -1,0 +1,41 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_chkUserEventByTarget;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_chkUserEventByTarget (
+/***********************************************************************
+**
+** CREATION:
+**   Author:        Andy Tran
+**   Date:          May 2008
+**   Description:   Count distinct user event for a given target
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+ at_userId             DECIMAL(12,0)
+,at_targetUserId       DECIMAL(12,0)
+,at_eventTypeId        SMALLINT
+,at_productCode        CHAR(1)
+,at_communityCode      CHAR(1)
+,at_eventMonitorCutoff DATETIME
+)
+BEGIN
+
+IF (SELECT 1
+      FROM UserEvent
+     WHERE userId = at_userId
+       AND targetUserId = at_targetUserId
+       AND eventTypeId = at_eventTypeId
+       AND productCode = at_productCode
+       AND communityCode = at_communityCode
+       AND dateCreated >= at_eventMonitorCutoff) IS NOT NULL
+THEN
+    SELECT 1 ;
+ELSE
+    SELECT 0 ;
+END IF;
+
+END;;
+DELIMITER ;

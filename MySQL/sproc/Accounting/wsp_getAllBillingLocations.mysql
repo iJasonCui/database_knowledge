@@ -1,0 +1,47 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAllBillingLocations;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAllBillingLocations ()
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  May 21, 2003
+**   Description:  retrieves all package descriptions
+**
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date: June 3, 2004
+**   Description: return merchantId as well
+**
+**   Author: Mike Stairs
+**   Date: June 24, 2005
+**   Description: make sure TaxRate the current one
+**
+**   Author: Andy Tran
+**   Date: September 27, 2005
+**   Description: return displayPayPal
+**
+**   Author: Andy Tran
+**   Date: November 15, 2006
+**   Description: return displayInterac
+**
+******************************************************************************/
+BEGIN  
+    SELECT 
+          b.billingLocationId,
+          billingLocationCode,
+          billingLocationDesc,
+          currencyId,
+          displayTax,
+          rate,
+          merchantId,
+          displayInterac,
+          displayPayPal
+     FROM BillingLocation b, TaxRate t
+    WHERE b.billingLocationId = t.billingLocationId 
+      AND (t.dateExpired = '00000000' OR t.dateExpired IS NULL)
+    ORDER BY b.billingLocationId ;
+
+END;;
+DELIMITER ;

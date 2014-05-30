@@ -1,0 +1,26 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getTwitterFeedByLLUser;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getTwitterFeedByLLUser (
+/***********************************************************************
+**
+** CREATION:
+**   Author:        Mark Jaeckle
+**   Date:          March, 2011
+**   Description:   Gets TwitterFeed record by Lavalife userId.
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+ at_llUserId  DECIMAL(12,0)
+)
+BEGIN
+    SELECT twitterFeedId
+           ,profileFeedEnabled
+      FROM TwitterFeed
+     WHERE llUserId = at_llUserId ;
+
+END;;
+DELIMITER ;

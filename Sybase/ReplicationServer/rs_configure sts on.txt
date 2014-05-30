@@ -1,0 +1,7 @@
+exec rs_configure 'sts_cachesize',  '3000'
+exec rs_configure 'sts_full_cache_rs_columns',  'on'
+exec rs_configure 'sts_full_cache_rs_objects',  'on'
+exec rs_configure 'sts_full_cache_rs_funcstri', 'on'
+exec rs_configure 'sts_full_cache_rs_function', 'on'
+
+

@@ -1,0 +1,93 @@
+--step 1: w151dbr05 source server
+
+cd /ccs/sybase12_5; tar -cvf sybase1254.tar ./sybase12_5/*
+
+gzip sybase1254.tar 
+
+scp -p sybase1254.tar.gz sybase@w151dbr03:/ccs/sybase12_5
+
+--step 2: w151dbr03 destination server
+
+cd /ccs; mkdir sybase12_5
+
+cd /ccs/sybase12_5; gunzip sybase1254.tar.gz
+
+cd /ccs/sybase12_5; tar -xvf sybase1254.tar
+
+
+--step 3: verify sybase RUN files 
+[sybase@w151dbr03:/ccs/sybase12_5/ASE-12_5/install]
+vi RUN_SYB_BACKUP
+vi RUN_w151dbr03
+vi RUN_w151dbr03m
+vi STOP_w151dbr03
+vi STOP_w151dbr03m
+
+--step 4: copy sybase .cfg file into new location
+
+[sybase@w151dbr03:~]$ cp /opt/etc/sybase12_52/w151dbr03.cfg /ccs/sybase12_5/ASE-12_5/
+
+--step 5:
+
+old location: /opt/etc/sybase12_52/interfaces
+new location: sybase@w151dbr03:/ccs/sybase12_5/interfaces
+
+cp /opt/etc/sybase12_52/interfaces /ccs/sybase12_5/interfaces
+
+--step 6: [w151rep01] suspend connection to w151dbr03.Profile_ad 
+sy	[w151rep01]suspend connection to w151dbr03.Profile_ar 
+[w151rep01]suspend connection to w151dbr03.Profile_ai 
+
+--step 7: shutdown Sybase BACKUP SERVER AND ASE server 
+
+--step 8: verify the .bash_profile for unix user "sybase"
+
+[sybase@w151dbr03:~]$ scp -p sybase@w151dbr05://opt/etc/sybase12_52/.bash_profile .
+
+vi .bash_profile
+
+
+
+--step 9: startup sybase BACKUP SERVER AND ASE server in maintenance mode
+
+--step 10: run installmaster and installmsgs
+
+[sybase@w151dbr03:/ccs/sybase12_5/ASE-12_5/scripts]$ 
+cd /ccs/sybase12_5/ASE-12_5/scripts; 
+isql -Usa -Sw151dbr03m -i installmaster -o installmaster.log.2007jul26
+
+isql -Usa -Sw151dbr02m -i instmsgs.ebf -o instmsgs.ebf.log.2007jul26
+
+--step 11: remove old sybase interfaces file to prevent confusion
+
+old location: /opt/etc/sybase12_52/interfaces
+new location: sybase@w151dbr03:/ccs/sybase12_5/interfaces
+
+rm /opt/etc/sybase12_52/interfaces
+
+--step 12: remove old sybase config file ${SERVER_NAME}.cfg to prevent confusion
+
+rm /opt/etc/sybase12_52/w151dbr02.cfg
+
+--step 13:  remove old sybase RUN files to prevent confusion
+
+rm /opt/etc/sybase12_52/install/[RS]*
+
+--step 14: shut it down and start it up as production mode 
+
+--step 15: verify all db scripts under cron or $SYBMAINT
+
+--step 16: 
+
+[w151rep01]resume connection to w151dbr03.Profile_ad 
+[w151rep01]resume connection to w151dbr03.Profile_ar 
+[w151rep01]resume connection to w151dbr03.Profile_ai 
+
+
+[sybase@w151dbr03:~/maint/check_ase_log]$ 
+scp -p sybase@webdb20p:~/maint/check_ase_log/check_ase_log.sh check_ase_log.sh.20p
+
+
+
+
+

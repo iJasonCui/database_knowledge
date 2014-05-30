@@ -1,0 +1,142 @@
+#--------------------------------#
+# Backup IQ                      
+#--------------------------------#
+00 18 * * 0 (cd /ccs/scripts/maint/iq; ./dump_IQ_Full.sh g104iqdb01 557 562 >  ./dump_IQ_Full.sh.out 2>&1 )
+00 17 * * * (cd /ccs/scripts/maint/iq; ./dump_IQ_INC.sh  g104iqdb01 >  ./dump_IQ_INC.sh.out 2>&1 )
+#------------------------------------------------------#
+# load mda info into IQ
+#------------------------------------------------------#
+*/10 * * * * (cd /ccs/scripts/maint/iq/MDA; ./bcpout_load_mda_user_proc_stats_all.sh >bcpout_load_mda_proc_stat_all.log 2>&1 )
+#
+#--------------------------------------------------------#
+# email out the MDA info
+#--------------------------------------------------------#
+0 9 * * * (cd /ccs/scripts/maint/iq/MDA; ./cron_emailMDAStats.sh > cron_emailMDAStats.log 2>&1 )
+#
+#---------------------------------------------------------------#
+# Deferred Revenue Report Created By Jason C. On Oct 24 2005    #
+#---------------------------------------------------------------#
+0 6 1 1,4,7,10 * (cd /ccs/scripts/maint/iq/DeferredRevenue; ./IQ_DR_curves.sh > IQ_DR_curves.sh.log 2>&1 )
+#
+#-----------------------------------#
+# WEB  # commented by Hunter 20100514 since PageCount is not needed 
+####----- Load PageCount from All Member/Guest WebServer to 0r and IQ ----------#####
+#Commented out - May 10, 2010
+#00 4 * * * (cd /ccs/scripts/maint/iq/WebPageCount; ./cron-loadPageCount.sh -1 no no > /dev/null 2>&1 )
+#30 9 * * * (cd /ccs/scripts/maint/iq/WebPageCount; ./patch-loadPageCount.sh      > /dev/null 2>&1 )
+#Commented out - May 10, 2010
+#30 6 5 * * (cd /ccs/scripts/maint/iq/WebPageCount; ./purge_PageCount.sh > purge_PageCount.sh.log 2>&1 )
+####---- ClickThrough Loads
+10 09 * * * (cd /ccs/scripts/maint/iq/clickthru; ./load_clickthrulogs.sh > ./load_clickthrulogs.sh.log 2>&1 )
+#
+#-------------------------------------------
+#     IVR Loads
+#-------------------------------------------
+#
+####---- Load CallLog data by city and product to archive table in IQ
+00 06,07,08,09,10,11,12,13,14 * * * (cd /ccs/scripts/maint/iq/IVR/load_scripts; ./insertDwBatchLog.sh > insertDwBatchLog.out 2>&1 )
+15 06,07,08,09,10,11,12,13,14 * * * (cd /ccs/scripts/maint/iq/IVR/load_scripts; ./load_IQFiles.sh CallLog CDR > ./load_IQFiles.sh.CallLog.out 2>&1 )
+30 06,07,08,09,10,11,12,13,14 * * * (cd /ccs/scripts/maint/iq/IVR/load_scripts; ./load_IQFiles.sh Mailbox CDR > ./load_IQFiles.sh.Mailbox.out 2>&1 )
+45 08,09,10,11,12,13 * * *          (cd /ccs/scripts/maint/iq/IVR/load_scripts; ./load_IQFiles.sh AdvCall IVR > ./load_IQFiles.sh.AdvCall.out 2>&1 )
+#
+# Blaster Related Table
+45 09 * * * ( cd /ccs/scripts/maint/iq/arch_IVRMobile; ./load_PromoOptIn.sh v151dbp01ivr PromoOptIn > ./load_PromoOptIn.sh.log 2>&1 )
+55 09 * * * ( cd /ccs/scripts/maint/iq/arch_IVRMobile; ./load_CallLogChdLL.sh v151dbp01ivr CallLog > ./load_CallLogChdLL.sh.log 2>&1 )
+#--------------------------------------#
+# Mobile
+#--------------------------------------#
+30 07 * * * (cd /ccs/scripts/maint/iq/arch_Mobile; ./cron_loadMobile.sh > ./cron_loadMobile.sh.out 2>&1 )
+#
+#
+# Load AccessLog to arch_Mobile
+55  3 * * * (cd /ccs/scripts/maint/iq/arch_Mobile; ./load_AccessLog.sh AccessLog > ./load_AccessLog.sh.log 2>&1 )
+#55  7 * * * (cd /ccs/scripts/maint/iq/arch_Mobile; ./load_SBDailyTransactions.sh SBDailyTransactions > ./load_SBDailyTransactions.sh.log 2>&1 )
+#
+# NowSMS Downloads
+25 5 * * *  ( cd /ccs/scripts/maint/iq/arch_Mobile; ./load_nowSMS_Messages.sh  v151dbp01sms  > ./load_nowSMS_Messages.sh.log 2>&1 )
+#50 5 * * *  ( cd /ccs/scripts/maint/iq/arch_Mobile; ./load_NowSMSLog.sh NowSMSOutLog  > ./load_NowSMSLog.sh.NowSMSOutLog.log 2>&1 )
+#20 6 * * *  ( cd /ccs/scripts/maint/iq/arch_Mobile; ./load_NowSMSLog.sh NowSMSInLog  > ./load_NowSMSLog.sh.NowSMSInLog.log 2>&1 )
+# MTM Loads
+50 8 * * *  ( cd /ccs/scripts/maint/iq/arch_Mobile; ./load_MTMDailyLog.sh MTMDailyLog > ./load_MTMDailyLog.sh.log  2>&1 )
+# Barry Mobile Monthly Report
+30 8 3 * *  ( cd /ccs/scripts/maint/iq/arch_Mobile; ./send_Mobile_Report.sh > ./send_Mobile_Report.sh.log 2>&1 )
+#
+#-------------------------------------------------------------------------------------------#
+# IVRMobile Load
+#-------------------------------------------------------------------------------------------#
+10 07 * * * ( cd /ccs/scripts/maint/iq/arch_IVRMobile; ./load_SubscriptionMembershipAudit.sh > ./load_SubscriptionMembershipAudit.sh.log  2>&1 )
+#--------------------------------------------------------------------------------------------#
+#
+#--------------------------------------------------------------------------------------------#
+# Send Daily B2C Subscription and Match Data via e-mail
+#--------------------------------------------------------------------------------------------#
+55 8 * * * ( cd /ccs/scripts/maint/iq/arch_Mobile; ./b2c_sub_dailydata.sh > ./b2c_sub_dailydata.sh.log 2>&1 )
+00 9 * * * ( cd /ccs/scripts/maint/iq/arch_Mobile; ./mobile_dailystats.sh > ./mobile_dailystats.sh.log 2>&1 )
+#
+#--------------------------------------------------------------------------------------------#
+# Populate BlasterList table for SMS Alert to Production Server
+#--------------------------------------------------------------------------------------------#
+30 10 * * * ( cd /ccs/scripts/maint/iq/arch_Mobile; ./load_BlasterList.sh v151dbp02mob > ./load_BlasterList.sh.v151dbp02mob.log     2>&1 )
+#
+#---------------------------------------------------------
+#      Load Audit data from auditdb0p by CITY to IQ
+#---------------------------------------------------------
+#
+00 01 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh TOR c151dbp02pgs > ./arch_audit.sh.TOR.out 2>&1 )
+05 01 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh NYC c151dbp02pgs > ./arch_audit.sh.NYC.out 2>&1 )
+10 01 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh MTL c151dbp02pgs > ./arch_audit.sh.MTL.out 2>&1 )
+15 01 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh ATL c151dbp02pgs > ./arch_audit.sh.ATL.out 2>&1 )
+20 01 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh BOS c151dbp02pgs > ./arch_audit.sh.BOS.out 2>&1 )
+25 01 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh CAL c151dbp02pgs > ./arch_audit.sh.CAL.out 2>&1 )
+30 01 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh CHI c151dbp02pgs > ./arch_audit.sh.CHI.out 2>&1 )
+35 01 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh COL c151dbp02pgs > ./arch_audit.sh.COL.out 2>&1 )
+40 01 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh DET c151dbp02pgs > ./arch_audit.sh.DET.out 2>&1 )
+45 01 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh DNR c151dbp02pgs > ./arch_audit.sh.DNR.out 2>&1 )
+50 01 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh EDM c151dbp02pgs > ./arch_audit.sh.EDM.out 2>&1 )
+55 01 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh HST c151dbp02pgs > ./arch_audit.sh.HST.out 2>&1 )
+00 02 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh LAX c151dbp02pgs > ./arch_audit.sh.LAX.out 2>&1 )
+05 02 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh MIN c151dbp02pgs > ./arch_audit.sh.MIN.out 2>&1 )
+10 02 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh OTT c151dbp02pgs > ./arch_audit.sh.OTT.out 2>&1 )
+15 02 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh PAR c151dbp02pgs > ./arch_audit.sh.PAR.out 2>&1 )
+20 02 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh PHI c151dbp02pgs > ./arch_audit.sh.PHI.out 2>&1 )
+25 02 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh PHN c151dbp02pgs > ./arch_audit.sh.PHN.out 2>&1 )
+30 02 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh PIT c151dbp02pgs > ./arch_audit.sh.PIT.out 2>&1 )
+35 02 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh QUE c151dbp02pgs > ./arch_audit.sh.QUE.out 2>&1 )
+40 02 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh SFO c151dbp02pgs > ./arch_audit.sh.SFO.out 2>&1 )
+45 02 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh STL c151dbp02pgs > ./arch_audit.sh.STL.out 2>&1 )
+50 02 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh VAN c151dbp02pgs > ./arch_audit.sh.VAN.out 2>&1 )
+55 02 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh WAS c151dbp02pgs > ./arch_audit.sh.WAS.out 2>&1 )
+00 03 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh WIN c151dbp02pgs > ./arch_audit.sh.WIN.out 2>&1 )
+05 03 * * * (cd /ccs/scripts/maint/iq/audit; ./arch_audit.sh SYD c151dbp02pgs > ./arch_audit.sh.SYD.out 2>&1 )
+#
+#-------------------------------------------
+#     Load Level3 CDR data
+#-------------------------------------------
+#
+00 04 * * * (cd /ccs/scripts/maint/iq/arch_CDR; ./ftpcdr > ftpcdr.log 2>&1 )
+00 05 * * * (cd /ccs/scripts/maint/iq/arch_CDR; ./arch_CDR.sh LL 2036 "/data/level3/LL/2036/cdr/" > arch_CDR_LL_2036.out 2>&1)
+04 05 * * * (cd /ccs/scripts/maint/iq/arch_CDR; ./arch_CDR.sh LL 2037 "/data/level3/LL/2037/cdr/" > arch_CDR_LL_2037.out 2>&1)
+05 05 * * * (cd /ccs/scripts/maint/iq/arch_CDR; ./arch_CDR.sh ML 2036 "/data/level3/ML/2036/cdr/" > arch_CDR_ML_2036.out 2>&1)
+10 05 * * * (cd /ccs/scripts/maint/iq/arch_CDR; ./arch_CDR.sh NE 2036 "/data/level3/NE/2036/cdr/" > arch_CDR_NE_2036.out 2>&1)
+
+##### comment out at Tom Eschenbrenner's request@9/28/2010: I think we can remove the coding that looks for these files
+#10 10 * * * (cd /ccs/scripts/maint/iq/arch_CDR; ./arch_CDR.sh NE 2037 "/data/level3/NE/2037/cdr/" > arch_CDR_NE_2037.out 2>&1)
+#15 05 * * * (cd /ccs/scripts/maint/iq/arch_CDR; ./arch_CDR.sh ML 2037 "/data/level3/ML/2037/cdr/" > arch_CDR_ML_2037.out 2>&1)
+
+20 05 * * * (cd /ccs/scripts/maint/iq/arch_CDR; ./arch_CDR.sh ML 2047 "/data/level3/ML/2047/cdr/" > arch_CDR_ML_2047.out 2>&1)
+#20 05 * * * (cd /ccs/scripts/maint/iq/arch_CDR; ./arch_CDR.sh ML 2010 "/data/level3/ML/2010/cdr/" > arch_CDR_ML_2010.out 2>&1)
+#25 05 * * * (cd /ccs/scripts/maint/iq/arch_CDR; ./arch_CDR.sh ML 2051 "/data/level3/ML/2051/cdr/" > arch_CDR_ML_2051.out 2>&1)
+30 08 * * * (cd /ccs/scripts/maint/iq/arch_CDR; ./arch_LavaCDR.sh "/data/dumps/reporting/CallDR/" > arch_LavaCDR.out 2>&1)
+#
+#-------------------------------------------
+#     IQ Monitoring Jobs
+#-------------------------------------------
+30 14 * * * (cd /ccs/scripts/maint/iq/; ./check_daily_loads.sh -1 > ./check_daily_loads.sh.log 2>&1 )
+#
+#
+#------------------------------------------------
+#    IQ table load for COMMONTABLE.NPA_NXX_Lookup
+#------------------------------------------------
+00 11 * * * (cd /ccs/scripts/maint/iq/COMMONTABLE; ./iqload_COMMONTABLE_NPA_NXX_Lookup.sh> iqload_NPA_NXX_Lookup.out 2>&1)
+#
+#

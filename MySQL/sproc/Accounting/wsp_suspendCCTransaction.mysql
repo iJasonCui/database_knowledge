@@ -1,0 +1,41 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_suspendCCTransaction;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_suspendCCTransaction (
+
+/*******************************************************************
+**
+** CREATION:
+**   Author:      Hunter Qian 
+**   Date:        June 5 2008 
+**   Description: suspend cc transactions pending for settlement to Settlement queue
+**
+** REVISION(S):
+**   Author: 
+**   Date:
+**   Description:
+**
+*******************************************************************/
+at_userId            DECIMAL(12,0)
+)
+BEGIN
+
+DECLARE at_dateNow       DATETIME;
+DECLARE at_productId     INT;
+
+IF at_userId IS NOT NULL AND ((SELECT 1 FROM UserAccount 
+                                 WHERE userId = at_userId
+                                   and accountType="S"
+                                   and dateCreated > TIMESTAMPADD(DAY, -550, NOW())) IS NOT NULL)
+THEN
+
+  SELECT productId INTO at_productId FROM UserAccount u, BillingLocation bl WHERE u.userId=at_userId AND u.billingLocationId=bl.billingLocationId;
+ 
+  SET at_dateNow = UTC_TIMESTAMP();
+
+  CALL wsp_cursorSuspendCCTransaction (at_userId, at_productId, at_dateNow);
+
+END IF;	
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

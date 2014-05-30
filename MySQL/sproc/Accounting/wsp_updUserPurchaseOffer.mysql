@@ -1,0 +1,139 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updUserPurchaseOffer;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updUserPurchaseOffer (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         January, 2007
+**   Description:  Update UserAccount purchaseOfferId for specified user
+**                 Backup default purchaseOfferId in UserDefaultOffer
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_userId           DECIMAL(12,0)
+,at_purchaseOfferId  SMALLINT
+)
+BEGIN
+DECLARE at_dateNow          DATETIME;
+DECLARE at_defaultOfferId   SMALLINT;
+DECLARE at_billingLocationId SMALLINT;
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+   ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+   ROLLBACK;
+END;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+START TRANSACTION;
+
+    -- get default offer from UserDefaultOffer
+    SELECT purchaseOfferId INTO at_defaultOfferId FROM UserDefaultOffer WHERE userId = at_userId;
+
+    -- default offer exists
+    IF (at_defaultOfferId > 0) THEN
+            -- case reset
+            IF (at_purchaseOfferId <= 0) THEN
+               SET at_purchaseOfferId = at_defaultOfferId;
+            END IF;
+
+            -- set purchase offer
+            UPDATE UserAccount
+               SET purchaseOfferId = at_purchaseOfferId
+                  ,subscriptionOfferId = NULL
+                  ,accountType = 'C'
+                  ,dateModified = at_dateNow
+             WHERE userId = at_userId;
+
+            -- case set
+            IF (at_purchaseOfferId = at_defaultOfferId) THEN 
+                    -- delete default offer
+               DELETE FROM UserDefaultOffer WHERE userId = at_userId;
+            END IF;
+    -- default offer does not exist
+    ELSE
+            -- get default offer from UserAccount
+            SELECT purchaseOfferId INTO at_defaultOfferId FROM UserAccount WHERE userId = at_userId;
+
+            -- if default offer is invalid then get from initial offer
+            IF (at_defaultOfferId <= 0) THEN
+               -- get initial offer
+               SELECT billingLocationId INTO at_billingLocationId FROM UserAccount WHERE userId = at_userId;
+               SELECT defaultPurchaseOfferId INTO at_defaultOfferId FROM DefaultUserAccount WHERE billingLocationId = at_billingLocationId;
+            END IF;
+
+            -- case reset
+            IF (at_purchaseOfferId <= 0) THEN 
+               SET at_purchaseOfferId = at_defaultOfferId;
+            END IF;
+
+            -- case set
+            IF (at_purchaseOfferId != at_defaultOfferId) THEN 
+                    -- save default offer
+               INSERT INTO UserDefaultOffer
+                                (
+                                     userId
+                                    ,purchaseOfferId
+                                    ,subscriptionOfferId
+                                    ,usageCellId
+                                    ,dateCreated
+                                )
+                         VALUES (
+                                     at_userId
+                                    ,at_defaultOfferId
+                                    ,-1
+                                    ,-1
+                                    ,at_dateNow
+                                );
+            END IF;
+
+            -- set purchase offer
+            UPDATE UserAccount
+               SET purchaseOfferId = at_purchaseOfferId
+                  ,subscriptionOfferId = NULL
+                  ,accountType = 'C'
+                  ,dateModified = at_dateNow
+             WHERE userId = at_userId;
+
+    END IF;
+
+    -- save user account history
+    INSERT INTO UserAccountHistory
+                (
+                     userId
+                    ,billingLocationId
+                    ,purchaseOfferId
+                    ,subscriptionOfferId
+                    ,usageCellId
+                    ,accountType
+                    ,dateCreated
+                    ,dateModified
+                    ,dateExpiry
+                )
+                SELECT userId
+                      ,billingLocationId
+                      ,purchaseOfferId
+                      ,subscriptionOfferId
+                      ,usageCellId
+                      ,accountType
+                      ,dateCreated
+                      ,dateModified
+                      ,dateExpiry
+                  FROM UserAccount
+                 WHERE userId = at_userId;
+
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,49 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]
+then
+   echo "Usage: "${0}" <serverName> <repServer> "
+   exit 1
+else
+   serverName=${1}
+   repServer=${2}
+fi
+
+Password=`cat $HOME/.sybpwd | grep -w ${serverName} | awk '{print $2}'`
+CurrentDate=`date '+%Y%m%d_%H%M%S'`
+LogFile=./output/${0}.${serverName}.${CurrentDate}
+
+date > ${LogFile}
+
+sqsh -Ucron_sa -S${serverName} -P${Password} << EOQ1 >> ${LogFile}
+
+select name from master..sysdatabases where name not in ('master', 'tempdb', 'model', 'sybsystemprocs', 'sybsystemdb') and name not
+like "%view"
+
+\do
+   \echo "use #1_view"
+   use #1_view
+   go
+   select db_name()
+   go
+   checkpoint
+   go
+
+   select name from #1..sysobjects where type = "U" and name not like "rs%"
+   \do
+      \echo "CREATE VIEW #1 AS SELECT * FROM ##1..#1"
+      CREATE VIEW #1 AS SELECT * FROM ##1..#1
+      go
+   \done  
+
+\done
+
+
+go
+
+EOQ1
+
+
+exit 0
+
+

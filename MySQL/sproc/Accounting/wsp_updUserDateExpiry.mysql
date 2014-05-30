@@ -1,0 +1,34 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updUserDateExpiry;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updUserDateExpiry (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Andy Tran
+**   Date:  Nov 11, 2004
+**   Description:  updates user date expiry
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+at_userId            DECIMAL(12,0),
+at_dateExpiry        DATETIME
+)
+BEGIN 
+ 
+DECLARE  at_dateModified   DATETIME;
+        
+SET at_dateModified = UTC_TIMESTAMP();
+     
+UPDATE UserAccount
+              SET dateExpiry = at_dateExpiry,
+                  dateModified = at_dateModified
+              WHERE userId = at_userId;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

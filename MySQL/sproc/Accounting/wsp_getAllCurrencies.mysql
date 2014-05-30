@@ -1,0 +1,40 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAllCurrencies;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAllCurrencies (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  May 21, 2003
+**   Description:  retrieves all currencies
+**
+**
+** REVISION(S):
+**   Author:        Andy Tran
+**   Date:          July 26, 2004
+**   Description:   adds contentId
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+)
+  BEGIN  
+	SELECT 
+          currencyId,
+          currencyCode,
+          currencyDesc,
+          currencySymbol,
+          convertUSD,
+          precisionDigits,
+          dateModified,
+          contentId
+        FROM Currency
+        ORDER BY currencyId ;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,28 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getCallResult;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getCallResult (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu/Jack Veiga
+**   Date:  September 2003
+**   Description:  
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+)
+BEGIN
+
+SELECT callResultId,
+       callResultName,
+       billedFlag
+  FROM CallResult;
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

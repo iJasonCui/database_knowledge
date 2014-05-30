@@ -1,0 +1,111 @@
+#!/usr/bin/perl 
+
+use Getopt::Long;
+
+$opt_h = 0;
+$opt_n = 0;
+$opt_d = 0;
+$opt_p = 0;
+
+GetOptions ('f|file=s', \$file, 'd|delay=i', 'n|number=i', 'p|params!', 'h|help!');
+
+if ($opt_h) 
+{
+   &usage; 
+}
+
+my $top_number = $opt_n ||25;
+my $sleep_seconds = $opt_d || 10;
+my $show_params = $opt_p;
+
+
+if (!$file)
+{
+   #get default JDBC log file name
+   my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+   $year = 1900 + $year;
+   $mon = $mon + 1;
+   if ($mon <10)
+   {
+     $mon = "0".$mon;
+   }
+   $file = "/opt/etc/javalife/logs/JDBCLog.$year-$mon-$mday.log";
+}
+open (INFILE, "< $file") or die "Can't open $file: $!\n" ;
+
+$slower=0;
+my @list;
+#print "Parsing the $file ...\n";
+
+for ($curpos = tell(INFILE); <INFILE>; $curpos = tell(INFILE)) 
+   {
+      my ($ms) = ($_ =~/execTime=(.+)ms/);
+
+      if(${ms}>100)
+      {
+      
+      if($show_params) 
+      {
+         ($date,$time,$db,$server,$proc,$params) = ($_ =~/^(.*)\s(.*)\s.*\/(.*).*\/(.*).*\:.*\{(.*)\}.*\[(.*)\]/);
+      }
+      else
+      {
+         ($date,$time,$db,$server,$proc) = ($_ =~/^(.*)\s(.*)\s.*\/(.*).*\/(.*).*\:.*\{(.*)\}/);
+      }
+
+      $proc=~ s/\(.*\)//g;
+      $proc=~ s/call //g;
+
+      printf "%6d",  ${ms};
+      print "|",${date}," ",${time},"|",${db},"|",${server},"|",${proc},"|",${params},"\n";
+
+
+##      push  @list, {
+##                          date => $date,
+##                          timestamp => $time, 
+##                          ms  => $ms, 
+##                          proc  => $proc, 
+##                          params => $params,
+## db => $db,
+##			  server => $server  
+ ##                        };
+
+   }
+}
+##   &output(@list);
+
+
+sub output 
+{
+   my (@mylist) = @_;
+   print `clear`;
+   #print "\n ELAPSED(ms) TIME      PROC_NAME\n";
+   #print "----------------------------------------------\n";
+
+   foreach my $item (@mylist)
+   {
+      printf "%6d",  $item->{ms};
+      $item->{proc} =~ s/\(.*\)//g;
+      $item->{proc} =~ s/call //g;
+      print "|",$item->{date}," ",$item->{timestamp},"|",$item->{db},"|",$item->{server},"|",$item->{proc},"|",$item->{params},"\n";
+   }
+
+}
+
+
+
+sub usage 
+{
+    print STDERR "Usage: dblog [options]\n";
+    print STDERR "\n";
+    print STDERR "Options:\n";
+    print STDERR "  -f, --file    jdbc_log filename\n";
+    print STDERR "  -d, --delay   the delay between screen updates \n";
+    print STDERR "  -n, --number  the length of the list\n";
+    print STDERR "  -p, --params  display the proc params(detail mode)\n";
+    print STDERR "  -h, --help    display usage page\n";
+    print STDERR "\n";
+    print STDERR "\n";
+    exit(1);
+}
+

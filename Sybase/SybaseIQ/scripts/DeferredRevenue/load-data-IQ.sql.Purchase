@@ -1,0 +1,32 @@
+SET OPTION cron_sa.CONVERSION_ERROR=OFF
+go
+LOAD TABLE DeferredRev.Purchase 
+(
+    xactionId                 ,
+    userId                    ,
+    purchaseTypeId            ,
+    purchaseOfferDetailId     ,
+    billingLocationId         ,
+    currencyId                ,
+    xactionTypeId             ,
+    creditCardId              ,
+    refXactionId              ,
+    cost                      ,
+    costUSD                   ,
+    tax                       ,
+    taxUSD                    ,
+    cardProcessor             ,
+    paymentNumber             ,
+    dateCreated               ,
+    batchId, 
+    subscriptionOfferDetailId 
+)
+from '/data/bcp-data/wp_report/Purchase.out'
+DELIMITED BY '|'
+QUOTES OFF
+ESCAPES OFF
+IGNORE CONSTRAINT UNIQUE 0, NULL 0, DATA VALUE 0 
+WITH CHECKPOINT ON 
+go
+select count(*) from DeferredRev.Purchase 
+go

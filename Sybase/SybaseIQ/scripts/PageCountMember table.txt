@@ -1,0 +1,24 @@
+if exists(
+   select 1 from sys.systable
+      where table_name='PageCountMember'
+      and table_type='BASE'
+      and creator=user_id('PageCount')
+) then
+   drop table PageCount.PageCountMember
+end if;
+
+/*==============================================================*/
+/* Table: PageCountMember                                       */
+/*==============================================================*/
+create table PageCount.PageCountMember (
+   webServerId          integer         not null,  
+   userId               numeric(12)     not null,
+   pageId               smallint        not null,
+   sessionContext       char(3)         not null,
+   sessionAdCode        varchar(30)     not null,
+   localePref           smallint        not null,
+   dateCreated          datetime        not null, 
+   primary key (webServerId, userId, dateCreated)
+)
+;
+

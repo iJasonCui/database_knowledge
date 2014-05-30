@@ -1,0 +1,38 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getCreditBalance;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getCreditBalance (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mark Jaeckle
+**   Date:  Sept 2, 2003
+**   Description:  retrieves credit balance for user, broken down by creditType
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+
+at_userId DECIMAL(12,0) 
+)
+BEGIN
+
+DECLARE at_dateNow 		DATETIME;
+
+SET at_dateNow = UTC_TIMESTAMP();
+	
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+SELECT CreditBalance.creditTypeId, credits
+         FROM CreditBalance, CreditType
+         WHERE userId = at_userId 
+         AND dateExpiry >= at_dateNow 
+         AND CreditBalance.creditTypeId = CreditType.creditTypeId
+         ORDER BY dateExpiry ASC,ordinal DESC;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

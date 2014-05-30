@@ -1,0 +1,47 @@
+--rep5p
+suspend connection to w151dbp01."Accounting"
+suspend connection to w151dbp01."Admin"
+suspend connection to w151dbp01."Associate"
+suspend connection to w151dbp01."Chargeback"
+suspend connection to w151dbp01."Content"
+suspend connection to w151dbp01."ContentJava"
+suspend connection to w151dbp01."IVRPictures"
+suspend connection to w151dbp01."Jump"
+suspend connection to w151dbp01."Member"
+suspend connection to w151dbp01."SMSGateway"
+suspend connection to w151dbp01."Session"
+suspend connection to w151dbp01."SurveyPoll"
+
+suspend connection to w151dbp02."IVROnWeb"
+suspend connection to w151dbp02."Msg_ad"
+suspend connection to w151dbp02."Msg_ai"
+suspend connection to w151dbp02."Msg_ar"
+suspend connection to w151dbp02."Msg_md"
+suspend connection to w151dbp02."Msg_mi"
+suspend connection to w151dbp02."Msg_mr"
+suspend connection to w151dbp02."Msg_wd"
+suspend connection to w151dbp02."Msg_wi"
+suspend connection to w151dbp02."Msg_wr"
+suspend connection to w151dbp02."Profile_md"
+suspend connection to w151dbp02."Profile_mi"
+suspend connection to w151dbp02."Profile_mr"
+suspend connection to w151dbp02."Profile_wd"
+suspend connection to w151dbp02."Profile_wi"
+suspend connection to w151dbp02."Profile_wr"
+suspend connection to w151dbp02."SuccessStory"
+suspend connection to w151dbp02."USI"
+
+suspend connection to w151dbp03.PartyMember
+suspend connection to w151dbp03.Profile_ad_view 
+suspend connection to w151dbp03.Profile_ar_view 
+suspend connection to w151dbp03.Profile_ai_view 
+
+--w151rep01
+
+suspend connection to w151dbr02.Profile_ad
+suspend connection to w151dbr02.Profile_ar
+suspend connection to w151dbr02.Profile_ai
+
+resume connection to w151dbr02.Profile_ad
+resume connection to w151dbr02.Profile_ar
+resume connection to w151dbr02.Profile_ai

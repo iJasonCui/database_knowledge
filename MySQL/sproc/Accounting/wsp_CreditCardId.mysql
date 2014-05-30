@@ -1,0 +1,40 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_CreditCardId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_CreditCardId (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  Sept 2003
+**   Description:  Generation of CreditCardId
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+
+OUT at_creditCardId INT
+)
+BEGIN
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+	ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+	ROLLBACK;
+END;
+
+START TRANSACTION;
+    UPDATE CreditCardId SET creditCardId = creditCardId + 1;
+
+    SELECT creditCardId INTO at_creditCardId FROM CreditCardId;
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

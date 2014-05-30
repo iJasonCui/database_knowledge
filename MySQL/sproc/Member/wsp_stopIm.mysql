@@ -1,0 +1,14 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_stopIm;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_stopIm (
+ at_userId             DECIMAL(12,0)
+,at_dateAccept         DATETIME 
+)
+BEGIN
+
+UPDATE user_info 
+   SET acceptImOn = at_dateAccept
+ WHERE user_id = at_userId ;
+
+END;;
+DELIMITER ;

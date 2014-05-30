@@ -1,0 +1,27 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_saveVoiceRjctInboundCall;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_saveVoiceRjctInboundCall (
+/***********************************************************************
+**
+** CREATION:
+**   Author:       Frank Qi
+**   Date:          June, 2010
+**   Description:   save(update) Voice Inbound Call
+**
+**
+*************************************************************************/
+ at_voiceConnectId       int,
+ at_rejectReason   Char (2)
+)
+BEGIN
+
+DECLARE at_dateGMT  DATETIME;
+
+CALL wsp_GetDateGMT(at_dateGMT);
+
+UPDATE VoiceConnect  
+   set rejectReason = at_rejectReason
+ where voiceConnectId = at_voiceConnectId ;
+       
+END;;
+DELIMITER ;

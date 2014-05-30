@@ -1,0 +1,37 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getEmailHistoryByUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getEmailHistoryByUserId (
+/***********************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga/Yan Liu
+**   Date:  May 2003
+**   Description:  Retrieves EmailHistory for a given user id
+**
+** REVISION(S):
+**   Author:  Jack Veiga
+**   Date:  January 2004
+**   Description:  Removed join with admin table
+**
+** REVISION(S):
+**   Author:  Yan L 
+**   Date:  November 2006
+**   Description:  Add bounceBackCounter column into resultset 
+**
+*************************************************************************/
+    at_userId DECIMAL(12, 0)
+)
+BEGIN
+    SELECT email,
+           status,
+           dateCreated,
+           dateModified,
+           modifiedBy,
+           type,
+           bounceBackCounter
+      FROM EmailHistory
+     WHERE userId = at_userId
+    ORDER BY dateCreated ;
+
+END;;
+DELIMITER ;

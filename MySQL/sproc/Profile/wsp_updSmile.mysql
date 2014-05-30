@@ -1,0 +1,30 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updSmile;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updSmile (
+ at_productCode CHAR(1)
+,at_communityCode CHAR(1)
+,at_userId DECIMAL(12,0)
+,at_targetUserId DECIMAL(12,0)
+,at_smileNoteId1 INT
+,at_smileNoteId2 INT
+)
+BEGIN
+
+DECLARE at_dateCreated DATETIME;
+
+CALL wsp_GetDateGMT(at_dateCreated);
+
+IF (SELECT 1 FROM Blocklist WHERE userId = at_targetUserId and targetUserId = at_userId) IS NULL THEN
+
+
+			UPDATE Smile SET
+			seen = 'N',
+			smileNoteId1 = at_smileNoteId1,
+			smileNoteId2 = at_smileNoteId2,
+			dateCreated = at_dateCreated
+			WHERE userId = at_userId
+			AND targetUserId = at_targetUserId;
+
+END IF;
+END;;
+DELIMITER ;

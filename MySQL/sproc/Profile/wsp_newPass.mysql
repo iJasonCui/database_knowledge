@@ -1,0 +1,48 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newPass;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newPass (
+ /***********************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga
+**   Date:  October 21 2002
+**   Description:  Inserts row into Pass
+**
+** REVISION(S):
+**   Author: F. Schonberger
+**   Date: September 2010
+**   Description: Added messageOnHoldStatus 
+**
+*************************************************************************/
+ at_productCode CHAR(1)
+,at_communityCode CHAR(1)
+,at_userId DECIMAL(12,0)
+,at_targetUserId DECIMAL(12,0)
+,at_messageOnHoldStatus CHAR(1)
+)
+BEGIN
+DECLARE at_dateCreated DATETIME;
+
+CALL wsp_GetDateGMT(at_dateCreated);
+
+IF (SELECT 1 FROM Blocklist WHERE userId = at_targetUserId and targetUserId = at_userId) IS NULL 
+THEN
+  IF (SELECT 1 FROM Pass WHERE userId = at_userId and targetUserId = at_targetUserId) IS NULL 
+  THEN
+    INSERT INTO Pass 
+				(userId
+				,targetUserId
+				,seen
+				,dateCreated
+				,messageOnHoldStatus
+				) VALUES
+				(at_userId
+				,at_targetUserId
+				,'N'
+				,at_dateCreated
+				,at_messageOnHoldStatus
+				);
+  END IF;
+END IF;
+END;;
+DELIMITER ;

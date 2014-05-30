@@ -1,0 +1,26 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_delAccountingEventByDate;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_delAccountingEventByDate (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  October 9, 2003
+**   Description:  delete all AccountingEvent rows older than date specified
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+at_cutoffDate DATETIME
+)
+BEGIN
+
+DELETE FROM AccountingEvent WHERE dateCreated <= at_cutoffDate;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

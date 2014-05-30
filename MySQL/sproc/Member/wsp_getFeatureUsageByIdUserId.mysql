@@ -1,0 +1,29 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getFeatureUsageByIdUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getFeatureUsageByIdUserId (
+/******************************************************************************
+**
+** CREATION: 
+**   Author:  F.Schonberger
+**   Date:  August 24, 2010
+**   Description:  Get usageCount, show flag and dates for a givenb featureId, userId
+**
+** REVISION(S):
+**
+******************************************************************************/
+at_featureId      varchar(255)
+,at_userId        DECIMAL(12,0)
+)
+BEGIN
+    SELECT 
+ 	`show`,
+	usageCount,
+	dateCreated,
+	dateModified
+     FROM FeatureUsage t
+    WHERE
+	 t.featureId = at_featureId AND
+	 t.userId = at_userId ;
+
+END;;
+DELIMITER ;

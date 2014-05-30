@@ -1,0 +1,43 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updUserInfoSuspndByUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updUserInfoSuspndByUserId (
+  /******************************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga
+**   Date:  June 6 2002
+**   Description:  Update status user info by user id to suspend and reinstate
+**
+**   Author: Mike Stairs
+**   Date: Oct 2005
+**   Description: added dateModified to user_info
+**
+******************************************************************************/
+ at_statusCode    CHAR(1)
+,at_userId        DECIMAL(12,0)
+)
+BEGIN
+
+DECLARE at_dateNow DATETIME;
+
+CALL wsp_GetDateGMT(at_dateNow);
+
+IF (at_statusCode = "A")
+THEN
+    UPDATE user_info 
+       SET
+           status = 'A'
+          ,suspendedon = NULL
+          ,dateModified = at_dateNow
+     WHERE user_id = at_userId ;
+ELSE
+    UPDATE user_info 
+       SET
+           status = 'S'
+          ,onhold_greeting = 'Y'
+          ,dateModified    = at_dateNow
+     WHERE user_id = at_userId ;
+END IF;
+ 
+END;;
+DELIMITER ;

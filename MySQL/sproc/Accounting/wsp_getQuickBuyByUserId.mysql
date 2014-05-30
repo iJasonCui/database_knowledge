@@ -1,0 +1,107 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getQuickBuyByUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getQuickBuyByUserId (
+/******************************************************************************
+**
+** CREATION:
+**   Author:      Andy Tran
+**   Date:        August 25, 2003
+**   Description: get QuickBuy record
+**
+** REVISION(S):
+**   Author:      Mike Stairs
+**   Date:        November 26, 2003
+**   Description: modified to return offerDetail mapped to current offer, if last
+**                purchase was from different offer
+**
+**   Author:      Andy Tran
+**   Date:        February 2006
+**   Description: modified to exclude offer details that are already expired
+**
+******************************************************************************/
+ at_userId DECIMAL(12,0)
+)
+BEGIN
+
+DECLARE at_maxDateCreated        DATETIME;
+DECLARE at_purchaseOfferId       SMALLINT;
+DECLARE at_creditCardId          INT;
+DECLARE at_purchaseOfferDetailId SMALLINT;
+DECLARE at_dateCreated           DATETIME;
+DECLARE at_ordinal               TINYINT;
+
+SELECT purchaseOfferId INTO at_purchaseOfferId 
+      FROM UserAccount 
+     WHERE userId = at_userId;
+
+SELECT MAX(dateCreated) INTO at_maxDateCreated 
+  FROM Purchase -- (INDEX XAK3Purchase) 
+ WHERE userId = at_userId 
+   AND creditCardId > 0 
+   AND cost > 0
+   AND purchaseOfferDetailId IN 
+      (SELECT purchaseOfferDetailId 
+         FROM PurchaseOfferDetail 
+        WHERE purchaseOfferId = at_purchaseOfferId 
+          AND ordinal > 0 
+          AND ( dateExpiry IS NULL OR dateExpiry = '00000000'));
+
+   ## -- if previous purchase using default purchase offer, get last purchase details
+
+IF at_maxDateCreated IS NOT NULL THEN 
+            SELECT creditCardId
+                  ,purchaseOfferDetailId
+                  ,dateCreated
+              FROM Purchase
+             WHERE userId = at_userId
+               AND dateCreated = at_maxDateCreated;
+ELSE
+            SELECT MAX(dateCreated) INTO at_maxDateCreated 
+              FROM Purchase 
+             WHERE userId = at_userId 
+               AND creditCardId > 0 
+               AND cost > 0
+               AND purchaseOfferDetailId IN 
+                  (SELECT purchaseOfferDetailId 
+                     FROM PurchaseOfferDetail 
+                    WHERE ordinal > 0 
+                      AND ( dateExpiry IS NULL OR dateExpiry = '00000000'));  ##-- not web 900 purchase
+
+            ##-- get last successful credit card purchase, we get ordinal of offer detail and map to current default
+            ##-- for this user
+            IF at_maxDateCreated IS NOT NULL THEN 
+                    SELECT creditCardId, purchaseOfferDetailId, dateCreated 
+                      INTO at_creditCardId, at_purchaseOfferDetailId, at_dateCreated 
+                      FROM Purchase
+                     WHERE userId = at_userId
+                       AND dateCreated = at_maxDateCreated;
+                
+                    IF at_purchaseOfferDetailId IS NOT NULL THEN 
+                            SELECT ordinal INTO at_ordinal 
+                              FROM PurchaseOfferDetail
+                             WHERE purchaseOfferDetailId = at_purchaseOfferDetailId
+                               AND ( dateExpiry IS NULL OR dateExpiry = '00000000');
+                     
+                            IF at_ordinal IS NOT NULL THEN 
+                                    SELECT purchaseOfferDetailId INTO at_purchaseOfferDetailId 
+                                      FROM PurchaseOfferDetail
+                                     WHERE purchaseOfferId = at_purchaseOfferId
+                                       AND ordinal = at_ordinal
+                                       AND ( dateExpiry IS NULL OR dateExpiry = '00000000');
+                       
+                                    SELECT at_creditCardId
+                                          ,at_purchaseOfferDetailId
+                                          ,at_dateCreated;
+                            ELSE 
+                                SELECT repTestId FROM RepTest where 1=2 ;
+                            END IF;
+                    ELSE
+                        SELECT repTestId FROM RepTest where 1=2 ;
+                    END IF;
+            ELSE
+                SELECT repTestId FROM RepTest where 1=2 ;
+            END IF;
+END IF;
+
+END;;
+DELIMITER ;

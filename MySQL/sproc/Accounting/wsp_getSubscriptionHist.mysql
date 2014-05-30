@@ -1,0 +1,26 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getSubscriptionHist;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getSubscriptionHist (
+ at_userId DECIMAL(12,0)
+,at_dateModified DATETIME
+)
+BEGIN
+
+SELECT            
+   usah.subscriptionOfferDetailId,
+   usah.subscriptionStatus,
+   usah.autoRenew,
+   usah.subscriptionEndDate,
+   usah.dateModified,                 
+   usah.cancelCodeMask,
+   usah.userCancelReason,
+   usah.cardId,
+   cc.cardNickname
+FROM UserSubscriptionAccountHistory usah, CreditCard cc
+WHERE usah.cardId = cc.creditCardId
+AND usah.userId = at_userId AND usah.dateModified > at_dateModified
+ORDER BY dateModified;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

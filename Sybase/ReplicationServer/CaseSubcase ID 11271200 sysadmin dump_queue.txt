@@ -1,0 +1,12 @@
+Sent: Tuesday, July 18, 2006 3:07 PM
+To: Jason Cui
+Subject: Case/Subcase ID: 11271200
+
+
+sysadmin dump_file,"filename"
+go
+sysadmin dump_queue,326,0,-1,-1,50
+go
+
+
+***** regarding case number: 11271200.

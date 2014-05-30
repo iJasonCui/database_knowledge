@@ -1,0 +1,36 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updAccountFlag;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updAccountFlag (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Slobodan Kandic
+**   Date:  Aug 2003
+**   Description:  Updates the AccountFlag table (just the reviewed field)
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date:  Oct 2003
+**   Description: added adminUserId and dateModified
+**
+******************************************************************************/
+ at_userId DECIMAL(12,0)
+,at_reviewed CHAR(1)
+,at_adminUserId INT
+)
+BEGIN 
+DECLARE  at_dateModified       DATETIME;
+        
+SET at_dateModified = UTC_TIMESTAMP();
+     
+UPDATE AccountFlag SET
+reviewed = at_reviewed
+,dateModified = at_dateModified
+,adminUserId = at_adminUserId
+WHERE
+userId = at_userId AND
+reviewed != at_reviewed;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

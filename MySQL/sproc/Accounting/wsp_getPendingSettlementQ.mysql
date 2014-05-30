@@ -1,0 +1,30 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getPendingSettlementQ;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getPendingSettlementQ (
+ /***********************************************************************
+**
+** CREATION:
+**   Author:  Jeff Yang 
+**   Date:  June 7 2008
+**   Description:  Retrieves Pending Settlement Queue if it is too old 
+**
+**
+*************************************************************************/
+
+at_olderThan DATETIME
+)
+
+BEGIN
+	SELECT
+	q.xactionId,
+	p.userId,
+	q.dateCreated
+	FROM SettlementQueue q, Purchase p 
+	WHERE q.dateCreated < at_olderThan AND status=0 AND q.xactionId=p.xactionId
+        AND q.dateCreated > TIMESTAMPADD(DAY,-30,NOW())  
+	ORDER BY q.dateCreated;
+ 
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

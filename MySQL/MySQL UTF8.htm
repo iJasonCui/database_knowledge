@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en-US">
+<head>
+<script type="text/javascript">var _sf_startpt=(new Date()).getTime()</script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Blue Box Blog</title>
+
+<link rel="stylesheet" href="http://www.bluebox.net/about/blog/wp-content/themes/bluebox_net/style.css" type="text/css" media="all" />
+<link rel="profile" href="http://gmpg.org/xfn/11" />
+<link rel="pingback" href="http://www.bluebox.net/about/blog/xmlrpc.php" />
+<script type="text/javascript" src="http://use.typekit.com/mnd4oqm.js"></script>
+<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+<meta name="generator" content="WordPress 3.3.1" />
+<meta name="template" content="bluebox.net " />
+<meta name="robots" content="index,follow" />
+<meta name="author" content="blueboxadmin" />
+<meta name="copyright" content="Copyright (c) July 2009" />
+<meta name="revised" content="Monday, April 9th, 2012, 6:39 pm" />
+<meta name="keywords" content="Blue Box General" />
+<link rel="alternate" type="application/rss+xml" title="Blue Box Blog &raquo; Feed" href="http://www.bluebox.net/about/blog/feed/" />
+<link rel="alternate" type="application/rss+xml" title="Blue Box Blog &raquo; Comments Feed" href="http://www.bluebox.net/about/blog/comments/feed/" />
+<link rel="alternate" type="application/rss+xml" title="Blue Box Blog &raquo; Getting out of MySQL Character Set Hell Comments Feed" href="http://www.bluebox.net/about/blog/2009/07/mysql_encoding/feed/" />
+<script type='text/javascript' src='http://www.bluebox.net/about/blog/wp-includes/js/jquery/jquery.js?ver=1.7.1'></script>
+<script type='text/javascript' src='http://www.bluebox.net/about/blog/wp-includes/js/comment-reply.js?ver=20090102'></script>
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://www.bluebox.net/about/blog/xmlrpc.php?rsd" />
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="http://www.bluebox.net/about/blog/wp-includes/wlwmanifest.xml" /> 
+<link rel='prev' title='Come check out our API at the nPost Startup Event' href='http://www.bluebox.net/about/blog/2009/06/come_check_out_our_api_at_the_npost_startup_event/' />
+<link rel='next' title='Blue Box Loves When Customers Come For a Visit!' href='http://www.bluebox.net/about/blog/2009/07/zubins_visit/' />
+<link rel='canonical' href='http://www.bluebox.net/about/blog/2009/07/mysql_encoding/' />
+<link rel='shortlink' href='http://www.bluebox.net/about/blog/?p=95' />
+
+<!-- Typekit JS code -->
+<script type="text/javascript" src="http://use.typekit.com/mnd4oqm.js"></script>
+<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+<!-- Typekit JS code end -->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-21021273-6']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</head>
+
+<body class="wordpress ltr en_US parent-theme y2013 m01 d25 h20 friday logged-out singular singular-post singular-post-95">
+
+	
+
+		
+				
+		
+		
+		<div id="container">
+
+			<div class="wrap">
+
+                    <a href="http://www.bluebox.net">
+                        <img src="http://www.bluebox.net/about/blog/wp-content/uploads/2012/10/bbg_blog_header.png" alt="Blue Box logo, link to Blue Box home page">
+                    </a>
+			
+			<div class="breadcrumb breadcrumbs"><div class="breadcrumb-trail"><span class="trail-before">Browsing: <span class="sep">/</span></span> <a href="http://www.bluebox.net/about/blog" title="Blue Box Blog" rel="home" class="trail-begin">Home</a> <span class="sep">/</span> <a href="http://www.bluebox.net/about/blog/2009/" title="2009">2009</a> <span class="sep">/</span> <a href="http://www.bluebox.net/about/blog/2009/07/" title="July 2009">July</a> <span class="sep">/</span> <span class="trail-end">Getting out of MySQL Character Set Hell</span></div></div>
+	
+	<div id="content">
+
+		
+		<div class="hfeed">
+
+			
+				
+					
+					<div id="post-95" class="hentry post publish post-1 odd author-blueboxadmin category-uncategorized">
+
+						
+						<div class="entry-utility"><a class="print-link hide-if-no-js" href="#">Print</a> <a class="email-link" href="mailto:?subject=%5BBlue+Box+Blog%5DGetting+out+of+MySQL+Character+Set+Hell&amp;body=Check+out+this+post%3A+http%3A%2F%2Fwww.bluebox.net%2Fabout%2Fblog%2F2009%2F07%2Fmysql_encoding%2F">Email</a> <a class="tips shortlink hide-if-no-js" rel="#shortlink-95" title="Shortlink for &#039;Getting out of MySQL Character Set Hell&#039;">Shortlink</a> <div id="shortlink-95" class="tip hide"><input type="text" value="http://www.bluebox.net/about/blog/?p=95" onclick="this.focus(); this.select();" /></div></div>
+						<h1 class="entry-title"><a href="http://www.bluebox.net/about/blog/2009/07/mysql_encoding/" title="Getting out of MySQL Character Set Hell" rel="bookmark">Getting out of MySQL Character Set Hell</a></h1>
+						<div class="byline">By <span class="author vcard"><a class="url fn n" href="http://www.bluebox.net/about/blog/author/blueboxadmin/" title="blueboxadmin">blueboxadmin</a></span> on <abbr class="published" title="Monday, July 6th, 2009, 1:02 pm">July 6, 2009</abbr> <span class="category"><span class="before"> in </span><a href="http://www.bluebox.net/about/blog/category/uncategorized/" rel="tag">Blue Box General</a></span> </div>
+						<div class="entry-content">
+							<p>Recently here at Blue Box Group we took on a new customer coming from another Ruby on Rails hosting provider. The website this new customer represents has international appeal, has been around for a number of years (with years&#8217; worth of data to go with it) and has been hosted on several different hosting providers in the past. This website has also seen many code changes over the years including significant changes to the underlying platform, and some turn-over of developers working on it.</p>
+<p>When our new customer came on-board with Blue Box Group, the agreement we came to was that BBG would handle most of the technical details behind the transition process including moving their entire data set (and associated databases) onto BBG hardware. They warned us up-front that they were concerned about “character set issues,” since they&#8217;d had to deal with these the last time they changed hosting providers. All of this is pretty standard fare when we bring on a new customer from another hosting provider, so I wasn&#8217;t too worried.</p>
+<p>I was careful to take the above into consideration when we moved the tens of gigabytes of database dumps, hundreds of gigabytes of data files, and everything else to their new cluster. Everything looked good after we&#8217;d gotten it all set up, and when it came time for the cut-over we expected a very smooth transition. To be fair, the transition was smooth, but a few days after the site went live we began to notice that some, rare pages on the site appeared to have suffered some kind of character set corruption somewhere in the process of transition. I was baffled at first until I took a closer look at those bits of data in the database from which these “corrupt” pages were being generated and began to understand what our new customer had meant by “character set issues.”</p>
+<p>After several days, a lot of Googling, reading of (mostly unhelpful) support mailing lists and much experimentation I felt I had accumulated a pretty solid understanding of how things had gotten the way they did in our customer&#8217;s database. What&#8217;s more, unlike most of the other blog articles and other web pages you&#8217;ll probably read on this, I felt I had discovered a relatively simple procedure for getting out of this situation. Since I wasn&#8217;t able to find any other authoritative source on this on the internet (and in fact, most of the other sources I&#8217;ve seen have said you really don&#8217;t want to be in this situation&#8211; while offering little help as to what to do about it if you&#8217;re already there), I thought writing a public document on the subject might help some other systems administrators out there who do find themselves unexpectedly in the middle of MySQL Character Set Hell.</p>
+<p><strong>Some Background on Character Encoding and MySQL&#8217;s Treatment of It</strong></p>
+<p>A full discussion of character sets and encoding is beyond the scope of this document. (If you want more background, I recommend checking out the wikipedia article for a good place to start here: <a href="http://en.wikipedia.org/wiki/Character_encoding" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://en.wikipedia.org']);">http://en.wikipedia.org/wiki/Character_encoding</a> ) However, a basic understanding of character set encoding technology and the specific character sets covered in this document is going to be required in order for the problem description and subsequent solution to make sense.</p>
+<p><strong>US-ASCII and Latin-1 Character Sets</strong></p>
+<p>In the early days of computing the ASCII character set became the industry standard that most computer systems used for representing characters. It&#8217;s a 7-bit encoding scheme which defines all the most commonly used characters in English text, as well as some non-printable control characters.</p>
+<p>Latin-1 (ISO-8859-1) is a slight extension of US-ASCII in that it is 8-bit (ie. each character is exactly one byte or octet), and defines some characters used by non-English languages which nevertheless share much of the character set with English. (This includes many European languages which employ accented characters and the like.) Latin-1 also defines several other commonly-used symbols and glyphs. Latin-1 is one of several 8-bit extensions to ASCII, and the one most commonly in use as a default by US computers.</p>
+<p>The major drawback of using Latin-1 is that it has only 256 possible characters, and therefore has no way of effectively representing characters in languages whose alphabets differ significantly from English (this includes languages like Russian, Greek, Hebrew, Arabic, almost all Asian languages and just about every language ever invented by humans). However, Latin-1 and US-ASCII remain the most commonly used character sets for all computer-related functions. That is, except for web pages.</p>
+<p><strong>UTF-8 Character Set</strong></p>
+<p>In 2008, UTF-8 surpassed ASCII as the most commonly used character encoding in use on the World Wide Web (source: <a href="http://en.wikipedia.org/wiki/ASCII" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://en.wikipedia.org']);">http://en.wikipedia.org/wiki/ASCII</a> ). Adoption of this character encoding scheme seems to be a growing trend for most applications in the information technology industry. A likely reason for this is because it is possible to represent the alphabet of nearly every written language ever invented using just this character set&#8211; which really helps when designing software that is meant to have an international user-base. (The thought here is that your non-English-speaking users will prefer to represent words in their native languages using characters from their native alphabets.)</p>
+<p>UTF-8 is a variable length multi-byte character encoding scheme in that each character may be represented using 1, 2, 3 or 4 bytes or octets of data. The total possible size of this character set is around 10 million characters, with around 1 million defined so far. It can be used to encode any Unicode character, including the characters in nearly every language known to humankind, as well as a bunch of symbols and other glyphs that aren&#8217;t letters at all.</p>
+<p>The main advantage of using UTF-8 over other multi-byte character encoding schemes (which can also encode Unicode characters) is that UTF-8 is backwards-compatible with ASCII. That is, a valid series of ASCII bytes is also a valid set of UTF-8 bytes and represents the exact same characters.</p>
+<p>One obvious advantage to using UTF-8 instead of Latin-1 or ASCII (especially for web pages, where international appeal is usually desired) is that once you&#8217;ve converted over to using UTF-8, you really don&#8217;t have to worry about character set encoding issues again: For just about any human language that has an alphabet or character set, there will be a valid UTF-8 encoding of those characters. (That&#8217;s not to say there aren&#8217;t other caveats and implications about which you need to be aware when using UTF-8, but we&#8217;ll get to those a little later on.) Internationalization of your software becomes much less of a problem when using UTF-8.</p>
+<p>For more good background information on UTF-8, check out <a href="http://en.wikipedia.org/wiki/UTF-8" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://en.wikipedia.org']);"> its wikipedia article</a>.</p>
+<p><strong>MySQL and Character Sets</strong></p>
+<p>MySQL by default uses the Latin-1 character set for all entities within the software or its data sets. In recent years, using UTF-8 has become a viable (and recommended) alternative, but probably in order not to confuse people with changing behavior, the developers of MySQL have decided to leave the default at Latin-1 for now. I believe this will change with MySQL version 6 (which seems like a good time to make everyone go through the task of converting from Latin-1 to UTF-8).</p>
+<p>MySQL has the ability to convert characters between Latin-1 and UTF-8 and will, in fact, do this transparently in many cases. As it turns out, this can actually be a problem which can lead to the exact sort of character set hell this document tries to help the reader recover from.</p>
+<p>In terms of the way MySQL stores textual fields (like CHARs, VARCHARs, and TEXT columns)&#8211; as far as I&#8217;ve been able to determine, at the raw storage level there is no difference between one of these fields and a BLOB (which is just raw binary data), except that text fields have a “collation” applied to them. Documentation on what this means is somewhat lacking, but as far as I can tell, “collation” in this case doesn&#8217;t exactly mean the character set in use in the text fields in the table so much as how MySQL will attempt to interpret the binary data stored in there. This means that it is possible to get ourselves into interesting situations where MySQL will store UTF-8 encoded characters in a table with Latin-1 collation. Also, since not every sequence of bytes is a valid string of UTF-8 characters, it&#8217;s possible to have invalid characters in a UTF-8 collated table.</p>
+<p>Through experimentation I&#8217;ve been able to determine that if you have a Latin-1 collated table with UTF-8 encoded characters in it, then attempting to take the most direct approach to fix this and simply alter the collation from Latin-1 to UTF-8 on the table causes MySQL to “helpfully” convert the characters in the text fields in the table from Latin-1 to UTF-8 for you. The conversion algorithm, unfortunately, is not intelligent enough to figure out when there already are perfectly valid UTF-8 characters in the text fields and instead tries to convert each byte of a multi-byte character into its UTF-8 equivalent. This results in what I will call “double-encoded UTF-8 characters” in your text fields, and looks like a bunch of gobbledygook. Do this several times (usually in an attempt to fix the problem you&#8217;re actually just making worse) and you can have triple- and quadruple-encoded characters (which look like really long strings of gobbledygook which nevertheless have noticeable patterns in them). Fortunately this is all reversible.</p>
+<p>Oh&#8211; and if this weren&#8217;t enough, MySQL can have different character encoding settings for the server, client, table, field, query results, replication, etc. What&#8217;s more, MySQL will transparently convert characters for you between character sets depending on how they&#8217;re used and accessed. (This can make troubleshooting these character set problems “interesting” to say the least.) Further, the terminal software or web server or web browser you&#8217;re using to access the data might also be using its own character set (and transparently converting characters for you)&#8230;</p>
+<p><strong>Why Should You Care?</strong></p>
+<p>You may be asking yourself, if you&#8217;re an English-speaking person writing English software which will only be used by an English-speaking user-base, why you should care about using the UTF-8 character encoding scheme instead of US-ASCII or Latin-1. It certainly seems like there are enough places where it&#8217;s easy to screw something up that it ought to be better to avoid the problem entirely and stick with Latin-1. There are several reasons you want to deal with this problem now:</p>
+<ul style="list-style: square inside;">
+<li>Again, the trend is that more and more software (especially that which touches the internet or has an international user-base) is being written using UTF-8 as the default character set. If you try to stay in the Latin-1 world, you will probably find that over the next couple of years the tools you use will be upgraded to using UTF-8 beneath you.</li>
+<li>It&#8217;s a bad idea to assume that English speaking users won&#8217;t try to enter UTF-8 characters into the text fields in your Latin-1 collated tables. (Ever see those “smart quotes?” Those are actually Unicode characters!) If this happens, especially if you don&#8217;t do character set validation yourself, you can end up in a situation where you do have UTF-8 encoded characters in your Latin-1 collated table (which means you&#8217;ve just landed in MySQL character set hell.)</li>
+<li>Having UTF-8 characters in your Latin-1 encoded tables means you can potentially create mysqldumps of your data which are not restore-able. This can happen transparently&#8211; mysqldump will create the dump with no errors or warnings, but you won&#8217;t know that the dump has syntax errors in it until you attempt to do a restore. (And this is usually exactly the time you don&#8217;t want to find out that your backups have serious problems.)</li>
+<li>The unfortunate nature of many of the problems associated with MySQL character set hell is that they can start happening with no indication that anything is wrong or that data is getting munged&#8211; until month or years later when you need to preserve the data you have, yet it&#8217;s a complete mess because of character encoding issues that have worked their way in there somehow.</li>
+</ul>
+<p>Believe me: Even if you believe you&#8217;ll never need anything more than the 256 characters in the Latin-1 character set, it&#8217;s better to do it with UTF-8 now and save yourself the headache months or years from now.</p>
+<p><strong>The Problem</strong></p>
+<p>It&#8217;s actually somewhat difficult for me to define exactly what it is that quantifies MySQL character set hell. I&#8217;ve alluded to some of the problems that make it a nasty situation to be in above; But just to try to create a more complete list of the symptoms describing what I mean here:</p>
+<ul style="list-style: square inside;">
+<li>Some characters (specifically those not in the ASCII character set) show up as being a series of 2-4 characters of gobbledygook. This might be in the mysql command line client, in your application, or in any other tool accessing text fields in your database.</li>
+<li>Special accented characters are showing up on your web page or in your database as the “replacement character” (�) or question marks. Sometimes forcing the browser to treat the page as being encoded in UTF-8 will show you the characters as they&#8217;re supposed to be.</li>
+<li>A mysqldump you have made of your database is not restore-able. (The mysql command-line client complains about syntax errors in the dump.)</li>
+<li>You&#8217;ve recently updated one of the components of your application, and either legacy data in the database isn&#8217;t showing up right anymore, or new data you add isn&#8217;t showing up right anymore.</li>
+<li>You&#8217;ve just converted from Rails 1.2 to Rails 2.0 or later and suddenly those special characters are showing signs of corruption as has been detailed in this document.</li>
+</ul>
+<p>Further, while the above can be fiendish problems the following secondary factors you may encounter when troubleshooting them can make it a truly hellish position to be in (and get out of):</p>
+<ul style="list-style: square inside;">
+<li>Using two different terminal programs, or connecting to the same database in different ways, the mysql client shows you what look like different results for the exact same query on the exact same data (where in one the data looks right, and in the other, the data looks corrupt&#8211; but only for non-ASCII characters).</li>
+<li>MySQL seems to resist your attempts to correct the double-encoding issue: That is, trying to fix the problem by altering a given table&#8217;s collation just seems to make the problem worse no matter what you do.</li>
+<li>If you have some characters that are double-encoded in your UTF-8 collated table, and some characters that aren&#8217;t, attempting to fix the double-encoded characters destroys the characters that were already right to begin with.</li>
+<li>If you have a very large data set, fixing the problem by manually editing a mysqldump, or by correcting each corrupt character individually is a losing proposition, even if you can find hexadecimal patterns to use in REGEX matching / replacement statements in SQL.</li>
+<li>The above point is especially true if you&#8217;ve got a lot of Chinese or Japanese characters (where there can be tens of thousands of possible characters that could be double-encoded).</li>
+<li>Most of the documentation I&#8217;ve been able to find on this seems to involve a very large amount of manually checking and manually correcting errors found in the data set. This again seems like a losing proposition.</li>
+<li>The MySQL documentation alludes to the fact that you don&#8217;t want to be in a position where you have two types of character encoding in the same table (see <a href="http://dev.mysql.com/doc/refman/5.1/en/charset-conversion.html" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://dev.mysql.com']);">http://dev.mysql.com/doc/refman/5.1/en/charset-conversion.html</a> ), but it does not suggest any course of action to correct this situation should it actually happen to you. Rather, it menacingly says such tables with columns like that “cannot be converted properly.”</li>
+<li>MySQL will “helpfully” transparently alter the character set being used in any given situation based on many different (and often hard to discover) settings. This can make it difficult, to say the least, to find out when and where character encoding conversions are happening, or what component in the system needs its configuration changed.</li>
+<li>MySQL uses its own process of character set conversion (more than likely in an attempt to be able to do conversions on invalid source data without aborting or disallowing the conversion entirely). Note especially that it does not work the same way as the standard gnu iconv utility.</li>
+<li>Attempts to fix double-encoded characters with iconv probably won&#8217;t work (depending on the data set and characters contained therein). Iconv appears to follow the RFC-compliant behavior of exiting with an error at the first improperly-encoded series of bytes it encounters instead of continuing with a warning. (And it will more than likely see these kinds of series of bytes, especially in a large, diverse and somewhat old dataset.) This is not what mysqld does. Furthermore, experimentation shows it doesn&#8217;t appear to catch and correct all instances of mysql double-encoding (among those data it actually will process).</li>
+</ul>
+<p>&#8230; and the list goes on. The above are just some of the things I found attempting to resolve character encoding issues for one customer on one moderately-sized data set. I have no doubt there are more symptoms and stumbling blocks that can be encountered when dealing with MySQL Character Set Hell.</p>
+<p><strong>The Solution</strong></p>
+<p>If you&#8217;ve read this far, you&#8217;ve probably already gathered that the only quasi-permanent solution to the problem of MySQL Character Set Hell is to use the UTF-8 (and only the UTF-8) character encoding everywhere: It&#8217;s the direction all content on the internet is headed, and universal adoption on PCs and server systems probably won&#8217;t be too far behind. The rest of this document proceeds with the assumption that this is where you want to be at the end of the process. The procedure for getting there consists of a few steps:</p>
+<ol style="list-style: square inside;">
+<li>Gather your tools.</li>
+<li>Make everything everywhere speak UTF-8.</li>
+<li>Convert your Latin-1 collated tables to UTF-8.</li>
+<li>Clean up double- (and triple- and quadruple-) -encoded characters in your current data set.</li>
+<li>Fix any other residual problems in your data set left over from previous attempts at cleaning up the character set encoding issues.</li>
+</ol>
+<hr />
+<p><strong>Step 1: Gather your tools</strong></p>
+<p>The way I fixed the above issues was done mostly using standard linux terminal software and the mysql command-line client. Specifically, I used gnome-terminal under Fedora linux, however any terminal software which understands how to display the UTF-8 character set should work. If you have to tweak any of your terminal&#8217;s settings to get it to talk UTF-8 by default, you should probably do this. (The current version of gnome-terminal with Fedora speaks UTF-8 by default, so I didn&#8217;t have to do anything special here.)</p>
+<p>Beyond that, it would be a good idea to consult the documentation for your application software (or the interpreter it uses, be that php, perl, rails, etc.) to determine how you force it to use UTF-8 as its default character set for all things MySQL related. (Since Blue Box Group specializes in Ruby on Rails, I&#8217;ll talk specifically about how to do this with Rails, but for other application platforms you&#8217;ll need to discover how to do this on your own.)</p>
+<p>Note that these instructions do not cover using any kind of GUI to fix your MySQL character set issues: A GUI introduces another layer of indirection from the database, which can further complicate the troubleshooting process (and may introduce yet another place a character set conversion may take place). The goal here is to get MySQL talking UTF-8 at the most fundamental level and in my mind the most direct way to do this is with the mysql command-line client.</p>
+<p>Also, these instructions assume you have complete administrative control over your own mysql database. If you run into MySQL Character Set Hell in a shared environment where you don&#8217;t have complete control over your databases, you&#8217;ll probably have to work with whoever does have administrative control of your database to get these problems fixed. Obviously, YMMV here.</p>
+<p><strong>Step 2: Make everything everywhere speak UTF-8</strong></p>
+<p>To configure both your mysql server daemon and client to speak UTF-8 by default, add lines like the following to every section of your my.cnf and restart your mysql daemon. If you use a mysql client from a different machine, make sure your client machine also has a my.cnf file which defines at least the [client] section and has the following configuration line:</p>
+<pre>default-character-set = utf8</pre>
+<p>You can verify both server and client are speaking UTF-8 by running the following query on the mysql command line (which should yield the following results):</p>
+<pre>mysql&gt; show variables like 'char%';
++--------------------------+----------------------------+
+| Variable_name            | Value                      |
++--------------------------+----------------------------+
+| character_set_client     | utf8                       |
+| character_set_connection | utf8                       |
+| character_set_database   | utf8                       |
+| character_set_filesystem | binary                     |
+| character_set_results    | utf8                       |
+| character_set_server     | utf8                       |
+| character_set_system     | utf8                       |
+| character_sets_dir       | /usr/share/mysql/charsets/ |
++--------------------------+----------------------------+
+8 rows in set (0.00 sec)</pre>
+<p>If you see latin1 mentioned in there anywhere, double-check your configuration, and / or make sure you&#8217;ve restarted your mysql daemon.</p>
+<p>If you&#8217;re running Rails version 2.0 or later, this version of Rails uses the UTF-8 character encoding scheme by default for talking to the MySQL database. If you&#8217;re using Rails 1.2, you need to add the last line below to the appropriate sections of your database.yml file in order to get your application to speak UTF-8 to the database:</p>
+<pre>production:
+  adapter:   mysql
+  database:  mydatabase
+  username:  mydbuser
+  password:  mydbpassword
+  host:      mydbhost
+  encoding:  utf8</pre>
+<p>If you are using a different application platform, you&#8217;ll need to check its documentation to determine how to get your mysql connection to speak UTF-8. If you&#8217;ve written your own functions to do MySQL queries, you can often make sure these queries use UTF-8 by issuing the following query after opening each MySQL connection:</p>
+<pre>set names utf8;</pre>
+<p>And of course, to test your application to make sure that it&#8217;s really talking UTF-8 to the database, you can always execute and examine the results of the show variables like &#8216;char%&#8217;; query above.</p>
+<p><strong>Step 3: Convert your Latin-1 collated tables to UTF-8</strong></p>
+<p><strong>Step 3A: Make a backup</strong></p>
+<p>Since this step is the first place we&#8217;re actually going to be changing data within the database, the very first thing we&#8217;ll want to do here is make a backup of the database. Note that since in MySQL Character Set Hell, a mysqldump of the database is likely to have syntax errors in it, I recommend making a backup of the raw database files. In order for this backup to have clean data in it, you&#8217;ll need to shut down your mysql daemon while making the backu If you&#8217;re server is a RedHat- or CentOS-like operating system using vendor-supplied RPMs for the MySQL packages (and default paths in your my.cnf), the following set of commands ought to do this for you:</p>
+<pre># service mysql stop
+# cd /var/lib
+# tar zcvf mysql-backup.tar.gz mysql
+# service mysql start</pre>
+<p>You&#8217;ll want to make sure your database server has enough space under /var/lib on it to store the above backup, of course.</p>
+<p><strong>Step 3B: Convert those tables</strong></p>
+<p>Please note that if your data set does not contain a mix of single- and double-encoded UTF-8 characters in a Latin-1 character set (ie. you either have one or the other) then there are safer conversion techniques than what I&#8217;m about to document below. (Specifically, see this page:). This step assumes that your data set contains tables with a mix of single- and double- (and triple- and quadruple-) encoded UTF-8 characters in a single Latin-1 collated table.</p>
+<p>The procedure for converting your tables to UTF-8 collation will vary depending on which sources you&#8217;ll read, but the way that worked for me was to do a carefully-crafted mysqldump, alter the dump slightly, then re-import the dump back over the database itself. To minimize the chances of clobbering data in tables that are already properly UTF-8 collated, this really only needs to be done on tables using the Latin-1 collation to begin with. Do discover which tables these are, you can run:</p>
+<pre>mysql&gt; show table status where collation like '%latin1%' \G
+*************************** 1. row ***************************
+           Name: UserInfo
+         Engine: InnoDB
+        Version: 10
+     Row_format: Compact
+           Rows: 2
+ Avg_row_length: 8192
+    Data_length: 16384
+Max_data_length: 0
+   Index_length: 65536
+      Data_free: 0
+ Auto_increment: 3
+    Create_time: 2008-06-01 22:48:11
+    Update_time: NULL
+     Check_time: NULL
+      Collation: latin1_swedish_ci
+       Checksum: NULL
+ Create_options:
+        Comment: InnoDB free: 0 kB
+9 rows in set (0.00 sec)
+
+mysql&gt;</pre>
+<p>(Yes, “latin1_swedish_ci” is the name MySQL uses for Latin-1 collation.) You&#8217;ll need to run the above for all databases on the MySQL server, and compile a list of affected tables. For each of these tables, run:</p>
+<pre># mysqldump -u dbuser -pdbpass --opt --skip-set-charset \
+  --default-character-set=latin1 --skip-extended-insert \
+  databasename --tables tablename &gt; database.table.sql
+# perl -i -pe 's/DEFAULT CHARSET=latin1/DEFAULT CHARSET=utf8/' \
+  database.table.sql
+# cat database.table.sql | mysql -u dbuser -pdbpass databasename</pre>
+<p>Let me analyze what each of the above three commands does for you:</p>
+<ol>
+<li>On the mysqldump command, the &#8211;skip-set-charset and &#8211;default-char-set=latin1 options should prevent MySQL from taking the already-Latin-1-collated table and “helpfully” converting it to any other character set for you. This should ensure that your mysqldump is really in the Latin-1 character encoding scheme.The &#8211;skip-extended-insert option forces mysqldump to put each INSERT command in the dump on its own line. This will make the dump take much longer to re-import, however, in my experimentation, adding this option was enough to prevent the dump from having syntax errors in in anywhere. And in any case, should the re-import fail for any reason, having each row&#8217;s data on its own line really helps to be able to zero-in on which rows are causing you problems (and gives you easier options to work-around the problem rows).</li>
+<li>The perl command above takes your mysqldump and replaces the first instance of “DEFAULT CHARSET=latin1” and replaces it with “DEFAULT CHARSET=utf8”. Since your dump should only contain one table, the first instance of this string should occur within the CREATE TABLE definition toward the top of the dum Doing this change using a perl script both avoids any problems you might introduce by opening the dump in an editor (like, say, if it “helpfully” decides to wrap lines for you), and allows you to make this change on a dump that&#8217;s multiple-gigabytes in size.</li>
+<li>The third command re-imports the modified mysqldump back into the database. The new table should have the UTF-8 collation.</li>
+</ol>
+<p>An astute observer here will note that we told mysql above to import a UTF-8 encoded dump that was actually encoded using Latin-1. In my experimentation, I found that this actually does seem to work, and I suspect this is because of the following reasons:</p>
+<ul style="list-style: square inside;">
+<li>If most of your data is in the ASCII character set (as it probably is), then the Latin-1 and UTF-8 representations of these series of bytes is actually binary equivalent. This means your rows that are purely ASCII will be unaffected by the above.</li>
+<li>For those rows with characters that are not ASCII in them, it appears the MySQL developers had already thought of the above conversion problems, and therefore wrote the mysql client to take a “best guess” approach to importing improperly-formatted data. Specifically, if in the above mysqldump, the mysql client gets handed rows with invalid UTF-8 characters in them, it appears mysql will assume that the characters are actually Latin-1 encoded and convert them to UTF-8 on the fly. Thank you MySQL developers! This is one place where that “helpful” automatic conversion really does help.Note that if you have any Latin-1 characters between the hexadecimal bytes 0xC2 and 0XF4 which are also followed by the right sequence of extended bytes thereafter&#8230; well, this can actually look like a properly-encoded UTF-8 character, so the mysql client&#8217;s best guess algorithm here is unlikely to know these are actually Latin-1 characters and will instead interpret them as the UTF-8 character those bytes appear to be. However, in practice, any such sequence of Latin-1 characters looks like gobbledygook anyway, so is unlikely to occur in a “real” data set. In the tens of gigabytes of data I converted for our new customer (which contained characters from at least a dozen languages including a lot of Chinese and Japanese) this never occurred, and it appears nothing got munged in the process. (We don&#8217;t really have a good way to detect munged characters in this case, but about 3 weeks after the conversion, nobody has reported any brokenness in the converted data.)</li>
+</ul>
+<p>I should also point out here that other sources of documentation will recommend actually converting the mysqldump to the UTF-8 character set using the iconv utility. If you have a relatively clean dataset, this may work for you. For the data set I had to work with, it did not.</p>
+<p>Anyway, before going any further in these instructions, it&#8217;s a good idea to check the collation on your converted tables:</p>
+<pre>mysql&gt; show table status \G
+*************************** 1. row ***************************
+           Name: UserInfo
+         Engine: InnoDB
+        Version: 10
+     Row_format: Compact
+           Rows: 2
+ Avg_row_length: 8192
+    Data_length: 16384
+Max_data_length: 0
+   Index_length: 65536
+      Data_free: 0
+ Auto_increment: 3
+    Create_time: 2008-06-01 22:48:11
+    Update_time: NULL
+     Check_time: NULL
+      Collation: utf8_general_ci
+       Checksum: NULL
+ Create_options:
+        Comment: InnoDB free: 0 kB
+9 rows in set (0.00 sec)
+
+mysql&gt;</pre>
+<p><strong>Step 4: Clean up double-encoded characters in your current data set</strong></p>
+<p>Before going any further in these instructions, I highly recommend taking a close look at your application. At this point, everything everywhere should be speaking UTF-8, and all your tables should have the UTF-8 collation. In an ideal world, especially if you started with a relatively clean data set, this may be all you need to do to make everything peachy in your application. So take a moment to look at your application (and specifically content generated from rows with non-ASCII characters in them) and verify you really need to go further in this how-to.</p>
+<p>Ok, so from here on out, we&#8217;re going to assume that you do still have problems displaying characters as they should be in your application, and that this is due to having double-encoded characters in your UTF-8 collated tables. (Note that if your terminal and mysql command-line client are speaking UTF-8, you can verify the problems lie with the data itself with a few SELECT statements targeted at rows containing the data.)</p>
+<p><strong>Caveats</strong></p>
+<p>As a few final notes before moving on just to drive the point home:</p>
+<ul style="list-style: square inside;">
+<li>*The remainder of these instructions will not work if you are not speaking UTF-8 everywhere, or if your tables are not using the UTF-8 collation.*</li>
+<li>If you have a relatively small number of rows affected by character encoding issues at this point, it may just be simpler and safer to fix these by hand.</li>
+<li>If you have a relatively small number of different types of double-encoded UTF-8 characters it may be simpler to convert these characters directly using techniques detailed by Derek Sivers in his excellent blog article on the same here: <a href="http://www.oreillynet.com/lpt/wlg/9022" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://www.oreillynet.com']);">http://www.oreillynet.com/lpt/wlg/9022</a></li>
+<li>These instructions assume you won&#8217;t have single- and double-encoded UTF-8 characters in the same field of a single row of any given table. This is a relatively safe assumption, unless you&#8217;ve already partially-completed manually fixing the data as described by Derek Sivers in the above point. If you do have such fields in your data set, these instructions will definitely corrupt them. (ie. You&#8217;re better off either finishing your conversion using Derek&#8217;s techniques, or reverting the data back to the state they were in before attempting Derek&#8217;s techniques.)</li>
+</ul>
+<p><strong>Scope of these instructions</strong></p>
+<p>The instructions in this section of this document will detail how to fix double- (and triple- and quadruple-)-encoded character issues for one column in all rows of one table in the database. These steps will need to be repeated for any affected columns in all tables in your database. Scripting this is left as an exercise for the reader (or as an incentive to become a customer of Blue Box Grou;) )</p>
+<p>For the examples I&#8217;ll be using below, we&#8217;ll use the following example name conventions. Obviously, you&#8217;ll need to replace these with the actual names that apply to your database:</p>
+<ul style="list-style: square inside;">
+<li>Table: mytable</li>
+<li>Field / Column: myfield</li>
+<li>Type of the above field / column: mytype</li>
+<li>Temporary table (name is arbitrarily chosen): temptable</li>
+</ul>
+<p><strong>Step 4A: Find tables with fields containing multi-byte characters in them</strong></p>
+<p>At this point, only those rows which have non-ASCII characters in text-containing fields (like CHAR, VARCHAR, TEXT, etc.) should have problems with double-encoded UTF-8 characters in them. The really nice part about UTF-8 here (and tables containing UTF-8 characters) is that any non-ASCII characters are by design multi-byte characters. We can exploit this fact to find tables and fields with rows containing non-ASCII characters.</p>
+<pre>mysql&gt; select count(*) from mytable where LENGTH(myfield) !=
+       CHAR_LENGTH(myfield);
++----------+
+| count(*) |
++----------+
+|      669 |
++----------+
+1 row in set (0.28 sec)</pre>
+<p>If the above query returns a count of zero, this means that either:</p>
+<ul style="list-style: square inside;">
+<li>There are no non-ASCII characters in any rows of the table for this field. Therefore, this field of this table does not need any correction and can be ignored.</li>
+<li>Your table is not using UTF-8 collation (which is bad, because if you&#8217;ve been following my instructions thus far it should be).</li>
+<li>Non-ASCII characters in this field in this table have already been munged by previous attempts at correcting character encoding issues and have been turned into single-byte characters (more than likely a question mark). If you have any rows with fields like this, the information needed to automatically convert them back into the multi-byte characters they should be has already been lost, and these rows will need to be fixed by hand.</li>
+</ul>
+<p>Anyway, you will want to go through all text-like fields in all tables of your database and find any which contain rows that have multi-byte characters in them like this. These rows can potentially have double-encoded UTF-8 characters in them and will need conversion as detailed below. I suggest compiling these into a list you can automatically parse with a script which will do the remainder of the steps below.</p>
+<p>*Also note that it is very important at this stage to make note of the field type and any associated parameters (eg. the length of the VARCHAR, etc.).* I suggest taking a close look at the table&#8217;s description to get this information.</p>
+<p><strong>Step 4B: Copy rows with multi-byte characters into a temporary table</strong></p>
+<p>Now that we know which fields in which tables potentially have double-encoded UTF-8 characters in them, copy just those rows into a temporary table. The goal here is to minimize the chances of blowing away large chunks of the data you want to keep, so we only need to run the remainder of our conversion steps on rows that are potential candidates for double-encoded UTF-8 characters:</p>
+<pre>mysql&gt; create table temptable (select * from mytable where
+       LENGTH(myfield) != CHAR_LENGTH(myfield));
+Query OK, 669 rows affected (1.15 sec)
+Records: 669  Duplicates: 0  Warnings: 0</pre>
+<p><strong>Step 4C: Convert double-encoded UTF-8 characters to proper UTF-8 characters</strong></p>
+<p>In order to do this, we&#8217;re actually going to convert the field from UTF-8 to Latin-1 and use a round-about way of changing it back to UTF-8 again. This may seem counter-intuitive, but I&#8217;ll explain why this works after listing the actual commands to run:</p>
+<pre>mysql&gt; alter table temptable modify temptable.myfield mytype character
+       set latin1;
+Query OK, 669 rows affected, 127 warnings (0.05 sec)
+Records: 669  Duplicates: 0  Warnings: 0
+
+mysql&gt; alter table temptable modify temptable.myfield blob;
+Query OK, 669 rows affected (0.17 sec)
+Records: 669  Duplicates: 0  Warnings: 0
+
+mysql&gt; alter table temptable modify temptable.myfield mytype character
+       set utf8;
+Query OK, 669 rows affected, 552 warnings (0.05 sec)
+Records: 669  Duplicates: 0  Warnings: 0</pre>
+<p>Let me explain what the above does:</p>
+<ul style="list-style: square inside;">
+<li>The first alter table command tells mysql to convert the UTF-8 encoded characters into Latin-1. At first, this appears to be the exact opposite of what we were trying to accomplish above by making everything everywhere speak UTF-8. But please remember that by “double-encoded” UTF-8 characters, I really mean properly-encoded UTF-8 characters that were run through MySQL&#8217;s Latin-1 to UTF-8 conversion algorithm one too many times. By converting the UTF-8 collated field to Latin-1, this effectively tells MySQL to run those characters through the reverse algorithm: Convert UTF-8 encoded characters to Latin-1. This has the effect of taking those double-encoded UTF-8 characters and turning them into single-encoded or properly-encoded UTF-8 characters.So what about those rows which already had properly-encoded UTF-8 characters in them? Well, that&#8217;s what some of those warnings were. But we&#8217;ll get to that in the next step sub-part.</li>
+<li>The second alter table command just converts the textual field into a BLOB (or raw binary) field. This does no change to the actual binary data underneath and no conversion algorithm is run.</li>
+<li>The third alter table command takes that BLOB field and converts it back to a textual field with the UTF-8 encoding. Since MySQL has no algorithms defined for character conversion when going from a BLOB to any other data type, these last two steps effectively allow us to fool MySQL into converting the field from Latin-1 to UTF-8 collation, but skip the character set conversion algorithm that would otherwise re-double-encode our now pristine properly-encoded UTF-8 characters. Pretty sneaky, eh.</li>
+</ul>
+<p><strong>Step 4D: Remove rows with only single-byte characters from the temporary table</strong></p>
+<p>Ok, so about those rows that already had properly-encoded UTF-8 characters in them: If MySQL encounters a multi-byte character in UTF-8 encoding, it essentially has two options when converting this character to Latin-1:</p>
+<ul style="list-style: square inside;">
+<li>If a Latin-1 representation of that character exists (as is the case with characters like: ¶, Ü, ¿, £, etc.), then MySQL just converts the multi-byte UTF-8 character into its single-byte Latin-1 equivalent.</li>
+<li>If a Latin-1 representation of that character does not exist, MySQL converts the multi-byte UTF-8 character into a question mark (?), which is the closest thing Latin-1 has to the replacement character (�). This also generates the warnings alluded to above, because we are effectively removing our ability to properly convert this character back from Latin-1 to UTF-8, and MySQL knows this.</li>
+</ul>
+<p>There&#8217;s also another case I haven&#8217;t discussed yet which you might encounter here: If the series of bytes that should be the UTF-8 field contains any sequence of bytes that does not actually represent UTF-8 characters (ie. corrupt characters or starting data that was never Latin-1 or UTF-8 at all to begin with), then my experimentation seems to show that MySQL will truncate these fields at the first such sequence of bytes. This appears to be how it will also handle queries on tables with UTF-8 collation where the series of bytes actually stored in the fields do not describe a proper UTF-8 string. Anyway, the end result of this “corrupt starting data” is that in the end, MySQL will truncate it at the first erroneous byte sequence whenever it&#8217;s accessed.</p>
+<p>And this is another key behavioral feature of MySQL&#8217;s character handling algorithms we can exploit: At the end of step 4C above, any fields which had already contained only properly-encoded UTF-8 characters in them, or which contained an erroneous sequence of bytes will be converted to strings which contain only single-byte characters.</p>
+<p>Since these are exactly the fields we do not want to do any kind of conversion on, it&#8217;s easy enough now to exclude them from our list of rows in the temporary table to be fixed in the “real” table:</p>
+<pre>mysql&gt; delete from temptable where LENGTH(myfield) = CHAR_LENGTH(myfield);
+Query OK, 549 rows affected (0.01 sec)</pre>
+<p><strong>Step 4E: Re-insert fixed rows back into the original table</strong></p>
+<p>Since our temporary table should now include only those rows which had double-encoded UTF-8 characters in them, and since those rows have been “fixed” as it were, all we need to do now is to update said rows in the original table. Note that it would probably be a good idea to take a look at the “fixed” rows with a few select statements before you do this:</p>
+<pre>mysql&gt; replace into mytable (select * from temptable);
+Query OK, 120 rows affected (0.05 sec)
+Records: 120  Duplicates: 0  Warnings: 0</pre>
+<p><strong>Step 4F: Verify fixed rows are actually fixed</strong></p>
+<p>At this point, the field we just updated should contain only valid, properly-encoded UTF-8 characters in it (unless, of course, you had triple- and quadruple-encoded characters). Especially before you run a script to do steps 4B through 4E above for all your affected columns in all your affected tables, now would be a very good time to check how those affected characters from those fields look in your application, in selects on the mysql command line client, etc. to verify the fixes we did above actually did fix things.</p>
+<p><strong>Step 5: Fix any residual problems</strong></p>
+<p>It&#8217;s entirely possible at this point that there still might be some character set issues which have defied our above attempts at using MySQL&#8217;s character encoding conversion algorithms to fix. There are any number of ways this may have happened, especially if you have a rather old data set that has been used with several different application front-ends or has been moved across several different platforms or been touched by a lot of different developers who may have taken different approaches to dealing with the problem of MySQL Character Set Hell. The hope here is that by following the above steps we should have reduced the number of rows which need fixing to only a handful, where manually fixing them is no longer a losing proposition.</p>
+<p>If you find yourself at this stage, I recommend reading through Derek Sivers&#8217; article on doing this as one way to fix these lingering problems: <a href="http://www.oreillynet.com/lpt/wlg/9022" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://www.oreillynet.com']);">http://www.oreillynet.com/lpt/wlg/9022</a></p>
+<p><strong>Some final notes on the conversion process</strong></p>
+<ul style="list-style: square inside;">
+<li>If you have triple- or quadruple-encoded UTF-8 characters, to fix these, just run the data through steps 4B through 4E above multiple times. The conversion process above is designed to avoid munging properly-encoded UTF-8 characters and should be safe to run multiple times on the same data set.</li>
+<li>If you have any foreign key constraints, triggers, etc. which would make the above steps as literally detailed impossible, then you&#8217;ll need to alter your plan somewhat. Hopefully at this point you understand enough of how the process works in order to come up with a plan to work around such constraints.</li>
+<li>If you&#8217;ve read through all these instructions hoping to fix MySQL character set problems involving any other character sets than Latin-1 or UTF-8, I&#8217;m sorry to say these instructions may not help you: I&#8217;ve not tried the above with any other character sets, and have no idea whether MySQL&#8217;s behavioral quirks (which I&#8217;m exploiting to do this fix) work as well for other character encoding schemes as they do for UTF-8 and Latin-1.</li>
+<li>As usual, your mileage may vary. This document was written in the hope that it would save some DBAs or SysAdmins somewhere a lot of trouble and headache by documenting in detail what worked for us and why. No promises, guarantees, or warranties are implied in any way shape or form with this document and we take no responsibility for any kind of data, customer, hair, employment, or spousal corruption or loss as a result of following the advice contained herein.</li>
+</ul>
+<p><strong>A few final words on using UTF-8</strong></p>
+<p>Let&#8217;s see&#8230; I said at some point above that if you&#8217;re new to the UTF-8 world, there are other issues about which you need to be aware when using this character set encoding scheme. Here are a few major ones:</p>
+<ul style="list-style: square inside;">
+<li>In the early stages of UTF-8, there were a myriad of exploits and buffer-overruns found in dealing with UTF-8 encoded character sets. These largely came from the (at the time) wide-spread assumption that 1 byte = 1 character. While these problems have largely been worked through in your operating system and standard software suites, if you&#8217;re writing your own code which will be exposed to UTF-8 characters, you need to keep in mind that characters are not guaranteed to be 1 byte long each, and plan accordingly.</li>
+<li>Some characters in UTF-8 take up no space or even print to the right of the cursor when displayed on screen. This is by design as some languages&#8217; alphabets are not meant to be read from left to right and have special ways of dealing with inflections, diphthongs, glottal stops, and other things you&#8217;d need to consult a linguist to understand. However, this can be somewhat surprising at first if you&#8217;re used to the English paradigm of everything you type appearing on the screen from left to right (especially if your terminal actually does know the right way to display these characters).</li>
+<li>If you have profanity filters or other character- or string-recognition-based anti-abuse measures in use on your site, UTF-8 presents some new challenges. Because of the vast number of characters in the UTF-8 character encoding scheme, it&#8217;s possible to take a character in another language which looks close enough to an English character to effectively side-step such filters. UTF-8 also opens the door for other less severe abuses of the character set like this: ¡ƃuıuǝddɐɥ s,ʇɐɥʍ ɐǝpı ou ǝʌɐɥ ı This becomes even more of a problem if an abusive user decides to put abusive content on your site in a language you don&#8217;t speak (and therefore probably won&#8217;t realize is abusive).If you only really want to support English characters in your application, instead of avoiding the use of UTF-8, I would instead recommend still following the above instructions to make everything everywhere speak UTF-8, but run user input through a filter which allows only a subset of the UTF-8 character set to be used. This way you can continue to have working profanity, etc. filters while avoiding the problem of MySQL Character Set Hell.</li>
+<li>If you rely on user reports to detect such abuses in your application, if you allow your users (and abusers) to enter any characters they would like for their username or other identifying information, you may find that your legitimate users have a hard time reporting the abuses since they won&#8217;t know how to type this identifying information in an abuse report. (In other words, when it comes to user identification, it&#8217;s usually best to write your code to limit this to just characters that can be found in the ASCII character set.)</li>
+</ul>
+<p>&#8230;and this list also goes on. Despite this, the more universal adoption of UTF-8 as the “standard” character set for nearly all human alphabets is probably a good thing. (And yes, your application is going to have to deal with these 21st century problems sometime– It&#8217;s better to deal with these sooner rather than later, eh.)</p>
+<p><strong>A conclusion (of sorts)</strong></p>
+<p>The one thing you&#8217;ll probably see in all the documentation you&#8217;ll find online about dealing with MySQL character set encoding issues is that it&#8217;s better to start with everything set up right from day one, and not have to go through a painful conversion. As they say, hindsight is better than foresight, and that definitely applies to the problems associated with MySQL character set encoding.</p>
+<p>If the steps I&#8217;ve done my best to explain above still seem too difficult to follow, then the only thing I can say about this is that this is a situation where hiring an expert DBA, or a well-trained, experienced support team is money well spent. This is a deceptively difficult position to be in, and it&#8217;s a good idea to have people who know what they&#8217;re doing to help you get out of it.</p>
+<p>In any case, if you&#8217;ve read this far, I thank you and wish you the best of luck in climbing out of MySQL Character Set Hell.</p>
+<p>Thanks,<br />
+Stephen Balukoff<br />
+~ CTO, Blue Box Group, LLC</p>
+													</div><!-- .entry-content -->
+
+						<div class="entry-meta"><span class="share">Share this on:</span> <a href="http://www.mixx.com" onclick="window.location='http://www.mixx.com/submit?page_url='+window.location; return false;">Mixx</a> <a href="http://delicious.com/save" onclick="window.open('http://delicious.com/save?v=5&amp;noui&amp;jump=close&amp;url='+encodeURIComponent('http://www.bluebox.net/about/blog/2009/07/mysql_encoding/')+'&amp;title='+encodeURIComponent('Getting out of MySQL Character Set Hell'),'delicious', 'toolbar=no,width=550,height=550'); return false;">Delicious</a> <a href="http://digg.com/submit?phase=2&#038;url=http%3A%2F%2Fwww.bluebox.net%2Fabout%2Fblog%2F2009%2F07%2Fmysql_encoding%2F&#038;title=Getting+out+of+MySQL+Character+Set+Hell" title="Digg this entry">Digg</a> <a href="http://facebook.com/sharer.php?u=http%3A%2F%2Fwww.bluebox.net%2Fabout%2Fblog%2F2009%2F07%2Fmysql_encoding%2F&#038;t=Getting+out+of+MySQL+Character+Set+Hell" title="Share this entry on Facebook">Facebook</a> <a href="http://twitter.com/home?status=Currently+reading+http%3A%2F%2Fwww.bluebox.net%2Fabout%2Fblog%2F%3Fp%3D95" title="Share this entry on Twitter">Twitter</a></div>
+						
+					</div><!-- .hentry -->
+
+					
+					
+	
+	<div id="sidebar-after-singular" class="sidebar utility">
+
+		<div class="ui-tabs">
+
+			<div class="ui-tabs-wrap">
+
+				<ul class="ui-tabs-nav">
+					<li><a href="#singular-post-tabs-1">Related Stories</a></li>
+					<li><a href="#singular-post-tabs-2">Most Popular</a></li>
+				</ul><!-- .ui-tabs-nav -->
+
+				<div id="singular-post-tabs-1" class="ui-tabs-panel">
+
+					
+					
+					
+						<ul class="alignleft">
+
+						
+							
+							<li><a href="http://www.bluebox.net/about/blog/2013/01/provisioning-with-razor-and-chef-an-interactive-demo/" title="Provisioning with Razor and Chef &#8211; An Interactive Demo">Provisioning with Razor and Chef &#8211; An Interactive Demo</a></li>
+						
+							
+							<li><a href="http://www.bluebox.net/about/blog/2013/01/blue-box-raises-over-4-3m-in-series-a-funding/" title="Blue Box raises over $4.3M in Series A funding">Blue Box raises over $4.3M in Series A funding</a></li>
+						
+							
+							<li><a href="http://www.bluebox.net/about/blog/2013/01/jesse-featured-on-ibm-developerworks-podcast/" title="Jesse Featured on IBM developerWorks Podcast">Jesse Featured on IBM developerWorks Podcast</a></li>
+						
+															</ul><ul class="alignright">
+							
+							<li><a href="http://www.bluebox.net/about/blog/2012/12/load-balancing-just-got-easier/" title="Load balancing just got easier!">Load balancing just got easier!</a></li>
+						
+							
+							<li><a href="http://www.bluebox.net/about/blog/2012/12/geeks-give-back-challenge/" title="Geeks Give Back Challenge!">Geeks Give Back Challenge!</a></li>
+						
+							
+							<li><a href="http://www.bluebox.net/about/blog/2012/12/blue-box-is-offering-a-limited-time-trade-up-deal/" title="Blue Box is offering a limited time &#8220;Trade Up&#8221; deal!">Blue Box is offering a limited time &#8220;Trade Up&#8221; deal!</a></li>
+						
+						</ul>
+
+					
+				</div><!-- #singular-post-tabs-1 .ui-tabs-panel -->
+
+				<div id="singular-post-tabs-2" class="ui-tabs-panel">
+
+					
+					
+					
+						<ul class="alignleft">
+
+						
+							
+							<li><a href="http://www.bluebox.net/about/blog/2012/07/blue-box-announces-new-partnership-with-code-climate/" title="Blue Box Announces New Partnership with Code Climate">Blue Box Announces New Partnership with Code Climate</a></li>
+						
+							
+							<li><a href="http://www.bluebox.net/about/blog/2007/08/blue-box-group-sla/" title="Blue Box Group SLA">Blue Box Group SLA</a></li>
+						
+							
+							<li><a href="http://www.bluebox.net/about/blog/2007/10/open_bar_night_at_ruby_conf/" title="Open Bar Night at Ruby Conf">Open Bar Night at Ruby Conf</a></li>
+						
+															</ul><ul class="alignright">
+							
+							<li><a href="http://www.bluebox.net/about/blog/2007/12/system_administrator_position_open/" title="System Administrator Position Open">System Administrator Position Open</a></li>
+						
+							
+							<li><a href="http://www.bluebox.net/about/blog/2008/01/eye_candy_cluster_setup/" title="Eye Candy: Cluster Setup">Eye Candy: Cluster Setup</a></li>
+						
+							
+							<li><a href="http://www.bluebox.net/about/blog/2008/01/blue_box_group_appoints_stephen_balukoff_as_cto/" title="Blue Box Group Appoints Stephen Balukoff as CTO">Blue Box Group Appoints Stephen Balukoff as CTO</a></li>
+						
+						</ul>
+
+					
+				</div><!-- #singular-post-tabs-2 .ui-tabs-panel -->
+
+			</div><!-- .ui-tabs-wrap -->
+
+		</div><!-- .ui-tabs -->
+
+	</div><!-- #sidebar-singular -->
+
+
+					
+					
+<div id="comments-template">
+
+	<div class="comments-wrap">
+
+		<div id="comments">
+
+			
+			
+		
+		</div><!-- #comments -->
+
+										<div id="respond">
+				<h3 id="reply-title">Leave a Reply <small><a rel="nofollow" id="cancel-comment-reply-link" href="/about/blog/2009/07/mysql_encoding/#respond" style="display:none;">Click here to cancel reply.</a></small></h3>
+									<form action="http://www.bluebox.net/about/blog/wp-comments-post.php" method="post" id="commentform">
+																										<p class="form-author req"><label for="author">Name <span class="required">*</span> </label> <input type="text" class="text-input" name="author" id="author" value="" size="40" /></p>
+<p class="form-email req"><label for="email">Email <span class="required">*</span> </label> <input type="text" class="text-input" name="email" id="email" value="" size="40" /></p>
+<p class="form-url"><label for="url">Website</label><input type="text" class="text-input" name="url" id="url" value="" size="40" /></p>
+												<p class="form-textarea req"><label for="comment">Comment</label><textarea name="comment" id="comment" cols="60" rows="10"></textarea></p>												<p class="form-submit">
+							<input name="submit" type="submit" id="submit" value="Submit" />
+							<input type='hidden' name='comment_post_ID' value='95' id='comment_post_ID' />
+<input type='hidden' name='comment_parent' id='comment_parent' value='0' />
+						</p>
+						<p style="display: none;"><input type="hidden" id="akismet_comment_nonce" name="akismet_comment_nonce" value="4a45d5d486" /></p>					</form>
+							</div><!-- #respond -->
+				<script type="text/javascript">
+		jQuery(document).ready(function () {
+			jQuery('#commentform').submit(function () {
+				_gaq.push(
+					['_setAccount', 'UA-21021273-6'],
+					['_trackEvent', 'comment', 'submit']
+				);
+			});
+		});
+	</script>
+				
+	</div><!-- .comments-wrap -->
+
+</div><!-- #comments-template -->
+				
+			
+		</div><!-- .hfeed -->
+
+		
+		
+	
+		<div class="loop-nav navigation-links">
+			<a href="http://www.bluebox.net/about/blog/2009/06/come_check_out_our_api_at_the_npost_startup_event/" rel="prev"><span class="previous">&larr; Previous</span></a>			<a href="http://www.bluebox.net/about/blog/2009/07/zubins_visit/" rel="next"><span class="next">Next &rarr;</span></a>		</div><!-- .navigation-links -->
+
+	
+	</div><!-- #content -->
+
+	
+			
+	<div id="sidebar-primary" class="sidebar aside">
+
+		
+		<div id="hybrid-search-2" class="widget search widget-search"><div class="widget-wrap widget-inside"><h3 class="widget-title">Search</h3><form method="get" class="search-form" id="search-form" action="http://www.bluebox.net/about/blog/"><div><input class="search-text" type="text" name="s" id="search-text" value="" onfocus="if(this.value==this.defaultValue)this.value='';" onblur="if(this.value=='')this.value=this.defaultValue;" /></div></form><!-- .search-form --></div></div><div id="hybrid-nav-menu-2" class="widget nav-menu widget-nav-menu"><div class="widget-wrap widget-inside"><h3 class="widget-title">Blue Box</h3><div class="menu-bbg-container"><ul id="menu-bbg" class="nav-menu"><li id="menu-item-634" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-634"><a href="http://bluebox.net" >Home</a></li><li id="menu-item-636" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-636"><a href="https://bluebox.net/solutions" >Solutions</a></li><li id="menu-item-637" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-637"><a href="https://bluebox.net/technology/hardware" >Hardware</a></li><li id="menu-item-635" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-635"><a href="https://bluebox.net/contact" >Contact</a></li></ul></div></div></div>
+		
+	</div><!-- #sidebar-primary .aside -->
+
+
+			
+	<div id="sidebar-secondary" class="sidebar aside">
+
+		
+		<div id="hybrid-archives-2" class="widget archives widget-archives"><div class="widget-wrap widget-inside"><h3 class="widget-title">Archives</h3><ul class="xoxo archives"><li><a href='http://www.bluebox.net/about/blog/2013/01/' title='January 2013'>January 2013</a></li><li><a href='http://www.bluebox.net/about/blog/2012/12/' title='December 2012'>December 2012</a></li><li><a href='http://www.bluebox.net/about/blog/2012/11/' title='November 2012'>November 2012</a></li><li><a href='http://www.bluebox.net/about/blog/2012/10/' title='October 2012'>October 2012</a></li><li><a href='http://www.bluebox.net/about/blog/2012/08/' title='August 2012'>August 2012</a></li><li><a href='http://www.bluebox.net/about/blog/2012/07/' title='July 2012'>July 2012</a></li><li><a href='http://www.bluebox.net/about/blog/2012/06/' title='June 2012'>June 2012</a></li><li><a href='http://www.bluebox.net/about/blog/2012/05/' title='May 2012'>May 2012</a></li><li><a href='http://www.bluebox.net/about/blog/2012/04/' title='April 2012'>April 2012</a></li><li><a href='http://www.bluebox.net/about/blog/2012/02/' title='February 2012'>February 2012</a></li></ul><!-- .xoxo .archives --></div></div>
+		
+	</div><!-- #sidebar-secondary .aside -->
+
+
+			
+			</div><!-- .wrap -->
+
+		</div><!-- #container -->
+
+		
+		
+		<div id="footer-wrapper">
+                </div>
+
+<p id="copyright">Copyright &copy; 2012 Blue Box Group, LLC. All rights reserved.
+  </div>
+  <!-- footer -->
+</div>
+<!-- footer-wrapper -->
+
+
+		
+	</div><!-- #body-container -->
+
+		<script type="text/javascript">/* <![CDATA[ */ jQuery(document).ready( function() { jQuery.post( "https://www.bluebox.net/about/blog/wp-admin/admin-ajax.php", { action : "entry_views", _ajax_nonce : "fa35b921cc", post_id : 95 } ); } ); /* ]]> */</script>
+<script type='text/javascript' src='http://www.bluebox.net/about/blog/wp-includes/js/jquery/ui/jquery.ui.core.min.js?ver=1.8.16'></script>
+<script type='text/javascript' src='http://www.bluebox.net/about/blog/wp-includes/js/jquery/ui/jquery.ui.widget.min.js?ver=1.8.16'></script>
+<script type='text/javascript' src='http://www.bluebox.net/about/blog/wp-includes/js/jquery/ui/jquery.ui.tabs.min.js?ver=1.8.16'></script>
+<script type='text/javascript' src='http://www.bluebox.net/about/blog/wp-content/themes/bluebox_net/js/news-theme.js?ver=0.1'></script>
+<script type="text/javascript">
+  var _sf_async_config = { uid: 38288, domain: 'bluebox.net' };
+  (function() {
+    function loadChartbeat() {
+      window._sf_endpt = (new Date()).getTime();
+      var e = document.createElement('script');
+      e.setAttribute('language', 'javascript');
+      e.setAttribute('type', 'text/javascript');
+      e.setAttribute('src',
+        (("https:" == document.location.protocol) ? "https://a248.e.akamai.net/chartbeat.download.akamai.com/102508/" : "http://static.chartbeat.com/") +
+        "js/chartbeat.js");
+      document.body.appendChild(e);
+    };
+    var oldonload = window.onload;
+    window.onload = (typeof window.onload != 'function') ?
+      loadChartbeat : function() { oldonload(); loadChartbeat(); };
+  })();
+</script>
+</body>
+</html>

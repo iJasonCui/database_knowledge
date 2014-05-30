@@ -1,0 +1,49 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_transSuspendCCTransaction;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_transSuspendCCTransaction (
+
+/*******************************************************************
+**
+** CREATION:
+**   Author:      Hunter Qian 
+**   Date:        June 5 2008 
+**   Description: suspend cc transactions pending for settlement to Settlement queue
+**
+** REVISION(S):
+**   Author: 
+**   Date:
+**   Description:
+**
+*******************************************************************/
+at_xactionId	INT,
+at_productId	INT,
+at_dateNow	DATETIME
+)
+BEGIN
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+        ROLLBACK;
+END;
+
+DECLARE EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+        ROLLBACK;
+END;
+
+START TRANSACTION;
+  
+IF (SELECT 1 FROM SettlementQueue WHERE xactionId = at_xactionId) IS NULL
+THEN
+   INSERT SettlementQueue (xactionId, status, dateCreated, productId) values (at_xactionId, 0, at_dateNow, at_productId);
+ELSE
+   UPDATE SettlementQueue set status=0 where xactionId = at_xactionId;
+END IF;
+  
+UPDATE CreditCardTransaction SET CCTranStatusId=6 WHERE xactionId=at_xactionId;
+  
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

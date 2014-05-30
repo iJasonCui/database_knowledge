@@ -1,0 +1,5246 @@
+CREATE PROCEDURE "arch_Mobile"."test_jdbc_exec"
+as
+select * from arch_Mobile.State;
+CREATE PROCEDURE "arch_Mobile"."test_exec"()
+on exception resume
+begin
+  execute immediate 'select count(*) from Profile where batchId = 28'
+end;
+CREATE PROCEDURE "arch_Mobile"."sp_updateBatchLog"(@batchId integer,@fileDate datetime,@startTime datetime,@finishTime datetime,@recallTime datetime,@removedTime datetime,@originatedRows integer,@terminatedRows integer)
+--on exception resume
+/*
+Lavalife Inc.
+Harry Helal
+27 Oct 2006
+
+This procedure inserts or updates a row in the BatchLog table.
+batchId is used as a key for an update.
+*/
+as
+begin
+  begin
+    declare @error integer,
+    @rowcount integer
+    select @rowcount=0
+    select @error=0
+    update arch_Mobile.BatchLog set
+      fileDate = @fileDate,
+      startTime = @startTime,
+      finishTime = @finishTime,
+      recallTime = @recallTime,
+      removedTime = @removedTime,
+      originatedRows = @originatedRows,
+      terminatedRows = @terminatedRows where
+      batchId = @batchId
+    select @rowcount = count(*) from arch_Mobile.BatchLog where
+      batchId = @batchId
+    if @rowcount = 0
+      begin
+        insert into arch_Mobile.BatchLog( batchId,
+          fileDate,
+          startTime,
+          finishTime,
+          recallTime,
+          removedTime,
+          originatedRows,
+          terminatedRows) values( 
+          @batchId,
+          @fileDate,
+          @startTime,
+          @finishTime,
+          @recallTime,
+          @removedTime,
+          @originatedRows,
+          @terminatedRows) 
+      end
+    return @error
+  end
+end;
+CREATE PROCEDURE "arch_Mobile"."sp_setBatchRemovedTime"(in @batchId integer,in @time datetime)
+on exception resume
+begin
+  set nocount on;
+  begin
+    declare @error integer;declare @rowcount integer;
+    update BatchLog set removedTime = @time where batchId = @batchId;
+    select @@error,@@rowcount into @error,@rowcount;
+    return @error
+  end
+end;
+CREATE PROCEDURE "arch_Mobile"."sp_setBatchRecallTime"(in @batchId integer,in @time datetime)
+on exception resume
+begin
+  set nocount on;
+  begin
+    declare @error integer;declare @rowcount integer;
+    update BatchLog set recallTime = @time where batchId = @batchId;
+    select @@error,@@rowcount into @error,@rowcount;
+    return @error
+  end
+end;
+CREATE PROCEDURE "arch_Mobile"."sp_remove_mobile"(@batchId integer,@fileId integer)
+/*
+Lavalife Inc.
+
+This procedure removes a batch of data from the archive tables.
+*/
+as
+begin
+  -- constants and variables
+  declare @error integer,
+  @rcount integer,
+  @date datetime,
+  @tabname varchar(30)
+  select @error=0
+  select @date=getdate(*)
+  select @rcount=10000
+  -- check parameters
+  if(@batchId is null)
+    begin
+      print 'Batch id is invalid (is null).'
+      return(20001)
+    end
+  -- delete rows from tables
+  select @tabname = fileName from arch_Mobile.FileTableMatch where
+    fileId = @fileId
+  if @tabname = 'Profile'
+    select @tabname='MobileProfile'
+  set rowcount 10000
+  -- ... Originated
+  while @rcount >= 10000
+    begin
+      execute('delete from arch_Mobile.' || @tabname || ' where batchId =' || @batchId)
+      select @rcount = @@rowcount,@error = @@error
+      if(@error <> 0)
+        begin
+          print 'Error deleting from table %1!',@tabname
+          return(@error)
+        end
+    end
+  -- finish
+  select @date=getdate(*)
+  update arch_Mobile.MobileBatchLog set
+    datePurged = @date where
+    batchId = @batchId
+  if @@error <> 0 or @error <> 0
+    begin
+      print 'Could not set up time after batch %1! was removed, error %2!.',@batchId,@error
+      return(@@error)
+    end
+  return(@error)
+end;
+CREATE PROCEDURE "arch_Mobile"."sp_remove"(in @batchId integer,in @maxTranSize integer default
+10000)
+on exception resume /*
+Lavalife Inc.
+Harry Helal
+25 Oct 2005
+
+This procedure removes a batch of data from the archive tables.
+*/
+begin
+  set nocount on;
+  -- constants and variables
+  begin
+    declare @error integer;declare @rowcount integer;declare @date datetime;
+    select 0,getdate(*) into @error,@date;
+    -- check parameters
+    if(@batchId is null) then
+      raiserror 20001 'Batch id is invalid (is null).';
+      return 20001
+    end if;
+    -- start
+    @error = call sp_setBatchRecallTime(@batchId,@date);
+    if @@error <> 0 or @error <> 0 then
+      raiserror 20002 'Could not set up time when removal of the batch %1! started, error %2!.',@batchId,@error;
+      return 20002
+    end if;
+    -- delete rows from tables
+    -- ... Originated
+    select 0,1 into @error,@rowcount;
+    while(@error = 0 and @rowcount > 0) loop
+      set rowcount @maxTranSize;
+      delete from Originated where batchId = @batchId;
+      select @@error,@@rowcount into @error,@rowcount;
+      set rowcount 0
+    end loop;
+    if @error <> 0 then
+      raiserror 20011 'Could not delete rows from Originated, batch id %1!, error %2!.',@batchId,@error;
+      return 20011
+    end if;
+    -- ... Terminated
+    select 0,1 into @error,@rowcount;
+    while(@error = 0 and @rowcount > 0) loop
+      set rowcount @maxTranSize;
+      delete from Terminated where batchId = @batchId;
+      select @@error,@@rowcount into @error,@rowcount;
+      set rowcount 0
+    end loop;
+    if @error <> 0 then
+      raiserror 20012 'Could not delete rows from Terminated, batch id %1!, error %2!.',@batchId,@error;
+      return 20012
+    end if;
+    -- finish
+    set @date=getdate(*);
+    @error = call sp_setBatchRemovedTime(@batchId,@date);
+    if @@error <> 0 or @error <> 0 then
+      raiserror 20021 'Could not set up time after batch %1! was removed, error %2!.',@batchId,@error;
+      return 20021
+    end if;
+    return @error
+  end
+end;
+CREATE PROCEDURE "arch_Mobile"."sp_recall_mobile"(@keepMonths integer)
+/*
+
+This procedure removes old data from the archive tables.
+
+*/
+as
+begin
+  declare @error integer,
+  @rcount integer,
+  @batchId integer,
+  @nullDate datetime,
+  @fileId integer,
+  @retstat integer
+  select @error = 0,@nullDate = convert(datetime,'1/1/1900')
+  -- check parameters
+  if @keepMonths <= 0
+    select @keepMonths=240
+  -- build the list of batch ids
+  create table #tmp(
+    batchId integer not null,
+    fileId integer not null,
+    )
+  select @error=@@error
+  if(@error = 0)
+    begin
+      insert into #tmp
+        select batchId,fileId from arch_Mobile.MobileBatchLog where
+          dateTimeFrom < dateadd(day,@keepMonths*-1,getdate(*)) and
+          datePurged is null and fileId <> 1
+      select @error=@@error
+    end
+  -- get the first batch id
+  if @error = 0
+    begin
+      set rowcount 1
+      select @batchId = batchId,@fileId = fileId from #tmp
+      select @error = @@error,@rcount = @@rowcount
+      set rowcount 0
+    end
+  -- loop through the list of ids
+  while(@error = 0 and @rcount <> 0)
+    begin
+      -- remove a batch
+      execute @retstat = arch_Mobile.sp_remove_mobile @batchId,@fileId
+      -- delete the just removed id from the list
+      if @retstat = 0
+        begin
+          set rowcount 1
+          delete from #tmp where batchId = @batchId
+          select @error = @@error,@rcount = @@rowcount
+        end
+      -- get the next batch id
+      if @error = 0
+        begin
+          set rowcount 1
+          select @batchId = batchId,@fileId = fileId from #tmp
+          select @error = @@error,@rcount = @@rowcount
+          set rowcount 0
+        end
+    end
+  return(@error)
+end;
+CREATE PROCEDURE "arch_Mobile"."sp_recall"(in @keepMonths integer default 240)
+/*
+Lavalife Inc.
+Harry Helal
+25 oct 2005
+
+This procedure removes old data from the archive tables.
+
+*/
+begin
+  declare @error integer;
+  declare @rowcount integer;
+  declare @batchId integer;
+  declare @nullDate datetime;
+  select 0,'19000101' into @error,@nullDate;
+  -- check parameters
+  if(@keepMonths is null or @keepMonths <= 0) then
+    set @keepMonths=240
+  end if; -- build the list of batch ids
+  create table #tmpTbl(
+    batchId integer not null,
+    );
+  --in SYSTEM on commit preserve rows ;
+  insert into #tmpTbl
+    select batchId from BatchLog where
+      fileDate < dateadd(month,@keepMonths*-1,getdate(*)) and
+      removedTime = @nullDate;
+  -- get the first batch id
+  set rowcount 1;
+  select batchId into @batchId from #tmpTbl;
+  set rowcount 0;
+  -- loop through the list of ids
+  while @rowcount > 0 loop
+    -- remove a batch
+    call arch_Mobile.sp_remove(@batchId);
+    -- delete the just removed id from the list
+    set rowcount 1;
+    delete from #tmpTbl where batchId = @batchId;
+    -- get the next batch id
+    set rowcount 1;
+    select batchId into @batchId from #tmpTbl;
+    set @rowcount=@@rowcount;
+    set rowcount 0
+  end loop
+--return @error
+end;
+CREATE PROCEDURE "arch_Mobile"."sp_getBatchId_new"(@batchId integer output)
+as
+begin
+  begin
+    declare @error integer,@count integer
+    --Update a row in the table, this will lock it.
+    update arch_Mobile.MobileBatchLogId set batchId = batchId+1
+    select @error = @@error,@count = @@rowcount
+    -- Get the updated BatchId column from the BatchId table.
+    select @batchId = batchId from arch_Mobile.MobileBatchLogId
+    return @error
+  end
+end;
+CREATE PROCEDURE "arch_Mobile"."sp_getBatchId"(@batchId integer output)
+as
+begin
+  begin
+    declare @error integer,@count integer
+    --Update a row in the table, this will lock it.
+    update arch_Mobile.BatchId set batchId = batchId+1
+    select @error = @@error,@count = @@rowcount
+    -- Handle the result
+    --if @error = 0
+    -- begin
+    -- If the table has been improperly seeded
+    --  if @count <> 1
+    --    begin
+    --      raiserror 20000 '%1! rows of BatchId table were updated in sp_getBatchId procedure',@count
+    --      return 20000
+    --    end
+    -- Get the updated BatchId column from the BatchId table.
+    select @batchId = batchId from arch_Mobile.BatchId
+    return @error
+  end
+end;
+CREATE PROCEDURE "arch_Mobile"."sp_delete"(@table_name varchar(40),@fileId integer,@days_to_keep integer)
+as
+set NOCOUNT on
+declare @batchId integer,
+@cutoff_date datetime
+set @cutoff_date=dateadd(day,@days_to_keep*-1,getdate(*))
+/*select @cutoff_date;*/
+declare get_batch dynamic scroll cursor for select batchId from
+    arch_Mobile.MobileBatchLog where
+    fileId = @fileId and
+    dateTimeFrom <= @cutoff_date order by
+    batchId asc
+open get_batch
+fetch next get_batch into @batchId
+while(@@sqlstatus = 0)
+  begin
+    declare @cmd varchar(500)
+    print 'The following batchId will be deleted  '+convert(varchar(10),@batchId)+'->'+@table_name
+    set @cmd='delete arch_Mobile.' || @table_name || ' where batchId = ' || @batchId
+    print ' '
+    print 'The following statement will be executed'
+    print '==>'+@cmd
+    -- execute immediate @cmd
+    execute IMMEDIATE 'delete arch_Mobile.Mobile  where batchId = ' || @batchId
+    -- execute immediate 'delete arch_Mobile.' || @table_name || ' where batchId = ' || @batchId
+    fetch next get_batch into @batchId
+  end
+close get_batch;
+CREATE PROCEDURE "arch_Mobile"."sp_archive"(@fileDate datetime) as
+begin
+  declare @error integer,
+  @rowcount integer,
+  @batchId integer,
+  @nullDate datetime,
+  @startTime datetime,
+  @finishTime datetime,
+  @recallTime datetime,
+  @removedTime datetime,
+  @originatedRows integer,
+  @terminatedRows integer
+  select @error=0
+  select @rowcount=0
+  select @batchId=0
+  select @nullDate='19000101'
+  select @startTime=@nullDate
+  select @finishTime=@nullDate
+  select @recallTime=@nullDate
+  select @removedTime=@nullDate
+  select @originatedRows=0
+  select @terminatedRows=0
+  select @batchId = batchId from BatchLog where fileDate = @fileDate
+  select @rowcount = count(*) from BatchLog where fileDate = @fileDate
+  if @rowcount = 0
+    begin
+      execute @error = arch_Mobile.sp_getBatchId @batchId
+    end
+  select @startTime=getdate(*)
+  execute arch_Mobile.sp_updateBatchLog
+  @batchId,
+  @fileDate,
+  @startTime,
+  @finishTime,
+  @recallTime,
+  @removedTime,
+  @originatedRows,
+  @terminatedRows
+  delete from arch_Mobile.Originated where batchId = @batchId
+  delete from arch_Mobile.Terminated where batchId = @batchId
+  insert into arch_Mobile.Originated( ticketId,
+    phone,
+    carrierId,
+    prefix,
+    messageDate,
+    state,
+    packagePrice,
+    shortCode,
+    batchId) (
+    select ticketId,
+      phone,
+      carrierId,
+      prefix,
+      messageDate,
+      state,
+      packagePrice,
+      shortCode,
+      @batchId from
+      arch_Mobile.Originated_buffer)
+  select @originatedRows = count(*) from arch_Mobile.Originated where batchId = @batchId
+  insert into arch_Mobile.Terminated( ticketId,
+    phone,
+    carrierId,
+    messageDate,
+    state,
+    packagePrice,
+    shortCode,
+    batchId) (
+    select ticketId,
+      phone,
+      carrierId,
+      messageDate,
+      state,
+      packagePrice,
+      shortCode,
+      @batchId from
+      arch_Mobile.Terminated_buffer)
+  select @terminatedRows = count(*) from arch_Mobile.Terminated where batchId = @batchId
+  select @finishTime=getdate(*)
+  execute arch_Mobile.sp_updateBatchLog
+  @batchId,
+  @fileDate,
+  @startTime,
+  @finishTime,
+  @recallTime,
+  @removedTime,
+  @originatedRows,
+  @terminatedRows
+end;
+CREATE PROCEDURE "arch_Mobile"."p_update_ProfileStatus"(in @tableName varchar(30))
+begin
+  declare err_notfound exception for sqlstate value '02000';
+  declare @statuss varchar(15);
+  declare @maxStatusId tinyint;
+  declare @rowcount integer;
+  set @rowcount=0;
+  --  declare local temporary table NewStat(
+  --      status varchar(15) not null,
+  --    );
+  --    in SYSTEM on commit preserve rows;
+  create table #NewStatus(
+    status varchar(15) not null,
+    );
+  if(@tableName = 'FlirtProfile_stage') then
+    insert into #NewStatus
+      select distinct status from arch_Mobile.FlirtProfileIn where
+        status is not null and lower(status) <> 'null'
+  else
+    if(@tableName = 'PlutolifeProfile_stage') then
+      insert into #NewStatus
+        select distinct status from arch_Mobile.PlutolifeProfile_stage where
+          status is not null and lower(status) <> 'null'
+    else
+      print 'UNKNOWN TABLE'
+    end if
+  end if
+end;
+CREATE PROCEDURE "arch_Mobile"."p_update_MobileBatchLog"(in @batchId integer,in @fileId integer,in @arcFinishedDateTime datetime,in @rowCountBcp integer,in @rowCountArchived integer)
+begin
+  update arch_Mobile.MobileBatchLog set
+    arcFinishedDateTime = @arcFinishedDateTime,
+    rowCountBcp = @rowCountBcp,
+    rowCountArchived = @rowCountArchived where
+    batchId = @batchId and
+    fileId = @fileId;
+  if @@error <> 0 then
+    print 'Error update batch log for [ fileId :%1! , batchId: %2! ]',@fileId,@batchId;
+    return 99
+  end if
+end;
+CREATE PROCEDURE "arch_Mobile"."p_update_MemberState"( @batchId integer )
+BEGIN
+   declare @error integer;
+
+    update arch_Mobile.Member
+        set stateId = 9 where memberId in (select memberId from arch_Mobile.DeletedMember where batchId = @batchId);
+    select @error=@@error;
+    if @error = 0 then
+         update arch_Mobile.Account
+            set stateId = 9 where memberId in (select memberId from arch_Mobile.DeletedMember where batchId = @batchId);
+        select @error=@@error;
+    
+        if @error <> 0 then
+            print 'Updating stateId in Member/Account table failed.';
+            return 1
+        end if
+    end if
+END;
+CREATE PROCEDURE "arch_Mobile"."p_test_insert_Terminated"(in @batchId integer,in @fileId integer)
+on exception resume
+begin
+  insert into arch_Mobile.Terminated
+    select ticketId,
+      phone,
+      carrierId,
+      messageDate,
+      packagePrice,
+      state,
+      shortCode,
+      @batchId from
+      arch_Mobile.Terminated_stage;
+  commit work
+end;
+CREATE PROCEDURE "arch_Mobile"."p_message_history_check"(@PN varchar(20))
+as
+begin
+  set NOCOUNT on
+  select distinct
+    CMM.cMonitorMessageId,
+    CMM.senderProfileId,
+    M.memberId,
+    M.phoneNumber,
+    M.carrierId,
+    CMM.receiverProfileId,
+    M2.memberId,
+    M2.phoneNumber,
+    M2.carrierId,
+    CMM.messageText,
+    CMM.moderatedMessage,
+    CS.cmonitorState,
+    CMM.cmonitorusersId,
+    CMU.loginName,
+    CMM.dateCreated,
+    CMM.dateRetrieved from
+    arch_Mobile.CMonitorMessage as CMM join
+    arch_Mobile.MemberApplicationProfile as MAP on CMM.senderProfileId = MAP.profileId join
+    arch_Mobile.Member as M on MAP.memberId = M.memberId join
+    arch_Mobile.MemberApplicationProfile as MAP2 on CMM.receiverProfileId = MAP2.profileId join
+    arch_Mobile.Member as M2 on MAP2.memberId = M2.memberId join
+    arch_Mobile.CMonitorStates as CS on CMM.cmonitorstatesId = CS.cmonitorstatesId join
+    arch_Mobile.CMonitorUsers as CMU on CMM.cmonitorusersId = CMU.cmonitorusersId where
+    (M.phoneNumber = @PN or M2.phoneNumber = @PN)
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insertSmsCommandAlias"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @commandId integer,
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.SmsCommandAlias_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.SmsCommandAlias as m from
+    arch_Mobile.SmsCommandAlias as m,arch_Mobile.SmsCommandAlias_stage as s where
+    m.commandAliasId = s.commandAliasId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing records'
+      return(@error)
+    end
+  insert into arch_Mobile.SmsCommandAlias( commandAliasId,
+    commandId,
+    commandAlias,
+    productId,
+    batchId,
+    dateCreated,
+    dateModified) (
+    select commandAliasId,
+      commandId,
+      commandAlias,
+      productId,
+      @batchId,
+      dateCreated,
+      dateModified from
+      arch_Mobile.SmsCommandAlias_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting records'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_XactionType"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @accountId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.XactionType_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.XactionType as m from
+    arch_Mobile.XactionType as m,arch_Mobile.XactionType_stage as s where
+    m.xactionTypeId = s.xactionTypeId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.XactionType( xactionTypeId,
+    description,
+    dateCreated,
+    batchId) (
+    select xactionTypeId,
+      description,
+      dateCreated,
+      @batchId from
+      arch_Mobile.XactionType_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_Terminated"(in @batchId integer,in @fileId integer)
+on exception resume
+begin
+  declare @rowCountArchived integer;
+  declare @rowCountBcp integer;
+  declare @arcFinishedDateTime datetime;
+  declare @error integer;
+  set @rowCountArchived=0;
+  if exists(select 1 from arch_Mobile.Terminated where batchId = @batchId) then
+    delete from arch_Mobile.Terminated where batchId = @batchId
+  end if;
+  insert into arch_Mobile.Terminated
+    select ticketId,
+      phone,
+      carrierId,
+      messageDate,
+      packagePrice,
+      state,
+      shortCode,
+      @batchId from
+      arch_Mobile.Terminated_stage;
+  set @error=@@error;
+  if @error = 0 then
+    select count(*) into @rowCountArchived from arch_Mobile.Terminated where batchId = @batchId
+  end if;
+  select count(*) into @rowCountBcp from arch_Mobile.Terminated_stage;
+  set @arcFinishedDateTime=getdate(*);
+  select @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived;
+  call arch_Mobile.p_update_MobileBatchLog(@batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived);
+  set @error=@@error;
+  if @error <> 0 then
+    select 'Error updating MobileBatchLog'
+  end if end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_TeleMedia"(@batchId integer,@fileId integer,@retention integer)
+as
+begin
+  declare @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer
+  set @rowCountArchived=0
+  begin
+    declare @status integer
+    execute @status = arch_Mobile.p_delete_batches 'TeleMedia',@fileId,@retention
+    if @status = 0
+      print 'DATA RETENTION PROCEDURE EXCEUTED SUCCESSFULLY'
+    else
+      print 'DATA RETENTION PROCEDURE FAILED'
+    if exists(select 1 from arch_Mobile.TeleMedia where batchId = @batchId)
+      delete from arch_Mobile.TeleMedia where batchId = @batchId
+    insert into arch_Mobile.TeleMedia( batchId,
+      counter,
+      dateCreated,
+      phoneNumber,
+      carrierId,
+      productId,
+      direction,
+      billable,
+      price,
+      statusId,
+      messages,
+      shortCode) 
+      select @batchId,
+        counter,
+        ctime,
+        phoneNumber,
+        isnull(cm.rptCarrierId,0),
+        productId=case when shortCode in( 22428,33433) then 7 -- chatParty
+        when shortCode in( 23333,83273) then 8 -- TxTeasers
+        when shortCode in( 22000,24288) then 9 -- Chat Her Up
+        else 0
+        end,direction=case when lower(dir) = 'mo' then 1
+        when lower(dir) = 'mt' then 2
+        else 0
+        -- #1
+        end,billable=case when price > 0 then 1
+        else 0
+        end,
+        price,
+        statusId=case when lower(delivered) = 'y' then 1
+        when lower(delivered) = 'n' then 2
+        else 0
+        end,messages,
+        shortCode from
+        arch_Mobile.TeleMedia_stage as t,
+        arch_Mobile.CarrierMatrix as cm where
+        t.carrierId *= cm.carrierId and
+        cm.source = 'TMD'
+    set @error=@@error
+    print @error
+    if @error = 0
+      select @rowCountArchived = count(*) from arch_Mobile.TeleMedia where batchId = @batchId
+    select @rowCountBcp = count(*) from arch_Mobile.TeleMedia_stage
+    set @arcFinishedDateTime=getdate(*)
+    select @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    set @error=@@error
+    if @error <> 0
+      select 'Error updating MobileBatchLog'
+  end end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_SubscriptionType"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @accountId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.SubscriptionType_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.SubscriptionType as m from
+    arch_Mobile.SubscriptionType as m,arch_Mobile.SubscriptionType_stage as s where
+    m.subscriptionTypeId = s.subscriptionTypeId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.SubscriptionType( subscriptionTypeId,
+    description,
+    dateCreated,
+    batchId) (
+    select subscriptionTypeId,
+      description,
+      dateCreated,
+      @batchId from
+      arch_Mobile.SubscriptionType_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_SubscriptionTransaction"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @accountId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.SubscriptionTransaction_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.SubscriptionTransaction as m from
+    arch_Mobile.SubscriptionTransaction as m,arch_Mobile.SubscriptionTransaction_stage as s where
+    m.xactionId = s.xactionId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.SubscriptionTransaction( xactionId,
+    subscriptionOfferId,
+    subscriptionMemberId,
+    memberId,
+    xactionTypeId,
+    subscriptionTypeId,
+    userGeneratedTrans,
+    carriercommunicationId,
+    cancelCodeId,
+    dateCreated,
+    batchId) (
+    select xactionId,
+      subscriptionOfferId,
+      subscriptionMemberId,
+      memberId,
+      xactionTypeId,
+      subscriptionTypeId,
+      userGeneratedTrans,
+      carriercommunicationId,
+      cancelCodeId,
+      dateCreated,
+      @batchId from
+      arch_Mobile.SubscriptionTransaction_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_SubscriptionOfferDetail"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @accountId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.SubscriptionOfferDetail_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.SubscriptionOfferDetail as m from
+    arch_Mobile.SubscriptionOfferDetail as m,arch_Mobile.SubscriptionOfferDetail_stage as s where
+    m.subscriptionOfferDetailId = s.subscriptionOfferDetailId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.SubscriptionOfferDetail( subscriptionOfferDetailId,
+    subscriptionOfferId,
+    applicationId,
+    productId,
+    dateCreated,
+    batchId) (
+    select subscriptionOfferDetailId,
+      subscriptionOfferId,
+      applicationId,
+      productId,
+      dateCreated,
+      @batchId from
+      arch_Mobile.SubscriptionOfferDetail_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_SubscriptionOfferCarrier"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @accountId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.SubscriptionOfferCarrier_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.SubscriptionOfferCarrier as m from
+    arch_Mobile.SubscriptionOfferCarrier as m,arch_Mobile.SubscriptionOfferCarrier_stage as s where
+    m.subscriptionOfferId = s.subscriptionOfferId and m.carrierId = s.carrierId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.SubscriptionOfferCarrier( subscriptionOfferId,
+    carrierId,
+    currencyId,
+    cost,
+    sendRenewalNotice,
+    requireRenewalConfirmation,
+    fulfillmentTypeId,
+    dateCreated,
+    batchId) (
+    select subscriptionOfferId,
+      carrierId,
+      currencyId,
+      cost,
+      sendRenewalNotice,
+      requireRenewalConfirmation,
+      fulfillmentTypeId,
+      dateCreated,
+      @batchId from
+      arch_Mobile.SubscriptionOfferCarrier_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_SubscriptionOffer"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @accountId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.SubscriptionOffer_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.SubscriptionOffer as m from
+    arch_Mobile.SubscriptionOffer as m,arch_Mobile.SubscriptionOffer_stage as s where
+    m.subscriptionOfferId = s.subscriptionOfferId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.SubscriptionOffer( subscriptionOfferId,
+    subscriptionTypeId,
+    description,
+    duration,
+    durationUnits,
+    dateCreated,
+    batchId) (
+    select subscriptionOfferId,
+      subscriptionTypeId,
+      description,
+      duration,
+      durationUnits,
+      dateCreated,
+      @batchId from
+      arch_Mobile.SubscriptionOffer_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_SubscriptionMemberHistory"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @accountId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.SubscriptionMemberHistory_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.SubscriptionMemberHistory as m from
+    arch_Mobile.SubscriptionMemberHistory as m,arch_Mobile.SubscriptionMemberHistory_stage as s where
+    m.subscriptionMemberId = s.subscriptionMemberId and m.dateModified = s.dateModified
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.SubscriptionMemberHistory( subscriptionMemberId,
+    subscriptionOfferId,
+    memberId,
+    carrierId,
+    cancelCodeId,
+    subscriptionReminderStatus,
+    subscriptionStatus,
+    chargeStatus,
+    durationStartDate,
+    subscriptionEndDate,
+    timesRenewed,
+    dateCreated,
+    dateModified,
+    batchId) (
+    select subscriptionMemberId,
+      subscriptionOfferId,
+      memberId,
+      carrierId,
+      cancelCodeId,
+      subscriptionReminderStatus,
+      subscriptionStatus,
+      chargeStatus,
+      durationStartDate,
+      subscriptionEndDate,
+      timesRenewed,
+      dateCreated,
+      dateModified,
+      @batchId from
+      arch_Mobile.SubscriptionMemberHistory_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_SubscriptionMember"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @accountId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.SubscriptionMember_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.SubscriptionMember as m from
+    arch_Mobile.SubscriptionMember as m,arch_Mobile.SubscriptionMember_stage as s where
+    m.subscriptionMemberId = s.subscriptionMemberId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.SubscriptionMember( subscriptionMemberId,
+    subscriptionOfferId,
+    memberId,
+    carrierId,
+    cancelCodeId,
+    subscriptionReminderStatus,
+    subscriptionStatus,
+    chargeStatus,
+    durationStartDate,
+    subscriptionEndDate,
+    timesRenewed,
+    dateCreated,
+    dateModified,
+    batchId) (
+    select subscriptionMemberId,
+      subscriptionOfferId,
+      memberId,
+      carrierId,
+      cancelCodeId,
+      subscriptionReminderStatus,
+      subscriptionStatus,
+      chargeStatus,
+      durationStartDate,
+      subscriptionEndDate,
+      timesRenewed,
+      dateCreated,
+      dateModified,
+      @batchId from
+      arch_Mobile.SubscriptionMember_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_SubscriptionFulfillmentType"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @accountId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.SubscriptionFulfillmentType_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.SubscriptionFulfillmentType as m from
+    arch_Mobile.SubscriptionFulfillmentType as m,arch_Mobile.SubscriptionFulfillmentType_stage as s where
+    m.fulfillmentTypeId = s.fulfillmentTypeId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.SubscriptionFulfillmentType( fulfillmentTypeId,
+    description,
+    dateCreated,
+    batchId) (
+    select fulfillmentTypeId,
+      description,
+      dateCreated,
+      @batchId from
+      arch_Mobile.SubscriptionFulfillmentType_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_SubscriptionCancelCode"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @accountId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.SubscriptionCancelCode_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.SubscriptionCancelCode as m from
+    arch_Mobile.SubscriptionCancelCode as m,arch_Mobile.SubscriptionCancelCode_stage as s where
+    m.cancelCodeId = s.cancelCodeId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.SubscriptionCancelCode( cancelCodeId,
+    description,
+    dateCreated,
+    batchId) (
+    select cancelCodeId,
+      description,
+      dateCreated,
+      @batchId from
+      arch_Mobile.SubscriptionCancelCode_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_State"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.State_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.State as m from
+    arch_Mobile.State as m,arch_Mobile.State_stage as s where
+    m.stateId = s.stateId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error deleting existing records '
+      return(@error)
+    end
+  insert into arch_Mobile.State( stateId,description,dateCreated,dateModified,batchId) (
+    select stateId,description,dateCreated,dateModified,@batchId from
+      arch_Mobile.State_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error inserting records'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_SMSMarketingMessageQueue"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @accountId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.SMSMarketingMessageQueue_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.SMSMarketingMessageQueue as m from
+    arch_Mobile.SMSMarketingMessageQueue as m,arch_Mobile.SMSMarketingMessageQueue_stage as s where
+    m.smsMarketingMessageQueueId = s.smsMarketingMessageQueueId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.SMSMarketingMessageQueue( smsMarketingMessageQueueId,
+    phoneNumber,
+    carrierId,
+    shortCode,
+    fromEmail,
+    sendType,
+    smsMarketingMessageId,
+    scheduledSendDate,
+    sendMsgResponseId,
+    sendMsgResponseStatus,
+    sendMsgResponseErr,
+    sendSMTPResponse,
+    deliveryRecieptStatus,
+    deliveryRecieptErr,
+    dateCreated,
+    dateSent,
+    dateModified,batchId) 
+    select smsMarketingMessageQueueId,
+      phoneNumber,
+      carrierId,
+      shortCode,
+      fromEmail,
+      sendType,
+      smsMarketingMessageId,
+      scheduledSendDate,
+      sendMsgResponseId,
+      sendMsgResponseStatus,
+      sendMsgResponseErr,
+      sendSMTPResponse,
+      deliveryRecieptStatus,
+      deliveryRecieptErr,
+      dateCreated,
+      dateSent,
+      dateModified,
+      @batchId from arch_Mobile.SMSMarketingMessageQueue_stage
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_SMSMarketingMessage"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @accountId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.SMSMarketingMessage_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.SMSMarketingMessage as m from
+    arch_Mobile.SMSMarketingMessage as m,arch_Mobile.SMSMarketingMessage_stage as s where
+    m.smsMarketingMessageId = s.smsMarketingMessageId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.SMSMarketingMessage( smsMarketingMessageId,
+    messageText,
+    description,
+    dateCreated,
+    dateModified,batchId) 
+    select smsMarketingMessageId,
+      messageText,
+      description,
+      dateCreated,
+      dateModified,
+      @batchId from arch_Mobile.SMSMarketingMessage_stage
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_SmsCommand"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @commandId integer,
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.SmsCommand_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.SmsCommand as m from
+    arch_Mobile.SmsCommand as m,arch_Mobile.SmsCommand_stage as s where
+    m.commandId = s.commandId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing records'
+      return(@error)
+    end
+  insert into arch_Mobile.SmsCommand( commandId,
+    applicationId,
+    moId,
+    mtId,
+    ignoreVelocity,
+    description,
+    batchId,
+    dateCreated,
+    dateModified) (
+    select commandId,
+      applicationId,
+      moId,
+      mtId,
+      ignoreVelocity,
+      description,
+      @batchId,
+      dateCreated,
+      dateModified from
+      arch_Mobile.SmsCommand_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting records'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_SBDailyTransactions"(@batchId integer,@fileId integer,@retention integer)
+as
+begin
+  declare @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer
+  set @rowCountArchived=0
+  begin
+    --      declare @status integer
+    --      execute @status = arch_Mobile.p_delete_batches 'SBDailyTransactions',@fileId,@retention
+    --    if @status = 0
+    --      print 'DATA RETENTION PROCEDURE EXCEUTED SUCCESSFULLY'
+    --    else
+    --      print 'DATA RETENTION PROCEDURE FAILED'
+    if exists(select 1 from arch_Mobile.SBDailyTransactions where batchId = @batchId)
+      delete from arch_Mobile.SBDailyTransactions where batchId = @batchId
+    insert into arch_Mobile.SBDailyTransactions( messageId,
+      sbTxnId,
+      accountId,
+      carrierId,
+      interfaceId,
+      msgType,
+      messageState,
+      returnCode,
+      source,
+      destination,
+      product,
+      adCode,
+      premiumMsg,
+      price,
+      msgText,
+      dateCreated,batchId) 
+      select messageId,
+        sbTxnId,
+        accountId,
+        carrierId,
+        interfaceId,
+        msgType,
+        messageState,
+        returnCode,
+        source,
+        destination,
+        product,
+        adCode,
+        premiumMsg,
+        (price*1.0)/100,
+        msgText,
+        dateCreated,
+        @batchId from
+        arch_Mobile.SBDailyTransactions_stage
+    set @error=@@error
+    print @error
+    if @error = 0
+      select @rowCountArchived = count(*) from arch_Mobile.SBDailyTransactions where batchId = @batchId
+    set @error=@@error
+    if @error <> 0
+      select 'Error updating SBDailyTransactions dateCreated to GMT'
+    select @rowCountBcp = count(*) from arch_Mobile.SBDailyTransactions_stage
+    set @arcFinishedDateTime=getdate(*)
+    select @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    set @error=@@error
+    if @error <> 0
+      select 'Error updating MobileBatchLog'
+  end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_RetryMessages"(@batchId integer,@fileId integer,@retention integer)
+as
+begin
+  declare @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer
+  set @rowCountArchived=0
+  begin
+    --      declare @status integer
+    --      execute @status = arch_Mobile.p_delete_batches 'SBDailyTransactions',@fileId,@retention
+    --    if @status = 0
+    --      print 'DATA RETENTION PROCEDURE EXCEUTED SUCCESSFULLY'
+    --    else
+    --      print 'DATA RETENTION PROCEDURE FAILED'
+    if exists(select 1 from arch_Mobile.RetryMessages where batchId = @batchId)
+      delete from arch_Mobile.RetryMessages where batchId = @batchId
+    insert into arch_Mobile.RetryMessages( retryMessageId,
+      mtMessageId,
+      dateCreated,
+      dateModified,
+      retryScheduleId,
+      retryAttemptIndex,
+      nowSmsId,batchId) 
+      select retryMessageId,
+        mtMessageId,
+        dateCreated,
+        dateModified,
+        retryScheduleId,
+        retryAttemptIndex,
+        nowSmsId,
+        @batchId from
+        arch_Mobile.RetryMessages_stage
+    set @error=@@error
+    print @error
+    if @error = 0
+      select @rowCountArchived = count(*) from arch_Mobile.RetryMessages where batchId = @batchId
+    set @error=@@error
+    if @error <> 0
+      select 'Error updating RetryMessages dateCreated to GMT'
+    select @rowCountBcp = count(*) from arch_Mobile.RetryMessages_stage
+    set @arcFinishedDateTime=getdate(*)
+    select @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    set @error=@@error
+    if @error <> 0
+      select 'Error updating MobileBatchLog'
+  end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_PurchaseOfferType"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @purchaseOfferTypeId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.PurchaseOfferType_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.PurchaseOfferType as m from
+    arch_Mobile.PurchaseOfferType as m,arch_Mobile.PurchaseOfferType_stage as s where
+    m.purchaseOfferTypeId = s.purchaseOfferTypeId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.PurchaseOfferType( purchaseOfferTypeId,
+    description,
+    dateCreated,
+    batchId) (
+    select purchaseOfferTypeId,
+      description,
+      dateCreated,
+      @batchId from
+      arch_Mobile.PurchaseOfferType_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_PurchaseOfferDetail"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @purchaseOfferDetailId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.PurchaseOfferDetail_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.PurchaseOfferDetail as m from
+    arch_Mobile.PurchaseOfferDetail as m,arch_Mobile.PurchaseOfferDetail_stage as s where
+    m.purchaseOfferDetailId = s.purchaseOfferDetailId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting data'
+      return(@error)
+    end
+  insert into arch_Mobile.PurchaseOfferDetail( purchaseOfferDetailId,
+    purchaseOfferId,
+    purchaseOfferTypeId,
+    carrierId,
+    contentId,
+    cost,
+    quantity,
+    quantityTypeId,
+    dateCreated,
+    dateExpiry,
+    batchId) (
+    select purchaseOfferDetailId,
+      purchaseOfferId,
+      purchaseOfferTypeId,
+      carrierId,
+      contentId,
+      cost,
+      quantity,
+      quantityTypeId,
+      dateCreated,
+      dateExpiry,
+      @batchId from
+      arch_Mobile.PurchaseOfferDetail_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_PurchaseOffer"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @purchaseOfferId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.PurchaseOffer_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.PurchaseOffer as m from
+    arch_Mobile.PurchaseOffer as m,arch_Mobile.PurchaseOffer_stage as s where
+    m.purchaseOfferId = s.purchaseOfferId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.PurchaseOffer( purchaseOfferId,
+    currencyId,
+    description,
+    applicationId,
+    dateCreated,
+    dateExpiry,
+    batchId,
+    productId) (
+    select purchaseOfferId,
+      currencyId,
+      description,
+      applicationId,
+      dateCreated,
+      dateExpiry,
+      @batchId,
+      productId from
+      arch_Mobile.PurchaseOffer_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_Purchase"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @purchaseId integer,
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.Purchase_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.Purchase as m from
+    arch_Mobile.Purchase as m,arch_Mobile.Purchase_stage as s where
+    m.purchaseId = s.purchaseId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error deleting existing records '
+      return(@error)
+    end
+  insert into arch_Mobile.Purchase( purchaseId,
+    accountId,
+    purchaseOfferDetailId,
+    cost,
+    carrierId,
+    dateCreated,batchId) (
+    select purchaseId,
+      accountId,
+      purchaseOfferDetailId,
+      cost,
+      carrierId,
+      dateCreated,@batchId from
+      arch_Mobile.Purchase_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error inserting records'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_ProfilePrefs"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @profileId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.ProfilePrefs_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.ProfilePrefs as m from
+    arch_Mobile.ProfilePrefs as m,arch_Mobile.ProfilePrefs_stage as s where
+    m.profileId = s.profileId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.ProfilePrefs( profileId,
+    language,
+    wantsGender,
+    wantsMinAge,
+    wantsMaxAge,
+    dateCreated,
+    dateModified,
+    dateCompleted,
+    batchId) (
+    select profileId,
+      language,
+      wantsGender,
+      wantsMinAge,
+      wantsMaxAge,
+      dateCreated,
+      dateModified,
+      dateCompleted,
+      @batchId from
+      arch_Mobile.ProfilePrefs_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_ProfilePicture"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @profileId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.ProfilePicture_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.ProfilePicture as m from
+    arch_Mobile.ProfilePicture as m,arch_Mobile.ProfilePicture_stage as s where
+    m.profileId = s.profileId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.ProfilePicture( profileId,
+    fileName,
+    dateCreated,
+    batchId) (
+    select profileId,
+      fileName,
+      dateCreated,
+      @batchId from
+      arch_Mobile.ProfilePicture_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_Profile"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @profileId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.Profile_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.Profile as m from
+    arch_Mobile.Profile as m,arch_Mobile.Profile_stage as s where
+    m.profileId = s.profileId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.Profile( profileId,
+    userNickName,
+    age,
+    gender,
+    profileText,
+    language,
+    lastActive,
+    state,
+    dateCreated,
+    dateModified,
+    batchId) (
+    select profileId,
+      userNickName,
+      age,
+      gender,
+      profileText,
+      language,
+      lastActive,
+      state,
+      dateCreated,
+      dateModified,
+      @batchId from
+      arch_Mobile.Profile_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_ProductApplication"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @accountId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.ProductApplication_stage
+  if @rowCountBcp <> 0
+    begin
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  select @rowCountArchived=0
+  delete from arch_Mobile.ProductApplication as m from
+    arch_Mobile.ProductApplication as m,
+    arch_Mobile.ProductApplication_stage as s where
+    m.productId = s.productId and
+    m.applicationId = s.applicationId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.ProductApplication( productId,applicationId,dateCreated,dateModified,batchId) (
+    select productId,applicationId,dateCreated,dateModified,@batchId from arch_Mobile.ProductApplication_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_Product"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @accountId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.Product_stage
+  if @rowCountBcp <> 0
+    begin
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  select @rowCountArchived=0
+  delete from arch_Mobile.Product as m from
+    arch_Mobile.Product as m,
+    arch_Mobile.Product_stage as s where
+    m.productId = s.productId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.Product( productId,
+    productName,dateCreated,productIdMask,productIdSearchMask,productDomain,dateModified,languageId,batchId) (
+    select productId,productName,dateCreated,productIdMask,productIdSearchMask,productDomain,dateModified,languageId,@batchId from
+      arch_Mobile.Product_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_PlutolifeMT"(@batchId integer,@fileId integer,@sourceId integer,@retention integer)
+as
+begin
+  declare @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer
+  set @rowCountArchived=0
+  declare @status integer
+  execute @status = arch_Mobile.p_delete_batches 'PlutolifeMOMT',@fileId,@retention
+  if @status = 0
+    print 'procedure succeeded'
+  else
+    print 'procedure failed'
+  if exists(select 1 from arch_Mobile.PlutolifeMOMT where batchId = @batchId and sourceId = @sourceId)
+    delete from arch_Mobile.PlutolifeMOMT where batchId = @batchId and sourceId = @sourceId
+  insert into arch_Mobile.PlutolifeMOMT( mType,
+    origin,
+    phone,
+    carrierId,
+    messagedate,
+    packagePrice,
+    productId,
+    batchId,
+    sourceId,
+    msguserdata) 
+    select mType='MT',
+      origin=isnull(mt.origin,0),
+      phone=mt.phone,
+      carrierId=case when mt.carrierId = 'null' then 0
+      when patindex('%[a-zA-Z]%',mt.carrierId) = 0 then convert(integer,mt.carrierId)
+      else 0
+      end,messagedate=case when mt.messagedate = 'null' then null else convert(datetime,mt.messagedate) end,
+      packagePrice=case when mt.packagePrice is null then null
+      when patindex('%[a-zA-Z]%',mt.packagePrice) = 0 then convert(numeric(10,2),mt.packagePrice)/100
+      else null
+      end,productId=case when p.productId = 4 and mt.origin = 19925425 and @sourceId = 2 then 6
+      when p.productId = 4 and mt.origin = 19935478 and @sourceId = 2 then 5
+      else isnull(p.productId,0)
+      end,batchId=@batchId,
+      sourceId=@sourceId,
+      msguserdata=case when mt.msguserdata = 'null' then null else mt.msguserdata end from
+      arch_Mobile.PlutolifeMT_stage as mt,
+      arch_Mobile.MobileProduct as p where
+      upper(mt.product) *= upper(p.product) and
+      (mt.phone is not null or mt.phone <> 'null') and
+      (mt.messagedate is not null or mt.messagedate <> 'null')
+  set @error=@@error
+  if @error = 0
+    select @rowCountArchived = count(*) from arch_Mobile.PlutolifeMOMT where batchId = @batchId and sourceId = @sourceId
+  select @rowCountBcp = count(*) from arch_Mobile.PlutolifeMT_stage
+  set @arcFinishedDateTime=getdate(*)
+  select @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+  execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+  set @error=@@error
+  if @error <> 0
+    select 'Error updating MobileBatchLog'
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_PlutolifeMO"(@batchId integer,@fileId integer,@sourceId integer,@retention integer)
+as
+begin
+  declare @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer
+  set @rowCountArchived=0
+  declare @status integer
+  execute @status = arch_Mobile.p_delete_batches 'PlutolifeMOMT',@fileId,@retention
+  if @status = 0
+    print 'procedure succeeded'
+  else
+    print 'procedure failed'
+  if exists(select 1 from arch_Mobile.PlutolifeMOMT where batchId = @batchId and sourceId = @sourceId)
+    delete from arch_Mobile.PlutolifeMOMT where batchId = @batchId and sourceId = @sourceId
+  insert into arch_Mobile.PlutolifeMOMT( mType,
+    origin,
+    phone,
+    carrierId,
+    prefix,
+    messagedate,
+    productId,
+    batchId,
+    sourceId,
+    msguserdata) 
+    select mType='MO',
+      origin=isnull(mo.origin,0),
+      phone=mo.phone,
+      carrierId=case when mo.carrierId = 'null' then 0
+      when patindex('%[a-zA-Z]%',mo.carrierId) = 0 then convert(integer,mo.carrierId)
+      else 0
+      end,prefix=case when mo.prefix = 'null' then null else mo.prefix end,
+      messagedate=case when mo.messagedate = 'null' then null else convert(datetime,mo.messagedate) end,
+      productId=case when upper(mo.product) = 'INVALID' then 1
+      when p.productId = 4 and mo.origin = 19925425 and @sourceId = 2 then 6
+      when p.productId = 4 and mo.origin = 19935478 and @sourceId = 2 then 5
+      else isnull(p.productId,0)
+      end,batchId=@batchId,
+      sourceId=@sourceId,
+      msguserdata=case when mo.msguserdata = 'null' then null else mo.msguserdata end from
+      arch_Mobile.PlutolifeMO_stage as mo,
+      arch_Mobile.MobileProduct as p where
+      upper(mo.product) *= upper(p.product) and
+      (mo.phone is not null or mo.phone <> 'null')
+  set @error=@@error
+  if @error = 0
+    select @rowCountArchived = count(*) from arch_Mobile.PlutolifeMOMT where batchId = @batchId and sourceId = @sourceId
+  select @rowCountBcp = count(*) from arch_Mobile.PlutolifeMO_stage
+  set @arcFinishedDateTime=getdate(*)
+  select @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+  execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+  set @error=@@error
+  if @error <> 0
+    select 'Error updating MobileBatchLog'
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_Originated"(in @batchId integer,in @fileId integer)
+on exception resume
+begin
+  declare @rowCountArchived integer;
+  declare @rowCountBcp integer;
+  declare @arcFinishedDateTime datetime;
+  declare @error integer;
+  set @rowCountArchived=0;
+  if exists(select 1 from arch_Mobile.Originated where batchId = @batchId) then
+    delete from arch_Mobile.Originated where batchId = @batchId
+  end if;
+  insert into arch_Mobile.Originated
+    select ticketId,
+      phone,
+      carrierId,
+      prefix,
+      messageDate,
+      state,
+      packagePrice,
+      shortCode,
+      @batchId from
+      arch_Mobile.Originated_stage;
+  set @error=@@error;
+  if @error = 0 then
+    select count(*) into @rowCountArchived from arch_Mobile.Originated where batchId = @batchId
+  end if;
+  select count(*) into @rowCountBcp from arch_Mobile.Originated_stage;
+  set @arcFinishedDateTime=getdate(*);
+  select @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived;
+  call arch_Mobile.p_update_MobileBatchLog(@batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived);
+  set @error=@@error;
+  if @error <> 0 then
+    select 'Error updating MobileBatchLog'
+  end if end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_NowSMSRetryMessages"(@batchId integer,@fileId integer,@retention integer)
+as
+begin
+  declare @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer
+  set @rowCountArchived=0
+  begin
+    --      declare @status integer
+    --      execute @status = arch_Mobile.p_delete_batches 'SBDailyTransactions',@fileId,@retention
+    --    if @status = 0
+    --      print 'DATA RETENTION PROCEDURE EXCEUTED SUCCESSFULLY'
+    --    else
+    --      print 'DATA RETENTION PROCEDURE FAILED'
+    if exists(select 1 from arch_Mobile.NowSMSRetryMessages where batchId = @batchId)
+      delete from arch_Mobile.NowSMSRetryMessages where batchId = @batchId
+    insert into arch_Mobile.NowSMSRetryMessages( retryMessageId,
+      mtMessageId,
+      dateCreated,
+      dateModified,
+      retryScheduleId,
+      retryAttemptIndex,
+      nowSmsId,batchId) 
+      select retryMessageId,
+        mtMessageId,
+        dateCreated,
+        dateModified,
+        retryScheduleId,
+        retryAttemptIndex,
+        nowSmsId,
+        @batchId from
+        arch_Mobile.NowSMSRetryMessages_stage
+    set @error=@@error
+    print @error
+    if @error = 0
+      select @rowCountArchived = count(*) from arch_Mobile.NowSMSRetryMessages where batchId = @batchId
+    set @error=@@error
+    if @error <> 0
+      select 'Error updating NowSMSRetryMessages dateCreated to GMT'
+    select @rowCountBcp = count(*) from arch_Mobile.NowSMSRetryMessages_stage
+    set @arcFinishedDateTime=getdate(*)
+    select @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    set @error=@@error
+    if @error <> 0
+      select 'Error updating MobileBatchLog'
+  end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_NowSMSOutLog"(@batchId integer,@fileId integer,@retention integer)
+as
+begin
+  declare @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer
+  set @rowCountArchived=0
+  begin
+    if exists(select 1 from arch_Mobile.NowSMSOutLog where batchId = @batchId)
+      delete from arch_Mobile.NowSMSOutLog where batchId = @batchId
+    insert into arch_Mobile.NowSMSOutLog( dateCreated,
+      senderId,
+      senderIP,
+      destination,
+      returnStatus,
+      returnUrl,
+      sender,
+      SMSCMsgId,
+      msgText,
+      batchId) 
+      select dateCreated,
+        senderId,
+        senderIP,
+        destination,
+        returnStatus,
+        returnUrl,
+        sender,
+        SMSCMsgId,
+        msgText,
+        @batchId from
+        arch_Mobile.NowSMSOutLog_stage
+    set @error=@@error
+    print @error
+    if @error = 0
+      select @rowCountArchived = count(*) from arch_Mobile.NowSMSOutLog where batchId = @batchId
+    set @error=@@error
+    if @error <> 0
+      select 'Error updating NowSMSOutLog dateCreated to GMT'
+    select @rowCountBcp = count(*) from arch_Mobile.NowSMSOutLog_stage
+    set @arcFinishedDateTime=getdate(*)
+    select @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    set @error=@@error
+    if @error <> 0
+      select 'Error updating MobileBatchLog'
+  end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_NowSMSMtMessages"(@batchId integer,@fileId integer,@retention integer)
+as
+begin
+  declare @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer
+  set @rowCountArchived=0
+  begin
+    --      declare @status integer
+    --      execute @status = arch_Mobile.p_delete_batches 'SBDailyTransactions',@fileId,@retention
+    --    if @status = 0
+    --      print 'DATA RETENTION PROCEDURE EXCEUTED SUCCESSFULLY'
+    --    else
+    --      print 'DATA RETENTION PROCEDURE FAILED'
+    if exists(select 1 from arch_Mobile.NowSMSMtMessages where batchId = @batchId)
+      delete from arch_Mobile.NowSMSMtMessages where batchId = @batchId
+    insert into arch_Mobile.NowSMSMtMessages( mtMessageId,
+      nowSmsId,
+      username,
+      password,
+      priority,
+      destination,
+      sender,
+      text,
+      receiptRequested,
+      delayUntil,
+      transactionId,
+      serverId,
+      optAdCodeId,
+      dateCreated,
+      dateModified,
+      optOperator,
+      optTariff,
+      optProductId,
+      optSessionId,
+      optTagSessionId,
+      optContentType,
+      optSubNew,
+      optSubRef,
+      optServiceId,
+      optCommand,
+      originatorApp,
+      messageTypeId,
+      optTagProdDesc,
+      batchId) 
+      select mtMessageId,
+        nowSmsId,
+        username,
+        password,
+        priority,
+        destination,
+        sender,
+        text,
+        receiptRequested,
+        delayUntil,
+        transactionId,
+        serverId,
+        optAdCodeId,
+        dateCreated,
+        dateModified,
+        optOperator,
+        optTariff,
+        optProductId,
+        optSessionId,
+        optTagSessionId,
+        optContentType,
+        optSubNew,
+        optSubRef,
+        optServiceId,
+        optCommand,
+        originatorApp,
+        messageTypeId,
+        optTagProdDesc,
+        @batchId from
+        arch_Mobile.NowSMSMtMessages_stage
+    set @error=@@error
+    print @error
+    if @error = 0
+      select @rowCountArchived = count(*) from arch_Mobile.NowSMSMtMessages where batchId = @batchId
+    set @error=@@error
+    if @error <> 0
+      select 'Error updating NowSMSMtMessages dateCreated to GMT'
+    select @rowCountBcp = count(*) from arch_Mobile.NowSMSMtMessages_stage
+    set @arcFinishedDateTime=getdate(*)
+    select @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    set @error=@@error
+    if @error <> 0
+      select 'Error updating MobileBatchLog'
+  end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_NowSMSMessages"(@batchId integer,@fileId integer,@retention integer)
+as
+begin
+  declare @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer
+  set @rowCountArchived=0
+  begin
+    --      declare @status integer
+    --      execute @status = arch_Mobile.p_delete_batches 'SBDailyTransactions',@fileId,@retention
+    --    if @status = 0
+    --      print 'DATA RETENTION PROCEDURE EXCEUTED SUCCESSFULLY'
+    --    else
+    --      print 'DATA RETENTION PROCEDURE FAILED'
+    if exists(select 1 from arch_Mobile.NowSMSMessages where batchId = @batchId)
+      delete from arch_Mobile.NowSMSMessages where batchId = @batchId
+    insert into arch_Mobile.NowSMSMessages( MessageID,
+      DateCreated,
+      CID,
+      UMDA,
+      RawMessage,
+      InternalID,
+      Direction,
+      ShortCode,
+      TransactionID,
+      ServerID,
+      batchId) 
+      select MessageID,
+        DateCreated,
+        CID,
+        UMDA,
+        RawMessage,
+        InternalID,
+        Direction,
+        ShortCode,
+        TransactionID,
+        ServerID,
+        @batchId from
+        arch_Mobile.NowSMSMessages_stage
+    set @error=@@error
+    print @error
+    if @error = 0
+      select @rowCountArchived = count(*) from arch_Mobile.NowSMSMessages where batchId = @batchId
+    set @error=@@error
+    if @error <> 0
+      select 'Error updating NowSMSMessages dateCreated to GMT'
+    select @rowCountBcp = count(*) from arch_Mobile.NowSMSMessages_stage
+    set @arcFinishedDateTime=getdate(*)
+    select @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    set @error=@@error
+    if @error <> 0
+      select 'Error updating MobileBatchLog'
+  end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_NowSMSInLog"(@batchId integer,@fileId integer,@retention integer)
+as
+begin
+  declare @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer
+  set @rowCountArchived=0
+  begin
+    if exists(select 1 from arch_Mobile.NowSMSInLog where batchId = @batchId)
+      delete from arch_Mobile.NowSMSInLog where batchId = @batchId
+    insert into arch_Mobile.NowSMSInLog( dateCreated,
+      sender,
+      encodeType,
+      msgText,
+      destination,
+      origMsgId,
+      submitted,
+      delivered,
+      dateDelivered,
+      messageStatus,
+      returnCode,
+      batchId) 
+      select dateCreated,
+        sender,
+        encodeType,
+        msgText,
+        destination,
+        origMsgId,
+        submitted,
+        delivered,
+        dateDelivered,
+        messageStatus,
+        returnCode,
+        @batchId from
+        arch_Mobile.NowSMSInLog_stage
+    set @error=@@error
+    print @error
+    if @error = 0
+      select @rowCountArchived = count(*) from arch_Mobile.NowSMSInLog where batchId = @batchId
+    set @error=@@error
+    if @error <> 0
+      select 'Error updating NowSMSInLog dateCreated to GMT'
+    select @rowCountBcp = count(*) from arch_Mobile.NowSMSInLog_stage
+    set @arcFinishedDateTime=getdate(*)
+    select @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    set @error=@@error
+    if @error <> 0
+      select 'Error updating MobileBatchLog'
+  end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_MTMDailyLog"(@batchId integer,@fileId integer,@retention integer)
+as
+begin
+  declare @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer
+  set @rowCountArchived=0
+  begin
+    if exists(select 1 from arch_Mobile.MTMDailyLog where batchId = @batchId)
+      delete from arch_Mobile.MTMDailyLog where batchId = @batchId
+    insert into arch_Mobile.MTMDailyLog( messageId,
+      shortCode,
+      phoneNumber,
+      messageType,
+      messageContent,
+      price,
+      keyWord,
+      carrierId,
+      delivered,
+      errCode,
+      errMessage,
+      dateCreated,
+      batchId,
+      adCode) 
+      select messageId,
+        shortCode,
+        phoneNumber,
+        messageType,
+        messageContent,
+        price,
+        keyWord,
+        carrierId,
+        delivered,
+        errCode,
+        errMessage,
+        dateCreated,
+        @batchId,
+        adCode from
+        arch_Mobile.MTMDailyLog_stage
+    set @error=@@error
+    print @error
+    if @error = 0
+      select @rowCountArchived = count(*) from arch_Mobile.MTMDailyLog where batchId = @batchId
+    set @error=@@error
+    if @error <> 0
+      select @rowCountBcp = count(*) from arch_Mobile.MTMDailyLog_stage
+    set @arcFinishedDateTime=getdate(*)
+    select @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    set @error=@@error
+    if @error <> 0
+      select 'Error updating MobileBatchLog'
+  end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_MobileSimpleWire"(in @batchId integer,in @fileId integer)
+on exception resume
+begin
+  declare @rowCountArchived integer;
+  declare @rowCountBcp integer;
+  declare @arcFinishedDateTime datetime;
+  declare @error integer;
+  set @rowCountArchived=0;
+  if exists(select 1 from arch_Mobile.MobileSimpleWire where batchId = @batchId) then
+    delete from arch_Mobile.MobileSimpleWire where batchId = @batchId
+  end if; --select @dateSubmitted = convert(datetime,(substring(@tsSubmit,1,10) + " " + substring(@tsSubmit,12,12)));
+  insert into arch_Mobile.MobileSimpleWire
+    select accountId,
+      ticketId,
+      carrierId,
+      interfaceId,
+      interface,
+      typeId,
+      type,
+      stateId,
+      reasonId,
+      sourceTon,
+      sourceAddres,
+      destinationTon,
+      destinationAddress,
+      chargeId,
+      chargePrice,
+      chargeCurrency,
+      udh,
+      dcs,
+      msgText,
+      msgData,
+      convert(datetime,(substring(tsSubmit,1,10)+' '+substring(tsSubmit,12,8))),
+      --   ,tsSubmit         
+      @batchId from
+      arch_Mobile.MobileSimpleWire_stage;
+  set @error=@@error;
+  if @error = 0 then
+    select count(*) into @rowCountArchived from arch_Mobile.MobileSimpleWire where batchId = @batchId
+  end if;
+  select count(*) into @rowCountBcp from arch_Mobile.MobileSimpleWire_stage;
+  set @arcFinishedDateTime=getdate(*);
+  select @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived;
+  call arch_Mobile.p_update_MobileBatchLog(@batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived);
+  set @error=@@error;
+  if @error <> 0 then
+    select 'Error updating MobileBatchLog'
+  end if end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_MobileBatchLog"(in @batchId integer,in @fileId integer,in @dateTimeFrom datetime)
+on exception resume
+begin
+  declare @dateTimeTo datetime;
+  set @dateTimeTo=dateadd(dd,1,@dateTimeFrom);
+  if not exists(select 1 from arch_Mobile.MobileBatchLog where
+      batchId = @batchId and fileId = @fileId and dateTimeFrom = @dateTimeFrom) then
+    insert into arch_Mobile.MobileBatchLog( batchId,fileId,dateTimeFrom,dateTimeTo) values( 
+      @batchId,@fileId,@dateTimeFrom,@dateTimeTo) ;
+    if @@error <> 0 then
+      select 'Error inserting into  MobileBatchLog '
+    end if -- return 99
+  end if
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_Mobile365"(@batchId integer,@fileId integer,@retention integer)
+as
+begin
+  declare @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer
+  set @rowCountArchived=0
+  begin
+    declare @status integer
+    execute @status = arch_Mobile.p_delete_batches 'Mobile365',@fileId,@retention
+    if @status = 0
+      print 'DATA RETENTION PROCEDURE EXCEUTED SUCCESSFULLY'
+    else
+      print 'DATA RETENTION PROCEDURE FAILED'
+    if exists(select 1 from arch_Mobile.Mobile365 where batchId = @batchId)
+      delete from arch_Mobile.Mobile365 where batchId = @batchId
+    insert into arch_Mobile.Mobile365( dateCreated,
+      carrierId,
+      productId,
+      MTpass,
+      MTfail,
+      MOpass,
+      MOfail,
+      batchId,
+      gmtDate) 
+      select dateadd(hour,-1*daylightSavingFactorInHours,dateCreated),
+        carrierId,
+        case when shortCode = 19925425 then 1
+        when shortCode = 19935478 then 3
+        else 0
+        end,MTpass,
+        MTfail,
+        MOpass,
+        MOfail,
+        @batchId,
+        dateCreated from
+        arch_Mobile.Mobile365_stage,
+        arch_Mobile.GMT_to_EST where
+        dateCreated >= daylightSavingStartedDateTime and dateCreated < daylightSavingEndedDateTime
+    set @error=@@error
+    print @error
+    if @error = 0
+      select @rowCountArchived = count(*) from arch_Mobile.Mobile365 where batchId = @batchId
+    select @rowCountBcp = count(*) from arch_Mobile.Mobile365_stage
+    set @arcFinishedDateTime=getdate(*)
+    select @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    set @error=@@error
+    if @error <> 0
+      select 'Error updating MobileBatchLog'
+  end end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_Mobile_Summary"()
+AS
+BEGIN
+	declare @FromTime datetime
+    declare @ToTime datetime
+    declare @error integer
+    set @ToTime = date(getdate())
+    set @FromTime = dateadd(day,-1,@ToTime)
+
+    if exists (select null from arch_Mobile.Summary_Mobile where DT = @FromTime)
+    begin
+    delete from arch_Mobile.Summary_Mobile where DT = @FromTime
+    end
+
+    insert into arch_Mobile.Summary_Mobile
+    select  @FromTime,
+            TT.carrierId,
+            TT.applicationId,
+            sum(TT.Num_Total) as Num_Total,
+            sum(TT.Num_Active) as Num_Active,
+            sum(TT.Num_Stopped) as Num_Stopped,
+            sum(TT.Num_Recycled) as Num_Recycled,
+            sum(TT.Num_Recycled_Active) as Num_Recycled_Active,
+            sum(TT.Num_Interacted) as Num_Interacted,
+            sum(TT.Num_TotalActive) as Num_TotalActive
+    from
+        (
+        select  M.carrierId,
+                A.applicationId,
+                count(A.accountId) as Num_Total,
+                0 as Num_Active,
+                0 as Num_Stopped,
+                0 as Num_Recycled,
+                0 as Num_Recycled_Active,
+                0 as Num_Interacted,
+                0 as Num_TotalActive
+        from    arch_Mobile.Account A
+                inner join arch_Mobile.Member M on A.memberId = M.memberId
+        where   (A.dateCreated >= @FromTime and A.dateCreated < @ToTime)
+        group by M.carrierId,
+                A.applicationId
+    
+        union all
+    
+        select  M.carrierId,
+                A.applicationId,
+                0,
+                count(A.accountId),
+                0,0,0,0,0
+        from    arch_Mobile.Account A
+                inner join arch_Mobile.Member M on A.memberId = M.memberId
+        where   (A.dateAdvisedOfCharge >= @FromTime and A.dateAdvisedOfCharge < @ToTime)
+                and A.advisedOfCharge = 1
+                and A.stateId = 0
+        group by M.carrierId, A.applicationId
+    
+        union all
+    
+        select  M.carrierId,
+                A.applicationId,
+                0,0,
+                count(A.accountId),
+                0,0,0,0
+        from    arch_Mobile.Account A
+                inner join arch_Mobile.Member M on A.memberId = M.memberId
+        where   (A.dateModified >= @FromTime and A.dateModified < @ToTime)
+                and A.advisedOfCharge = 1
+                and A.stateId = 1
+        group by M.carrierId,A.applicationId
+    
+        union all
+    
+        select  M.carrierId,
+                A.applicationId,
+                0,0,0,
+                count(A.accountId),
+                0,0,0
+        from    arch_Mobile.Account A
+                inner join arch_Mobile.Member M on A.memberId = M.memberId
+        where   (A.dateModified >= @FromTime and A.dateModified < @ToTime)
+                and A.stateId = 5
+                and A.advisedOfCharge = 1
+        group by M.carrierId,A.applicationId
+    
+        union all
+    
+        select  M.carrierId,
+                A.applicationId,
+                0,0,0,0,
+                count(A.accountId),
+                0,0
+        from    arch_Mobile.Account A
+                inner join arch_Mobile.Member M on A.memberId = M.memberId
+        where   (A.dateModified >= @FromTime and A.dateModified < @ToTime)
+                and (A.stateId = 5 and A.prevStateId = 0)
+                and A.advisedOfCharge = 1
+        group by M.carrierId,A.applicationId
+    
+        union all
+    
+        select  C.carrierId,
+                C.applicationId,
+                0,0,0,0,0,
+                count(distinct(C.memberId)),
+                0
+        from    arch_Mobile.Carriercommunication C
+        where   (C.dateCreated >= @FromTime and C.dateCreated < @ToTime)
+                and C.direction = 0
+                and C.messageTypeId <> 20
+        group by C.carrierId,
+                C.applicationId
+    
+        union all
+    
+        select  M.carrierId,
+                A.applicationId,
+                0,0,0,0,0,0,
+                count(A.accountId)
+        from    arch_Mobile.Account A
+                inner join arch_Mobile.Member M on A.memberId = M.memberId
+        where   (A.stateId = 0
+                and A.advisedOfCharge = 1)
+        group by M.carrierId,A.applicationId
+        )TT
+    group by TT.carrierId,
+            TT.applicationId
+
+    select @error = @@error
+    if @error = 0 return 0
+    else return 99
+
+END;
+CREATE PROCEDURE "arch_Mobile"."p_insert_MessageType"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @memberId integer,
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.MessageType_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.MessageType as m from
+    arch_Mobile.MessageType as m,arch_Mobile.MessageType_stage as s where
+    m.messageTypeId = s.messageTypeId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error deleting existing records '
+      return(@error)
+    end
+  insert into arch_Mobile.MessageType( messageTypeId,description,dateCreated,dateModified,batchId) (
+    select messageTypeId,description,dateCreated,dateModified,@batchId from
+      arch_Mobile.MessageType_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error inserting records'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_Messages"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.Messages_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.Messages as m from
+    arch_Mobile.Messages as m,arch_Mobile.Messages_stage as s where
+    m.messagesId = s.messagesId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error deleting existing records '
+      return(@error)
+    end
+  insert into arch_Mobile.Messages( messagesId,
+    senderProfileId,receiverProfileId,messagesRead,messages,dateCreated,dateModified,batchId) (
+    select messagesId,senderProfileId,receiverProfileId,messagesRead,messages,dateCreated,dateModified,@batchId from
+      arch_Mobile.Messages_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error inserting records'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_Message"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.Messages_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.Messages as m from
+    arch_Mobile.Messages as m,arch_Mobile.Messages_stage as s where
+    m.messagesId = s.messagesId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error deleting existing records '
+      return(@error)
+    end
+  insert into arch_Mobile.Messages( messagesId,
+    senderProfileId,receiverProfileId,messageRead,messages,dateCreated,dateModified,batchId) (
+    select messagesId,senderProfileId,receiverProfileId,messageRead,messages,dateCreated,dateModified,@batchId from
+      arch_Mobile.Messages_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error inserting records'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_MemberHistory"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.MemberHistory_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.MemberHistory as m from
+    arch_Mobile.MemberHistory as m,arch_Mobile.MemberHistory_stage as s where
+    m.memberId = s.memberId and m.dateModified = s.dateModified
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error deleting existing records '
+      return(@error)
+    end
+  insert into arch_Mobile.MemberHistory( memberId,phoneNumber,carrierId,dateCreated,countryId,dateModified,stateId,batchId,wapId) (
+    select memberId,phoneNumber,carrierId,dateCreated,countryId,dateModified,stateId,@batchId,wapId from
+      arch_Mobile.MemberHistory_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error inserting records'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_MemberApplicationProf"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @MemberApplicationProfileId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.MemberApplicationProfile_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.MemberApplicationProfile as m from
+    arch_Mobile.MemberApplicationProfile as m,arch_Mobile.MemberApplicationProfile_stage as s where
+    m.MemberId = s.MemberId and
+    m.applicationId = s.applicationId and
+    m.productId = s.productId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing records'
+      return(@error)
+    end
+  insert into arch_Mobile.MemberApplicationProfile( memberId,
+    applicationId,
+    profileId,
+    dateCreated,
+    lastActive,
+    batchId,
+    stateId,
+    dateModified,
+    productId,
+    productIdMask) (
+    select memberId,
+      applicationId,
+      profileId,
+      dateCreated,
+      lastActive,
+      @batchId,
+      stateId,
+      dateModified,
+      productId,
+      productIdMask from
+      arch_Mobile.MemberApplicationProfile_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_Member2"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @memberId integer,
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.Member_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.Member as m from
+    arch_Mobile.Member as m,arch_Mobile.Member_stage as s where
+    m.memberId = s.memberId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  insert into arch_Mobile.Member( memberId,phoneNumber,carrierId,dateCreated,countryId,dateModified,batchId) (
+    select memberId,phoneNumber,carrierId,dateCreated,countryId,dateModified,@batchId from
+      arch_Mobile.Member_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_Member_tmp"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @memberId integer,
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.Member_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.Member as m from
+    arch_Mobile.Member as m,arch_Mobile.Member_stage as s where
+    m.memberId = s.memberId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error deleting existing records '
+      return(@error)
+    end
+  insert into arch_Mobile.Member( memberId,phoneNumber,carrierId,dateCreated,countryId,dateModified,batchId,stateId) (
+    select memberId,phoneNumber,carrierId,dateCreated,countryId,dateModified,@batchId,stateId from
+      arch_Mobile.Member_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error inserting records'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_Member"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @memberId integer,
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.Member_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.Member as m from
+    arch_Mobile.Member as m,arch_Mobile.Member_stage as s where
+    m.memberId = s.memberId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error deleting existing records '
+      return(@error)
+    end
+  insert into arch_Mobile.Member( memberId,phoneNumber,carrierId,dateCreated,countryId,dateModified,batchId,stateId,wapId) (
+    select memberId,phoneNumber,carrierId,dateCreated,countryId,dateModified,@batchId,stateId,wapId from
+      arch_Mobile.Member_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error inserting records'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_MatchProfile2"(@batchId integer,@fileId integer,@sourceId integer,@retention integer)
+as
+begin
+  declare @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @status integer
+  set @rowCountArchived=0
+  execute @status = arch_Mobile.p_delete_batches 'MatchProfile',@fileId,@retention
+  if @status = 0
+    print 'DATA RETENTION PROCEDURE EXCEUTED SUCCESSFULLY'
+  else
+    print 'DATA RETENTION PROCEDURE FAILED'
+  if exists(select 1 from
+      arch_Mobile.MatchProfile where
+      batchId = @batchId and
+      sourceId = @sourceId)
+    begin
+      delete from
+        arch_Mobile.MatchProfile where
+        batchId = @batchId and
+        sourceId = @sourceId
+    end
+  insert into arch_Mobile.MatchProfile( phoneNumber,
+    age,
+    gender,
+    carrier,
+    statusId,
+    createdDate,
+    lastActive,
+    initializeGenderAge,
+    initializeWants,
+    initializeNickname,
+    initializeProfile,
+    wantsGender,
+    wantsMinAge,
+    wantsMaxAge,
+    profileType,
+    initializePhoto,
+    batchId,
+    testProfile,
+    subscriptionDate,
+    sourceId,
+    adCode) 
+    select phoneNumber=case when patindex('%[a-zA-Z]%',m.phoneNumber) = 0 then m.phoneNumber
+      --set @error=@@error
+      else '0' end,age=case when m.age = 'null' then null
+      when convert(integer,m.age) >= 18 then convert(integer,m.age)
+      else 0
+      end,gender=case when m.gender = 'null' then null
+      when upper(m.gender) in( 'M','F') then upper(m.gender)
+      else 'U' end,carrier=case when m.carrier = 'null' then null
+      when patindex('%[a-zA-Z]%',m.carrier) = 0 then convert(integer,m.carrier)
+      else 0
+      end,statusId=isnull(p.statusId,0),
+      createdDate=case when m.createTime = 'null' then null
+      else convert(datetime,m.createTime)
+      end,
+      lastActive=case when m.lastActivityTime = 'null' then null
+      else convert(datetime,m.lastActivityTime)
+      end,
+      initializeGenderAge=case when m.initializeGenderAge = 'null' then null
+      else convert(datetime,m.initializeGenderAge)
+      end,
+      initializeWants=case when m.initializeWants = 'null' then null
+      else convert(datetime,m.initializeWants)
+      end,
+      initializeNickname=case when m.initializeNickname = 'null' then null
+      else convert(datetime,m.initializeNickname)
+      end,
+      initializeProfile=case when m.initializeProfile = 'null' then null
+      else convert(datetime,m.initializeProfile)
+      end,
+      wantsGender=case when m.wantsGender = 'null' then null
+      when upper(m.wantsGender) in( 'M','F') then upper(m.wantsGender)
+      else 'U' end,wantsMinAge=case when m.wantsMinAge = 'null' then null
+      when convert(integer,m.wantsMinAge) >= 18 then convert(integer,m.wantsMinAge)
+      else 0
+      end,wantsMaxAge=case when m.wantsMaxAge = 'null' then null
+      when convert(integer,m.wantsMaxAge) >= 18 then convert(integer,m.wantsMaxAge)
+      else 0
+      end,profileType=case when m.profileType = 'null' then null
+      when upper(m.profileType) in( 'WEB','SMS') then 2
+      when upper(m.profileType) = 'WAP' then 3
+      else 0
+      end,initializePhoto=case when m.initializePhoto = 'null' then null
+      when upper(m.initializePhoto) = 'YES' then 1
+      else 0
+      end,batchId=@batchId,testProfile=case when
+      patindex('%[a-zA-Z]%',m.phoneNumber) = 0 then 0
+      else 1
+      end,
+      subscriptionDate=case when m.subscriptionTime = 'null' then null
+      else convert(datetime,m.subscriptionTime)
+      end,
+      sourceId=@sourceId,
+      adCode=case when m.adCode = 'null' then 0
+      when patindex('%[a-zA-Z]%',m.adCode) = 0 then convert(integer,m.adCode)
+      else 0
+      end from arch_Mobile.MatchProfile_stage as m,
+      arch_Mobile.ProfileStatus as p where
+      m.status *= p.status and
+      m.phoneNumber is not null
+  select @error=@@error
+  if @error = 0
+    begin
+      select @rowCountArchived = count(*) from
+        arch_Mobile.Profile where
+        batchId = @batchId and
+        sourceId = @sourceId
+    end
+  select @rowCountBcp = count(*) from
+    arch_Mobile.MatchProfile_stage
+  set @arcFinishedDateTime=getdate(*)
+  select @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+  execute arch_Mobile.p_update_MobileBatchLog @batchId,
+  @fileId,
+  @arcFinishedDateTime,
+  @rowCountBcp,
+  @rowCountArchived
+  select @error=@@error
+  if @error <> 0
+    select 'Error updating MobileBatchLog'
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_MatchProfile"(@batchId integer,@fileId integer,@sourceId integer,@retention integer)
+as
+begin
+  declare @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer
+  set @rowCountArchived=0
+  declare @status integer
+  execute @status = arch_Mobile.p_delete_batches 'MatchProfile',@fileId,@retention
+  if @status = 0
+    print 'DATA RETENTION PROCEDURE EXCEUTED SUCCESSFULLY'
+  else
+    print 'DATA RETENTION PROCEDURE FAILED'
+  if exists(select 1 from arch_Mobile.MatchProfile where batchId = @batchId and sourceId = @sourceId)
+    delete from arch_Mobile.MatchProfile where batchId = @batchId and sourceId = @sourceId
+  insert into arch_Mobile.MatchProfile( phoneNumber,
+    age,
+    gender,
+    carrier,
+    statusId,
+    createdDate,
+    lastActive,
+    initializeGenderAge,
+    initializeWants,
+    initializeNickname,
+    initializeProfile,
+    wantsGender,
+    wantsMinAge,
+    wantsMaxAge,
+    profileType,
+    initializePhoto,
+    batchId,
+    testProfile,
+    subscriptionDate,
+    sourceId,
+    adCode) 
+    select case when patindex('%[a-zA-Z]%',m.phoneNumber) = 0 then m.phoneNumber
+      else '0' end,case when m.age = 'null' then null
+      when convert(integer,m.age) >= 18 then convert(integer,m.age)
+      else 0
+      end,case when m.gender = 'null' then null
+      when upper(m.gender) in( 'M','F') then upper(m.gender)
+      else 'U' end,case when m.carrier = 'null' then null
+      when patindex('%[a-zA-Z]%',m.carrier) = 0 then convert(integer,m.carrier)
+      else 0
+      end,isnull(p.statusId,0),
+      case when m.createTime = 'null' then null else convert(datetime,m.createTime) end,
+      case when m.lastActivityTime = 'null' then null else convert(datetime,m.lastActivityTime) end,
+      case when m.initializeGenderAge = 'null' then null else convert(datetime,m.initializeGenderAge) end,
+      case when m.initializeWants = 'null' then null else convert(datetime,m.initializeWants) end,
+      case when m.initializeNickname = 'null' then null else convert(datetime,m.initializeNickname) end,
+      case when m.initializeProfile = 'null' then null else convert(datetime,m.initializeProfile) end,
+      case when m.wantsGender = 'null' then null
+      when upper(m.wantsGender) in( 'M','F') then upper(m.wantsGender)
+      else 'U' end,case when m.wantsMinAge = 'null' then null
+      when convert(integer,m.wantsMinAge) >= 18 then convert(integer,m.wantsMinAge)
+      else 0
+      end,case when m.wantsMaxAge = 'null' then null
+      when convert(integer,m.wantsMaxAge) >= 18 then convert(integer,m.wantsMaxAge)
+      else 0
+      end,case when m.profileType = 'null' then null
+      when upper(m.profileType) in( 'WEB','SMS') then 2
+      when upper(m.profileType) = 'WAP' then 3
+      else 0
+      end,case when m.initializePhoto = 'null' then null
+      when upper(m.initializePhoto) = 'YES' then 1
+      else 0
+      end,@batchId,case when
+      patindex('%[a-zA-Z]%',m.phoneNumber) = 0 then 0 else 1 end,
+      case when m.subscriptionTime = 'null' then null else convert(datetime,m.subscriptionTime) end,
+      @sourceId,
+      case when m.adCode = 'null' then 0
+      when patindex('%[a-zA-Z]%',m.adCode) = 0 then convert(integer,m.adCode)
+      else 0
+      end from arch_Mobile.MatchProfile_stage as m,
+      arch_Mobile.ProfileStatus as p where
+      m.status *= p.status and
+      m.phoneNumber is not null
+  set @error=@@error
+  if @error = 0
+    select @rowCountArchived = count(*) from arch_Mobile.Profile where batchId = @batchId and sourceId = @sourceId
+  select @rowCountBcp = count(*) from arch_Mobile.MatchProfile_stage
+  set @arcFinishedDateTime=getdate(*)
+  select @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+  execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+  set @error=@@error
+  if @error <> 0
+    select 'Error updating MobileBatchLog'
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_FlirtProfile"(@batchId integer,@fileId integer,@sourceId integer,@retention integer)
+as
+begin
+  declare @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer
+  set @rowCountArchived=0
+  declare @status integer
+  execute @status = arch_Mobile.p_delete_batches 'MatchProfile',@fileId,@retention
+  if @status = 0
+    print 'DATA RETENTION PROCEDURE EXCEUTED SUCCESSFULLY'
+  else
+    print 'DATA RETENTION PROCEDURE FAILED'
+  if exists(select 1 from arch_Mobile.MatchProfile where batchId = @batchId and sourceId = @sourceId)
+    delete from arch_Mobile.MatchProfile where batchId = @batchId
+  insert into arch_Mobile.MatchProfile( phoneNumber,
+    age,
+    gender,
+    carrier,
+    statusId,
+    createdDate,
+    lastActive,
+    wantsGender,
+    wantsMinAge,
+    wantsMaxAge,
+    profileType,
+    initializePhoto,
+    batchId,
+    testProfile,
+    sourceId,
+    adCode) 
+    select case when patindex('%[a-zA-Z]%',f.phoneNumber) = 0 then f.phoneNumber
+      else '0' end,case when f.age = 'null' then null
+      when convert(integer,f.age) >= 18 then convert(integer,f.age)
+      else 0
+      end,case when f.gender = 'null' then null
+      when upper(f.gender) in( 'M','F') then upper(f.gender)
+      else 'U' end,case when f.carrier = 'null' then null
+      when patindex('%[a-zA-Z]%',f.carrier) = 0 then convert(integer,f.carrier)
+      else 0
+      end,isnull(p.statusId,0),
+      case when f.createdDate = 'null' then null else convert(datetime,f.createdDate) end,
+      case when f.lastActive = 'null' then null else convert(datetime,f.lastActive) end,
+      case when f.wantsGender = 'null' then null
+      when upper(f.wantsGender) in( '''M''','''F''') then upper(substring(f.wantsGender,2,1))
+      else 'U' end,case when f.wantsMinAge = 'null' then null
+      when convert(integer,f.wantsMinAge) >= 18 then convert(integer,f.wantsMinAge)
+      else 0
+      end,case when f.wantsMaxAge = 'null' then null
+      when convert(integer,f.wantsMaxAge) >= 18 then convert(integer,f.wantsMaxAge)
+      else 0
+      end,3,0,@batchId,case when
+      patindex('%[a-zA-Z]%',f.phoneNumber) = 0 then 0 else 1 end,
+      @sourceId,
+      case when f.adCode = 'null' then 0
+      when patindex('%[a-zA-Z]%',f.adCode) = 0 then convert(integer,f.adCode)
+      else 0
+      end from arch_Mobile.FlirtProfile_stage as f,
+      arch_Mobile.ProfileStatus as p where
+      f.status *= p.status and
+      f.phoneNumber is not null
+  set @error=@@error
+  if @error = 0
+    select @rowCountArchived = count(*) from arch_Mobile.MatchProfile where batchId = @batchId and sourceId = @sourceId
+  select @rowCountBcp = count(*) from arch_Mobile.FlirtProfile_stage
+  set @arcFinishedDateTime=getdate(*)
+  select @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+  execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+  set @error=@@error
+  if @error <> 0
+    select 'Error updating MobileBatchLog'
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_DeletedMember"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @memberId integer,
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.DeletedMember_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.DeletedMember as m from
+    arch_Mobile.DeletedMember as m,arch_Mobile.DeletedMember_stage as s where
+    m.memberId = s.memberId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error deleting existing records '
+      return(@error)
+    end
+  insert into arch_Mobile.DeletedMember( memberId,stateId,dateCreated,dateModified,batchId) (
+    select memberId,stateId,dateCreated,dateModified,@batchId from
+      arch_Mobile.DeletedMember_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error inserting records'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+      execute arch_Mobile.p_update_MemberState @batchId
+      select @error=@@error
+      if @@error <> 0
+        print 'Error updating DeletedMember Status'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_Currency"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @currencyId integer,
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.Currency_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.Currency as m from
+    arch_Mobile.Currency as m,arch_Mobile.Currency_stage as s where
+    m.currencyId = s.currencyId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error deleting existing records '
+      return(@error)
+    end
+  insert into arch_Mobile.Currency( currencyId,
+    currencyCode,
+    currencyDesc,
+    currencySymbol,
+    convertUSD,
+    precisionDigits,
+    dateCreated,
+    dateModified,
+    contentId,batchId) (
+    select currencyId,
+      currencyCode,
+      currencyDesc,
+      currencySymbol,
+      convertUSD,
+      precisionDigits,
+      dateCreated,
+      dateModified,
+      contentId,@batchId from
+      arch_Mobile.Currency_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error inserting records'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_CMonitorUsers"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @accountId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.CMonitorUsers_stage
+  if @rowCountBcp <> 0
+    begin
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  select @rowCountArchived=0
+  delete from arch_Mobile.CMonitorUsers as m from
+    arch_Mobile.CMonitorUsers as m,
+    arch_Mobile.CMonitorUsers_stage as s where
+    m.cmonitorusersId = s.cmonitorusersId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.CMonitorUsers( cmonitorusersId,
+    loginName,password,lastLogin,dateCreated,dateModified,fullName,batchId) (
+    select cmonitorusersId,loginName,password,lastLogin,dateCreated,dateModified,fullName,@batchId from
+      arch_Mobile.CMonitorUsers_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_CMonitorStates"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @accountId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.CMonitorStates_stage
+  if @rowCountBcp <> 0
+    begin
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  select @rowCountArchived=0
+  delete from arch_Mobile.CMonitorStates as m from
+    arch_Mobile.CMonitorStates as m,
+    arch_Mobile.CMonitorStates_stage as s where
+    m.cmonitorstatesId = s.cmonitorstatesId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.CMonitorStates( cmonitorstatesId,
+    cmonitorState,dateCreated,dateModified,batchId) (
+    select cmonitorstatesId,cmonitorState,dateCreated,dateModified,@batchId from
+      arch_Mobile.CMonitorStates_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_CMonitorMessage"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @accountId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.CMonitorMessage_stage
+  if @rowCountBcp <> 0
+    begin
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  select @rowCountArchived=0
+  delete from arch_Mobile.CMonitorMessage as m from
+    arch_Mobile.CMonitorMessage as m,
+    arch_Mobile.CMonitorMessage_stage as s where
+    m.cMonitorMessageId = s.cMonitorMessageId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.CMonitorMessage( cMonitorMessageId,
+    senderProfileId,receiverProfileId,applicationId,
+    productId,messageText,moderatedMessage,cmonitorusersId,cmonitorstatesId,
+    dateCreated,dateRetrieved,dateMonitored,batchId,priority,cMonitorMessageTypeId) (
+    select cMonitorMessageId,senderProfileId,receiverProfileId,applicationId,
+      productId,messageText,moderatedMessage,cmonitorusersId,cmonitorstatesId,
+      dateCreated,dateRetrieved,dateMonitored,@batchId,priority,cMonitorMessageTypeId from
+      arch_Mobile.CMonitorMessage_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_Carriercommunication"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @carriercommunicationId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.Carriercommunication_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.Carriercommunication as m from
+    arch_Mobile.Carriercommunication as m,arch_Mobile.Carriercommunication_stage as s where
+    m.carriercommunicationId = s.carriercommunicationId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing records'
+      return(@error)
+    end
+  insert into arch_Mobile.Carriercommunication( carriercommunicationId,
+    carrierSessionId,
+    carrierMessageTicket,
+    carrierOrigin,
+    carrierDestination,
+    carrierId,
+    carrierMsgStatus,
+    carrierMsgData,
+    direction,
+    dateCreated,
+    dateModified,
+    purchaseId,
+    batchId,
+    memberId,
+    productId,
+    applicationId,
+    messageTypeId,
+    commandAliasId,
+    subscriptionOfferId,
+    aggregatorMessageTicket,
+    carrierMsgStatusDetail) (
+    select carriercommunicationId,
+      carrierSessionId,
+      carrierMessageTicket,
+      carrierOrigin,
+      carrierDestination,
+      carrierId,
+      carrierMsgStatus,
+      carrierMsgData,
+      direction,
+      dateCreated,
+      dateModified,
+      purchaseId,
+      @batchId,
+      memberId,
+      productId,
+      applicationId,
+      messageTypeId,
+      commandAliasId,
+      subscriptionOfferId,
+      aggregatorMessageTicket,
+      carrierMsgStatusDetail from
+      arch_Mobile.Carriercommunication_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting records'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_Carrier"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @carrierId integer,
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.Carrier_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.Carrier as m from
+    arch_Mobile.Carrier as m,arch_Mobile.Carrier_stage as s where
+    m.carrierId = s.carrierId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error deleting existing records '
+      return(@error)
+    end
+  insert into arch_Mobile.Carrier( carrierId,
+    networkOperator,
+    maxtextLength,
+    dateCreated,
+    dateModified,batchId) (
+    select carrierId,
+      networkOperator,
+      maxtextLength,
+      dateCreated,
+      dateModified,@batchId from
+      arch_Mobile.Carrier_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error inserting records'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_BlockList"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.BlockList_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.BlockList as m from
+    arch_Mobile.BlockList as m,arch_Mobile.BlockList_stage as s where
+    m.profileId = s.profileId and m.blockMemberId = s.blockMemberId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error deleting existing records '
+      return(@error)
+    end
+  insert into arch_Mobile.BlockList( profileId,blockMemberId,dateCreated,batchId) (
+    select profileId,blockMemberId,dateCreated,@batchId from
+      arch_Mobile.BlockList_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error inserting records'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_BadWord"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @badWordId integer,
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.BadWord_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.BadWord as m from
+    arch_Mobile.BadWord as m,arch_Mobile.BadWord_stage as s where
+    m.badWordId = s.badWordId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing records'
+      return(@error)
+    end
+  insert into arch_Mobile.BadWord( badWordId,
+    createdById,
+    modifiedById,
+    activeFlag,
+    word,
+    autoReplace,
+    dateCreated,
+    dateModified,
+    batchId) (
+    select badWordId,
+      createdById,
+      modifiedById,
+      activeFlag,
+      word,
+      autoReplace,
+      dateCreated,
+      dateModified,
+      @batchId from
+      arch_Mobile.BadWord_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting records'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_Application"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @applicationId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.Application_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.Application as m from
+    arch_Mobile.Application as m,arch_Mobile.Application_stage as s where
+    m.applicationId = s.applicationId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.Application( applicationId,
+    applicationName,
+    dateCreated,
+    batchId) (
+    select applicationId,
+      applicationName,
+      dateCreated,
+      @batchId from
+      arch_Mobile.Application_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_AlertView"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @alertBatchLogId integer,
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.AlertView_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.AlertView as m from
+    arch_Mobile.AlertView as m,arch_Mobile.AlertView_stage as s where
+    m.alertBatchLogId = s.alertBatchLogId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error deleting existing records '
+      return(@error)
+    end
+  insert into arch_Mobile.AlertView( alertBatchLogId,
+    memberId,
+    applicationId,
+    interval,
+    purchaseOfferDetailId,
+    productId,
+    dateCreated,
+    batchId) (
+    select alertBatchLogId,
+      memberId,
+      applicationId,
+      interval,
+      purchaseOfferDetailId,
+      productId,
+      dateCreated,@batchId from
+      arch_Mobile.AlertView_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error inserting records'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_AlertBatchLog"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @alertBatchLogId integer,
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.AlertBatchLog_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.AlertBatchLog as m from
+    arch_Mobile.AlertBatchLog as m,arch_Mobile.AlertBatchLog_stage as s where
+    m.alertBatchLogId = s.alertBatchLogId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error deleting existing records '
+      return(@error)
+    end
+  insert into arch_Mobile.AlertBatchLog( alertBatchLogId,alertTypeId,dateCreated,dateCompleted,totalAlerts,totalB2C,totalT2C,totalFree,totalPremium,batchId) (
+    select alertBatchLogId,alertTypeId,dateCreated,dateCompleted,totalAlerts,totalB2C,totalT2C,totalFree,totalPremium,@batchId from
+      arch_Mobile.AlertBatchLog_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'error inserting records'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,
+      @rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_Account"(@fileId integer,@dateTimeFrom datetime) as
+begin
+  declare @accountId numeric(12),
+  @batchId integer,
+  @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer,
+  @dateSubmitted datetime
+  /* GENERATE NEW BATCH ID */
+  select @rowCountBcp = count(*) from arch_Mobile.Account_stage
+  if @rowCountBcp <> 0
+    begin
+      /*    begin atomic */
+      update arch_Mobile.MobileBatchLogId set mobileBatchLogId = mobileBatchLogId+1
+      select @batchId = mobileBatchLogId from arch_Mobile.MobileBatchLogId
+    end
+  /*    end ; */
+  select @rowCountArchived=0
+  /*       begin atomic */
+  delete from arch_Mobile.Account as m from
+    arch_Mobile.Account as m,arch_Mobile.Account_stage as s where
+    m.accountId = s.accountId
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error deleting existing data'
+      return(@error)
+    end
+  insert into arch_Mobile.Account( accountId,
+    applicationId,
+    memberId,
+    purchaseOfferId,
+    dateSubscribed,
+    dateCreated,
+    adcode,
+    password,
+    dateModified,
+    stateId,
+    batchId,
+    advisedOfCharge,
+    productId,
+    currentAdcode,
+    prevStateId,
+    subscriptionMemberId,
+    dateAdvisedOfCharge,
+    passwordVerified) (
+    select accountId,
+      applicationId,
+      memberId,
+      purchaseOfferId,
+      dateSubscribed,
+      dateCreated,
+      adcode,
+      password,
+      dateModified,
+      stateId,
+      @batchId,
+      advisedOfCharge,
+      productId,
+      currentAdcode,
+      prevStateId,
+      subscriptionMemberId,
+      dateAdvisedOfCharge,
+      passwordVerified from
+      arch_Mobile.Account_stage)
+  select @error=@@error
+  if @error = 0
+    select @rowCountArchived=@rowCountBcp
+  else
+    begin
+      print 'Error inserting data'
+      return(@error)
+    end
+  /*       end;    */
+  select @arcFinishedDateTime=getdate(*)
+  /*UPDATE the BatchLog file */
+  if @rowCountBcp <> 0
+    begin
+      execute arch_Mobile.p_insert_MobileBatchLog @batchId,@fileId,@dateTimeFrom
+      select @error=@@error
+      if @error <> 0
+        print 'Error Inserting Batchlog'
+      execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+      select @error=@@error
+      if @error <> 0
+        print 'Error updating MobileBatchLog'
+    end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_insert_AccessLog"(@batchId integer,@fileId integer,@retention integer)
+as
+begin
+  declare @rowCountArchived integer,
+  @rowCountBcp integer,
+  @arcFinishedDateTime datetime,
+  @error integer
+  set @rowCountArchived=0
+  begin
+    --      declare @status integer
+    --      execute @status = arch_Mobile.p_delete_batches 'AccessLog',@fileId,@retention
+    --    if @status = 0
+    --      print 'DATA RETENTION PROCEDURE EXCEUTED SUCCESSFULLY'
+    --    else
+    --      print 'DATA RETENTION PROCEDURE FAILED'
+    if exists(select 1 from arch_Mobile.AccessLog where batchId = @batchId)
+      delete from arch_Mobile.AccessLog where batchId = @batchId
+    insert into arch_Mobile.AccessLog( ipAddress,
+      appName,
+      wapId,
+      carrierId,
+      adcode,
+      prodName,
+      curPage,
+      sid,
+      statusCode,
+      userAgent,
+      phoneBrand,
+      phoneModel,
+      dateCreated,
+      respTime,
+      batchId,
+      phoneNumber) 
+      select ipAddress,
+        appName,
+        wapId,
+        carrierId,
+        adcode,
+        prodName,
+        curPage,
+        sid,
+        statusCode,
+        userAgent,
+        phoneBrand,
+        phoneModel,
+        dateCreated,
+        respTime,
+        @batchId,
+        phoneNumber from
+        arch_Mobile.AccessLog_stage
+    set @error=@@error
+    print @error
+    if @error = 0
+      select @rowCountArchived = count(*) from arch_Mobile.AccessLog where batchId = @batchId
+    update arch_Mobile.AccessLog as a set
+      dateCreated = dateadd(hour,b.daylightSavingFactorInHours,a.dateCreated) from
+      arch_Mobile.AccessLog as a,
+      arch_Mobile.GMT_to_EST as b where
+      a.dateCreated >= b.daylightSavingStartedDateTime and a.dateCreated < b.daylightSavingEndedDateTime and
+      a.batchId = @batchId
+    set @error=@@error
+    if @error <> 0
+      select 'Error updating AccessLog dateCreated to GMT'
+    select @rowCountBcp = count(*) from arch_Mobile.AccessLog_stage
+    set @arcFinishedDateTime=getdate(*)
+    select @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    execute arch_Mobile.p_update_MobileBatchLog @batchId,@fileId,@arcFinishedDateTime,@rowCountBcp,@rowCountArchived
+    set @error=@@error
+    if @error <> 0
+      select 'Error updating MobileBatchLog'
+  end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_get_MobileBatchLogId"(in @dateTimeFrom datetime,in @fileId integer)
+on exception resume
+begin
+  declare @error integer;
+  if exists(select 1 from arch_Mobile.MobileBatchLog where fileId = @fileId and dateTimeFrom = @dateTimeFrom) then
+    select batchId from arch_Mobile.MobileBatchLog where fileId = @fileId and dateTimeFrom = @dateTimeFrom
+  else
+    update arch_Mobile.MobileBatchLogId set
+      mobileBatchLogId = mobileBatchLogId+1;
+    select mobileBatchLogId from arch_Mobile.MobileBatchLogId
+  end if;
+  set @error=@@error;
+  if @error <> 0 then
+    -- select mobileBatchLogId into @batchId from cmessa.MobileBatchLogId;
+    select 'Error retrieving batchd'
+  end if
+end;
+CREATE PROCEDURE "arch_Mobile"."p_delete_batches"(in @table_name varchar(40),in @fileId integer,in @retention integer)
+on exception resume
+begin
+  set NOCOUNT on;
+  begin
+    declare @batchId integer;
+    declare @cutoff_date datetime;
+    declare @ctr integer;
+    declare @max_row integer;
+    declare @cmd varchar(300);
+    set @cutoff_date=dateadd(day,@retention*-1,getdate(*));
+    create table #batches(
+      batchId integer not null,
+      rowCtr integer not null,
+      );
+    insert into #batches
+      select batchId,number(*) from
+        arch_Mobile.MobileBatchLog where
+        fileId = @fileId and
+        dateTimeFrom <= @cutoff_date order by
+        batchId asc;
+    set @ctr=1;
+    select max(rowCtr) into @max_row from #batches;
+    if(@max_row = 0) then
+      return
+    else
+      while(@ctr <= @max_row) loop
+        select batchId into @batchId from #batches where rowCtr = @ctr;
+        set @cmd='delete  arch_Mobile.' || @table_name || '  where batchId = ' || @batchId;
+        execute immediate 'delete  arch_Mobile.' || @table_name || '  where batchId = ' || @batchId;
+        set @ctr=@ctr+1;
+        print @cmd
+      end loop
+    end if
+  end
+end;
+CREATE PROCEDURE "arch_Mobile"."p_delete_batch"(@table_name varchar(40),@fileId integer,@days_to_keep integer)
+as
+set NOCOUNT on
+declare @batchId integer,
+@cutoff_date datetime,
+@ctr integer,
+@max_row integer
+set @cutoff_date=dateadd(day,@days_to_keep*-1,getdate(*))
+create table #batches(
+  batchId integer not null,
+  rowId integer not null,
+  )
+insert into #batches
+  select batchId,number(*) from
+    arch_Mobile.MobileBatchLog where
+    fileId = @fileId and
+    dateTimeFrom <= @cutoff_date order by
+    batchId asc
+set @ctr=1
+select @max_row = max(rowId)+1 from #batches
+while(@ctr < @max_row)
+  begin
+    print 'Counter is '+@ctr+' max row is '+@max_row
+    set @ctr=@ctr+1
+  end;
+CREATE PROCEDURE "arch_Mobile"."msp_searchAll"(@profileId integer,@wantsGender char(1),@wantsMinAge varchar(2),@wantsMaxAge varchar(2),@gender char(1),@age varchar(2))
+/* @parameter_name parameter_type [= default_value] [OUTPUT], ... */
+as
+begin
+  /* Type the procedure statements here */
+  declare @return integer,
+  @dateCreated datetime
+  execute @return = arch_Mobile.msp_GetDateGMT @dateCreated
+  if @return <> 0
+    begin
+      return @return
+    end
+  set rowcount 200
+  select a.profileId,
+    a.userNickName,
+    a.age from
+    arch_Mobile.MobileProfile as a, --  (index lastActive_idx),
+    arch_Mobile.ProfilePrefs as b, -- (index ProfilePrefs_profileId_pk),
+    arch_Mobile.MemberApplicationProfile as ma,
+    arch_Mobile.Account as ac where
+    a.profileId = b.profileId and
+    ma.profileId = a.profileId and
+    ma.memberId = ac.memberId and
+    ac.stateId = 0 and
+    a.gender = @wantsGender and
+    a.age between @wantsMinAge and @wantsMaxAge and
+    b.wantsGender = @gender and
+    b.wantsMinAge <= @age and
+    b.wantsMaxAge >= @age and
+    a.userNickName is not null and
+    a.lastActive between dateadd(dd,-30,@dateCreated) and @dateCreated order by
+    --select @wantsGender, @wantsMinAge , @wantsMaxAge, @age, @dateCreated
+    a.lastActive desc
+end;
+CREATE PROCEDURE "arch_Mobile"."msp_getMemberCarrierCommByDate"(@phoneNumber varchar(20),@startCutoff datetime,@endCutoff datetime)
+as
+begin
+  select carriercommunicationId,
+    carrierOrigin,
+    carrierDestination,
+    c.carrierId,
+    carrierMessageTicket,
+    carrierMsgData,
+    direction,
+    cost,
+    c.dateCreated from
+    arch_Mobile.Carriercommunication as c,arch_Mobile.Purchase as p where
+    (carrierOrigin = @phoneNumber or carrierDestination = @phoneNumber) and
+    c.purchaseId *= p.purchaseId and
+    c.dateCreated >= @startCutoff and
+    c.dateCreated < @endCutoff
+end;
+CREATE PROCEDURE "arch_Mobile"."msp_GetDateGMT"(@getDateGMT datetime output)
+/* @parameter_name parameter_type [= default_value] [OUTPUT], ... */
+as
+begin
+  /* Type the procedure statements here */
+  declare @date_year char(4),
+  @date_dow integer, /* day of week */
+  @date_dst_start datetime, /* day light savings time start */
+  @date_dst_end datetime, /* day light savings time end */
+  @getdate datetime, /* local time (db server) */
+  @gmt_offset integer /* offset between GMT and local time */
+  select @getdate=GETDATE(*)
+  --begin
+  /* Get Year */
+  select @date_year=convert(char(4),DATEPART(yy,@getdate))
+  /* Get Daylight start for year (2AM second Sunday in March) */
+  select @date_dst_start=convert(datetime,'March 8, '+@date_year+' 2:00')
+  select @date_dow=DATEPART(dw,@date_dst_start)
+  if @date_dow <> 1
+    select @date_dst_start=DATEADD(dd,8-@date_dow,@date_dst_start)
+  /* Get Daylight end for year (2AM first Sunday in November) */
+  select @date_dst_end=convert(datetime,'November 1, '+@date_year+' 1:59:59:999')
+  select @date_dow=DATEPART(dw,@date_dst_end)
+  if @date_dow <> 1
+    select @date_dst_end=DATEADD(dd,8-@date_dow,@date_dst_end)
+  /* Get hour offset by date */
+  if @getdate between @date_dst_start and @date_dst_end
+    select @gmt_offset=4
+  else
+    select @gmt_offset=5
+  select @getDateGMT=DATEADD(hour,@gmt_offset,@getdate)
+end;
+CREATE PROCEDURE "arch_Mobile"."mp_insert_MemberMap"(@start_date datetime,@end_date datetime,@batchId integer)
+as
+begin
+  update dwMobile.MemberMap as mm set
+    phoneNumber = m.phoneNumber,
+    stateKey = case when m.stateId = 0 then 10
+    when m.stateId = 1 then 11
+    when m.stateId = 2 then 12
+    when m.stateId = 3 then 13
+    when m.stateId = 4 then 14
+    when m.stateId = 5 then 15
+    when m.stateId = 6 then 16
+    when m.stateId = 7 then 17
+    when m.stateId is null then 18
+    end,dateModified = getdate(*),
+    batchId = @batchId from
+    dwMobile.MemberMap as mm,
+    arch_Mobile.Member as m where
+    mm.memberId = m.memberId and
+    ((m.dateCreated between @start_date and @end_date) or(m.dateModified between @start_date and @end_date))
+  insert into dwMobile.MemberMap( memberId,phoneNumber,stateKey,dateCreated,dateModified) 
+    select m.memberId,
+      m.phoneNumber,
+      case when m.stateId = 0 then 10
+      when m.stateId = 1 then 11
+      when m.stateId = 2 then 12
+      when m.stateId = 3 then 13
+      when m.stateId = 4 then 14
+      when m.stateId = 5 then 15
+      when m.stateId = 6 then 16
+      when m.stateId = 7 then 17
+      when m.stateId is null then 18
+      end,m.dateCreated,
+      getdate(*),
+      @batchId from
+      arch_Mobile.Member as m where
+      ((m.dateCreated between @start_date and @end_date) or
+      (m.dateModified between @start_date and @end_date)) and
+      not exists(select 1 from dwMobile.MemberMap as mm2 where mm2.memberId = m.memberId)
+end;
+CREATE FUNCTION "arch_Mobile"."GMTtoEST"(@gmtDate datetime)
+returns datetime
+as
+begin
+  declare @estDate datetime
+  select @estDate = dateadd(hour,-1*daylightSavingFactorInHours,@gmtDate) from
+    arch_Mobile.GMT_to_EST where
+    @gmtDate >= daylightSavingStartedDateTime and @gmtDate < daylightSavingEndedDateTime
+  return @estDate
+end;
+CREATE PROCEDURE "arch_Mobile"."dw_genLoadScript_MOB"(@tbl_name varchar(128),@tbl_owner varchar(128),@file_name varchar(128),@col_delim varchar(16))
+as
+set NOCOUNT on
+declare @col_name char(128),
+@col_id integer,
+@max_col_id integer
+declare get_cols dynamic scroll cursor for select sc.column_name,
+    sc.column_id from
+    systable as st,
+    syscolumn as sc,
+    sysuserperm as su where
+    lower(st.table_name) = lower(@tbl_name) and
+    sc.table_id = st.table_id and
+    st.creator = su.user_id and
+    su.user_name = @tbl_owner order by
+    sc.column_id asc
+select @max_col_id = max(sc.column_id) from
+  systable as st,
+  syscolumn as sc,
+  sysuserperm as su where
+  lower(st.table_name) = lower(@tbl_name) and
+  sc.table_id = st.table_id and
+  st.creator = su.user_id and
+  su.user_name = @tbl_owner
+print 'truncate table '+@tbl_owner+'.'+@tbl_name
+print ';'
+print 'SET TEMPORARY OPTION Date_Format=''YYYYMMDD'''
+print ';'
+print 'SET TEMPORARY OPTION Output_Format=''TEXT'''
+print ';'
+print 'LOAD TABLE '+@tbl_owner+'.'+@tbl_name
+print '('
+open get_cols
+fetch next get_cols into @col_name,
+  @col_id
+print '        '+@col_name+'        NULL(''NULL'')'
+while(@@sqlstatus = 0)
+  begin
+    fetch next get_cols into @col_name,
+      @col_id
+    if @col_id = @max_col_id-1
+      begin
+        print '       ,'+@col_name+'       ''\\n''  )'
+        break
+      end
+    if @@sqlstatus = 2
+      break
+    print '        ,'+@col_name+'        NULL(''NULL'')'
+  end
+close get_cols
+print 'FROM '''+@file_name+''''
+print 'FORMAT ascii'
+print 'DELIMITED BY '''+@col_delim+''''
+print 'STRIP OFF'
+print 'QUOTES OFF'
+print 'ESCAPES OFF'
+print 'PREVIEW ON'
+print 'NOTIFY 10000'
+print ';'
+print 'select ''Count After  Load: '', convert(varchar,count(*)) from '+@tbl_owner+'.'+@tbl_name
+print ';'
+print 'COMMIT'
+print ';';
+CREATE PROCEDURE "arch_Mobile"."dw_genLoadScript_ANY"(@tbl_name varchar(128),@tbl_owner varchar(128),@file_name varchar(128),@col_delim varchar(16))
+as
+set NOCOUNT on
+declare @col_name char(128),
+@col_id integer,
+@max_col_id integer
+declare get_cols dynamic scroll cursor for select sc.column_name,
+    sc.column_id from
+    systable as st,
+    syscolumn as sc,
+    sysuserperm as su where
+    lower(st.table_name) = lower(@tbl_name) and
+    sc.table_id = st.table_id and
+    st.creator = su.user_id and
+    su.user_name = @tbl_owner order by
+    sc.column_id asc
+select @max_col_id = max(sc.column_id) from
+  systable as st,
+  syscolumn as sc,
+  sysuserperm as su where
+  lower(st.table_name) = lower(@tbl_name) and
+  sc.table_id = st.table_id and
+  st.creator = su.user_id and
+  su.user_name = @tbl_owner
+print 'truncate table '+@tbl_owner+'.'+@tbl_name
+print ';'
+print 'SET TEMPORARY OPTION Date_Format=''YYYYMMDD'''
+print ';'
+print 'SET TEMPORARY OPTION Output_Format=''TEXT'''
+print ';'
+print 'LOAD TABLE '+@tbl_owner+'.'+@tbl_name
+print '('
+open get_cols
+fetch next get_cols into @col_name,
+  @col_id
+print '        '+@col_name+'        NULL(''NULL'')'
+while(@@sqlstatus = 0)
+  begin
+    fetch next get_cols into @col_name,
+      @col_id
+    if @col_id = @max_col_id-1
+      begin
+        print '       ,'+@col_name+'       ''\\n''  )'
+        break
+      end
+    if @@sqlstatus = 2
+      break
+    print '        ,'+@col_name+'        NULL(''NULL'')'
+  end
+close get_cols
+print 'FROM '''+@file_name+''''
+print 'FORMAT ascii'
+print 'DELIMITED BY '''+@col_delim+''''
+print 'STRIP OFF'
+print 'QUOTES OFF'
+print 'ESCAPES OFF'
+print 'PREVIEW ON'
+print 'NOTIFY 10000'
+print ';'
+print 'select ''Count After  Load: '', convert(varchar,count(*)) from '+@tbl_owner+'.'+@tbl_name
+print ';'
+print 'COMMIT'
+print ';';
+CREATE PROCEDURE "arch_Mobile"."CreateTableProc"(in tablename char(30))
+begin
+  execute immediate 'CREATE TABLE ' || tablename || ' ( column1 INT PRIMARY KEY)'
+end;

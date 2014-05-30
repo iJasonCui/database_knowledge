@@ -1,0 +1,33 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAccountXactionCredSum;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAccountXactionCredSum (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mark Jaeckle
+**   Date:  Sept 18 2003
+**   Description: Gets record count and credit sum for given date range, for downtime compensation report
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+  at_dateFrom DATETIME
+ ,at_dateTo DATETIME
+ ,at_usageTypeId TINYINT
+)
+BEGIN
+
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+SELECT COUNT(*) AS num, SUM(credits) AS total
+        FROM AccountTransaction, UsageType
+        WHERE dateCreated > at_dateFrom AND dateCreated < at_dateTo
+        AND UsageType.xactionTypeId = AccountTransaction.xactionTypeId
+	    AND usageTypeId = at_usageTypeId;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

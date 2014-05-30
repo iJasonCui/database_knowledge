@@ -1,0 +1,87 @@
+
+To install and use a MySQL binary distribution, the basic command sequence looks like this: 
+shell> groupadd mysql
+shell> useradd -r -g mysql mysql
+shell> cd /usr/local
+shell> tar zxvf /path/to/mysql-VERSION-OS.tar.gz
+shell> ln -s full-path-to-mysql-VERSION-OS mysql
+shell> cd mysql
+shell> chown -R mysql .
+shell> chgrp -R mysql .
+shell> scripts/mysql_install_db --user=mysql
+shell> chown -R root .
+shell> chown -R mysql data
+# Next command is optional
+shell> cp support-files/my-medium.cnf /etc/my.cnf
+shell> bin/mysqld_safe --user=mysql &
+# Next command is optional
+shell> cp support-files/mysql.server /etc/init.d/mysql.server
+A more detailed version of the preceding description for installing a binary distribution follows. 
+
+
+mysql_install_db --user=mysql --datadir=/var/lib/w530devdb_4010/
+
+mysql_install_db --user=mysql --datadir=/var/lib/w530devdb_5010/ 
+
+1. installation
+
+1.1 download mysql
+1.2 rpm install 
+
+To perform a standard minimal installation, install the server and client RPMs:
+
+shell> rpm -i MySQL-server-VERSION.glibc23.i386.rpm
+shell> rpm -i MySQL-client-VERSION.glibc23.i386.rpm
+
+rpm -
+
+1.3 start up mysql
+
+1.3.1 /bin/sh /usr/bin/mysqld_safe &
+1.3.2 
+mysqld_safe --defaults-file=/etc/w151dbp10_4100.cnf &
+
+
+
+1.4  cd /usr/bin; ./mysql_secure_installation
+
+1.5 cpan installation 
+
+shell> perl -MCPAN -e shell
+cpan> install Finance::Quote
+
+1.6 shutdown mysql instance
+
+mysqladmin -P 5100 -h 127.0.0.1 shutdown
+
+1.7 connect to our new mysql instance using:
+mysql -S /var/run/mysqld/mysqld2.sock
+or
+mysql -h 127.0.0.1  -P4100 --prompt="[\u@\h;\p] [\d]> "
+
+1.8 only backup storedprocedure
+
+mysqldump --routines --no-create-info --no-data --no-create-db --skip-opt <database> > outputfile.sql
+
+
+#-------------------------------------
+# secure install
+#-------------------------------------
+PLEASE REMEMBER TO SET A PASSWORD FOR THE MySQL root USER !
+To do so, start the server, then issue the following commands:
+
+/usr/bin/mysqladmin -u root password 'new-password'
+/usr/bin/mysqladmin -u root -h localhost.localdomain password 'new-password'
+
+Alternatively you can run:
+/usr/bin/mysql_secure_installation
+
+which will also give you the option of removing the test
+databases and anonymous user created by default.  This is
+strongly recommended for production servers.
+
+See the manual for more instructions.
+
+Please report any problems with the /usr/bin/mysqlbug script!
+
+#-------------------------------------------------------------

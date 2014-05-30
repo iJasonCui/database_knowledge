@@ -1,0 +1,20 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getMsgOnHoldStatusByUsrId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getMsgOnHoldStatusByUsrId (
+/***********************************************************************
+ **
+ ** CREATION:
+ **   Author:	Sean Dwyer
+ **   Date:	Dec 2008
+ **   Description:	Retrieves the message "on hold" status for a member.	
+ **			
+ **
+ *************************************************************************/
+at_userId DECIMAL(12,0)
+)
+BEGIN
+     SELECT messageOnHoldStatus
+       FROM user_info
+      WHERE user_id = at_userId ;
+END;;
+DELIMITER ;

@@ -1,0 +1,55 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updAccountingEvent;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updAccountingEvent (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:        Slobodan Kandic
+**   Date:          Oct 03 2003 at 09:13AM
+**   Description:
+**
+** REVISION(S):
+ **   Author:       Andy Tran
+ **   Date:         February 2008
+ **   Description:  replace encodedCardNum with encodedCardId.
+**
+******************************************************************************/
+ at_userId DECIMAL(12,0)
+,at_eventType CHAR(1)
+,at_xactionId DECIMAL(12,0)
+,at_encodedCardNum VARCHAR(64)
+,at_dateCreated DATETIME
+)
+BEGIN
+IF (SELECT 1 FROM AccountingEvent WHERE userId = at_userId AND dateCreated = at_dateCreated AND eventType = at_eventType) IS NOT NULL THEN 
+
+   UPDATE AccountingEvent
+                  SET xactionId = at_xactionId
+                     ,encodedCardNum = at_encodedCardNum
+              WHERE userId = at_userId
+               AND dateCreated = at_dateCreated
+               AND eventType = at_eventType;
+ELSE
+   INSERT INTO AccountingEvent (
+                 userId
+                ,eventType
+                ,xactionId
+                ,cardNum
+                ,encodedCardNum
+                ,dateCreated
+            )
+            VALUES (
+                 at_userId
+                ,at_eventType
+                ,at_xactionId
+                ,''
+                ,at_encodedCardNum
+                ,at_dateCreated
+            );
+        
+END IF; 
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

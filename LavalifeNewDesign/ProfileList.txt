@@ -1,0 +1,2316 @@
+<spokenLanguageList>
+English
+French
+Spanish
+Portuguese
+Italian
+Russian
+German
+Mandarin
+Cantonese
+Dutch
+Greek
+Japanese
+Arabic
+Hebrew
+Danish
+Swedish
+Hindi
+Thai
+Hungarian
+Polish 
+Finnish 
+Tagalog
+Croatian
+Vietnamese
+Korean
+Ukrainian
+  
+
+<perinterestsCategoryList>
+Outdoor Activity
+Participate in Sports
+Watch Sports
+Entertainment
+Hobbies
+  
+
+<perinterestsList category=oa>
+Aerobics
+Biking
+Boating / sailing
+Camping
+Fishing
+Hiking
+Horseback Riding
+Hunting
+Ice skating
+Jogging / running
+Kayaking / canoeing
+Martial Arts
+Mountain climbing
+In-line skating
+Snow skiing / snowboarding
+Snowmobiling
+Swimming
+Walking
+Water skiing
+Weight lifting
+Wind surfing / surfing
+  
+
+<perinterestsList category=sp>
+Auto racing/>
+Badminton/>
+Baseball/>
+Basketball/>
+Billiards/>
+Bowling/>
+Boxing/>
+Diving/>
+Cricket/>
+Extreme sports/>
+Figure skating/>
+Football/>
+Golf/>
+Hockey/>
+Olympic sports/>
+Rugby/>
+Soccer/>
+Squash / racquetball/>
+Tennis/>
+Volleyball/>
+  
+
+<perinterestsList category=en>
+Bars / pubs
+Casino / gambling
+Concerts
+Cultural events
+Dance clubs
+Dancing
+Darts
+Dinner parties at home
+Fashion events
+Fine dining
+Movies
+Music - Classical
+Music - Country
+Music - Pop
+Music - Jazz
+Music - Rap
+Music - Rock
+Poetry
+Reading
+Surfing the web
+Traditional games
+TV: Entertainment
+TV: Educational / news
+Video games
+Wine tasting
+  
+
+<perinterestsList category=ho>
+Antiques / furniture restoration
+Astrology
+Cars
+Cats
+Collecting
+Computer / software
+Crafts
+Creative writing
+Dogs
+Family / kids
+Fish / aquarium
+Gardening
+Gourmet cooking
+Home improvement
+Investing
+Motorcycles
+News / politics / current events
+Painting
+Philosophy / spirituality
+Photography
+Playing a musical instrument
+Shopping
+Social cause / activism
+Traveling
+Vegetarianism
+Volunteer
+Yoga
+  
+
+<sexualInterestList>
+curious
+online sex
+sex with no intercourse
+oral sex
+conventional sex
+threesome
+swinger
+domination submission
+fetishes
+  
+
+<sexualSeekingList product=a>
+an encounter with a single man
+an encounter with a single woman
+an encounter with an attached man
+an encounter with an attached woman
+an encounter with a couple
+  
+
+<sexualSeekingList product=m>
+an encounter with a single man
+an encounter with an attached man
+an encounter with a couple
+  
+
+<sexualSeekingList product=w>
+an encounter with a single woman
+an encounter with an attached woman
+an encounter with a couple
+  
+
+<attachedStatusList>
+I am single
+I am attached (partner not included)
+We are a couple
+  
+
+<personalDetailList community=d>
+Body Type:
+Ethnic Background:
+Smoking Habits:
+Religion:
+Drinking Habits:
+  
+
+<personalDetailList community=r>
+Body Type:
+Ethnic Background:
+Smoking Habits:
+Have Children:
+Want Children:
+Education:
+Annual Income:
+Religion:
+Drinking Habits:
+  
+
+<personalDetailList community=i>
+Body Type:
+Ethnic Background:
+Smoking Habits:
+Religion:
+Drinking Habits:
+  
+
+<bodyType>
+slim
+fit
+muscular
+average
+few extra pounds
+queen or king sized
+prefer not to say
+  
+
+<ethnicityType>
+white
+black
+asian
+hispanic / latino
+aboriginal
+east indian
+middle eastern
+west indian
+mixed
+Pacific Islander
+other
+prefer not to say
+  
+
+<smokerType>
+do not smoke
+occasionally
+regularly
+trying to quit
+prefer not to say
+  
+
+<drinkerType>
+non-drinker
+socially
+often
+prefer not to say
+  
+
+<religionType>
+new age
+islamic
+jewish
+catholic
+buddhist
+hindu
+non-religious
+anglican
+sikh
+methodist
+christian - other
+baptist
+lutheran
+presbyterian
+other
+prefer not to say
+  
+
+<hasChildrenType>
+have none
+have and live with
+have and live with part-time
+have and do not live with
+prefer not to say
+  
+
+<bodyTypeSignupProfile>
+slim
+fit
+muscular
+average
+few extra pounds
+queen or king sized
+  
+
+<ethnicityTypeSignupProfile>
+white
+black
+asian
+hispanic / latino
+aboriginal
+east indian
+middle eastern
+west indian
+mixed
+Pacific Islander
+other
+  
+
+<smokerTypeSignupProfile>
+do not smoke
+occasionally
+regularly
+trying to quit
+  
+
+<drinkerTypeSignupProfile>
+non-drinker
+socially
+often
+  
+
+<religionTypeSignupProfile>
+new age
+islamic
+jewish
+catholic
+buddhist
+hindu
+non-religious
+anglican
+sikh
+methodist
+christian - other
+baptist
+lutheran
+presbyterian
+other
+  
+
+<childPlansType>
+want
+do not want
+undecided
+prefer not to say
+  
+
+<educationType>
+secondary school
+vocational/technical
+college
+university
+post-graduate studies
+prefer not to say
+  
+
+<incomeType>
+less than $25,000
+$25,000 to $50,000
+$50,000 to $75,000
+$75,000+
+prefer not to say
+  
+
+<interestList product=a community=d category=a title=My idea of a fun date:>
+a day at the beach                value=B
+a game of mini-golf               value=C
+a movie                           value=D
+a night of dancing                value=E
+a video game arcade               value=F
+an amusement park                 value=G
+attending a lecture               value=H
+browsing a bookstore              value=I
+bungee jumping                    value=J
+canoeing                          value=K
+dinner                            value=L
+drinks on an outdoor patio        value=M
+going bowling                     value=N
+hanging out with friends          value=O
+horseback riding                  value=P
+loading up at a candy store       value=Q
+playing darts                     value=R
+playing pool                      value=S
+playing trivia in a pub           value=T
+scuba diving                      value=U
+seeing a live band                value=V
+seeing a modern dance production  value=W
+seeing a play/ballet/opera        value=X
+seeing live comedy                value=Y
+sightseeing                       value=Z
+skinny-dipping                    value=a
+skydiving                         value=b
+snorkeling                        value=c
+surfing the Net at a cyber-café   value=d
+Sunday brunch                     value=A
+talking over a coffee             value=e
+visiting a museum                 value=f
+visiting an antique/flea market   value=g
+visiting an art gallery           value=h
+visiting the zoo/aquarium         value=i
+wandering the city                value=j
+white-water rafting               value=k
+window shopping                   value=l
+  
+
+<interestList product=a community=d category=b title=I like to talk about:>
+anything but the meaning of life value=A
+arts and crafts                  value=B
+astrology                        value=C
+cars                             value=D
+celebrity gossip                 value=E
+fashion                          value=F
+fine art                         value=G
+food/cooking                     value=H
+gardening                        value=I
+home renovation                  value=J
+literature                       value=K
+local politics                   value=L
+magazines                        value=M
+movies                           value=N
+music                            value=O
+my children                      value=P
+my dreams                        value=Q
+my friends                       value=R
+my job                           value=S
+news                             value=T
+nothing in particular            value=U
+past relationship experiences    value=V
+pets                             value=W
+philosophy                       value=X
+poetry                           value=Y
+popular fiction                  value=Z
+religion                         value=a
+sexual issues                    value=b
+social issues                    value=c
+sports                           value=e
+stereo equipment                 value=f
+technology/computers             value=g
+the Web                          value=h
+the economy/business issues      value=i
+the meaning of life              value=j
+travel                           value=l
+woodworking                      value=m
+world politics                   value=n
+  
+
+<interestList product=a community=d category=c title=My friends would describe me as:>
+a bit of a cynic                    value=A
+a bit of a loner                    value=B
+a cat person                        value=C
+a computer geek                     value=D
+a dog person                        value=E
+a free-thinker                      value=F
+a good listener                     value=G
+a hedonist                          value=H
+a social butterfly                  value=I
+a sucker for a cute smile           value=J
+a thrill-seeker                     value=K
+a throwback                         value=L
+a workaholic                        value=M
+always on the go                    value=N
+always ready to party               value=O
+an aspiring stand-up comic          value=P
+an open book                        value=Q
+an optimist                         value=R
+articulate                          value=S
+compassionate                       value=T
+dependable                          value=U
+down-to-earth                       value=V
+eccentric                           value=W
+generous to a fault                 value=Y
+generous                            value=X
+gentle                              value=Z
+happy-go-lucky                      value=a
+independent                         value=b
+intelligent                         value=c
+intense                             value=d
+kind                                value=e
+never being lost for words          value=f
+nobodys fool                        value=g
+outspoken/opinionated               value=h
+polite                              value=i
+reserved                            value=j
+serious                             value=k
+shy                                 value=l
+slightly mysterious                 value=m
+sometimes out in left field         value=n
+sophisticated                       value=o
+strong and silent                   value=p
+the class clown                     value=q
+the first one to pick up the check  value=r
+the human encyclopedia              value=s
+the life of the party               value=t
+tidy                                value=u
+touchy-feely                        value=v
+traditional                         value=w
+wise with my money                  value=x
+witty                               value=y
+  
+
+<interestList product=a community=i category=a title=What really turns me on:>
+a beard                    value=A
+a foot/back massage        value=B
+a hot tub                  value=C
+a king-sized body          value=D
+a moustache                value=E
+a muscular body            value=F
+a petite figure            value=G
+a queen-sized body         value=H
+a shower/bath for two      value=I
+a slow hot oil massage     value=J
+being blindfolded          value=K
+being creative with food   value=L
+being tickled              value=M
+being undressed slowly     value=N
+being watched/videotaped   value=O
+body piercing              value=P
+classical music            value=Q
+dirty dancing              value=R
+edible oils                value=S
+erotic movies              value=T
+extended foreplay          value=U
+french kissing             value=V
+getting a hickey           value=W
+giving a hickey            value=X
+hard rock music            value=Y
+incense                    value=Z
+latex clothing             value=a
+leather clothing           value=b
+lights on during sex       value=c
+lips/tongues               value=d
+oral sex                   value=e
+satin sheets               value=g
+scented candles            value=h
+short height               value=k
+sharing my fantasies       value=j
+sex talk                   value=i
+soul/funk/blues music      value=l
+spanking                   value=m
+tattoos                    value=p
+teasing with a feather     value=q
+talking dirty in bed       value=n
+tall height                value=o
+reading erotic literature  value=f
+unusual locations for sex  value=r
+voyeurism                  value=s
+whispering in my ear       value=t
+  
+
+<interestList product=a community=i category=b title=Encounters I am open to:>
+a threesome
+anything goes
+being dominant/ a master
+being submissive/a slave
+being watched
+bondage
+conventional sex only
+costumes/disguises
+cross-dressing
+discipline
+fetishes
+group activity
+multiple encounters
+nothing kinky
+one-night stand
+oral sex
+role playing
+sex talk
+spanking
+swinging/partner swapping
+tantric sex
+transvestism
+using sex toys
+video-taping
+visiting a nude/topless beach
+visiting a swinging club
+whips
+  
+
+<interestList product=a community=i category=c title=What I am looking for in a partner:>
+a Don Juan
+a femme fatale
+a non-virgin
+a sense of humor
+a virgin
+aggressiveness
+always practices safe sex
+asks what I want
+average sex drive
+confidence
+discretion/secrecy
+dislikes routine
+gentleness
+good personal hygiene
+good with their hands
+has a secret love nest
+high-sex drive
+imagination
+likes routine
+likes to give oral sex
+likes to go slow
+likes to receive oral sex
+likes to watch
+likes to work fast
+lots of stamina
+not possessive
+says what they want
+someone I can teach
+someone to teach me
+will let me take control
+will take control
+willingness to experiment
+  
+
+<interestList product=m community=r category=a title=My idea of romance includes:>
+a country drive
+a drive-in movie
+a horse-drawn carriage ride
+a moonlight swim
+a picnic
+a secret location
+a singing telegram
+a surprise at work
+a trail of flower petals
+a walk along the beach
+a walk in the park/forest
+a weekend getaway
+celebrating special dates
+champagne on ice
+chivalry/gallantry
+cooking a meal
+cuddling by a roaring fire
+dinner by candlelight
+dressing up for dinner
+flowers for no reason
+going to the opera
+going to the theater
+holding hands
+listening to music
+love letters
+love notes in special places
+love poems
+ordering in food
+random acts of kindness
+serenading my partner
+slow dancing
+snuggling by the TV
+special deliveries
+stargazing
+surprise gifts
+watching a sunset/sunrise
+  
+
+<interestList product=m community=r category=b title=In my spare time I enjoy:>
+arranging flowers
+arts and crafts
+autobiographies
+baking
+best-selling novels
+bird watching
+board games
+camping
+cards
+chatting on the Web
+collecting
+cooking
+darts
+doing absolutely nothing
+fishing
+gardening
+golf
+horseback riding
+hunting
+listening to music
+meditation
+my pet
+mystery novels
+non-fiction
+painting
+photography
+playing a musical instrument
+pottery/sculpting
+praying
+rock climbing
+rollerblading
+romance novels
+sailing
+shopping
+sleeping
+snowboarding
+spending time alone
+sunbathing
+surfing the Web
+surfing
+traveling
+visiting a park
+volunteering
+watching sports
+windsurfing
+woodworking
+working out
+writing poetry
+  
+
+<interestList product=m community=r category=c title=I value:>
+a curious mind
+a religious upbringing
+a sense of humor
+a sense of justice
+a strong work ethic
+an entrepreneurial spirit
+being a good listener
+being non-judgmental
+common sense
+compassion
+education/high intellect
+following a healthy lifestyle
+generosity
+good manners
+having a zest for life
+integrity
+knowing what you want from life
+loyalty
+non-materialism
+open communication
+open-mindedness
+openness
+optimism
+patriotism
+pragmatism
+putting your family first
+respect for animals
+respect for other cultures
+respect for the environment
+self-knowledge/awareness
+sensitivity
+showing affection freely
+social consciousness
+spirituality
+taking life as it comes
+the ability to laugh at yourself
+thoughtfulness
+  
+
+<interestList product=m community=d category=a title=My idea of a fun date:>
+a day at the beach
+a game of mini-golf
+a movie
+a night of dancing
+a video game arcade
+an amusement park
+attending a lecture
+browsing a bookstore
+bungee jumping
+canoeing
+dinner
+drinks on an outdoor patio
+going bowling
+hanging out with friends
+horseback riding
+loading up at a candy store
+playing darts
+playing pool
+playing trivia in a pub
+scuba diving
+seeing a live band
+seeing a modern dance production
+seeing a play/ballet/opera
+seeing live comedy
+sightseeing
+skinny-dipping
+skydiving
+snorkeling
+surfing the Net at a cyber-café
+Sunday brunch
+talking over a coffee
+visiting a museum
+visiting an antique/flea market
+visiting an art gallery
+visiting the zoo/aquarium
+wandering the city
+white-water rafting
+window shopping
+  
+
+<interestList product=m community=d category=b title=I like to talk about:>
+anything but the meaning of life
+arts and crafts
+astrology
+cars
+celebrity gossip
+fashion
+fine art
+food/cooking
+gardening
+home renovation
+literature
+local politics
+magazines
+movies
+music
+my children
+my dreams
+my friends
+my job
+news
+nothing in particular
+past relationship experiences
+pets
+philosophy
+poetry
+popular fiction
+religion
+sexual issues
+social issues
+sports
+stereo equipment
+technology/computers
+the economy/business issues
+the meaning of life
+the weather
+the Web
+travel
+woodworking
+world politics
+  
+
+<interestList product=m community=d category=c title=My friends would describe me as:>
+a bit of a cynic
+a bit of a loner
+a cat person
+a computer geek
+a dog person
+a free-thinker
+a good listener
+a hedonist
+a social butterfly
+a sucker for a cute smile
+a thrill-seeker
+a throwback
+a workaholic
+always on the go
+always ready to party
+an aspiring stand-up comic
+an open book
+an optimist
+articulate
+compassionate
+dependable
+down-to-earth
+eccentric
+generous
+generous to a fault
+gentle
+happy-go-lucky
+independent
+intelligent
+intense
+kind
+never being lost for words
+nobodys fool
+outspoken/opinionated
+polite
+reserved
+serious
+shy
+slightly mysterious
+sometimes out in left field
+sophisticated
+strong and silent
+the class clown
+the first one to pick up the check
+the human encyclopedia
+the life of the party
+touchy-feely
+tidy
+traditional
+wise with my money
+witty
+  
+
+<interestList product=w community=r category=a title=My idea of romance includes:>
+a country drive
+a drive-in movie
+a horse-drawn carriage ride
+a moonlight swim
+a picnic
+a secret location
+a singing telegram
+a surprise at work
+a trail of flower petals
+a walk along the beach
+a walk in the park/forest
+a weekend getaway
+celebrating special dates
+champagne on ice
+chivalry/gallantry
+cooking a meal
+cuddling by a roaring fire
+dinner by candlelight
+dressing up for dinner
+flowers for no reason
+going to the opera
+going to the theater
+holding hands
+listening to music
+love letters
+love notes in special places
+love poems
+ordering in food
+random acts of kindness
+serenading my partner
+slow dancing
+snuggling by the TV
+special deliveries
+stargazing
+surprise gifts
+watching a sunset/sunrise
+  
+
+<interestList product=w community=r category=b title=In my spare time I enjoy:>
+arranging flowers
+arts and crafts
+autobiographies
+baking
+best-selling novels
+bird watching
+board games
+camping
+cards
+chatting on the Web
+collecting
+cooking
+darts
+doing absolutely nothing
+fishing
+gardening
+golf
+horseback riding
+hunting
+listening to music
+meditation
+my pet
+mystery novels
+non-fiction
+painting
+photography
+playing a musical instrument
+pottery/sculpting
+praying
+rock climbing
+rollerblading
+romance novels
+sailing
+shopping
+sleeping
+snowboarding
+spending time alone
+sunbathing
+surfing
+surfing the Web
+traveling
+visiting a park
+volunteering
+watching sports
+windsurfing
+woodworking
+working out
+writing poetry
+  
+
+<interestList product=w community=r category=c title=I value:>
+a curious mind
+a religious upbringing
+a sense of humor
+a sense of justice
+a strong work ethic
+an entrepreneurial spirit
+being a good listener
+being non-judgmental
+common sense
+compassion
+education/high intellect
+following a healthy lifestyle
+generosity
+good manners
+having a zest for life
+integrity
+knowing what you want from life
+loyalty
+non-materialism
+open communication
+open-mindedness
+openness
+optimism
+patriotism
+pragmatism
+putting your family first
+respect for animals
+respect for other cultures
+respect for the environment
+self-knowledge/awareness
+sensitivity
+showing affection freely
+social consciousness
+spirituality
+taking life as it comes
+the ability to laugh at yourself
+thoughtfulness
+  
+
+<interestList product=w community=d category=a title=My idea of a fun date:>
+a day at the beach
+a game of mini-golf
+a movie
+a night of dancing
+a video game arcade
+an amusement park
+attending a lecture
+browsing a bookstore
+bungee jumping
+canoeing
+dinner
+drinks on an outdoor patio
+going bowling
+hanging out with friends
+horseback riding
+loading up at a candy store
+playing darts
+playing pool
+playing trivia in a pub
+scuba diving
+seeing a live band
+seeing a modern dance production
+seeing a play/ballet/opera
+seeing live comedy
+sightseeing
+skinny-dipping
+skydiving
+snorkeling
+surfing the Net at a cyber-café
+Sunday brunch
+talking over a coffee
+visiting a museum
+visiting an antique/flea market
+visiting an art gallery
+visiting the zoo/aquarium
+wandering the city
+white-water rafting
+window shopping
+  
+
+<interestList product=w community=d category=b title=I like to talk about:>
+anything but the meaning of life
+arts and crafts
+astrology
+cars
+celebrity gossip
+fashion
+fine art
+food/cooking
+gardening
+home renovation
+literature
+local politics
+magazines
+movies
+music
+my children
+my dreams
+my friends
+my job
+news
+nothing in particular
+past relationship experiences
+pets
+philosophy
+poetry
+popular fiction
+religion
+sexual issues
+social issues
+sports
+stereo equipment
+technology/computers
+the Web
+the economy/business issues
+the meaning of life
+the weather
+travel
+woodworking
+world politics
+  
+
+<interestList product=w community=d category=c title=My friends would describe me as:>
+a bit of a cynic
+a bit of a loner
+a cat person
+a computer geek
+a dog person
+a free-thinker
+a good listener
+a hedonist
+a social butterfly
+a sucker for a cute smile
+a thrill-seeker
+a throwback
+a workaholic
+always on the go
+always ready to party
+an aspiring stand-up comic
+an open book
+an optimist
+articulate
+compassionate
+dependable
+down-to-earth
+eccentric
+generous
+generous to a fault
+gentle
+happy-go-lucky
+independent
+intelligent
+intense
+kind
+never being lost for words
+nobodys fool
+outspoken/opinionated
+polite
+reserved
+serious
+shy
+slightly mysterious
+sometimes out in left field
+sophisticated
+strong and silent
+the class clown
+the first one to pick up the check
+the human encyclopedia
+the life of the party
+tidy
+touchy-feely
+traditional
+wise with my money
+witty
+  
+
+<interestList product=a community=r category=a title=My idea of romance includes:>
+a country drive              value=A
+a drive-in movie             value=B
+a horse-drawn carriage ride  value=C
+a moonlight swim             value=D
+a picnic                     value=E
+a secret location            value=F
+a singing telegram           value=G
+a surprise at work           value=H
+a trail of flower petals     value=I
+a walk along the beach       value=J
+a walk in the park/forest    value=K
+a weekend getaway            value=L
+celebrating special dates    value=M
+champagne on ice             value=N
+chivalry/gallantry           value=O
+cooking a meal               value=P
+cuddling by a roaring fire   value=Q
+dinner by candlelight        value=R
+dressing up for dinner       value=S
+flowers for no reason        value=T
+going to the opera           value=U
+going to the theater         value=V
+holding hands                value=W
+listening to music           value=X
+love letters                 value=Y
+love notes in special places value=Z
+love poems                   value=a
+ordering in food             value=b
+random acts of kindness      value=c
+serenading my partner        value=d
+slow dancing                 value=e
+snuggling by the TV          value=f
+special deliveries           value=g
+stargazing                   value=h
+surprise gifts               value=i
+watching a sunset/sunrise    value=j
+  
+
+<interestList product=a community=r category=b title=In my spare time I enjoy:>
+arranging flowers            value=A
+arts and crafts              value=B
+autobiographies              value=C
+baking                       value=D
+best-selling novels          value=E
+bird watching                value=F
+board games                  value=G
+camping                      value=H
+cards                        value=I
+chatting on the Web          value=J
+collecting                   value=K
+cooking                      value=L
+darts                        value=M
+doing absolutely nothing     value=N
+fishing                      value=O
+gardening                    value=P
+golf                         value=Q
+horseback riding             value=R
+hunting                      value=S
+listening to music           value=T
+meditation                   value=U
+my pet                       value=V
+mystery novels               value=W
+non-fiction                  value=X
+painting                     value=Y
+photography                  value=Z
+playing a musical instrument value=a
+pottery/sculpting            value=b
+praying                      value=c
+rock climbing                value=d
+rollerblading                value=e
+romance novels               value=f
+sailing                      value=g
+shopping                     value=h
+sleeping                     value=i
+snowboarding                 value=j
+spending time alone          value=k
+sunbathing                   value=l
+surfing the Web              value=n
+surfing                      value=m
+traveling                    value=o
+visiting a park              value=p
+volunteering                 value=q
+watching sports              value=r
+windsurfing                  value=s
+woodworking                  value=t
+working out                  value=u
+writing poetry               value=v
+  
+
+<interestList product=a community=r category=c title=I value:>
+a curious mind                   value=A
+a religious upbringing           value=B
+a sense of humor                 value=C
+a sense of justice               value=D
+a strong work ethic              value=E
+an entrepreneurial spirit        value=F
+being a good listener            value=G
+being non-judgmental             value=H
+common sense                     value=I
+compassion                       value=J
+education/high intellect         value=K
+following a healthy lifestyle    value=L
+generosity                       value=M
+good manners                     value=N
+having a zest for life           value=O
+integrity                        value=P
+knowing what you want from life  value=Q
+loyalty                          value=R
+non-materialism                  value=S
+open communication               value=T
+open-mindedness                  value=U
+openness                         value=V
+optimism                         value=W
+patriotism                       value=X
+pragmatism                       value=Y
+putting your family first        value=Z
+respect for animals              value=a
+respect for other cultures       value=b
+respect for the environment      value=c
+self-knowledge/awareness         value=d
+sensitivity                      value=e
+showing affection freely         value=f
+social consciousness             value=g
+spirituality                     value=h
+taking life as it comes          value=i
+the ability to laugh at yourself value=j
+thoughtfulness                   value=k
+  
+
+<interestList product=m community=i category=a title=What really turns me on:>
+a beard
+a foot/back massage
+a hot tub
+a king-sized body
+a moustache
+a muscular body
+a petite figure
+a shower/bath for two
+a slow hot oil massage
+being blindfolded
+being creative with food
+being tickled
+being undressed slowly
+being watched/videotaped
+body piercing
+classical music
+dirty dancing
+edible oils
+erotic movies
+extended foreplay
+french kissing
+getting a hickey
+giving a hickey
+hard rock music
+incense
+latex clothing
+leather clothing
+lights on during sex
+lips/tongues
+oral sex
+reading erotic literature
+satin sheets
+scented candles
+sex talk
+sharing my fantasies
+short height
+soul/funk/blues music
+spanking
+talking dirty in bed
+tall height
+tattoos
+teasing with a feather
+unusual locations for sex
+voyeurism
+whispering in my ear
+  
+
+<interestList product=m community=i category=b title=Encounters I am open to:>
+a threesome
+anything goes
+being dominant/ a master
+being submissive/a slave
+being watched
+bondage
+conventional sex only
+costumes/disguises
+cross-dressing
+discipline
+fetishes
+group activity
+multiple encounters
+nothing kinky
+one-night stand
+oral sex
+role playing
+sex talk
+spanking
+swinging/partner swapping
+tantric sex
+using sex toys
+video-taping
+visiting a nude/topless beach
+whips
+  
+
+<interestList product=m community=i category=c title=What I am looking for in a partner:>
+a Don Juan
+a non-virgin
+a sense of humor
+a virgin
+aggressiveness
+always practices safe sex
+asks what I want
+average sex drive
+confidence
+discretion/secrecy
+dislikes routine
+gentleness
+good personal hygiene
+good with their hands
+has a secret love nest
+high-sex drive
+imagination
+likes routine
+likes to give oral sex
+likes to go slow
+likes to receive oral sex
+likes to watch
+likes to work fast
+lots of stamina
+not possessive
+says what they want
+someone I can teach
+someone to teach me
+will let me take control
+will take control
+willingness to experiment
+  
+
+<interestList product=w community=i category=a title=What really turns me on:>
+a foot/back massage
+a hot tub
+a muscular body
+a petite figure
+a queen-sized body
+a shower/bath for two
+a slow hot oil massage
+being blindfolded
+being creative with food
+being tickled
+being undressed slowly
+being watched/videotaped
+body piercing
+classical music
+dirty dancing
+edible oils
+erotic movies
+extended foreplay
+french kissing
+getting a hickey
+giving a hickey
+hard rock music
+incense
+latex clothing
+leather clothing
+lights on during sex
+lips/tongues
+oral sex
+reading erotic literature
+satin sheets
+scented candles
+sex talk
+sharing my fantasies
+short height
+soul/funk/blues music
+spanking
+talking dirty in bed
+tall height
+tattoos
+teasing with a feather
+unusual locations for sex
+voyeurism
+whispering in my ear
+  
+
+<interestList product=w community=i category=b title=Encounters I am open to:>
+a threesome
+anything goes
+being dominant/ a master
+being submissive/a slave
+being watched
+bondage
+conventional sex only
+costumes/disguises
+cross-dressing
+discipline
+fetishes
+group activity
+multiple encounters
+nothing kinky
+one-night stand
+oral sex
+role playing
+sex talk
+spanking
+swinging/partner swapping
+tantric sex
+using sex toys
+video-taping
+visiting a nude/topless beach
+whips
+  
+
+<interestList product=w community=i category=c title=What I am looking for in a partner:>
+a Don Juan
+a femme fatale
+a non-virgin
+a sense of humor
+a virgin
+aggressiveness
+always practices safe sex
+asks what I want
+average sex drive
+confidence
+discretion/secrecy
+dislikes routine
+gentleness
+good personal hygiene
+good with their hands
+has a secret love nest
+high-sex drive
+imagination
+likes routine
+likes to give oral sex
+likes to go slow
+likes to receive oral sex
+likes to watch
+likes to work fast
+lots of stamina
+not possessive
+says what they want
+someone I can teach
+someone to teach me
+will let me take control
+will take control
+willingness to experiment
+  
+
+<customPersonalDetailList1 community=d>
+Body Type:
+Ethnic Background:
+  
+
+<customPersonalDetailList2 community=d>
+Smoking Habits:
+Drinking Habits:
+Religion:
+  
+
+<customPersonalDetailList1 community=r>
+Body Type:
+Ethnic Background:
+Smoking Habits:
+Drinking Habits:
+  
+
+<customPersonalDetailList2 community=r>
+Have Children:
+Want Children:
+Education:
+Annual Income:
+Religion:
+  
+
+<customPersonalDetailList1 community=i>
+Body Type:
+  
+
+<customPersonalDetailList2 community=i>
+Ethnic Background:
+Smoking Habits:
+Drinking Habits:
+Religion:
+  
+
+<customNewProfiles title=New Profiles >
+accepted anytime
+Since last visit
+In the past 24 hrs
+In the past 3 days
+In the past week
+In the past 14 days
+In the past month
+In the past 3 months
+  
+
+<customOnlineActivity title=Online Activity >
+online in the past 90 days
+online in the past 30 days
+online in the past 7 days
+online now
+  
+
+<customSeekingWomen title=Seeking Women >
+all women
+single
+single, seeking a couple
+attached
+attached, seeking a couple
+  
+
+<customSeekingMen title=Seeking Women >
+all men
+single
+single, seeking a couple
+attached
+attached, seeking a couple
+  
+
+<customSeekingCouple product=a title=Seeking Couple >
+all couples
+seeking single women
+seeking attached women
+seeking single men
+seeking attached men
+seeking another couple
+  
+
+<customSeekingCouple product=m title=Seeking Couple >
+all couples
+seeking single men
+seeking attached men
+seeking another couple
+  
+
+<customSeekingCouple product=w title=Seeking Couple >
+all couples
+seeking single women
+seeking attached women
+seeking another couple
+  
+
+
+
+
+
+
+
+-- smile optional
+
+<sendsmilecomment product=a community=d category=A>
+your wacky sense of humor
+your style...I think we could have a lot of fun
+your many admirable qualities
+your diversity of interests
+the fact that you really know what you want
+your honesty
+your openness
+your spirituality
+the way you express yourself
+the fact that we are complete opposites
+the fact that we have so much in common
+the fact that you live in a part of the world unknown to me
+your sense of adventure
+your love of the good life
+your outgoing nature
+your philosophy about life
+your proper use of grammar
+your ambitious nature
+your career orientation
+your lifestyle
+your athleticism
+your high energy
+your interest in sports
+your outspoken nature
+your many interests
+message me and I'll tell you
+the many common interests that we have
+your worldliness
+your down-to-earth nature
+your curious mind
+your healthy lifestyle
+your passion for life
+your love of the outdoors
+your keen wit
+asking - Can I see your Backstage?
+seeing more of you. Care to share a video? 
+the fact that you are drop dead gorgeous
+your attractive figure
+your eyes
+your smile
+your sex appeal
+the fact that you are a real hunk!
+your hair - you still have it
+your attractive build
+your eyes
+your smile
+your sex appeal
+  
+
+<sendsmilecomment product=a community=d category=D>
+my season tickets
+my hot sports car
+the celebrity I most resemble
+my last appearance on Springer
+my Halloween costume
+my last vacation
+my most embarrassing moment
+the last concert I went to
+my favorite hang out
+who my lifeline would be
+why my teachers always loved me
+my biggest thrill
+what keeps me up at night
+how I plan to rock your world
+my idea of a perfect date
+why Homer Simpson is my hero
+my garden
+my favorite movie
+my shoe size
+my pets
+my motto for life
+my roommate
+my favorite Web sites
+why I am smarter than Bill Gates
+what my friends consider to be my best quality
+the last Web site I hacked into
+what I really do for fun
+my hidden talent
+my most impressive asset
+the 3 things that I would take with me to a deserted island
+access to my Backstage pictures!?
+getting to know me better through Video
+  
+
+<sendsmilecomment product=a community=r category=A>
+your great sense of humor
+the confidence you exude
+your many great qualities
+your values
+your sensuality
+the fact that you know what you want
+your honesty
+your openness
+your spirituality
+the way in which you express yourself
+the fact that we are complete opposites
+the fact that we have so much in common
+the fact that you live in a part of the world unknown to me
+your sense of adventure
+your outgoing nature
+your interest in family
+your style
+message me and I'll tell you
+your ambitious nature
+your career orientation
+your lifestyle
+your outspoken nature
+your unselfishness
+the fact that we have many common interests
+your worldliness
+your down-to-earth nature
+your curious mind
+your healthy lifestyle
+your passion for life
+your love of the outdoors
+your keen wit
+your religious upbringing
+asking - Can I see your Backstage?
+seeing more of you. Care to share a video?
+the fact that you are drop dead gorgeous
+your attractive figure
+your eyes
+your smile
+your sex appeal
+the fact that you are a real hunk!
+your hair - you still have it
+your attractive build
+your eyes
+your smile
+your sex appeal
+  
+
+<sendsmilecomment product=a community=r category=D>
+my hidden talent
+my motto for life
+my most impressive asset
+my idea of romance
+my favorite restaurant
+my pets
+my favorite bottle of wine
+what I picture doing on our first date
+the meaning of life
+why my teachers always loved me
+my biggest thrill
+what keeps me up at night
+how I plan to rock your world
+my idea of a perfect date
+why Homer Simpson is my hero
+my last home improvement project
+why Dilbert hits close to home
+my garden
+my collection of...
+the best movie I've ever seen
+my favorite Web sites
+what my friends consider to be my best quality
+what I really do for fun
+my season tickets
+my hot sports car
+the 3 things I would take with me to a deserted island
+access to my Backstage pictures!
+getting to know me better through Video
+  
+
+<sendsmilecomment product=a community=i category=A>
+your great sense of humor
+the confidence that you exude
+your many sexy qualities
+the fact that you're even hornier than me
+the fact that you're local
+your love for oral
+your fetishes
+the fact that you like to share
+your willingness to experiment
+your toy collection
+your body art
+your many shaggable qualities, baby
+the raw sensuality behind your words
+your sexual desires
+the fact that you are a real 'hottie'
+the raw sexual energy you stirred inside of me
+the fact that you are looking for a discreet encounter
+your nice shoes, let's have sex
+your whole package
+your alleged endowment
+your kinky side
+the fact that you love sex as much as I do
+the fact that you are hot, hot, hot!
+your insatiable sex drive
+your sensuality
+your lusty nature
+the fact that you know what you want
+your dominant nature
+your submissive nature
+your openness
+the way in which you express yourself
+your sense of adventure
+your outgoing nature
+your style
+your lifestyle
+your curious mind
+your passion for life
+your keen wit
+your intellect, very sexy
+the fact that you are married and as frustrated as I am
+message me and I will tell you
+asking - Can I see your Backstage?
+seeing more of you. Care to share a video?
+your attractive figure
+your hard body
+your full-figured body
+your eyes
+your lovely, full breasts
+all those curves, and me with no brakes
+your smile
+your sex appeal
+the fact that you are drop dead gorgeous!
+your hair - you still have it
+your hard body
+your eyes
+your impressive looking package
+your smile
+your sex appeal
+the fact that you are a real hunk!
+  
+
+<sendsmilecomment product=a community=i category=D>
+my talented tongue
+my soft hands
+my oral fixation
+my secret weapon
+my favorite fantasy
+groups I belong to
+my favorite toy
+my last erotic adventure
+my fantasy with you
+my need for a high protein diet
+what I'm wearing right now
+my hidden birth mark
+why I was the teacher's pet
+my favorite lingerie
+my biggest thrill
+my dark side
+what keeps me up at night
+the directions to my place
+my erogenous zones
+how I plan to rock your world
+my shoe size
+sex motto
+my first experience with a couple
+my roommate
+my favorite Web sites
+what I really do for fun
+my hidden talent
+the time my mother walked in on me
+my most impressive asset
+when I lost my virginity
+the most creative place I have had sex
+the first time I watched my partner have sex with someone else
+access to my Backstage pictures!
+getting to know me better through Video
+  
+
+<sendsmilecomment product=m community=d category=A>
+your great sense of humor
+your style...I think we could have a lot of fun
+the fact that we have a lot in common
+your many admirable qualities
+your diversity of interests
+the fact that you really know what you want
+your honesty
+your openness
+your spirituality
+the way you express yourself
+the fact that we are complete opposites
+the fact that we have so much in common
+your sense of adventure
+your love of the good life
+your outgoing nature
+your philosophy about life
+your proper use of grammar
+your ambitious nature
+your career orientation
+your lifestyle
+your athleticism
+your high energy
+your interest in sports
+your outspoken nature
+your many interests
+the many common interests we have
+your worldliness
+your down to earth nature
+your curious mind
+your healthy lifestyle
+your passion for life
+your love of the outdoors
+your keen wit
+the fact that you live in a part of the world unknown to me
+asking - Can I see your Backstage?
+the fact that you have Video. Care to play show and tell?
+your hair - you still have it
+your eyes
+your smile
+your sex appeal
+the fact that you are drop dead gorgeous a real hunk!
+  
+
+<sendsmilecomment product=m community=d category=D>
+season tickets
+my hot sports car
+my measurements
+the celebrity I most resemble
+my last appearance on Springer
+my Halloween costume
+my last vacation
+my most embarrassing moment
+the last concert I went to
+my favorite hang out
+my biggest thrill
+my idea of a perfect date
+why Madonna is my hero
+my garden
+my favorite movie
+my shoe size
+my pets
+my motto for life
+my roommate
+my favorite web sites
+what my friends consider to be my best quality
+the last web site I hacked into
+what I really do for fun
+my hidden talent
+my most impressive asset
+what I am really looking for
+my relationship with my parentsv
+the 3 things that I would take with me to a deserted island
+access to my Backstage pictures!
+my video talents
+  
+
+<sendsmilecomment product=m community=r category=A>
+your great sense of humor
+the confidence you exude
+your many great qualities
+your values
+your sensuality
+the fact that you know what you want
+your honesty
+your openness
+your spirituality
+the way in which you express yourself
+the fact that we are complete opposites
+the fact that we have so much in common
+the fact that you live in a part of the world unknown to me
+your sense of adventure
+your outgoing nature
+your interest in family
+your style
+message me and I'll tell you
+your ambitious nature
+your career orientation
+your lifestyle
+your outspoken nature
+your unselfishness
+the fact that we have many common interests
+your worldliness
+your down-to-earth nature
+your curious mind
+your healthy lifestyle
+your passion for life
+your love of the outdoors
+your keen wit
+your religious upbringing
+asking - Can I see your Backstage?
+the fact that you have Video. Care to play show and tell?
+the fact that you are drop dead gorgeous
+your attractive figure
+your eyes
+your smile
+your sex appeal
+the fact that you are a real hunk!
+your hair - you still have it
+your attractive build
+your eyes
+your smile
+your sex appeal
+  
+
+<sendsmilecomment product=m community=r category=D>
+my hidden talent
+my motto for life
+my most impressive asset
+my idea of romance
+my favorite restaurant
+my pets
+my favorite bottle of wine
+what I picture doing on our first date
+the meaning of life
+why my teachers always loved me
+my biggest thrill
+what keeps me up at night
+how I plan to rock your world
+my idea of a perfect date
+why Homer Simpson is my hero
+my last home improvement project
+why Dilbert hits close to home
+my garden
+my collection of...
+the best movie I've ever seen
+my favorite Web sites
+what my friends consider to be my best quality
+what I really do for fun
+my season tickets
+my hot sports car
+the 3 things I would take with me to a deserted island
+access to my Backstage pictures!
+my video talents
+  
+
+<sendsmilecomment product=m community=i category=A>
+the confidence you exude
+the fact that you are local
+your love for oral
+your fetishes
+the fact that you like to share
+your willingness to experiment
+your toy collection
+your body art
+the fact that you sound like you mean business
+the fact that you are looking for a quickie
+your big basket
+your whole package
+your alleged endowment (I want proof!)
+your kinky side
+the fact that you like sex as much as I do
+the fact that you are hot, hot, hot!
+your insatiable sex drive
+your sensuality
+the fact that you know what you want
+your dominant nature
+your submissive nature
+your openness
+the way you express yourself
+your sense of adventure
+your outgoing nature
+your lifestyle
+your curious mind
+the fact that you are married and as frustrated as I am
+asking - Can I see your Backstage?
+the fact that you have Video. Care to play show and tell?
+your hair - you still have it
+your attractive build
+your smile
+your sex appeal
+the fact that you are a real hunk!
+  
+
+<sendsmilecomment product=m community=i category=D>
+my talented tongue
+my oral fixation
+my secret weapon
+my favourite fantasy
+my favourite toy
+my last erotic adventure
+my fantasy with you
+what I am wearing right now
+my hidden birth mark
+my dark side
+the directions to my place
+my shoe size
+my favourite web sites
+what I really do for fun
+my hidden talent
+my most impressive asset
+the most creative place I had sex
+what I am famous for
+my sensitive nipples
+whether or not I am shaved
+stamina
+my endowment
+the first time I watched my partner have sex with someone else
+access to my Backstage pictures!
+my video talents
+  
+
+<sendsmilecomment product=w community=d category=A>
+your wacky sense of humor
+your style...I think we could have a lot of fun
+your many admirable qualities
+your diversity of interests
+the fact that you really know what you want
+your honesty
+your openness
+your spirituality
+the way you express yourself
+the fact that we are complete opposites
+the fact that we have so much in common
+the fact that you live in a part of the world unknown to me
+your love of the good life
+your outgoing nature
+your philosophy about life
+your proper use of grammar
+your ambitious nature
+your career orientation
+your lifestyle
+your athleticism
+your high energy
+your interest in sports
+your outspoken nature
+your many interests
+message me and I'll tell you
+the many common interests that we have
+your worldliness
+your down-to-earth nature
+your curious mind
+your healthy lifestyle
+your passion for life
+your love of the outdoors
+your keen wit
+asking - Can I see your Backstage?
+seeing more of you. Care to share a video?
+the fact that you are drop dead gorgeous
+your attractive figure
+your eyes
+your smile
+your sex appeal
+not exist
+  
+
+<sendsmilecomment product=w community=d category=D>
+my season tickets
+my hot sports car
+the celebrity I most resemble
+my last appearance on Springer
+my Halloween costume
+my last vacation
+my most embarrassing moment
+the last concert I went to
+my favorite hang out
+who my lifeline would be
+why my teachers always loved me
+my biggest thrill
+what keeps me up at night
+how I plan to rock your world
+my idea of a perfect date
+why Homer Simpson is my hero
+my garden
+my favorite movie
+my shoe size
+my pets
+my motto for life
+my roommate
+my favorite Web sites
+why I am smarter than Bill Gates
+what my friends consider to be my best quality
+the last Web site I hacked into
+what I really do for fun
+my hidden talent
+my most impressive asset
+the 3 things that I would take with me to a deserted island
+access to my Backstage pictures!
+getting to know me better through Video
+  
+
+<sendsmilecomment product=w community=r category=A>
+your great sense of humor
+the confidence you exude
+your many great qualities
+your values
+your sensuality
+the fact that you know what you want
+your honesty
+your openness
+your spirituality
+the way in which you express yourself
+the fact that we are complete opposites
+the fact that we have so much in common
+the fact that you live in a part of the world unknown to me
+your sense of adventure
+your outgoing nature
+your interest in family
+your style
+message me and I'll tell you
+your ambitious nature
+your career orientation
+your lifestyle
+your outspoken nature
+your unselfishness
+the fact that we have many common interests
+your worldliness
+your down-to-earth nature
+your curious mind
+your healthy lifestyle
+your passion for life
+your love of the outdoors
+your keen wit
+your religious upbringing
+asking - Can I see your Backstage?
+seeing more of you. Care to share a video?
+the fact that you are drop dead gorgeous
+your attractive figure
+your eyes
+your smile
+your sex appeal
+not exist
+  
+
+<sendsmilecomment product=w community=r category=D>
+my hidden talent
+my motto for life
+my most impressive asset
+my idea of romance
+my favorite restaurant
+my pets
+my favorite bottle of wine
+what I picture doing on our first date
+the meaning of life
+why my teachers always loved me
+my biggest thrill
+what keeps me up at night
+how I plan to rock your world
+my idea of a perfect date
+why Homer Simpson is my hero
+my last home improvement project
+why Dilbert hits close to home
+my garden
+my collection of...
+the best movie I've ever seen
+my favorite Web sites
+what my friends consider to be my best quality
+what I really do for fun
+my season tickets
+my hot sports car
+the 3 things I would take with me to a deserted islandv
+access to my Backstage pictures!
+getting to know me better through Video
+  
+
+<sendsmilecomment product=w community=i category=A>
+your great sense of humor
+the confidence that you exude
+your many sexy qualities
+the fact that you're even hornier than me
+the fact that you're local
+your love for oral
+your fetishes
+the fact that you like to share
+your willingness to experiment
+your toy collection
+your body art
+your many shaggable qualities, baby
+the raw sensuality behind your words
+your sexual desires
+the fact that you are a real 'hottie'
+the raw sexual energy you stirred inside of me
+the fact that you are looking for a discreet encounter
+your nice shoes, let's have sex
+your whole package
+your kinky side
+the fact that you love sex as much as I do
+the fact that you are hot, hot, hot!
+your insatiable sex drive
+your sensuality
+your lusty nature
+the fact that you know what you want
+your dominant nature
+your submissive nature
+your openness
+the way in which you express yourself
+your sense of adventure
+your outgoing nature
+your style
+your lifestyle
+your curious mind
+your passion for life
+your keen wit
+your intellect, very sexy
+the fact that you are married and as frustrated as I am
+asking - Can I see your Backstage?
+seeing more of you. Care to share a video?
+your attractive figure
+your hard body
+your full-figured body
+your eyes
+your lovely, full breasts
+all those curves, and me with no brakes
+your smile
+your sex appeal
+the fact that you are drop dead gorgeous!
+my talented tongue
+not exist
+  
+
+<sendsmilecomment product=w community=i category=D>
+my soft hands
+my oral fixation
+my secret weapon
+my favorite fantasy
+groups I belong to
+my favorite toy
+my last erotic adventure
+my fantasy with you
+what I'm wearing right now
+my hidden birth mark
+why I was the teacher's pet
+my favorite lingerie
+my biggest thrill
+my dark side
+what keeps me up at night
+the directions to my place
+my erogenous zones
+how I plan to rock your world
+my shoe size
+sex motto
+my first experience with a couple
+my roommate
+my favorite Web sites
+what I really do for fun
+my hidden talent
+the time my mother walked in on me
+my most impressive asset
+when I lost my virginity
+the most creative place I have had sex
+the first time I watched my partner have sex with someone else
+access to my Backstage pictures!
+getting to know me better through Video
+  
+

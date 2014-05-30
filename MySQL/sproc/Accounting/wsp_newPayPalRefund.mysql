@@ -1,0 +1,50 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newPayPalRefund;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newPayPalRefund (
+
+/*******************************************************************
+**
+** CREATION:
+**   Author:      Andy Tran
+**   Date:        July 2009
+**   Description: Inserts row into PayPalRefund
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*******************************************************************/
+
+ at_xactionId        DECIMAL(12,0)
+,at_refPaymentNumber VARCHAR(19)
+,at_refundType       VARCHAR(7)
+,at_refundAmount     VARCHAR(7)
+,at_currencyCode     CHAR(3)
+)
+BEGIN
+
+DECLARE at_dateNow DATETIME;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+INSERT INTO PayPalRefund (
+         xactionId
+        ,refPaymentNumber
+        ,refundType
+        ,refundAmount
+        ,currencyCode
+        ,dateCreated
+    )
+    VALUES (
+         at_xactionId
+        ,at_refPaymentNumber
+        ,at_refundType
+        ,at_refundAmount
+        ,at_currencyCode
+        ,at_dateNow
+    );
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

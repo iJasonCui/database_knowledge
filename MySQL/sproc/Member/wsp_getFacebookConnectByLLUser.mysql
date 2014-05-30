@@ -1,0 +1,26 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getFacebookConnectByLLUser;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getFacebookConnectByLLUser (
+/***********************************************************************
+**
+** CREATION:
+**   Author:        Andy Tran
+**   Date:          January, 2011
+**   Description:   Gets FacebookConnect record by Lavalife userId.
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+ at_llUserId  DECIMAL(12,0)
+)
+BEGIN
+    SELECT fbUserId
+      FROM FacebookConnect
+     WHERE llUserId = at_llUserId
+       AND status = 'A' ;
+
+END;;
+DELIMITER ;

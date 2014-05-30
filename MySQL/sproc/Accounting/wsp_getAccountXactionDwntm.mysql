@@ -1,0 +1,33 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAccountXactionDwntm;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAccountXactionDwntm (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mark Jaeckle
+**   Date:  September 19 2003
+**   Description:  
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+  at_dateFrom DATETIME
+ ,at_dateTo DATETIME
+ ,at_usageTypeId int
+)
+BEGIN
+
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+ 
+SELECT userId, creditTypeId, credits
+        FROM AccountTransaction, UsageType
+        WHERE dateCreated > at_dateFrom AND dateCreated < at_dateTo 
+        AND UsageType.xactionTypeId = AccountTransaction.xactionTypeId
+	    AND usageTypeId = at_usageTypeId;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

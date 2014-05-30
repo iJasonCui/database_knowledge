@@ -1,0 +1,56 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getOptimalPaymentsRequest;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getOptimalPaymentsRequest (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         Feb 24 2011
+**   Description:  Retrieves OptimalPaymentsRequest record for the given xactionId
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_xactionId DECIMAL(12,0)
+,at_actionCode VARCHAR(20)
+)
+BEGIN  
+
+    SELECT customerId,
+           merchantId,
+           merchantRefNum,
+           cardNumber,
+           cardType,
+           cardExpiryMonth,
+           cardExpiryYear,
+           amount,
+           currencyCode,
+           cardHolderName,
+           userStreet,
+           userCity,
+           userState,
+           userCountryCode,
+           userPostalCode,
+           cardSecurityValue,
+           cardIssueNumber,
+           cardStartMonth,
+           cardStartYear,
+           dateCreated,
+           cardSecurityPresence,
+           authAmount,
+           encodedCardId,
+           customerIP,
+           email
+      FROM OptimalPaymentsRequest
+     WHERE activityId = at_xactionId
+       AND actionCode = at_actionCode;
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

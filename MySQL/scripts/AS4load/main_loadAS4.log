@@ -1,0 +1,39 @@
+#------------------------------------------
+# OBJECT_KEY is 362
+# DATE_KEY is 2013-12-10
+#------------------------------------------
+# ./loadMySQLtoAS4.sh 362 2013-12-10
+ARCHIVE_KEY=552588
+OBJECT_NAME=jump_user
+
+Starting copy...
+1000 rows sent to SQL Server.
+2000 rows sent to SQL Server.
+3000 rows sent to SQL Server.
+4000 rows sent to SQL Server.
+5000 rows sent to SQL Server.
+6000 rows sent to SQL Server.
+7000 rows sent to SQL Server.
+8000 rows sent to SQL Server.
+9000 rows sent to SQL Server.
+10000 rows sent to SQL Server.
+11000 rows sent to SQL Server.
+12000 rows sent to SQL Server.
+13000 rows sent to SQL Server.
+14000 rows sent to SQL Server.
+15000 rows sent to SQL Server.
+16000 rows sent to SQL Server.
+17000 rows sent to SQL Server.
+18000 rows sent to SQL Server.
+19000 rows sent to SQL Server.
+19906 rows copied.
+#------------------------------------------
+# OBJECT_KEY is 367
+# DATE_KEY is 2013-12-10
+#------------------------------------------
+# ./loadMySQLtoAS4.sh 367 2013-12-10
+ARCHIVE_KEY=552589
+OBJECT_NAME=AffiliateUser
+
+Starting copy...
+23 rows copied.

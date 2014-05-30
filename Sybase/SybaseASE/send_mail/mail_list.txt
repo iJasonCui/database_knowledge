@@ -1,0 +1,81 @@
+#
+# Lavalife Inc.
+# May 2004
+#
+# mail_list.txt
+#
+# This file is used by the script 'send_mail.sh' as a default mail list.
+# There are three columns (fields, words) in its structure:
+# 	1 - name of a task, usually a script name;
+# 	2 - message type, used to differentiate messages;
+#	3 - e-mail address of a recipient.
+# The fields (column, words) may be delimited by tab or space.
+#
+# Both 'task' and 'message type' are passed as parameters to send_mail.sh
+# to determine the list of corresponding mail recipients.
+#
+check_ase_log.sh			failure			DatabaseManagement@lavalife.com
+check_ase_log.sh			notification	        DatabaseManagement@lavalife.com
+dump_db.sh                                      failure         DatabaseManagement@lavalife.com
+run_sql.sh					failure         DatabaseManagement@lavalife.com
+run_sql.sh					success         DatabaseManagement@lavalife.com
+run_proc.sh					failure         DatabaseManagement@lavalife.com
+run_proc.sh					success         DatabaseManagement@lavalife.com
+run_processfileinfo.sh			failure 		DatabaseManagement@lavalife.com
+run_processfileinfo.sh			success 		DatabaseManagement@lavalife.com
+run_getfileinfo.sh				failure 		DatabaseManagement@lavalife.com
+run_getfileinfo.sh				success 		DatabaseManagement@lavalife.com
+run_getdates.sh				success 		DatabaseManagement@lavalife.com
+run_getdates.sh				failure 		DatabaseManagement@lavalife.com
+run_scpfile.sh				failure 		DatabaseManagement@lavalife.com
+run_scpfile.sh				success 		DatabaseManagement@lavalife.com
+run_getbatchid.sh				failure 		DatabaseManagement@lavalife.com
+run_getbatchid.sh				success 		DatabaseManagement@lavalife.com
+run_createintable.sh				failure 		DatabaseManagement@lavalife.com
+run_createintable.sh				success 		DatabaseManagement@lavalife.com
+run_bcpfile.sh				success 		DatabaseManagement@lavalife.com
+run_bcpfile.sh				failure 		DatabaseManagement@lavalife.com
+run_archive.sh				failure 		DatabaseManagement@lavalife.com
+run_archive.sh				success 		DatabaseManagement@lavalife.com
+run_updatebatchlog.sh			failure 		DatabaseManagement@lavalife.com
+run_archive.sh				success 		DatabaseManagement@lavalife.com
+MainTest.sh					failure 		DatabaseManagement@lavalife.com
+MainTest.sh					success 		DatabaseManagement@lavalife.com
+MainTest2.sh					failure 		DatabaseManagement@lavalife.com
+MainTest2.sh					success 		DatabaseManagement@lavalife.com
+xfer900CallFile.sh                              failure                 DatabaseManagement@lavalife.com 
+xfer900CallFile.sh                              success                 DatabaseManagement@lavalife.com 
+xfer900CallFile.sh.temp                         failure                 DatabaseManagement@lavalife.com 
+xfer900CallFile.sh.temp                         success                 DatabaseManagement@lavalife.com 
+pullRecFile.sh                          failure                 DatabaseManagement@lavalife.com
+pullRecFile.sh                          success                 DatabaseManagement@lavalife.com
+processRecFile.sh                       failure                 DatabaseManagement@lavalife.com
+processRecFile.sh                       success                 DatabaseManagement@lavalife.com
+pullSCBRecFile.sh                       failure                 DatabaseManagement@lavalife.com 
+pullSCBRecFile.sh                       success                 DatabaseManagement@lavalife.com 
+processSCBRecFile.sh                    failure                 DatabaseManagement@lavalife.com 
+processSCBRecFile.sh                    success                 DatabaseManagement@lavalife.com 
+run_ivrAdminActivity.sh			success 		DatabaseManagement@lavalife.com
+run_ivrAdminActivity.sh			failure 		DatabaseManagement@lavalife.com
+run_9001305.sh				success 		DatabaseManagement@lavalife.com
+run_9001305.sh				failure 		DatabaseManagement@lavalife.com
+run_9002304.sh				success 		DatabaseManagement@lavalife.com
+run_9002304.sh				failure 		DatabaseManagement@lavalife.com
+killByDemand.sh				failure			DatabaseManagement@lavalife.com
+updLastCCpurch				failure                 DatabaseManagement@lavalife.com
+updLastCCpurch                          success                 DatabaseManagement@lavalife.com
+loadVerisign_Settlement.sh      success                 DatabaseManagement@lavalife.com
+loadVerisign_Settlement.sh      failure                 DatabaseManagement@lavalife.com
+xfer900UnBillable.sh            success                 DatabaseManagement@lavalife.com
+xfer900UnBillable.sh            failure                 DatabaseManagement@lavalife.com
+xferTritonNE.sh                 success                 DatabaseManagement@lavalife.com
+xferTritonNE.sh                 failure                 DatabaseManagement@lavalife.com
+xferTritonNE.sh                 summary                 DatabaseManagement@lavalife.com
+xferTritonNE.sh                 summary                 mark@mptelemedia.com
+xferTritonNE.sh                 summary                 rlegg@tritonglobal.ca
+xferTritonNE.sh                 summary                 mfietz@tritonglobal.ca  
+xferTritonNE.sh                 details                 DatabaseManagement@lavalife.com
+db_space.sh			success			databaseManagement@lavalife.com
+db_space.sh			failure			databaseManagement@lavalife.com
+checkActivityLoads.sh           success                 DatabaseManagement@lavalife.com
+checkActivityLoads.sh           failure                 DatabaseManagement@lavalife.com

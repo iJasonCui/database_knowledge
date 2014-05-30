@@ -1,0 +1,29 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_cntFirstIdentitiesApproved;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_cntFirstIdentitiesApproved (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  Jan 7, 2005  
+**   Description:  Counts number of new users with approved identities within time range 
+**          
+** REVISION(S):
+**   Author: 
+**   Date: 
+**   Description:
+**
+******************************************************************************/
+at_startSeconds INT,
+at_endSeconds   INT
+)
+BEGIN
+    SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;
+    SELECT count(*)
+      FROM user_info
+     WHERE user_type NOT IN ('G', 'S', 'A', 'C', 'E') AND
+           firstidentitytime >= at_startSeconds AND
+           firstidentitytime <= at_endSeconds ;
+        
+END;;
+DELIMITER ;

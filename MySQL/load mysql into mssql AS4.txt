@@ -1,0 +1,85 @@
+--##-------------------------------------------------
+--step 1:
+--
+--find out the objectKey and dateKey 
+select * from succor.audit.tLoadArchive where objectKey = 367 and dateKey = '20130318'
+
+--find out the loadArchiveKey based on the objectKey and dateKey 
+select loadArchiveKey from succor.audit.tLoadArchive where objectKey = 367 and dateKey = '20130318'
+
+
+--select * from succor.audit.tObjectConfigArchive where objectKey in (362, 367)
+--362	archive_jump_user	E:\Projects\SSIS\WEB\WEB\
+--367	archive_AffiliateUser	E:\Projects\SSIS\WEB\WEB\
+
+--select * from succor.audit.tLoadArchive where loadArchiveKey = 383413
+--select * from succor.audit.tLoadArchive where objectKey = 362 and dateKey = 'mar 19 2013'
+--select * from succor.audit.tLoadArchive where objectKey = 367 and dateKey = '20130318'
+
+--##------------------------------------------
+-- step 2:
+--
+-- export data from MySQL production source
+-- have to be on mysql server locally; cannot do it remotely;
+--ENCLOSED BY '"'
+--ESCAPED BY '\\'
+--PATH: /data/dump/w151dbp30_7100/bcp/Jump
+
+SELECT cookieId
+      ,CONCAT(LTRIM(RTRIM(affiliateId)), ' ') 
+      ,dateCreated
+      ,517108 AS loadArchiveKey
+INTO OUTFILE '/data/dump/w151dbp30_7100/bcp/Jump/AffiliateUser.20130319.367.517108.out'
+FIELDS TERMINATED BY '|~|'
+LINES TERMINATED BY '|@|\n'
+FROM Jump.AffiliateUser
+WHERE dateCreated >= '2013-03-19 4:00:00' 
+  AND dateCreated <  TIMESTAMPADD(day, 1, '2013-03-19 4:00:00');
+
+sed -i "s/\\\/ /g" /data/dump/w151dbp30_7100/bcp/Jump/AffiliateUser.20130319.367.517108.out
+
+
+SELECT cookie_id
+      ,adcode
+      ,context
+      ,gender
+      ,user_id
+      ,dateRegistered
+      ,dateCreated
+      ,dateModified
+      ,ipAddress
+      ,brand
+      ,loadArchiveKey
+INTO OUTFILE '/data/dump/w151dbp30_7100/bcp/Jump/jump_user.20130319.362.517108.out'
+FIELDS TERMINATED BY '|~|'
+LINES TERMINATED BY '|@|\n'
+FROM Jump.AffiliateUser
+WHERE dateCreated >= '2013-03-19 4:00:00' 
+  AND dateCreated <  TIMESTAMPADD(day, 1, '2013-03-19 4:00:00');
+
+--##---------------------------------------
+-- STEP 3:
+--
+-- freebcp into archive.web.AffiliateUser
+--  FROM archive.web.jump_user
+
+freebcp ${FMG_DB}..${FMG_VIEW} out ${BCP_DIR}/${FMG_VIEW}.OUT -S${FMG_SRV} -U${FMG_USER} -P${FMG_PASSWD} \
+           -c -t "|" -r "|@|\n" -e ${BCP_DIR}/${FMG_VIEW}.ERR
+
+
+freebcp archive.web.AffiliateUser in /data/dump/w151dbp30_7100/bcp/Jump/AffiliateUser.20130319.367.517108.out -SAS4 -Ucron_sa -P63vette -c -t "|~|" -r "|@|\n" -e ERR
+
+
+
+
+
+
+--update succor.audit.tLoadArchive
+
+ALTER procedure [succor].[audit].[pULoadArchive]
+@loadArchiveKey int
+,@rowCountRaw int
+,@rowCountLoaded int
+,@startDateTime datetime
+,@minDateTime datetime
+,@maxDateTime datetime

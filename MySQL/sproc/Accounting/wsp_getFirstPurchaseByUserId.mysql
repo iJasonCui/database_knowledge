@@ -1,0 +1,36 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getFirstPurchaseByUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getFirstPurchaseByUserId (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Yan L 
+**   Date:         Oct 3 2008
+**   Description:  Get first purchase history for a given user 
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+
+   at_userId DECIMAL(12,0)
+)
+
+BEGIN
+   SELECT xactionId,
+          creditCardId,
+          currencyId,
+          cost,
+          tax,
+          dateCreated
+     FROM Purchase
+    WHERE xactionId = (SELECT min(xactionId) FROM Purchase
+                        WHERE userId = at_userId 
+                          AND cost > 0) ;
+  
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

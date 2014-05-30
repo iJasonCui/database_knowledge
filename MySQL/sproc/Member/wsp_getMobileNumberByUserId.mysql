@@ -1,0 +1,19 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getMobileNumberByUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getMobileNumberByUserId (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  Oct 2006
+**   Description: return mobileNumber from WapInfo table 
+**
+******************************************************************************/
+ at_userId DECIMAL(12,0) 
+)
+BEGIN
+     SELECT mobileNumber 
+       FROM WapInfo 
+      WHERE userId = at_userId ;
+END;;
+DELIMITER ;

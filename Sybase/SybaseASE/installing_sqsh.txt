@@ -1,0 +1,88 @@
+
+1. wget sqsh
+su; cd /ccs; mkdir sqsh; cd sqsh; wget "http://sourceforge.net/projects/sqsh/files/latest/download"
+
+Welcome to SQSH version 2.4
+
+This is the latest release of the sqsh source package sqsh-2.4.
+This README file contains some basic instructions on howto install sqsh on your
+computer.
+
+Download the zipped tar ball from Sourceforge to your client computer, in the
+$HOME directory for example. Use GNU tar to install/unpack the source package
+(executable usually just named tar or gtar). For example:
+
+    $ cd $HOME
+    $ mkdir src
+    $ cd src
+    $ tar xzf $HOME/sqsh-2.4.tgz
+    $ cd sqsh-2.4
+
+
+There is also a README and INSTALL file in the root directory of sqsh-2.4
+and also a lot of info can be found in the doc directory. If you want to build
+sqsh on Cygwin, you can check the cygwin directory and the README file there.
+Basically it comes to check the script conf.sh in the root directory
+($HOME/src/sqsh-2.4/conf.sh) and choose if you want to build a 32bit or 64bit
+version of sqsh (depending on your platform of course). Eventually sqsh will be
+installed in /usr/local by default. If you want to change that, you can use the
+--prefix option of configure just to do that, for example: --prefix=/opt/software
+You can run ./configure --help for more info.
+You will definitely want sqsh with readline support enabled, so you will need
+to install a readline development package for that. The script conf.sh sets
+some parameters and then runs configure. You can check and adapt the Makefile and
+src/Makefile and src/sqsh_parser/Makefile that are created by configure to your
+needs.
+
+
+In order to succesfully create the sqsh_parser.a archive on IBM AIX 64 bits,
+you need to edit the Makefile in sqsh-2.4/src/sqsh_parser just after you have
+run configure and change line 8 into:
+
+	ar -r -s -X 64 sqsh_parser.a sqsh_parser.o tsql.o tsql.yy.o
+
+
+Then you can run make, make install, make install.man etc. So, just do:
+
+    $ ./conf.sh
+    $ make
+    $ sudo make install
+    $ sudo make install.man
+    $ man sqsh
+
+Well, reading the manual page will keep you busy for a while. :-)
+In the doc directory a couple of examples for a .sqshrc can be found
+that you can copy to your $HOME directory. During start-up, sqsh reads
+this file to load default values for variables that controls the
+behavior of sqsh, or installs additional functions, commands or aliases.
+For example:
+
+    $ cp doc/sqshrc-2.2.0 $HOME/.sqshrc
+    $ chmod 600 $HOME/.sqshrc
+    $ mkdir tmp $HOME/.sqsh
+    $ chmod 700 $HOME/.sqsh
+
+This sqshrc file assumes a $HOME/tmp directory exists for work files
+and a .sqsh directory exists to store history and readline_history
+files, and you can also provide a sqsh_session file here for runtime adjustments
+during connection setup to a server.
+
+PLEASE NOTE, this sqshrc file sets a color prompt and text color, so
+you have to make sure that the color scheme fits your terminal settings.
+A sqsh black text color on a black xterm background is not what you want,
+presumably.
+Make sure that the directory where the sqsh executable is installed is in your
+PATH (by default this would be /usr/local/bin). If everything succeeded you
+can now start sqsh and provide a servername, username and password as you
+would do with isql.
+
+    $ sqsh -SSYBASE -Usybdba
+    Password:
+    [1] SYBASE.sybdba.master.1>
+
+
+Happy sqsh-ing,
+Martin Wesdorp.
+
+
+/* The end */

@@ -1,0 +1,72 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updUserInfoByUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updUserInfoByUserId (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga
+**   Date:  June 6 2002
+**   Description:  Update user info by user id
+**
+** REVISION(S):
+**   Author: Valeri Popov
+**   Date: Apr. 28, 2004
+**   Description: added new Location code
+**
+**   Author: Mike Stairs
+**   Date: Oct 2005
+**   Description: eliminated references to removed columns from user_info
+**
+**   Author: Andy Tran
+**   Date: May 2010
+**   Description: added preferred_units
+**
+******************************************************************************/
+ at_userId               DECIMAL(12,0)
+,at_height_cm            int
+,at_body_type            char(1)
+,at_ethnic               char(1)
+,at_religion             char(1)
+,at_smoking              char(1)
+,at_birthdate            datetime
+,at_lat_rad              int
+,at_long_rad             int
+,at_zipcode              varchar(10)
+,at_countryId            smallint
+,at_jurisdictionId       smallint
+,at_secondJurisdictionId smallint
+,at_cityId               int
+,at_preferred_units      char(1)
+)
+BEGIN
+
+DECLARE at_dateNow DATETIME ;
+DECLARE at_lat_rad1 int ;
+DECLARE at_long_rad1 int ;
+
+CALL wsp_GetDateGMT( at_dateNow);
+	
+CALL wsp_getLatLong(at_lat_rad, at_long_rad, at_countryId, at_cityId, at_lat_rad1, at_long_rad1);
+
+    UPDATE user_info
+       SET birthdate = at_birthdate
+          ,zipcode = at_zipcode
+          ,lat_rad = at_lat_rad
+          ,long_rad = at_long_rad
+          ,lat_rad1 = at_lat_rad1
+          ,long_rad1 = at_long_rad1
+          ,height_cm = at_height_cm
+          ,smoke = at_smoking
+          ,body_type = at_body_type
+          ,ethnic = at_ethnic
+          ,religion = at_religion
+          ,countryId = at_countryId
+          ,jurisdictionId = at_jurisdictionId
+          ,secondJurisdictionId = at_secondJurisdictionId
+          ,cityId = at_cityId
+          ,preferred_units = at_preferred_units
+          ,dateModified = at_dateNow
+     WHERE user_id = at_userId ;
+
+END;;
+DELIMITER ;

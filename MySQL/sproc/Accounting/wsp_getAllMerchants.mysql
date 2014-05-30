@@ -1,0 +1,31 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAllMerchants;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAllMerchants (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  May 21, 2003
+**   Description:  retrieves all merchants
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+)
+  BEGIN  
+	SELECT 
+          merchantId,
+          merchantCode,
+          routingCode,
+          cardProcessor,
+          description
+        FROM Merchant
+        ORDER BY merchantId ;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

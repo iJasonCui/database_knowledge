@@ -1,0 +1,15 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updNewSmilesSeen;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updNewSmilesSeen (
+ at_productCode CHAR(1)
+,at_communityCode CHAR(1)
+,at_userId DECIMAL(12,0)
+)
+BEGIN 
+
+	UPDATE Smile 
+	SET seen='Y' 
+	WHERE targetUserId = at_userId 
+	AND seen='N';
+END;;
+DELIMITER ;

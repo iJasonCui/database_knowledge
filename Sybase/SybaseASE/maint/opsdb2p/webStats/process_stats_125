@@ -1,0 +1,205 @@
+#!/usr/bin/perl -w
+#
+use strict;
+use Time::Local;
+
+sub getdate()
+{
+	my $date = shift (@_);
+	my ($year, $month, $day, $hour, $min) = unpack ("a4a2a2a2a2", $date);
+	my $time = timelocal (0, $min, $hour, $day, $month-1, $year);
+	my $string = $year . "-" . $month . "-" . $day . " " . $hour . ":" . $min;
+	return ($time, $string);
+}
+sub parse_sysmon()
+{
+	my $file = shift(@_);
+	my @tmp;
+
+	my %data = (
+		"Engine Busy Utilization" => 0,
+		"Committed Xacts" => 0,
+		"Total Rows Inserted" => 0,
+		"Total Rows Updated" => 0,
+		"Total DOL Rows Updated" => 0,
+		"Total Rows Deleted" => 0,
+		"Total Lock Requests" => 0,
+		"Total Requested Disk I\/Os" => 0,
+		"Total TDS Packets Rec'd" => 0,
+		"Total Bytes Rec'd" => 0,
+		"Total TDS Packets Sent" => 0,
+		"Total Bytes Sent" => 0,
+		"Total Deadlocks" => 0
+		);
+
+	open (FH, "< $file") or return (0, "Error, cannot open $file: " . $!, undef);
+	while (<FH>)
+	{
+		chomp($_);
+		#if ($_ =~ m/Summary                 Total/)
+		if ($_ =~ m/^\s*Average/) 
+		{
+			# we got the Engine Utilization
+		        if ($_ !~ m/Time|Wait|Packet/i) 
+                        {
+			   @tmp = split(" ", $_);
+			   $data{"Engine Busy Utilization"} = $tmp[1] + $tmp[3];
+                        }
+		}
+		elsif ($_ =~ m/Committed Xacts/)
+		{
+			@tmp = split(" ", $_);
+			$data{"Committed Xacts"} = $tmp[4];
+		}
+		elsif ($_ =~ m/Total Rows Inserted/)
+		{
+			# We got the Total Rows Inserted 
+			@tmp = split(" ", $_);
+			$data{"Total Rows Inserted"} = $tmp[5];
+		}
+		elsif ($_ =~ m/Total Rows Updated/)
+		{
+			# We got the Total Rows Updated 
+			@tmp = split(" ", $_);
+			$data{"Total Rows Updated"} = $tmp[5];
+		}
+		elsif ($_ =~ m/Total DOL Rows Updated/)
+		{
+			# We got the Total DOL Rows Updated 
+			@tmp = split(" ", $_);
+			$data{"Total DOL Rows Updated"} = $tmp[6];
+		}
+		elsif ($_ =~ m/Total Rows Deleted/)
+		{
+			# We got the Total Rows Deleted 
+			@tmp = split(" ", $_);
+			$data{"Total Rows Deleted"} = $tmp[5];
+		}
+		elsif ($_ =~ m/Total Lock Requests/)
+		{
+			# We got the Total Rows Deleted 
+			@tmp = split(" ", $_);
+			$data{"Total Lock Requests"} = $tmp[5];
+		}
+		elsif ($_ =~ m/Total Requested Disk I\/Os/)
+		{
+			# We got the Total Rows Deleted 
+			@tmp = split(" ", $_);
+			$data{"Total Requested Disk I\/Os"} = $tmp[6];
+		}
+		elsif ($_ =~ m/Total TDS Packets Rec'd/)
+		{
+			# We got the Total Rows Deleted 
+			@tmp = split(" ", $_);
+			$data{"Total TDS Packets Rec'd"} = $tmp[6];
+		}
+		elsif ($_ =~ m/Total Bytes Rec'd/)
+		{
+			# We got the Total Rows Deleted 
+			@tmp = split(" ", $_);
+			$data{"Total Bytes Rec'd"} = $tmp[5];
+		}
+		elsif ($_ =~ m/Total TDS Packets Sent/)
+		{
+			# We got the Total Rows Deleted 
+			@tmp = split(" ", $_);
+			$data{"Total TDS Packets Sent"} = $tmp[6];
+		}
+		elsif ($_ =~ m/Total Bytes Sent/)
+		{
+			# We got the Total Rows Deleted 
+			@tmp = split(" ", $_);
+			$data{"Total Bytes Sent"} = $tmp[5];
+		}
+		elsif ($_ =~ m/Total Deadlocks/)
+		{
+			# We got the Total Deadlocks
+			@tmp = split(" ", $_);
+			$data{"Total Deadlocks"} = $tmp[4];
+		}	
+	}
+	close (FH);
+	return (1, "", \%data);
+}
+sub main()
+{
+	my ($ok, $msg, $data, $tag);
+	my ($file, $server, $date);
+	my (%sysmon_by_server, %tmpdate);
+
+	# %sysmon_by_server is a hash of hash refs of hash refs
+	# $sysmon_by_server{$server}->{$date}->{$tag} gives the sysmon value
+	# for a particular server, at a particular date, for a particular tag
+
+	if (scalar (@::ARGV) == 0)
+	{
+		print ("Usage: process_sm [files]\n");
+		print ("where files is a list of files produced by the sp_sysmon cron job\n");
+		print ("in the format webdbxp.yyyymmddhhmm.\n");
+		return;
+	}
+
+	while (defined ($file = shift (@::ARGV)))
+	{
+	      ($server, $date) = split ('\.', $file);
+              $sysmon_by_server{$server} = $server;
+              $tmpdate{$date} = $date;
+	}
+
+	# process by server
+	foreach $server (sort keys %sysmon_by_server)
+	{
+		print ("Processing $server \n");
+		my %sysmon_date = ();
+
+		# process by date
+		foreach $date (sort keys %tmpdate)
+		{
+			$file = $server . "." . $date;
+			if ( -f $file )
+			{
+				(($ok, $msg, $data) = &parse_sysmon ($file))[0]
+					or die ("Ooops, can't process $file: $msg\n");
+				$sysmon_date{$date} = $data;
+			}
+			else
+			{
+				print ("Ooops, can't find $file\n");
+			}
+		}
+		$sysmon_by_server{$server} = \%sysmon_date;
+	}
+
+	# process by server
+	foreach $server (sort keys %sysmon_by_server)
+	{
+#		my $printheader = 1;
+		open (FH, "> $server") or die ("Cannot open $server: $!\n");
+		# process by date
+		foreach $date (sort keys %{$sysmon_by_server{$server}})
+		{
+#			if ($printheader == 1)
+#			{
+		       #		print FH ("\"Server\", \"Time\", \"Timestring\"");
+				# output tags for each of the collected data elemenets
+#				foreach $tag (sort keys %{$sysmon_by_server{$server}->{$date}})
+#				{
+#					print FH (", \"$tag\"");
+#				}
+#				$printheader = 0;
+#				print FH ("\n");
+#			}
+
+			my ($time, $string) = &getdate($date);
+			print FH ("$server|~$time|~$string");
+			# output the data for each of the collected tags
+			foreach $tag (sort keys %{$sysmon_by_server{$server}->{$date}})
+			{
+				print FH ("|~$sysmon_by_server{$server}->{$date}->{$tag}");
+			}
+			print FH ("\|@|");
+		}
+		close (FH);
+	}
+}
+&main();

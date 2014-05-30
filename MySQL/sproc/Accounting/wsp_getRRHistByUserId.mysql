@@ -1,0 +1,72 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getRRHistByUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getRRHistByUserId (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu 
+**   Date:  July 31 2008 
+**   Description:  get RenewalRetryHistory by userId 
+**
+** REVISION(S):
+**   Author: 
+**   Date: 
+**   Description:
+**
+******************************************************************************/
+at_userId DECIMAL(12,0)
+)
+BEGIN
+
+DECLARE at_origXactionId DECIMAL(12,0);
+DECLARE done INT DEFAULT FALSE;
+DECLARE CUR_RenewalResult CURSOR FOR SELECT DISTINCT origXactionId FROM RenewalRetryHistory WHERE userId = at_userId ORDER BY origXactionId DESC;
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+CREATE TEMPORARY TABLE IF NOT EXISTS tmp_RenewalResult
+(
+      userId	   DECIMAL(12,0),
+      status       CHAR(1),
+      retryCounter INT,
+      declineCode  INT,
+      dateCreated  DATETIME
+) ENGINE=MEMORY;
+
+DELETE FROM tmp_RenewalResult;
+
+OPEN CUR_RenewalResult; 
+
+read_loop: LOOP
+   FETCH CUR_RenewalResult INTO at_origXactionId;
+
+   IF done THEN
+      LEAVE read_loop;
+   END IF;
+
+   START TRANSACTION;
+
+   INSERT INTO tmp_RenewalResult
+      SELECT r.userId, r.status, 
+             r.retryCounter,
+             r.declineCode,
+             p.dateCreated 
+        FROM RenewalRetryHistory r, Purchase p
+       WHERE r.userId = at_userId
+         AND r.origXactionId = p.xactionId
+         AND r.origXactionId = at_origXactionId
+         AND r.xactionId = (SELECT MAX(xactionId) FROM RenewalRetryHistory
+                             WHERE userId = at_userId
+                               AND origXactionId = at_origXactionId);
+
+   COMMIT;
+
+END LOOP; 
+
+CLOSE CUR_RenewalResult;
+
+SELECT status, retryCounter, declineCode, dateCreated  FROM tmp_RenewalResult where userId = at_userId;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,85 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updUserBillingLocation;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updUserBillingLocation (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Mike Stairs
+**   Date:         Sept 29, 2003
+**   Description:  Updates user billing location
+**
+**
+** REVISION(S):
+**   Author:       Andy Tran
+**   Date:         January, 2007
+**   Description:  Updates user purchase offer as well
+**
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_userId             DECIMAL(12,0)
+,at_billingLocationId  SMALLINT
+)
+BEGIN
+
+DECLARE at_dateNow            DATETIME;
+DECLARE at_defaultOfferId     SMALLINT;
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+   ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+   ROLLBACK;
+END;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+START TRANSACTION;
+    -- get initial offer
+    SELECT defaultPurchaseOfferId INTO at_defaultOfferId FROM DefaultUserAccount WHERE billingLocationId = at_billingLocationId;
+
+    -- update user account
+    UPDATE UserAccount
+       SET billingLocationId = at_billingLocationId
+          ,purchaseOfferId = at_defaultOfferId
+          ,dateModified = at_dateNow
+     WHERE userId = at_userId;
+
+    -- delete any default offer
+    DELETE FROM UserDefaultOffer WHERE userId = at_userId;
+
+    -- save user account history
+    INSERT INTO UserAccountHistory
+                (
+                     userId
+                    ,billingLocationId
+                    ,purchaseOfferId
+                    ,subscriptionOfferId
+                    ,usageCellId
+                    ,accountType
+                    ,dateCreated
+                    ,dateModified
+                    ,dateExpiry
+                )
+                SELECT userId
+                      ,billingLocationId
+                      ,purchaseOfferId
+                      ,subscriptionOfferId
+                      ,usageCellId
+                      ,accountType
+                      ,dateCreated
+                      ,dateModified
+                      ,dateExpiry
+                  FROM UserAccount
+                 WHERE userId = at_userId;
+
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,46 @@
+###############################################
+# example of deadlock
+###############################################
+03:00000:00032:2001/02/15 09:35:05.68 server  DBCC TRACEON 8399, SPID 32
+00:00000:00054:2001/02/15 10:24:35.11 server  Deadlock Id 2 detected
+Deadlock Id 2: detected. 1 deadlock chain(s) involved.
+
+Deadlock Id 2: Process (Familyid 0, 86) (suid 3) was executing a UPDATE command at line 1.
+SQL Text: update a_profile_dating set username='DOG WITH SHOES', user_type='F', location_id=7001001001, long_ra
+d=138487, height_cm=192, zodiac_sign='f', country_area='Ontario', zipcode='M2J2X5', height_in=76, body_type='d'
+, country='Canada', gender='M', birthdate='Sep  2 1981 12:00AM', lat_rad=233515, city='TORONTO', religion='z', 
+ethnic='a', smoke='a' where user_id=30163878 
+Deadlock Id 2: Process (Familyid 0, 54) (suid 3) was executing a UPDATE command at line 4.
+SQL Text: update a_profile_romance set on_line='Y', 
+                 rsession_id=rsession_id, laston=982250674, show='Y' 
+                 where user_id=22209804
+update a_profile_dating set on_line='Y', 
+                 rsession_id=rsession_id, laston=982250674, show='Y' 
+                 where user_id=22209804
+
+Deadlock Id 2: Process (Familyid 0, Spid 54) was waiting for a 'exclusive page' lock on page 1046257 of the 'a_
+profile_dating' table in database 6 but process (Familyid 0, Spid 86) already held a 'exclusive page' lock on i
+t.
+Deadlock Id 2: Process (Familyid 0, Spid 86) was waiting for a 'exclusive page' lock on page 502506 of the 'a_p
+rofile_dating' table in database 6 but process (Familyid 0, Spid 54) already held a 'exclusive page' lock on it
+.
+
+Deadlock Id 2: Process (Familyid 0, 86) was chosen as the victim. End of deadlock information.
+
+#####################################################
+#  How to investigate ? 
+#####################################################
+#login into webdb4p
+use webdb20
+go
+select first,root,id,name,indid from sysindexes where id = object_id("a_profile_dating")
+go
+# get the db_id of webdb20
+sp_helpdb
+go
+dbcc traceon(3604)
+go
+dbcc page (6, 1046257)
+go
+dbcc page (6, 502506)
+go

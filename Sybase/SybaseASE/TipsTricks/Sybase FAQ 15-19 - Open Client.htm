@@ -1,0 +1,484 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<TITLE>Sybase FAQ: 15/19 - Open Client</TITLE>
+<script language="JavaScript1.2">
+function edc(s,s2)
+{document.write("<font face=\"Arial\"><A href=\"",s,"\" target=\"_blank\" onclick=\"window.open('",s,"','Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=720,height=530,left=30,top=43');return false;\" )>Not finding the answers you need?&nbsp;",s2,"Submit your question for others to see.</A></font>");}
+//-->
+</script>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<DIV ALIGN=CENTER>
+<SMALL>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  Part15 -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A>
+</SMALL>
+<BR><HR SIZE=2 WIDTH=600 NOSHADE>
+<P><H1>Sybase FAQ: 15/19 - Open Client</H1>
+<table border="0" cellpadding="4" cellspacing="4" width="35%">
+<tr><td width="100%" align="center" bgcolor="#D6D6C0">
+<p align=center><small>
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part15/index.html","<br>");
+// --></script>
+</small></p>
+</td></tr>
+</table>
+ <br>
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="40%">
+<tr><td width="100%" align="center" bgcolor="#CCCCFF"><font face="Arial">There are reader questions on this topic!<a href="#ct"><br>Help
+others by sharing your knowledge</a></font></td></tr>
+</table></center></div>
+<HR SIZE=2 WIDTH=600 NOSHADE>
+</DIV>
+<PRE>
+Message-ID: &lt;databases/sybase-faq/part15_1074677126@rtfm.mit.edu&gt;
+X-Last-Updated: 2003/03/02
+From: dowen@midsomer.org (David Owen)
+Newsgroups: <A HREF="http://groups.google.com/groups?group=comp.databases.sybase" target="new">comp.databases.sybase</A>
+Subject: Sybase FAQ: 15/19 - Open Client
+Reply-To: <A HREF="mailto:dowen@midsomer.org">dowen@midsomer.org</A> (David Owen)
+Keywords: FAQ, DATABASES, SYBASE, ASA, ASE, REP
+Date: 21 Jan 2004 09:26:08 GMT
+
+Archive-name: databases/sybase-faq/part15
+URL: <A HREF="http://www.isug.com/Sybase_FAQ">http://www.isug.com/Sybase_FAQ</A>
+Version: 1.7
+Maintainer: David Owen
+Last-modified: 2003/03/02
+Posting-Frequency: posted every 3rd month
+   A how-to-find-the-FAQ article is posted on the intervening months.
+
+                                  Open Client                                  
+                                                                               
+ 
+
+    7.1    What is Open Client?
+    7.2    What is the difference between DB-lib and CT-lib?
+    7.3    What is this TDS protocol?
+    7.4    I have upgraded to MS SQL Server 7.0 and can no longer connect from
+    Sybase's isql.
+    7.5    The Basics of Connecting to Sybase
+    7.6    Connecting to ASE using ODBC
+    7.7    Which version of Open Client works with which ASE?
+    7.8    How do I tell the version of Open Client I am running?
+   
+Freeware Useful SQL Tricks ASE FAQ
+
+-------------------------------------------------------------------------------
+
+7.1: What is Open Client?
+
+-------------------------------------------------------------------------------
+
+Open Client is the interface (API) between client systems and Sybase servers.  
+Fundamentally, it comes in two forms:
+
+Runtime
+
+The runtime version is a set of dynamic libraries (dlls on W32 platforms) that
+allow client applications to connect to Sybase and Microsoft servers, or, in
+fact, any server that implements the Tabular Data Streams (TDS) protocol.  You
+need some form of Open Client in order to be able to connect to ASE in any way,
+shape or form.   Even if you are running isql on exactly the same machine as
+ASE itself, communication will still be via Open Client.  That is not to say
+that client to server communication on the same machine will go via the
+physical network, that decision is left entirely to the protocol implementation
+on the machine in question.
+
+Development
+
+The development version contains all of the libraries from the runtime version,
+plus the header files and other files, library files etc, that enable
+developers to build client apps that are able to connect to Sybase servers.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+7.2: What is the difference between DB-lib and CT-lib?
+
+-------------------------------------------------------------------------------
+
+Both DB-lib and CT-lib are libraries that implement the TDS protocol from the
+client side. 
+
+DB-lib
+
+DB-lib was Sybase's first version.  It was a good first attempt, but has/had a
+number of inconsistencies.  There are, or possibly were, a lot of applications
+written using DB-lib.  If you are about to start a new Open Client development,
+consider using CT-lib, it is the preferred choice.  (What version of TDS does
+DB-lib, is it only 4.2?)
+
+Having said that you should use CT-lib for new developments, there is one case
+that this may not be true for and that is 2 phase commit.  2 phase commit is
+supported directly by DB-lib but is not supported directly by CT-lib.
+
+CT-lib
+
+CT-lib is a completely re-written version of Open Client that was released in
+the early '90s.  The API is totally different from DB-lib, and is much more
+consistent.  Applications written using DB-lib cannot simply be compiled using
+CT-lib, they need a significant amount of porting effort.   CT-lib is newer,
+more consistent and, in several people's opinions, including mine, slightly
+longer winded.  Having said that, the future of DB-lib is uncertain and is
+certainly not being developed any more, as a result all new apps should be
+written using CT-lib.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+7.3: What is this TDS protocol?
+
+-------------------------------------------------------------------------------
+
+Tabular Data Streams or TDS is the name given to the protocol that is used to
+connect Sybase clients with Sybase servers.  A specification for the protocol
+can be obtained from Sybase, I had a copy but cannot seem to find it now.
+
+The is a project that is reverse engineering the protocol and building a set of
+libraries independent of either Sybase or Microsoft, but able to connect to
+either of their servers.  FreeTDS is a considerable way down the line, although
+I do not believe that it is production ready yet!
+
+As part of the project, they have started to document the protocol, and a view
+of TDS 5.0 can be seen here.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+7.4: I have upgraded to MS SQL Server 7.0 and can no longer connect from
+Sybase's isql.
+
+-------------------------------------------------------------------------------
+
+Microsoft SQL Server has always supported the TDS protocol, and up to release 7
+it has been the primary means of communication between clients and servers. 
+With release 7, TDS has been reduced to being a "legacy" protocol.  (I do not
+know what the communication protocol/mechanism with release 7 is, you will need
+to talk to someone from Microsoft or search <A HREF="http://groups.google.com/groups?group=comp.databases.ms-sqlserver" target="new">comp.databases.ms-sqlserver</A> .)
+
+In order to connect to MS Sql Server 7 using Sybase's Open Client you will need
+to install Service Pack 2 of SQL Server 7, available from http://
+www.microsoft.com.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+7.5:    The Basics of Connecting to Sybase
+
+-------------------------------------------------------------------------------
+
+The following describes how to connect to Sybase ASE on a UNIX machine from a
+windows client with isql etc.  The specific example is Sybase ASE 11.9 on
+Redhat Linux 6.1, using Windows 95 and NT.  (Have both on partitions and the
+process was the same... This is not a technical review or an in-depth
+discussion (there are people far more qualified than me for that ;-) ).  Rather
+it is more along the lines of "This is how I managed it, it should work for
+you". As always there are no guarantees, so it if goes wrong, it's your fault
+[&lt;g&gt;].
+
+The starting point for this discussion has to be, you've downloaded (or
+whatever means you used to acquire it) both Sybase ASE for Linux and the PC
+Client software (a big zip file) and are ready to install. I'm not going to
+discuss the install process as Sybase managed to do a good job of that, so
+I'm leaving well alone. The bit you have to take notice of is when you run
+srvbuild. This should happen the first time you log on as the user sybase after
+the install.  If it doesn't then you can run it by hand after, it line in the
+$SYBASE directory under bin. The reason why I'm mentioning this is that
+srvbuild defaults to installing your database using the name "localhost". Now
+the problem with localhost is that it is kind of a special case and would mean
+that you could not connect to your database from anywhere other that the server
+itself. This would defeat the object of this
+discussion, so simply name it something else, bob, george, albert, mydatabase,
+whatever, the choice is yours.
+
+Having done this (it takes a while to complete) you should now have a running
+database. so try to connect to it on the local machine with something like isql
+-SServerName -Usa, (where ServerName is whatever you called it when you ran
+srvbuild) when it asks for a password, just press enter and you should be
+greeted by the monumentous welcome 
+
+1&gt;
+
+Not a lot for all the work you have done to get to this point, but you've
+connected to your database and that's the main thing. This is very important as
+not only does this mean that your database is working, but it also means that
+the server half of Open Client is working. This is because even isql on the
+server connects to the database using Open Client and you've just proved it
+works, cool. Next run dsedit on the server and make a note of the following 3
+things:
+
+    1: The server name
+    2: The IP address
+    3: The port
+   
+Your going to need these to get connected from windows.
+
+Now switch to you windows machine, did I remember to tell you to shut down
+dsedit on the server?, consider it said ;-). Unpack the PC Client software zip
+file and install it using the instructions that came with it. They worked fine
+for me and I'm an idiot, so they should work for you. When you've finished, go
+to the start menu and start dsedit (on my machine it's under programs -&gt;
+sybase). When it runs, it begins with a dialog asking you which Interface
+driver to open, I've done this 3 times and went with the default every time, so
+it should be a safe bet. At this point you can now add your Linux based server.
+Select the menu item serverobject-&gt;add. Then enter the name of the server you
+just got from your Linux box, in the field labeled "server". It is probably a
+good idea that it is the same name you got from your Linux based dsedit to
+ensure that everyone is referring to the same server with the same name. 
+Prevents confusion.  This then opens a new window with several fields, one of
+which is the server name you just entered. The bottom field is the bit where
+you enter the "nitty gritty", the server IP address and port. To do this right
+click on the field and select "modify attribute" to open the server address
+dialog. When this new dialog opens click add to open yet another dialog (is
+there an award for the most gratuitous use of the word dialog???). OK, this is
+the last one, honest. Leave the drop down list where it is (hopefully showing
+TCP/IP or something similar). Instead move straight to the address field and
+enter the following: the Linux servers IP address followed by the port number
+(the one from the server dsedit), separated by a comma. On my machine it looks
+like this.
+
+192.0.0.2,2501
+
+Now you can "OK" your way back out of the dialogs, back up to where you started
+from and exit dsedit. Then launch isql on the windows box and log in.
+Personally I did this from a DOS prompt, using exactly the same syntax I did on
+the Linux box, but that's just because I like it that way.  Now you should be
+happily querying you Linux (or other UNIX for that matter) based Sybase ASE
+database. What you do with it now, is covered elsewhere in this FAQ from people
+able to tell you, unlike me. Now just one more time for good measure, I'm going
+to type the word, wait for it.... Dialog.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+7.6: Connecting to ASE Using OLTP
+
+-------------------------------------------------------------------------------
+
+To begin with you need to be certain that you can connect to your Linux hosted
+Sybase ASE database from your windows based machine. Do this by running isql
+from your Linux box and connect to the database, if this works, then your all
+set (See Q7.5). You will need the Sybase ODBC driver, this came with the PC
+Client package. If you got your Windows Open Client software through some other
+means, then you may need to down load the ODBC driver, this will become
+apparent later. Right, begin by launching the 32 bit ODBC administrator, either
+from the Sybase menu under start -&gt; programs or the control panel. Ensure that
+you are displaying the "user DSN" section (by clicking on the appropriate tab).
+
+You can then click on the button labeled add to move to the driver selection
+dialog. Select Sybase System 11 and click on finish. You will by now have
+noticed that this is Microsoft's way of taunting you and you haven't actually
+finished yet, you're actually at the next dialog. What you have actually done
+is told windows that you are now about to configure your Sybase ODBC driver.
+There are 4 boxes on the dialog with which you are now presented, and they are:
+
+    Data Source Name
+    Description
+    Server Name
+    Database Name
+   
+The data source name is the Server name from your interfaces file on your Linux
+server. If you are uncertain of any of these values, then log onto your Linux
+box, run dsedit and take a look. It will only take you 2 minutes and much
+easier than debugging it later. The description field is irrelevant and you can
+put anything in there that is meaningful to you.  Server name is the IP address
+of the Linux server, that is hosting your database. Database name is the name
+of a database to which you want to connect, once your Sybase connection has
+been established.  If in doubt, you can stick master in there for now, at least
+you'll get a connection.  Now you can click on OK to get back to the starting
+screen, followed by another OK to exit ODBC administrator. We will now test the
+connection by running Sybase Central. I chosen this because I figure that if
+you downloaded the PC Client package, then I know you've got it (at least I'm
+fairly sure). When you launch Sybase administrator from start-&gt;programs-&gt;
+Sybase, you are presented with a connection dialog. There are 3 fields in this
+box
+
+    User ID
+    Password
+    Server Name
+   
+In the field labeled UserID, you can type in sa. If you've been doing some work
+on Sybase through other means and you have already created a valid user, then
+you can use him (her, it, whatever). In the password field, type in the
+appropriate password. Assuming you have changed nothing from the
+original Sybase install and you are using sa, then you will leave this blank.
+The final field is a dropdown list box containing all the Sybase remote
+connections you have. Assuming you only have the one, then you can leave this
+alone. If you have more than one, stick to the one that you know works for now
+and that allows access to the user you've used. In simple English (and if you
+don't speak English, then I hope somebody has translated it :-) ). If this is a
+clean install and you have altered nothing after following the instruction
+earlier to establish an Open Client, then the top box should contain simply
+"sa", the middle box should be blank, and the bottom list-box should contain
+whatever the servername is in your Linux based interfaces file. Clicking on OK
+will now connect Sybase Central to the database and "away you go"...
+
+Hope this is of some assistance to you, but if you run into problems then I
+suggest you post to the newsgroup, which is where the real experts hang out. I
+am unlikely to be able to help you, as I have simply noted down my experiences
+as I encountered them, in the hope they may help somebody out.
+I take no responsibility for anything, including any result of following the
+instructions in this text.
+Good luck...
+
+Jim
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+7.7: Which version of Open Client works with which ASE?
+
+-------------------------------------------------------------------------------
+
+The TDS protocol that *is* Open Client is built so that either the client or
+server will fallback to a common dialect. I suppose that it is theoretically
+possible that both would fallback for some reason, but it seems unlikely. I was
+recently working with a client that was using Open/Client 4.2 to speak to a
+version 11.5 ASE using Powerbuilder 3 and 4! Amazing, it all worked! The main
+problem that you will encounter is not lack of communication but lack of
+features. The facility to bcp out of views was added to the 11.1.1 release. You
+will still be able to connect to servers with old copies of Open/Client, you
+just won't have all of the features.
+
+There is also another fairly neat feature of the later releases of Open/Client,
+it has a very good compatibility mode for working with old applications. The
+client that was running Open/Client 4.2 with Powerbuilder 3 is now connecting
+to the database using version 11.1.1. Which is not bad when you remember that
+Powerbuilder 3 only talked 4.2 DBLib!
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+7.8: How do I tell the version of Open Client I am running?
+
+-------------------------------------------------------------------------------
+
+Run
+
+isql -v
+
+from the command line, will return a string like:
+
+Sybase CTISQL Utility/11.1.1/P-EBF7729/PC Intel/1/ OPT/Thu Dec 18 01:05:29 1997
+
+The 11.1.1 part represents the version number.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+Freeware Useful SQL Tricks ASE FAQ
+
+</PRE>
+<DIV ALIGN=CENTER>
+<SMALL>
+<P><HR WIDTH=1900 NOSHADE><BR>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  Part15 -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A></SMALL>
+<P>
+<div align="center">
+
+<center>
+<form method="post" action="rateit.php">
+<table border="1" cellpadding="0" cellspacing="0" width="150" bgcolor="#ffcccc" style="WIDTH: 150px">
+<tr><td width="100%">
+<div align="center">
+<table border="0" cellpadding="2" width="100%" bgcolor="#ffcccc">
+<tr><td width="100%" height="14">
+<p align="center"><font face="Arial">Rate this FAQ</font></p>
+</td></tr>
+<tr><td width="100%" height="14">
+<p align="center">
+<INPUT TYPE=HIDDEN NAME="pid" VALUE="databases/sybase-faq/part15/index.html">
+<select size="1" name="D1" style="COLOR: darkmagenta; BACKGROUND-COLOR: cornsilk">
+<option selected value="0">N/A</option>
+<option value="1">Worst</option>
+<option value="2">Weak</option>
+<option value="3">OK</option>
+<option value="4">Good</option>
+<option value="5">Great</option>
+</select>
+</p>
+</td></tr>
+<tr><td width="100%" height="27">
+<p align="center">
+<IMG onclick="mystr='/frate.php?pid='+pid.value+'&vote='+D1.value;
+Popup=window.open(mystr,'Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=380,height=270,left=230,top=43'); 
+ return false;" height=28 src="/images/vote.gif" alt="Vote" width=83 border=0 ></p>
+</td></tr>
+</table>
+</div>
+</td></tr>
+</table>
+<font size="-1" face="Arial"><br><a href="/topRated.html">Current Top-Rated FAQs</a><br></font>
+</form>
+</center>
+
+</div>
+
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="100%">
+<tr><td width="100%" bgcolor="#D6D6C0">
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part15/index.html"," ");
+// --></script>
+<p><font face="Arial"><a name="ct">Are you an expert in this area?</a> Share your knowledge and earn expert points by giving answers or rating people's questions and answers! This section of FAQS.ORG is not sanctioned in any way by FAQ authors or maintainers.</font></p>
+<p><font face="Arial">Questions strongly related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-6730.html">How can I display the table sizes of ALL tables in a database?   </a> by Caspar (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9594.html">how to use nested cursors in a stored procedure in ASE ? is there any template to use !...</a> by nino (12/18/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3265.html">to connect sybase and c++,how to connect and access the data </a> by kumaran (9/2/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6741.html">how do u tell the last time update statistics has been run on a table (11.0.3) </a> by yujo (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11075.html">I need to Execute an SP & set its output to the insert statement. This will be occured for...</a> by rose (1/14/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9435.html">I wanted to know EXACT technical details about what ACTUALLY happens when u fire a simple...</a> by anu (12/15/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-8395.html">Is there anyway to start dataserver in ASE 11.9.2 with only the master and tempdb online...</a> by steve_2000g (11/28/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-854.html">i get an error on the "convert" when i try to run this line of code, why is this?   print...</a> by shugarhi (7/14/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11834.html">Hi  &nbsp; We're using Sybase ASE 12.0 running on SUN 4500 Cluster server. We cannot...</a> by KK (1/26/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6297.html">I am creating a stored proc to create a report of dependencies. &nbsp;We are creating...</a> by RR (10/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7388.html">How is this hazardous if we do not close a cursor? </a> by amar (11/11/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9827.html">How can i reduce my tempdb size once i have increased it by creating a device also? </a> by rajs (12/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12835.html">how can i transfer a table from cybase to db2? &nbsp;please sendme step by step method if...</a> by maulik (2/9/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3213.html">My database is in bypass recovery mode. How do I put it in normal mode? </a> by Lach (9/1/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-1435.html">Hi ,  &nbsp;We are using Sybase ASE 11.9.2 with SCO Unix 7.1.1 &nbsp;as the operating ...</a> by gowri (7/27/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-2412.html">were is a database that will bring up  a person address without there last name </a> by travis (8/15/2003)</font></li>
+</ul>
+<p><font face="Arial">Questions somewhat related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-2221.html">Guys!   See the Sybase query below: select convert(float,substring(&lt;field1&gt;,3,...</a> by pathfinder (8/12/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7790.html">What are the side-effects of turning-on the built-in auditing capabilities of sybase? </a> by Choy (11/17/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12136.html">When ever i execute select property('PROCESSCPU') i get the value 189 and whenever i...</a> by anilkumarsh (1/29/2004)</font></li>
+</ul>
+<p><font face="Arial">Other questions awaiting answers:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/related.html">10088 questions</a> related to other FAQs<br></font></li>
+<li><font face="Arial"><a href="/qa/unrelated.html">1765 general questions</a></font></li>
+<li><font face="Arial"><a href="/qa/answered.html">4091 answered questions</a><br></font></li>
+</ul>
+</td></tr></table> <br></center></div>
+<HR NOSHADE SIZE=2 WIDTH=450>
+[ <a href="/faqs/">Usenet FAQs</a> | <a href="/faqs/faqsearch.html">Search</a> | <a href="/contrib/">Web FAQs</a> | <a href="/docs/">Documents</a> | <a href="/rfcs/">RFC Index</a> ]
+<BR><HR NOSHADE SIZE=2 WIDTH=450>
+<P>
+<ADDRESS>
+Send corrections/additions to the FAQ Maintainer: <BR>dowen@midsomer.org (David Owen)
+</ADDRESS>
+<P>
+<SMALL>
+<STRONG>Last Update February 12 2004 @ 00:28 AM</STRONG>
+<BR>
+</SMALL>
+</DIV>
+</BODY>
+</HTML>
+

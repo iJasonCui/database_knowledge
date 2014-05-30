@@ -1,0 +1,27 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_delVoiceByDate;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_delVoiceByDate (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yadira Genoves Xolalpa
+**   Date:  June 2010
+**   Description:  Deletes the voice rows by date
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+    at_cutoffDate          DATETIME
+)
+BEGIN
+    DECLARE at_voiceId        DECIMAL(10,0); 
+    DECLARE at_deleteCount    INT ;
+
+    DELETE FROM VoiceConnect
+    WHERE dateCreated <= at_cutoffDate ;
+
+END;;
+DELIMITER ;

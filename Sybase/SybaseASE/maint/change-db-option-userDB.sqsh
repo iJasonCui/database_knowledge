@@ -1,0 +1,48 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]
+then
+   echo "Usage: "${0}" <serverName> "
+   exit 1
+else
+   serverName=${1}
+fi
+
+Password=`cat $HOME/.sybpwd | grep -w ${serverName} | awk '{print $2}'`
+CurrentDate=`date '+%Y%m%d_%H%M%S'`
+LogFile=./output/${0}.${serverName}.${CurrentDate}
+
+date > ${LogFile}
+
+sqsh -Ucron_sa -S${serverName} -P${Password} << EOQ1 >> ${LogFile}
+
+select name from master..sysdatabases where name not in ('master', 'model', 'tempdb', 'sybsystemdb', 'sybsystemprocs')
+\do
+   \echo "use #1"
+   select db_name()
+   go
+   checkpoint
+   go
+
+   USE master
+   go
+   EXEC sp_dboption #1,'dbo use only', false
+   go
+   EXEC sp_dboption #1,'trunc log on chkpt',true
+   go
+   USE #1 
+   go
+   CHECKPOINT
+   go
+
+\done
+
+
+go
+
+EOQ1
+
+
+exit 0
+
+

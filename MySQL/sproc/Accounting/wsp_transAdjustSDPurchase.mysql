@@ -1,0 +1,64 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_transAdjustSDPurchase;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_transAdjustSDPurchase (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         July 2009
+**   Description:  adjusts SD purchase for user
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_userId         DECIMAL(12,0)
+,at_xactionId      DECIMAL(12,0)
+,at_refXactionId   DECIMAL(12,0)
+,at_contentId      SMALLINT
+,at_xactionTypeId  TINYINT
+,at_cardProcessor  CHAR(1)
+,at_adminUserId    INT
+,at_passTypeId     TINYINT
+,at_dateNow        DATETIME
+,at_cost           DECIMAL(10,2)
+,at_costUSD        DECIMAL(5,2)
+,at_tax            DECIMAL(10,2)
+,at_taxUSD         DECIMAL(5,2)
+,at_currencyId     TINYINT
+,at_purchaseOfferDetailId  SMALLINT
+,at_purchaseTypeId         TINYINT
+,at_billingLocationId      SMALLINT
+,at_creditCardId           INT
+)
+BEGIN
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+	ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+	ROLLBACK;
+END;
+
+START TRANSACTION;
+
+INSERT INTO SDTransaction (xactionId,userId,eventId,passTypeId,passes,xactionTypeId,contentId,dateCreated
+   ) VALUES (at_xactionId,at_userId,-1,at_passTypeId,0,at_xactionTypeId,at_contentId,at_dateNow);
+
+INSERT INTO Purchase (xactionId,purchaseTypeId,billingLocationId,purchaseOfferDetailId,currencyId,cost,costUSD,tax,taxUSD,userId,dateCreated,creditCardId,cardProcessor,xactionTypeId,refXactionId
+   ) VALUES (at_xactionId,at_purchaseTypeId,at_billingLocationId,at_purchaseOfferDetailId,at_currencyId,at_cost,at_costUSD,at_tax,at_taxUSD,
+     	    at_userId,at_dateNow,at_creditCardId,at_cardProcessor,at_xactionTypeId,at_refXactionId);
+
+INSERT INTO AdminAccountTransaction (xactionId,adminUserId,userId,dateCreated
+   ) VALUES (at_xactionId,at_adminUserId,at_userId,at_dateNow);
+
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

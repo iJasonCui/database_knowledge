@@ -1,0 +1,27 @@
+SET OPTION cron_sa.CONVERSION_ERROR=OFF
+go
+LOAD TABLE DeferredRev.AccountTransaction 
+(
+    xactionId     ,
+    userId        ,
+    xactionTypeId ,
+    creditTypeId  ,
+    contentId     ,
+    product       ,
+    community     ,
+    credits       ,
+    balance       ,
+    userType      ,
+    description   ,
+    dateCreated   ,
+    batchId       
+)
+from '/data/bcp-data/wp_report/AccountTransaction.out'
+DELIMITED BY '|'
+QUOTES OFF
+ESCAPES OFF
+IGNORE CONSTRAINT UNIQUE 0, NULL 0, DATA VALUE 0 
+WITH CHECKPOINT ON 
+go
+select count(*) from DeferredRev.AccountTransaction 
+go

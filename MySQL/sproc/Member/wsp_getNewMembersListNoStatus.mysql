@@ -1,0 +1,33 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getNewMembersListNoStatus;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getNewMembersListNoStatus (
+/******************************************************************************
+**
+** CREATION:
+**   Author: Mike Stairs
+**   Date:  Jan 14, 2005  
+**   Description:  gets list of new users within time range 
+**          
+** REVISION(S):
+**   Author: Yan Liu 
+**   Date:  July 20, 2006
+**   Description: append a few new columns in the result set.
+**
+******************************************************************************/
+    at_startSeconds INT,
+    at_endSeconds   INT
+)
+BEGIN
+    SELECT user_id,
+           signuptime,
+           firstidentitytime,
+           signup_adcode,
+           user_type,
+           email,
+           zipcode
+      FROM user_info 
+     WHERE user_type IN('F', 'P')
+       AND signuptime >= at_startSeconds 
+       AND signuptime <  at_endSeconds ;
+END;;
+DELIMITER ;

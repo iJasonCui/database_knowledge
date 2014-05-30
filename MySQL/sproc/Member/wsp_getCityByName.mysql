@@ -1,0 +1,33 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getCityByName;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getCityByName (
+/******************************************************************************
+**
+** CREATION:
+**   Author: Yan L 
+**   Date:  Oct 24 2008
+**   Description: Retrieves jurisdiction info by countryId, jurisdictionId, cityName 
+**
+** REVISION(S):
+**   Author: 
+**   Date:  
+**   Description: 
+**
+******************************************************************************/
+   at_countryId      SMALLINT,
+   at_jurisdictionId SMALLINT, 
+   at_cityName       VARCHAR(120)
+)
+BEGIN
+   SET at_cityName = LTRIM(RTRIM(UPPER(at_cityName))) ;
+
+   SELECT cityId,
+          cityName
+     FROM City 
+    WHERE countryId = at_countryId
+      AND jurisdictionId = at_jurisdictionId
+      AND UPPER(cityName) = at_cityName 
+    LIMIT 1 ;
+
+END;;
+DELIMITER ;

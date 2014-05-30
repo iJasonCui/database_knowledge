@@ -1,0 +1,59 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_saveEmailHistory;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_saveEmailHistory (
+ /***********************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga/Yan Liu
+**   Date:  May 2003
+**   Description:  Either inserts/updates a row in/on EmailHistory
+**
+** REVISION(S):
+**   Author:  Yan Liu
+**   Date:  November 2006
+**   Description:  Add bounceBackCounter column 
+**
+*************************************************************************/
+    at_userId            DECIMAL(12, 0),
+    at_email             VARCHAR(129),
+    at_status            CHAR(1),
+    at_modifiedBy        INT,
+    at_type              CHAR(1),
+    at_bounceBackCounter INT
+)
+BEGIN
+
+DECLARE at_date DATETIME ;
+CALL wsp_GetDateGMT(at_date);
+
+IF (SELECT 1 FROM EmailHistory WHERE userId = at_userId AND email = at_email) IS NOT NULL
+THEN    
+    UPDATE EmailHistory 
+       SET status            = at_status,
+           dateModified      = at_date,
+           modifiedBy        = at_modifiedBy,
+           type              = at_type,
+           bounceBackCounter = at_bounceBackCounter 
+     WHERE userId = at_userId
+       AND email  = at_email ;
+ELSE
+    INSERT EmailHistory(userId, 
+                        email, 
+                        status, 
+                        dateCreated, 
+                        dateModified, 
+                        modifiedBy,
+                        type,
+                        bounceBackCounter)
+    VALUES(at_userId, 
+           at_email, 
+           at_status, 
+           at_date, 
+           at_date, 
+           at_modifiedBy, 
+           at_type,
+           at_bounceBackCounter) ;
+END IF;
+
+END;;
+DELIMITER ;

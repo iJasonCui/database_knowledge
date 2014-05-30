@@ -1,0 +1,13 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getCityById;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getCityById (
+at_id int
+)
+begin
+
+   select countryId, jurisdictionId, secondJurisdictionId, cityName, latitudeRad, longitudeRad, tz.legacyName 
+   from City left join Timezone tz on tz.timezoneId = City.timezoneId and cityId = at_id
+   where cityId = at_id ;
+
+END;;
+DELIMITER ;

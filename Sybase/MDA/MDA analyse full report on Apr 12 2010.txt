@@ -1,0 +1,137 @@
+
+print '-------------------------------------------------------------------------'
+print 'Top 20 Elapsed Time (slow) Stored Procedures               '
+print '-------------------------------------------------------------------------'
+print '  '
+
+select top 20 ProcName, DBName, ElapsedTime, StartTime
+from mda_user.proc_stats
+where SRVName      = 'w151dbp04'
+  and dateCreated >= 'Apr 11 2010'
+  and dateCreated < 'Apr 12 2010'
+order by ElapsedTime desc
+
+print '-----------------------------------------------------------------------'
+print 'Top 20 Logical Read (expensive) Stored Procedures               '
+print '-----------------------------------------------------------------------'
+print '  '
+
+select top 20 ProcName, DBName, LogicalReads, StartTime
+from mda_user.proc_stats
+where SRVName      = 'w151dbp04'
+  and dateCreated >= 'Apr 11 2010'
+  and dateCreated < 'Apr 12 2010'
+order by LogicalReads desc
+
+print '-----------------------------------------------------------------------'
+print 'Top 20 Been Executed (popular) Stored Procedures               '
+print '-----------------------------------------------------------------------'
+print '  '
+
+select DBName, ProcName, count(*) as ExecCount, 
+       min(ElapsedTime) as minExeTime, max(ElapsedTime) as maxExeTime, convert(int, avg(ElapsedTime)) as avgExeTime   
+into #MostExecuted
+from mda_user.proc_stats
+where SRVName      = 'w151dbp04'
+  and dateCreated >= 'Apr 11 2010'
+  and dateCreated < 'Apr 12 2010'
+group by DBName, ProcName 
+
+select top 20 t.ProcName,
+       convert(varchar(15),t.DBName) as DBName,
+       ExecCount ,
+       minExeTime, 
+       maxExeTime,
+       avgExeTime
+from #MostExecuted t
+order by ExecCount desc
+
+print '-----------------------------------------------------------------------'
+print 'Stored Procedures were executed in the previous day, not in reporting period '
+print '-----------------------------------------------------------------------'
+print '  '
+
+select DBName, ProcName, count(*) as ExecCount, min(dateCreated) as min_startTime, max(dateCreated) as max_startMax
+into #MostExecutedPrevious
+from mda_user.proc_stats
+where SRVName      = 'w151dbp04'
+  and dateCreated >= 'Apr 4 2010'
+  and dateCreated <  'Apr 5 2010'
+group by DBName, ProcName
+
+select t1.ProcName, t1.DBName, t1.ExecCount as ExecCount1, t2.ExecCount as ExecCount2  
+into   #ProcInYesterdayNotToday
+from #MostExecutedPrevious t1, #MostExecuted t2
+where t1.ProcName *= t2.ProcName 
+  and t1.DBName *= t2.DBName  
+
+select ProcName, DBName, ExecCount1 
+from  #ProcInYesterdayNotToday
+where ExecCount2 is null
+
+print '------------------------------------------------------------------------------'
+print 'Stored Procedures were not executed in the previous day, but in reporting period '
+print '------------------------------------------------------------------------------'
+print '  '
+
+select t1.ProcName, t1.DBName, t1.ExecCount as ExecCount1, t2.ExecCount as ExecCount2                       
+into   #ProcInTodayNotInYesterday
+from #MostExecuted  t1, #MostExecutedPrevious t2
+where t1.ProcName *= t2.ProcName
+  and t1.DBName *= t2.DBName
+
+select ProcName, DBName, ExecCount1                      
+from  #ProcInTodayNotInYesterday 
+where ExecCount2 is null
+
+print '------------------------------------------------------------------------------'
+print 'Stored Procedures were executed 20 percent more or less between the previous day and the reporting period '
+print '------------------------------------------------------------------------------'
+print '  '
+
+select t1.ProcName, t1.DBName, 
+       t1.ExecCount as ExecCount1, 
+       t2.ExecCount as ExecCount2, 
+       t1.ExecCount - t2.ExecCount as CountDiff, 
+       (abs(CountDiff) * 100 / t1.ExecCount) as CountDiffPercent
+  into #ProcInTodayInYesterday
+  from #MostExecuted  t1, #MostExecutedPrevious t2
+ where t1.ProcName = t2.ProcName
+   and t1.DBName = t2.DBName
+
+select ProcName, DBName, ExecCount1 , ExecCount2 as ExecCountPrevious, CountDiff, CountDiffPercent
+from #ProcInTodayInYesterday
+where CountDiffPercent >= 20  
+order by CountDiffPercent desc
+
+select top 20 ProcName, DBName, ExecCount1 , ExecCount2 as ExecCountPrevious, CountDiff, CountDiffPercent
+from #ProcInTodayInYesterday
+order by CountDiffPercent desc
+
+print '-----------------------------------------------------------------------'
+print 'Total Stored Proc Executions which ElapsedTime >= 200ms               '
+print '-----------------------------------------------------------------------'
+print '  '
+
+select count(*) as "TotalProcExecElapsedTime>=200ms" 
+from mda_user.proc_stats
+where SRVName      = 'w151dbp04'
+  and dateCreated >= 'Apr 11 2010'
+  and dateCreated < 'Apr 12 2010'
+  and ElapsedTime >= 200
+
+
+print '-----------------------------------------------------------------------'
+print 'Total Stored Proc Executions which ElapsedTime < 200ms                 '
+print '-----------------------------------------------------------------------'
+print '  '
+
+select count(*)  as "TotalProcExecElapsedTime<200ms" 
+from mda_user.proc_stats
+where SRVName      = 'w151dbp04'
+  and dateCreated >= 'Apr 11 2010'
+  and dateCreated < 'Apr 12 2010'
+  and ElapsedTime < 200
+
+print '--------------------------------------------------------------------------------------------------'
+

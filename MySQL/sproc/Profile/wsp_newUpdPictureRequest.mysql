@@ -1,0 +1,53 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newUpdPictureRequest;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newUpdPictureRequest (
+/***********************************************************************
+**
+** CREATION:
+**   Author:  Eugene Huang
+**   Date:  August 4, 2010
+**   Description:  Insert new row, or update existing row in the
+**                 PictureRequest table
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+ at_productCode CHAR(1)
+,at_communityCode CHAR(1)
+,at_userId DECIMAL(12,0)
+,at_targetUserId DECIMAL(12,0)
+)
+BEGIN
+
+DECLARE at_dateCreated DATETIME;
+
+CALL wsp_GetDateGMT(at_dateCreated);
+    
+IF (SELECT 1 FROM PictureRequest WHERE userId = at_userId and targetUserId = at_targetUserId) IS NOT NULL 
+THEN
+
+        UPDATE PictureRequest SET
+        dateModified = at_dateCreated
+        WHERE userId = at_userId
+        AND targetUserId = at_targetUserId;
+ELSE
+        INSERT INTO PictureRequest (
+             userId
+            ,targetUserId
+            ,seen
+            ,dateCreated
+            ,dateModified
+        )
+        VALUES (
+             at_userId
+            ,at_targetUserId
+            ,'N'
+            ,at_dateCreated
+            ,at_dateCreated
+        );
+END IF;
+END;;
+DELIMITER ;

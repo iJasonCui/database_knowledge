@@ -1,0 +1,43 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_cntWActiveCardByCardNumber;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_cntWActiveCardByCardNumber (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         Sept 9, 2003
+**   Description:  Find if the credit card is being used in our system
+**
+** REVISION(S):
+**   Author:       Mike Stairs
+**   Date:
+**   Description:  Changed to check status not inactive, so include banned cards as used
+**
+**   Author:       Andy Tran
+**   Date:         Feb 17, 2005
+**   Description:  Used encodedCardNum
+**
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+
+ at_encodedCardNum VARCHAR(64)
+,at_userId         DECIMAL(12,0)
+,at_productId      SMALLINT 
+)
+BEGIN
+
+    SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+    SELECT count(*)
+      FROM CreditCard
+     WHERE encodedCardNum = at_encodedCardNum
+       AND userId != at_userId
+       AND productId = at_productId
+       AND status NOT IN ('I', 'D');
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

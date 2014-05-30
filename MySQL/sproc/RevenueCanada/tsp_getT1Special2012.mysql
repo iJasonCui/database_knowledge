@@ -1,0 +1,114 @@
+IF OBJECT_ID('tsp_getT1Special2012') IS NOT NULL
+BEGIN
+    DROP PROCEDURE tsp_getT1Special2012
+    IF OBJECT_ID('tsp_getT1Special2012') IS NOT NULL
+        PRINT '<<< FAILED DROPPING PROCEDURE tsp_getT1Special2012 >>>'
+    ELSE
+        PRINT '<<< DROPPED PROCEDURE tsp_getT1Special2012 >>>'
+END
+go
+CREATE PROCEDURE tsp_getT1Special2012
+     at_T4Box14_line101 DECIMAL(12,2), 
+     at_RRSP_line208    DECIMAL(12,2), 
+     at_PensionAdjustBox52 DECIMAL(12,2), 
+     at_UCCB_line117    DECIMAL(12,2),
+     at_INTREST_line121 DECIMAL(12,2),
+     at_INTREST_EXPENSE_line221 DECIMAL(12,2), 
+     at_TAX_DEDUCTED_line437 DECIMAL(12,2),
+     at_CPP  DECIMAL(12,2),  ##2217.60
+     at_EI  DECIMAL(12,2),  ##786.76
+     at_Donation  DECIMAL(12,2),  ##75.00
+     at_childrenAmount  DECIMAL(12,2), ##children amount; Line 5, col367; 2 * $2131 = $4262
+     at_spouseNetIncome DECIMAL(12,2), 
+     at_combineFlag  int 
+AS
+BEGIN
+
+     DECLARE at_line260  DECIMAL(12,2);  ##Taxable income
+     DECLARE at_line150  DECIMAL(12,2); 
+  
+     DECLARE at_line303  DECIMAL(12,2); 
+     DECLARE at_line233  DECIMAL(12,2); 
+     DECLARE at_line234  DECIMAL(12,2); 
+     DECLARE at_line236  DECIMAL(12,2); 
+     DECLARE at_line420  DECIMAL(12,2); ##LINE 50 FROM SCHEDULE 1
+     DECLARE at_line428  DECIMAL(12,2); 
+     DECLARE at_line435  DECIMAL(12,2); ##total PAYABLE
+     DECLARE at_line479  DECIMAL(12,2); ##ONTARIO CREDITS
+     DECLARE at_line482  DECIMAL(12,2); ##total CREDITS
+     DECLARE at_line484  DECIMAL(12,2); ##REFUND
+     DECLARE at_line485  DECIMAL(12,2); ##BALANCE OWING
+     
+     DECLARE at_col345  DECIMAL(12,2);   ##from schedule 1  pass it into on428
+     DECLARE at_col347  DECIMAL(12,2);    ##from schedule 1  pass it into on428
+     
+     
+     SET at_line484 = 0 
+     SET at_line485 = 0  
+          
+     ##calculate the Line150 total income
+     SET at_line150 = at_T4Box14_line101 + at_UCCB_line117  + at_INTREST_line121 
+     
+     PRINT "Line 101: %1! " , at_T4Box14_line101
+     PRINT "Line 117: %1! " , at_UCCB_line117
+     PRINT "Line 121: %1! " , at_INTREST_line121 
+     PRINT "Line 150: %1! " , at_line150
+     
+     SET at_line233 = at_RRSP_line208 + at_INTREST_EXPENSE_line221
+     SET at_line234 = at_line150 - at_line233
+    
+     PRINT "Line 206: %1! " , at_PensionAdjustBox52
+     PRINT "Line 208: %1! " , at_RRSP_line208
+     PRINT "Line 221: %1! " , at_INTREST_EXPENSE_line221
+     PRINT "Line 233: %1! " , at_line233
+     PRINT "Line 234: %1! " , at_line234
+     
+     SET at_line236 = at_line234
+     PRINT "Line 236: %1! " , at_line236
+      
+     SET at_line260 = at_line236
+     PRINT "Line 260: %1! " , at_line260
+      
+     ##schedule 1
+     PRINT "#########################################-#" 
+     PRINT "Go to Schedule 1"
+     CALL tsp_getSchedule1_2012 at_line260, at_spouseNetIncome, at_combineFlag, at_CPP, at_EI, at_Donation, at_childrenAmount, at_line420 output, at_col345 output, at_col347 output
+     PRINT "Line 420: %1! " , at_line420
+     
+      PRINT "#########################################-#" 
+      PRINT "Go to Ontario Tax 428"
+      ##ontario tax 428
+      CALL tsp_getON428_2012 at_line260,   at_spouseNetIncome,   at_combineFlag , at_CPP, at_EI, at_col345, at_col347, at_line428 output 
+      PRINT "Line 428: %1! " , at_line428
+      PRINT "The end of Ontario Tax 428"
+      PRINT "#########################################-#" 
+      
+      SET at_line435 = at_line420 + at_line428
+      PRINT "Line 435: %1! " , at_line435
+      
+      PRINT "Line 437: %1! " , at_TAX_DEDUCTED_line437
+      
+      SET at_line479  = 105.2
+      PRINT "Line 479: %1! " , at_line479
+            
+      SET at_line482 = at_TAX_DEDUCTED_line437 + at_line479
+      PRINT "Line 482: %1! " , at_line482
+    
+      IF  at_line435 > at_line482 SET at_line485 = at_line435 - at_line482
+      IF  at_line435 < at_line482 SET at_line484 = at_line435 - at_line482
+      
+      PRINT "Line 484: %1! " , at_line484
+      PRINT "Line 485: %1! " , at_line485
+           
+END
+/* ### DEFNCOPY: END OF DEFINITION */
+go
+GRANT EXECUTE ON tsp_getT1Special2012 TO web
+go
+IF OBJECT_ID('tsp_getT1Special2012') IS NOT NULL
+   PRINT '<<< CREATED PROCEDURE tsp_getT1Special2012 >>>'
+ELSE
+   PRINT '<<< FAILED CREATING PROCEDURE tsp_getT1Special2012 >>>'
+go
+CALL sp_procxmode 'tsp_getT1Special2012','unchained'
+go

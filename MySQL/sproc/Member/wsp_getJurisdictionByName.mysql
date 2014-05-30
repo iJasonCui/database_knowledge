@@ -1,0 +1,32 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getJurisdictionByName;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getJurisdictionByName (
+/******************************************************************************
+**
+** CREATION:
+**   Author: Yan L 
+**   Date:  Oct 24 2008
+**   Description: Retrieves jurisdiction info by countryId, jurisdictionName 
+**
+** REVISION(S):
+**   Author: 
+**   Date:  
+**   Description: 
+**
+******************************************************************************/
+   at_countryId        SMALLINT,
+   at_jurisdictionName VARCHAR(100)
+)
+BEGIN
+   SET at_jurisdictionName = LTRIM(RTRIM(UPPER(at_jurisdictionName))) ;
+
+   SELECT jurisdictionId AS regionId, 
+          jurisdictionName AS regionLabel
+     FROM Jurisdiction 
+    WHERE countryId = at_countryId
+      AND UPPER(jurisdictionName) = at_jurisdictionName 
+      AND jurisdictionId = parentId 
+    LIMIT 1;
+
+END;;
+DELIMITER ;

@@ -1,0 +1,109 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newSDTransaction;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newSDTransaction (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         June 1, 2009
+**   Description:  Record new SD transaction
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_userId             DECIMAL(12,0)
+,at_eventId            DECIMAL(12,0)
+,at_passTypeId         SMALLINT
+,at_passes             SMALLINT
+,at_xactionTypeId      TINYINT
+,at_contentId          SMALLINT
+)
+BEGIN
+
+DECLARE at_xactionId          DECIMAL(12,0);
+DECLARE at_balance            SMALLINT;
+DECLARE at_dateNow            DATETIME;
+DECLARE at_dateExpiry         DATETIME;
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+   ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+   ROLLBACK;
+END;
+
+-- get at_xactionId
+CALL wsp_XactionId(at_xactionId);
+-- get at_dateNow
+SET at_dateNow = UTC_TIMESTAMP();
+-- get at_dateExpiry
+SET at_dateExpiry = '2052-12-31 00:00:00';
+
+START TRANSACTION;
+
+-- insert transaction record
+INSERT INTO SDTransaction (
+         xactionId
+        ,userId
+        ,eventId
+        ,passTypeId
+        ,passes
+        ,xactionTypeId
+        ,contentId
+        ,dateCreated
+    ) VALUES (
+         at_xactionId
+        ,at_userId
+        ,at_eventId
+        ,at_passTypeId
+        ,at_passes
+        ,at_xactionTypeId
+        ,at_contentId
+        ,at_dateNow
+    );
+
+    -- if there's an existing record for this userId and passTypeId
+    IF (SELECT 1 FROM SDBalance WHERE userId = at_userId AND passTypeId = at_passTypeId) IS NOT NULL THEN 
+            SELECT balance INTO at_balance FROM SDBalance WHERE userId = at_userId AND passTypeId = at_passTypeId;
+            IF at_balance + at_passes = 0 THEN 
+                    DELETE FROM SDBalance
+                     WHERE userId = at_userId
+                       AND passTypeId = at_passTypeId;
+            ELSE
+                    UPDATE SDBalance
+                       SET balance = balance + at_passes
+                          ,dateModified = at_dateNow
+                          ,dateExpiry = at_dateExpiry
+                     WHERE userId = at_userId AND passTypeId = at_passTypeId;
+            END IF;
+    -- else insert new balance record for this userId and passTypeId (only if # of passes > 0)
+    ELSEIF (at_passes > 0) THEN 
+            INSERT INTO SDBalance (
+                 userId
+                ,passTypeId
+                ,balance
+                ,dateCreated
+                ,dateModified
+                ,dateExpiry
+            ) VALUES (
+                 at_userId
+                ,at_passTypeId
+                ,at_passes
+                ,at_dateNow
+                ,at_dateNow
+                ,at_dateExpiry
+            );
+
+    END IF;
+
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

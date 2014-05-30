@@ -1,0 +1,66 @@
+In terms of the reporting staff, we need to retieve data from several SQL servers. 
+Due to the limitation of disk space on reporting server (webdb0p), we have to bcp(bulk copy) out data at local server(webdb0p), and then  bcp in data at remote server (thumper). This process is a time-cosuming task and often takes 6 or 7 hours for transfering data of five tables.    
+In that case, we can take advantage of Sybase CIS(Component Integration Services) feature to save time, space and make our life easier.
+
+What is CIS?
+Component Integration Services allows users to access both Sybase and non-Sybase databases on different servers. These external data sources include host data files and tables, views and RPCs (remote procedure calls) in database systems such as Adaptive Server, Oracle, and DB2.
+Getting Started with Component Integration Services...
+•	Log into Adaptive Server as the System Administrator and issue the following command: sp_configure "enable cis", 1
+➢	In terms of CIS bulk copy, we also are supposed to configure “cis bulk copy batch size” with sp_configure. During these tests, this system parameter has been set to 1000. 
+•	Restart Adaptive Server
+•	Add the remote server to the interfaces file, using the dsedit or dscp utility. 
+•	Grant connect to public
+•	Add the name, server class, and network name of the remote server to system tables, using the system procedure sp_addserver. 
+sp_addserver server_name [,server_class [,network_name]]
+•	Assign an alternate login name and password, using the system procedure sp_addexternlogin. This step is not optional!!
+sp_addexternlogin remote_server, login_name, remote_name [,remote_password]
+
+for example, on 0r to IQDB1
+   sp_addexternlogin IQDB1, dm_dbo, dm_user, "dm_user"
+sp_addexternlogin IQDB1, sa, DBA, "REMOTE_PASSWORD"
+•	Use the stored procedure sp_addobjectdef to define the storage location of a remote object.  (optional)
+sp_addobjectdef object, " server_name.dbname.owner.object" [ ," object_type"]    table / view / rpc
+•	Use the create table or the create existing table command to map the remote table schema to the server. 
+[create existing table ( … ) at “remote_server.database.owner.object_name”]
+Do not forget the “ “ quotation mark
+For example:
+Create existing table test_table (aaa int)
+ at “remote_server.database.owner.object_name”
+More detailed information about CIS refers to http://manuals.sybase.com/onlinebooks/group-as/asg1150e/omni_ug/@ebt-link;pt=430?target=%25N%13_485_START_RESTART_N%25
+Note: 1. Better create a cis user and login in as cis_user instead of sa, otherwise it will impact master’s log. It will fill up master transaction log. Better use cis login with default db other than master.
+For instance, from ASE to IQ,
+sp_addexternlogin IQDB1, dm_dbo, dm_user, "dm_user"
+sp_addexternlogin IQDB1, sa, DBA, "Password"
+
+ 
+sp_addobjectdef PageCountMember_IQ, "IQDB1..PageCount.PageCountMember","table"
+sp_addobjectdef PageCountGuest_IQ, "IQDB1..PageCount.PageCountGuest","table"
+ 
+CREATE existing TABLE PageCountGuest_IQ
+(
+    webServerId    tinyint       NOT NULL,
+    cookieId       numeric(12,0) NOT NULL,
+    pageId         smallint      NOT NULL,
+    sessionContext char(3)       NOT NULL,
+    sessionAdCode  varchar(30)   NOT NULL,
+    localePref     smallint      NOT NULL,
+    dateCreated    datetime      NOT NULL,
+    batchId        int           NOT NULL
+)
+--at "IQDB1..PageCount.PageCountGuest"
+ 
+select count(*) from PageCountGuest_IQ
+ 
+CREATE existing TABLE PageCountMember_IQ
+(
+    webServerId    tinyint       NOT NULL,
+    userId         numeric(12,0) NOT NULL,
+    pageId         smallint      NOT NULL,
+    sessionContext char(3)       NOT NULL,
+    sessionAdCode  varchar(30)   NOT NULL,
+    localePref     smallint      NOT NULL,
+    dateCreated    datetime      NOT NULL,
+    batchId        int           NOT NULL
+)
+at "IQDB1..PageCount.PageCountMember"
+

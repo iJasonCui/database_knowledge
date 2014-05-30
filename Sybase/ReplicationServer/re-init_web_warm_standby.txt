@@ -1,0 +1,262 @@
+[re-initializing the standby ]
+
+#----------------- CLEAN UP BEFORE SETUP -------------------------------------------------#
+
+--step 1: [rep5p] drop db subscription for w151dbp02
+
+
+SELECT 'drop subscription "' + s.subname + '" for database replication definition "' + o.dbrepname 
+     + '" with primary at "' + p.dsname + '"."' + p.dbname
+     + '" with replicate at "' + d.dsname + '"."' + d.dbname + '" without purge' 
+FROM   rep5p_RSSD..rs_subscriptions s, rep5p_RSSD..rs_databases p, rep5p_RSSD..rs_databases d, rep5p_RSSD..rs_dbreps o
+WHERE  s.pdbid = p.dbid and s.dbid = d.dbid and s.pdbid  = o.dbid and s.subname like "w151dbp02%"
+
+--step 2: [rep5p]   drop MSA connections
+
+select 'drop connection to "' + d.dsname + '"."' + d.dbname + '"' from rep5p_RSSD..rs_databases d where d.dsname like "w151dbp02%"
+
+sqsh -Usa -Srep5p
+
+drop connection to [ws_server_name].[ws_db_name]  (for instance, v104db12.Tracking)
+
+
+--step 3: [rep4p] drop db subscription for w104dbr05
+
+SELECT 'drop subscription "' + s.subname + '" for database replication definition "' + o.dbrepname 
+     + '" with primary at "' + p.dsname + '"."' + p.dbname
+     + '" with replicate at "' + d.dsname + '"."' + d.dbname + '" without purge' 
+FROM   rep4p_RSSD..rs_subscriptions s, rep4p_RSSD..rs_databases p, rep4p_RSSD..rs_databases d, rep4p_RSSD..rs_dbreps o
+WHERE  s.pdbid = p.dbid and s.dbid = d.dbid and s.pdbid  = o.dbid and s.subname like "w104dbr05%"
+
+--step 4: [rep4p]   drop MSA connections
+
+sqsh -Usa -Srep4p
+
+select 'drop connection to "' + d.dsname + '"."' + d.dbname + '"' from rep4p_RSSD..rs_databases d where d.dsname like "w104dbr05%"
+
+For example,
+
+drop connection to "w104dbr05"."Msg_ad"
+drop connection to "w104dbr05"."Msg_ai"
+
+
+--step 5: [rep4p] drop database rep definition
+
+select "drop database replication definition " + r.dbrepname + "  with primary at " + d.dsname + "." + d.dbname
+from rs_dbreps r, rs_databases d where r.dbid = d.dbid 
+
+For instance,
+
+drop database replication definition IVROnWeb  with primary at LogicalSRV.IVROnWeb
+drop database replication definition Msg_ad  with primary at LogicalSRV.Msg_ad
+
+#-----------------THE END OF PRE-SETUP CLEANING UP -----------------------------------------#
+#-----------------The above part has been done----------------------------------------------#
+
+#-----------------THE 2nd part CLEAN UP -----------------------------------------#
+
+--step 1: [rep4p]  drop connection on both primary and warm standby, and logical connection
+
+sqsh -Usa -Srep4p
+
+drop connection to webdb22p.Tracking
+drop connection to webdb31p.Tracking
+drop logical connection to LogicalSRV.Tracking
+
+--step 2: [webdb31p and w151dbp02] disable rep agent and ignore the ltm marker BOTH ON PRIMARY AND WARM STANDBY
+
+use Tracking
+dbcc gettrunc
+
+exec sp_stop_rep_agent Tracking
+dbcc settrunc('ltm', ignore)
+sp_config_rep_agent Tracking, disable
+
+
+--step 3: [on primary database, for instance, webdb31p]
+
+drop rep4p_maint_user as alias on prim db 
+
+USE Tracking
+go
+IF EXISTS (SELECT * FROM sysalternates WHERE suid=SUSER_ID('rep4p_maint_user'))
+BEGIN
+    EXEC sp_dropalias 'rep4p_maint_user'
+    IF EXISTS (SELECT * FROM sysalternates WHERE suid=SUSER_ID('rep4p_maint_user'))
+        PRINT '<<< FAILED DROPPING ALIAS rep4p_maint_user >>>'
+    ELSE
+        PRINT '<<< DROPPED ALIAS rep4p_maint_user >>>'
+END
+go
+
+
+========================================================
+Implementation warm standby 
+========================================================
+
+[new installation]
+
+--step 1: [w151rep02]
+
+create logical connection to LogicalSRV.Tracking
+admin logical_status
+
+
+--step 1.1 modify interfaces 
+
+--step 2:  [w151rep02, host name is webtheta] add primary db 
+
+--2.1 login [webtheta] host as the 'repserver' user and add primary database connection 
+
+--2.2 run this one to set up rep15 environment because webtheta has two rep server instances, REp12.6 and Rep 15
+
+. /ccs/repsrv15_0/SYBASE.sh
+
+--2.3 edit the resource file "/ccs/repsrv15_0/REP-15_0/init/logs/webdb31p_Tracking.prim.rs"
+
+--2.4 run rs_init with resource file as follows:
+
+[repserver@webtheta:/ccs/repsrv15_0/REP-15_0/init/logs]$ 
+/ccs/repsrv15_0/REP-15_0/install/rs_init -r /ccs/repsrv15_0/REP-15_0/init/logs/webdb31p_Tracking.prim.rs 
+
+admin who_is_down (no one should be down)
+
+--step 3:  set rep table/col and run sp_reptostandby
+
+--step 3.1: [on primary database, for instance, webdb31p]
+
+use Tracking
+sp_reptostandby Tracking, 'all'
+
+--step 3.2 set rep table/col
+
+[tips 1] figure out whether there is text column in the table
+
+select o.name as table_name, c.name as col_name, t.name as col_type
+from sysindexes i, sysobjects o, syscolumns c, systypes t 
+where i.indid = 255 and i.id = o.id and o.type = "U" and c.id = o.id and c.type = t.type and t.name = "text"
+
+if there is one, run exec sp_setreptable_text [table name], 'true','owner_off', 'replicate_if_changed'
+
+[tips 2] generate the sql of set rep tables
+
+select "exec sp_setreptable " +  name + " , true" from sysobjects where type = "U" and name not like "rs%"
+
+--step 4: [webtheta] add warm standby connection 
+
+--4.1 login [webtheta] host as the 'repserver' user and add ws database connection 
+
+--4.2 run this one to set up rep15 environment because webtheta has two rep server instances, REp12.6 and Rep 15
+
+. /ccs/repsrv15_0/SYBASE.sh
+
+--4.3 edit the resource file "/ccs/repsrv15_0/REP-15_0/init/logs/w151dbp02_Tracking.ws.rs"
+
+--4.4 run rs_init with resource file as follows:
+
+[repserver@rep4p:/ccs/repsrv15_0/REP-15_0/init/logs]$ 
+/ccs/repsrv15_0/REP-15_0/install/rs_init -r /ccs/repsrv15_0/REP-15_0/init/logs/w151dbp02_Tracking.ws.rs 
+
+
+--step 5: [webdb31p] dump primary db
+
+[sybase@webdb31p:/ccs/sybase12_5]$ cd /opt/etc/sybase/maint;  ./cron-dumpdb.sh Tracking a   
+
+
+--step 5.1: copy the db dump from source server to destination 
+
+[sybase@webdb31p:/opt/etc/sybase12_52/dump/Tracking]
+scp -p /data/dump/Tracking/Tracking-dba* sybase@w151dbp02:/data/dump/Tracking
+
+--step 6: load it into ws db
+
+[tips] ONLY For Sybase ASE 15, on warm standby server, after loading database, and then run
+dbcc dbrepair(dbname, ltmignore)
+
+[sybase@w151dbp02:~/maint]$ more Load_db_Tracking.sql 
+cd $SYBMAINT
+isql -Usa -Sw151dbp02 -i Load_db_Tracking.sql 
+
+AND THEN 1>  online database Tracking
+
+--step 7: add "w151rep02_maint_user" as dbo alias on BOTH WARM STANDBY and PRIMARY 
+
+USE Tracking
+go
+IF USER_ID('w151rep02_maint_user') IS NOT NULL
+BEGIN
+    EXEC sp_dropuser 'w151rep02_maint_user'
+    IF USER_ID('w151rep02_maint_user') IS NOT NULL
+        PRINT '<<< FAILED DROPPING USER w151rep02_maint_user >>>'
+    ELSE 
+        PRINT '<<< DROPPED USER w151rep02_maint_user >>>'
+END
+go
+
+USE Tracking
+go
+EXEC sp_addalias 'w151rep02_maint_user','dbo'
+go
+
+[NOte 1:] there is a handy shell script doing this task.
+
+jasonc@webccs:~/src/javalife/db/scripts/RepServer$ 
+./drop_Alias_Add_as_user_OnActiveSRV.sh webdb31p w151rep02 Tracking
+
+
+-- step 7.1:  make sure that set "dbo use only" and "trunc log"  on STANDBY
+
+USE master
+go
+EXEC sp_dboption 'Tracking','dbo use only',true
+go
+USE master
+go
+EXEC sp_dboption 'Tracking','trunc log on chkpt',true
+go
+USE Tracking
+go
+CHECKPOINT
+go
+
+--step 8: [w151rep02] resume connection to ws db
+sqsh -Usa -Sw151rep01
+
+resume connection to w151dbp02.Tracking
+
+--step 9: test rep 
+
+If the table "RepTest" does not exist, please create it on the user database as follows 
+
+CREATE TABLE dbo.RepTest
+(
+    repTestId       int      NOT NULL,
+    dateTime        datetime NOT NULL,
+    defaultDateTime datetime DEFAULT GETDATE() NULL
+)
+LOCK ALLPAGES
+go
+
+SELECT T.repTestId, T.dateTime FROM Tracking..RepTest T
+INSERT INTO Tracking..RepTest ( repTestId, dateTime ) VALUES ( 108, getdate() )
+
+--step 10 : check the stable queue
+admin disk_space (on rep server)
+
+rs_helppartition (on rssd db)
+
+-- step 11: trouble shooting
+
+
+
+
+
+
+
+
+
+
+
+
+
+

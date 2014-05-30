@@ -1,0 +1,122 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updUserInfo;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updUserInfo (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga/Jeff Yang
+**   Date:  June 10 2002
+**   Description:  Updates row in user_info
+**
+** REVISION(S):
+**   Author:  Malay Dave
+**   Date:  Mar 4 2004
+**   Description:  Add new col 'pref_clubll_signup' - for storing clubll signup preference
+**
+**   Author:  Valeri Popov
+**   Date:  Apr. 16 2004
+**   Description:  Add languagesSpokenMask, countryId, jurisdictionId, secondJursidictionId,
+**                 cityId
+**
+**   Author:  Valeri Popov
+**   Date:  May 4 2004
+**   Description:   Removed UPPER for City
+**
+**   Author:  Malay Dave
+**   Date:  May 6 2005
+**   Description:   Added searchLanguageMask
+**
+**   Author: Mike Stairs
+**   Date: Oct 2005
+**   Description: eliminated references to removed columns from user_info
+**
+**   Author: Yan L 
+**   Date: December 2 2005
+**   Description: fix input parameter mismatch problem. 
+**
+**   Author: Andy Tran
+**   Date: Jul 30 2008
+**   Description: use email address as username
+**
+******************************************************************************/
+ at_userId             DECIMAL(12,0)
+,at_username           VARCHAR(129)
+,at_user_type          CHAR(1)
+,at_password           VARCHAR(16)
+,at_gender             CHAR(1)
+,at_status             CHAR(1)
+,at_signuptime         INT
+,at_laston             INT
+,at_height_cm          INT
+,at_birthdate          DATETIME
+,at_email              VARCHAR(129)
+,at_lat_rad            INT
+,at_long_rad           INT
+,at_zipcode            VARCHAR(10)
+,at_ethnic             CHAR(1)
+,at_religion           CHAR(1)
+,at_smoke              CHAR(1)
+,at_body_type          CHAR(1)
+,at_pref_last_on       CHAR(1)
+,at_preferred_units    CHAR(1)
+,at_signup_adcode      VARCHAR(30)
+,at_signup_context     CHAR(3)
+,at_user_agent         VARCHAR(80)
+,at_emailStatus        CHAR(1)
+,at_pref_clubll_signup CHAR(1)
+,at_languagesSpokenMask INT
+,at_countryId          SMALLINT
+,at_jurisdictionId     SMALLINT
+,at_secondJurisdictionId SMALLINT
+,at_cityId             INT
+,at_searchLanguageMask INT
+)
+BEGIN
+
+DECLARE at_dateNow DATETIME ;
+
+DECLARE at_lat_rad1 int; 
+DECLARE at_long_rad1 int;
+
+CALL wsp_getLatLong(at_lat_rad, at_long_rad, at_countryId, at_cityId, at_lat_rad1 , at_long_rad1);
+
+CALL wsp_GetDateGMT(at_dateNow);
+	
+UPDATE user_info SET
+ username=LTRIM(UPPER(at_username))
+,user_type=at_user_type
+,password=LTRIM(UPPER(at_password))
+,gender=at_gender
+,status=at_status
+,signuptime=at_signuptime
+,laston=at_laston
+,height_cm=at_height_cm
+,birthdate=at_birthdate
+,email=LTRIM(UPPER(at_email))
+,lat_rad=at_lat_rad
+,long_rad=at_long_rad
+,lat_rad1=at_lat_rad1
+,long_rad1=at_long_rad1
+,zipcode=LTRIM(UPPER(at_zipcode))
+,ethnic=at_ethnic
+,religion=at_religion
+,smoke=at_smoke
+,body_type=at_body_type
+,pref_last_on=at_pref_last_on
+,preferred_units=at_preferred_units
+,signup_adcode=at_signup_adcode
+,signup_context=at_signup_context
+,user_agent=at_user_agent
+,emailStatus=at_emailStatus
+,pref_clubll_signup=at_pref_clubll_signup
+,languagesSpokenMask=at_languagesSpokenMask
+,countryId=at_countryId
+,jurisdictionId=at_jurisdictionId
+,secondJurisdictionId=at_secondJurisdictionId
+,cityId=at_cityId
+,searchLanguageMask=at_searchLanguageMask
+,dateModified=at_dateNow
+WHERE user_id = at_userId ;
+
+END;;
+DELIMITER ;

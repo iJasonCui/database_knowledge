@@ -1,0 +1,31 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAllUsageTypes;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAllUsageTypes (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  May 21, 2003
+**   Description:  retrieves all usage types
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+)
+BEGIN  
+
+SELECT usageTypeId,
+          contentId,
+          xactionTypeId,
+          hasDuration,
+          appletDesc
+        FROM UsageType
+        ORDER BY usageTypeId ;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,22 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_wcsCreditCardByNameOnCard;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_wcsCreditCardByNameOnCard (
+ at_rowcount   INT
+,at_nameOnCard VARCHAR(40)
+)
+BEGIN
+
+    SET at_nameOnCard = UPPER(at_nameOnCard);
+
+    SELECT userId
+          ,replicate('*',12) + right(rtrim(partialCardNum),4)
+          ,nameOnCard
+          ,'N/A' as gender
+    FROM CreditCard
+    WHERE nameOnCard LIKE at_nameOnCard
+    ORDER BY userId DESC 
+    LIMIT at_rowcount;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

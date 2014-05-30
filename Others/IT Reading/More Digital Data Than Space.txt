@@ -1,0 +1,36 @@
+Study: More Digital Data Than Space
+Tuesday, Mar. 06, 2007 By AP/BRIAN BERGSTEIN Article ToolsPrintEmail  (BOSTON) ！ A new study that estimates how much digital information the world is generating finds that for the first time, there's not enough storage space to hold it all.
+
+The report, assembled by the technology research firm IDC, sought to account for all the ones and zeros that make up photos, videos, e-mails, Web pages, instant messages, phone calls and other digital content zipping around. The researchers also assumed that on average, each digital file gets replicated three times.
+
+Add it all up and IDC determined that the world generated 161 billion gigabytes ！ 161 exabytes ！ of digital information last year. That's the equivalent of 12 stacks of books that each reach from the Earth to the sun. Or you might think of it as 3 million times the information in all the books ever written, according to IDC. You'd need more than 2 billion of the most capacious iPods on the market to get 161 exabytes.
+
+The previous best estimate came from researchers at the University of California, Berkeley, who totaled the globe's information production at 5 exabytes in 2003.
+
+But that report followed a different trail. It included non-electronic information, such as analog radio broadcasts or printed office memos, and tallied how much space that would consume if digitized. And it counted original data only, not all the times things got copied.
+
+In comparison, the IDC numbers were made much higher by including content as it was created and as it was reproduced ！ for example, as a digital TV file was made and every time it landed on a screen. If IDC tracked original data only, its result would have been 40 exabytes.
+
+Still, even the 2003 figure of 5 exabytes is enormous ！ it was said at the time to be 37,000 Libraries of Congress ！ so why does it matter how much more enormous the number is now?
+
+For one thing, said IDC analyst John Gantz, it's important to understand the effects of the factors behind the information explosion ！ such as the profusion of surveillance cameras and regulatory rules for corporate data retention. In fact, the supply of data technically outstrips the supply of places to put it.
+
+IDC estimates that the world had 185 exabytes of storage available last year and will have 601 exabytes in 2010. But the amount of stuff generated is expected to jump from 161 exabytes last year to 988 exabytes (closing in on 1 zettabyte) in 2010. "If you had a run on the bank, you'd be in trouble," Gantz said. "If everybody stored every digital bit, there wouldn't be enough room."
+
+Fortunately, storage space is not actually scarce and continues to get cheaper. That's because not everything gets warehoused. Not only do e-mails get deleted, but some digital signals are not made to linger, like the contents of phone calls. (Although, who's to say those conversations don't get catalogued someplace, perhaps the National Security Agency? The IDC researchers assumed the answer was no. "I don't want men in black coming to look for me," Gantz joked.)
+
+But even if the IDC findings don't raise the prospect that disk drives will be virtually bursting at the seams, the study has intriguing implications. Among them: We'll need better technologies to help secure, parse, find and recover usable material in this universe of data.
+
+Chuck Hollis, vice president of technology alliances at EMC Corp., the data-management company that sponsored the IDC research and the earlier Berkeley studies, said the new report made him wonder whether enough is being done to save the digital data for posterity.
+
+"Someone has to make a decision about what to store and what not," Hollis said. "How do we preserve our heritage? Who's responsible for keeping all of this stuff around so our kids can look at it, so historians can look at it? It's not clear."
+
+
+
+What Is RSS? 
+
+The Internet grows exponentially on a daily basis. How can you keep track of so many sources of information? RSS, or Really Simple Syndication, is the answer. 
+
+RSS feeds are streams of data that offer a list of articles on a site or section of a site and update whenever new, relevant information appears online. Through the use of a news reader or Live Bookmark that processes RSS feeds, you can view headlines and article excerpts from multiple sources, all in one place. A few popular news readers are Bloglines, FeedDemon, Pluck or, for Mozilla Firefox users, the Sage RSS reader. Live Bookmarks are a feature of the Firefox and Safari browsers and function much the same as RSS readers. 
+
+Once you've chosen your program, follow its instructions for adding our headlines. You can also subscribe to TIME's RSS feeds through personalized news sites, like My AOL, My Yahoo! and My MSN. If you have a personal website, you can use these feeds to add TIME.com headlines to your pages. Look for the orange  logo on the web or the Live Bookmark  icon in your browser's status bar. 

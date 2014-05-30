@@ -1,0 +1,28 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getGeoTargetLocales;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getGeoTargetLocales ()
+/***********************************************************************
+**
+** CREATION:
+**   Author:        Andy Tran
+**   Date:          May 17, 2004
+**   Description:   Retrieves all Geo-targeting locale
+**
+** REVISION(S):
+**   Author:        Valeri Popov
+**   Date:          Sep 16, 2004
+**   Description:   Retrieves all Geo-targeting locale
+**
+** REVISION(S):
+**   Author:
+**   Date:
+** Description:
+**
+*************************************************************************/
+BEGIN
+    SELECT b.countryCodeIso, a.navigateLocaleId, a.dateStarted
+      FROM GeoTargetLocale a, Country b
+     WHERE a.targetCountryId = b.countryId ;
+    
+END;;
+DELIMITER ;

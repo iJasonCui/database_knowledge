@@ -1,0 +1,17 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updPassStatus;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updPassStatus (
+    at_userId       DECIMAL(12, 0),
+    at_targetUserId DECIMAL(12, 0),
+    at_seen         CHAR(1)
+)
+
+BEGIN
+
+    UPDATE Pass 
+       SET seen = at_seen  
+     WHERE userId = at_userId
+       AND targetUserId = at_targetUserId
+	 AND seen != 'T';
+END;;
+DELIMITER ;

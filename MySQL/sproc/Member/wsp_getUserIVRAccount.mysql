@@ -1,0 +1,12 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getUserIVRAccount;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getUserIVRAccount (
+at_userId DECIMAL(12,0)
+)
+BEGIN
+     SELECT accountnum, passcode, cityId
+       FROM UserIVRAccount
+      WHERE userId = at_userId ;
+
+END;;
+DELIMITER ;

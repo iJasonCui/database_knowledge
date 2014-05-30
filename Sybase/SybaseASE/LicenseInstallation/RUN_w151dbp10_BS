@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Error log path:	/opt/sybase/ASE-15_0/install/logs/w151dbp10_BS.log
+# Maximum number of network connections:	25
+# Maximum number of server connections:	20
+# Multibuf executable path:	/opt/sybase/ASE-15_0/bin/sybmultbuf
+# Backup Server name:	w151dbp10_BS
+#
+
+LOGDIR=/opt/sybase/ASE-15_0/install/logs/
+mv $LOGDIR/w151dbp10_BS.log $LOGDIR/w151dbp10_BS.log.`date +%Y%m%d%H%M`
+
+/opt/sybase/ASE-15_0/bin/backupserver \
+-e/opt/sybase/ASE-15_0/install/logs/w151dbp10_BS.log \
+-N25 \
+-C20 \
+-M/opt/sybase/ASE-15_0/bin/sybmultbuf \
+-Sw151dbp10_BS \
+

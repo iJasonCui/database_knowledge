@@ -1,0 +1,19 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newPreRegInfo;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newPreRegInfo (
+ at_email              VARCHAR(129)
+)
+BEGIN
+
+DECLARE  at_dateNow DATETIME;
+
+CALL wsp_GetDateGMT(at_dateNow);
+
+IF (SELECT 1  FROM PreRegInfo WHERE email = at_email) IS NULL
+THEN
+    INSERT INTO PreRegInfo ( email ,dateCreated)
+    VALUES ( at_email ,at_dateNow) ;
+END IF;
+
+END;;
+DELIMITER ;

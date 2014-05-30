@@ -1,0 +1,24 @@
+ServerName	IP	Databases	Production/Test/Dev
+g151mydb1	10.10.97.71	click_magazine	P 
+		lavalife_corp	P
+		adsales	P
+		survey	P
+wx151mydb2	10.10.25.63	beacon	P
+		coupon	P
+		tooluser	P
+		Lentrance	P
+vxmydb1	10.10.97.74	lportal	P
+		lportal_LL_IVR	P
+cxmydb2	10.10.97.76	AdCode	P
+			
+cxmydb1	10.10.97.75	lportal	T
+wxmydb1	10.10.25.159	beacon	T
+		coupon	T
+		tooluser	T
+		Lentrance	T
+lab195	10.40.90.195	AdCode	T
+			
+mysql-dev1	10.10.26.54	click_magazine	D
+		lavalife	D
+		mobile	D
+

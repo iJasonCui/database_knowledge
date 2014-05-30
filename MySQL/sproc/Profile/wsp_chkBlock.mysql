@@ -1,0 +1,13 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_chkBlock;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_chkBlock (
+ at_productCode CHAR(1)
+,at_communityCode CHAR(1)
+,at_userId DECIMAL(12,0) 
+,at_targetUserId DECIMAL(12,0)
+)
+BEGIN
+  SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;
+  SELECT 1 FROM Blocklist WHERE userId = at_userId AND targetUserId = at_targetUserId; 
+END;;
+DELIMITER ;

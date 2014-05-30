@@ -1,0 +1,33 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_saveCampaignUserLabel;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_saveCampaignUserLabel (
+at_campaignId DECIMAL(12,0)
+,at_userId int
+,at_labelId int
+)
+BEGIN
+
+DECLARE at_dateGMT            DATETIME;
+
+IF (SELECT 1 FROM CampaignUserLabel WHERE campaignId = at_campaignId AND 
+            userId = at_userId AND labelId = at_labelId) IS NULL THEN
+        CALL wsp_GetDateGMT(at_dateGMT);
+        
+        INSERT INTO CampaignUserLabel
+            (
+                 campaignId
+                ,userId
+                ,labelId
+                ,dateModified
+            )
+            VALUES
+            (
+                 at_campaignId
+                ,at_userId
+                ,at_labelId
+                ,at_dateGMT
+            );
+            
+END IF;
+END;;
+DELIMITER ;

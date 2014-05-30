@@ -1,0 +1,41 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getBadCardByNumber;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getBadCardByNumber (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Mike Stairs
+**   Date:         November 21, 2003
+**   Description:  retrieves all bad credit cards for a given card number
+**
+**
+** REVISION(S):
+**   Author:       Andy Tran
+**   Date:         Feb 17, 2005
+**   Description:  Used encodedCardNum
+**
+**   Author:       Andy Tran
+**   Date:         February, 2008
+**   Description:  added encodedCardId
+**
+******************************************************************************/
+ at_encodedCardNum VARCHAR(64)
+)
+BEGIN
+    SELECT cc.creditCardId
+          ,cc.userId
+          ,cc.cardTypeId
+          ,cc.encodedCardNum
+          ,cc.partialCardNum
+          ,cc.nameOnCard
+          ,bcc.reasonContentId
+          ,bcc.reason
+          ,cc.encodedCardId
+      FROM BadCreditCard bcc, CreditCard cc
+     WHERE bcc.creditCardId = cc.creditCardId AND bcc.status='B'  AND cc.encodedCardNum = at_encodedCardNum
+  ORDER BY cc.nameOnCard;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

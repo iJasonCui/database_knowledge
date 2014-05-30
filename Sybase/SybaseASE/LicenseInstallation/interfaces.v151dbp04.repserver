@@ -1,0 +1,162 @@
+#---------------------------------------------#
+# RSSD
+#---------------------------------------------#
+v151dbp04ivr_BS
+        master tcp ether v151dbp04 4200
+        query tcp ether v151dbp04 4200
+
+v151dbp04ivr
+        master tcp ether v151dbp04 4100
+        query tcp ether v151dbp04 4100
+
+c151rssd44_BS
+        master tcp ether v151dbp04 4244
+        query tcp ether v151dbp04 4244
+
+c151rssd44
+        master tcp ether v151dbp04 4144
+        query tcp ether v151dbp04 4144
+
+m151rssd45_BS
+        master tcp ether v151dbp04 4245
+        query tcp ether v151dbp04 4245
+
+m151rssd45
+        master tcp ether v151dbp04 4145
+        query tcp ether v151dbp04 4145
+
+w151rssd41_BS
+        master tcp ether v151dbp04 4241
+        query tcp ether v151dbp04 4241
+
+w151rssd41
+        master tcp ether v151dbp04 4141
+        query tcp ether v151dbp04 4141
+
+w151rssd42_BS
+        master tcp ether v151dbp04 4242
+        query tcp ether v151dbp04 4242
+
+w151rssd42
+        master tcp ether v151dbp04 4142
+        query tcp ether v151dbp04 4142
+
+w151rssd43_BS
+        master tcp ether v151dbp04 4243
+        query tcp ether v151dbp04 4243
+
+w151rssd43
+        master tcp ether v151dbp04 4143
+        query tcp ether v151dbp04 4143
+
+#--------------------------#
+# mobile rep server
+#--------------------------#
+m151rep45
+        master tcp ether v151dbp04 6145
+        query  tcp ether v151dbp04 6145
+
+#--------------------------#
+# ccd rep server
+#--------------------------#
+c151rep44
+        master tcp ether v151dbp04 6144
+        query  tcp ether v151dbp04 6144
+
+#--------------------------#
+# web rep server
+#--------------------------#
+w151rep41
+        master tcp ether v151dbp04 6141
+        query  tcp ether v151dbp04 6141
+
+w151rep42
+        master tcp ether v151dbp04 6142
+        query  tcp ether v151dbp04 6142
+
+w151rep43
+        master tcp ether v151dbp04 6143
+        query  tcp ether v151dbp04 6143
+
+
+#--------------------------------------------#
+# Mobile Primary DB Server
+#--------------------------------------------#
+v151dbp01sms
+        query tcp ether v151dbp01 5100
+
+v151dbp01mob
+        query tcp ether v151dbp01 6100
+
+#--------------------------------------------#
+# Mobile Warm Standby DB Server
+#--------------------------------------------#
+v151dbp02sms
+        query tcp ether v151dbp02 5100
+
+v151dbp02mob
+        query tcp ether v151dbp02 6100
+
+v151dbp05sms
+        query tcp ether v151dbp05 5100
+
+v151dbp05mob
+        query tcp ether v151dbp05 6100
+
+#--------------------------------------------#
+# CCD Environment
+#--------------------------------------------#
+c151dbp06
+        query tcp ether c151dbp06 4100
+
+c151dbp06pgs
+        query tcp ether c151dbp06 5100
+
+c151dbp07
+        query tcp ether c151dbp07 4100
+
+c151dbp07pgs
+        query tcp ether c151dbp07 5100
+
+#------------------------------------#
+# MSA real time reporting server     #
+#------------------------------------#
+
+w151dbr06
+       query tcp ether w151dbr06 4100
+
+g151dbr07sms
+        query tcp ether g151dbr07 5100
+
+g151dbr07
+        query tcp ether g151dbr07 4100
+
+#-------------------------------------
+# opsdb
+#-------------------------------------#
+
+opsdb1p
+        query tcp ether opsdb1p 4100
+
+g151opsdb01
+        query tcp ether g151db01 8100
+
+#--------------------------------------#
+
+#--------------------------------------------#
+# web Environment
+#--------------------------------------------#
+
+#--------------------------------------------------------------
+# --- These entries added by Sybase InstallShield Installer ---
+# --- for the sample Replication Server ---
+#
+SAMPLE_RS
+   master tcp ether localhost 11752
+   query tcp ether localhost 11752
+#
+SAMPLE_RS_ERSSD
+   master tcp ether localhost 11751
+   query tcp ether localhost 11751
+
+

@@ -1,0 +1,34 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updFirstIdentityTime;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updFirstIdentityTime (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  June 4 2002
+**   Description:  Update firstidentitytime column of user_info by user_id if
+**                 set to NULL
+**
+**   Author: Mike Stairs
+**   Date: Oct 2005
+**   Description: added dateModified to user_info
+**
+******************************************************************************/
+ at_userId DECIMAL(12,0)
+,at_firstidentitytime INT
+)
+BEGIN
+
+DECLARE at_dateNow DATETIME ;
+
+CALL wsp_GetDateGMT(at_dateNow);
+	
+    UPDATE user_info 
+       SET
+           firstidentitytime = at_firstidentitytime
+          ,dateModified = at_dateNow
+     WHERE user_id = at_userId
+       AND firstidentitytime = NULL ;
+
+END;;
+DELIMITER ;

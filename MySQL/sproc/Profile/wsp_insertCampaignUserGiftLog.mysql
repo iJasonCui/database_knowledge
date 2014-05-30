@@ -1,0 +1,28 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_insertCampaignUserGiftLog;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_insertCampaignUserGiftLog (
+/*
+* File Name: wsp_insertCampaignUserGiftLog
+* Description: save Campaign User GiftLog
+* Created: Apr. 2010 
+*/
+at_campaignId                               int,
+at_userId                             DECIMAL(12,0),
+at_targetUserId                    DECIMAL(12,0),
+at_giftId                          int
+)
+BEGIN
+	INSERT INTO CampaignUserGiftLog	(
+	campaignId,
+        senderUserId,
+        targetUserId,
+	giftId)
+	VALUES	
+	(
+	at_campaignId,
+        at_userId,
+        at_targetUserId,  
+	at_giftId
+	);
+END;;
+DELIMITER ;

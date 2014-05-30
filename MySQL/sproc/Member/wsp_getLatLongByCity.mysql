@@ -1,0 +1,30 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getLatLongByCity;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getLatLongByCity (
+/***********************************************************************
+**
+** CREATION:
+**   Author: Generator 
+**   Date: at_TIMESTAMPat_ 
+**   Description: getLatLongByCity 
+**
+*************************************************************************/
+    at_cityId int
+)
+BEGIN
+
+   DECLARE at_lat int ; 
+   DECLARE at_lon int ;
+
+   SELECT latitudeRad, longitudeRad INTO at_lat, at_lon
+     FROM City
+    WHERE cityId = at_cityId ;
+
+   IF at_lat IS NOT NULL
+   THEN
+       SET at_lat = at_lat - 2 ;
+       SELECT at_lat as latitude, at_lon as longitude ;
+   END IF;
+
+END;;
+DELIMITER ;

@@ -1,0 +1,45 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getPurchaseByDate;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getPurchaseByDate (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu/Jack Veiga
+**   Date:  November 2003
+**   Description:  
+**
+** REVISION(S):
+**   Author:  Yan Liu	
+**   Date:  April 5 2005
+**   Description:
+**
+******************************************************************************/
+    at_startDate DATETIME,
+    at_endDate   DATETIME
+)
+
+BEGIN
+    SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+    SELECT xactionTypeId,
+           xactionId,
+           userId,
+           creditCardId,
+           refXactionId,
+           purchaseTypeId,
+           purchaseOfferDetailId,
+           currencyId,
+           costUSD,
+           taxUSD,
+           cost,
+           tax, 
+           subscriptionOfferDetailId, 
+           dateCreated
+      FROM Purchase
+     WHERE dateCreated >= at_startDate
+       AND dateCreated <  at_endDate;
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

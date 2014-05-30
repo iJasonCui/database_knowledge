@@ -1,0 +1,11 @@
+ Daily Backup Alert Report                                             
+ --------------------------------------------------------------------- 
+ This report ran at Sep 14 2009 10:01AM                                
+
+(1 row affected)
+ alertId     executionId hostName             jobId       jobDesc                                  groupName                      scheduleId  scheduleDesc                             dateCreated                Note                                                                                                                                                                                                                                                            
+ ----------- ----------- -------------------- ----------- ---------------------------------------- ------------------------------ ----------- ---------------------------------------- -------------------------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 
+       35070        NULL WEBSMS                       539 daily backup for websms                  NTS                                    544 daily websms backup                             Sep 14 2009  7:00AM Schedule 'websms' for job 'websms' did not report in !!! Call NTS.                                                                                                                                                                                              
+       35072        NULL WEBADMIN                     286 daily backup for webadmin                NTS                                    289 daily backup for webadmin                       Sep 14 2009  9:30AM Schedule ' webadmin' for job 'Webadmin' did not report in !!! Call NTS.                                                                                                                                                                                         
+
+(2 rows affected)

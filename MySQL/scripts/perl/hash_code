@@ -1,0 +1,22 @@
+#! /usr/bin/perl -w
+
+my %last_name = (
+"fred" => "flintstone",
+"dino" => "unde",
+"barney"=> "rubble",
+"betty"=> "rubble"
+);
+
+while (($key, $value) = each %last_name){
+print "$key => $value\n";
+}
+
+#-------------------------
+# hash sort
+#------------------------
+
+foreach $key (sort keys %last_name){
+$value = $last_name{$key};
+print "$key => $value\n";
+print "$key => $last_name{$key}\n";
+}

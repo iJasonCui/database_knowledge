@@ -1,0 +1,24 @@
+Replicate Database Migration 
+(with database connection and subscription)
+
+1. (23p and 24p) rcp Profile_ad’s database dump and tran dump from webdb23p to webdb24p
+2. (24p) load database Profile_ad_new from 23p’s Profile_ad and transactions sequentially, but do not online database .
+3. (syntax) suspend log transfer from { data_server.database | all} 
+4. (rep2p) suspend log transfer from webdb28p.Profile_ad
+5. (rep2p) suspend log transfer from webdb28p.Profile_ar
+6. (rep2p) suspend log transfer from webdb28p.Profile_ai
+7. (rep2p) checking whether the rep system is quiesce or not by using “admin health” or “admin quiesce_check”
+8. (rep2p) After the rep system quiesce, suspend connection to webdb23p.Profile_ad and suspend connection to webdb24p.Profile_ad
+9. (24p) turn on “dbo use only “ on Profile_ad
+10. (rep2p) resume log transfer from webdb28p.Profile_ad
+11. (rep2p) resume log transfer from webdb28p.Profile_ar
+12. (rep2p) resume log transfer from webdb28p.Profile_ai
+13. (23p) dump the last transaction of Profile_ad on webdb23p 
+14. (rep2p) resume connection to webdb23p.Profile_ad 
+15.  (24p) load the last transaction into Profile_ad_new on webdb24p and online database Profile_ad_new
+16. (24p) sp_dboption both Profile_ad and Profile_ad_new “dbo use only”, and kill user connections against those two databases
+17. (24p) double check the Profile_ad_new (users, aliases, indexes, tables and stored procedures)
+18. (24p) drop database Profile_ad
+19. (24p) sp_rename Profile_ad_new (in single user mode)
+20. (rep2p) resume connection to webdb24p.Profile_ad 
+21. (24p) after outbound queue catch up, do a rep test and if passed,  turn off “dbo use only” on Profile_ad

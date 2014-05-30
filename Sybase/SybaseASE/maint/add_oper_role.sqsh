@@ -1,0 +1,48 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]
+then
+   echo "Usage: "${0}" <serverName> "
+   exit 1  
+else
+   serverName=${1}
+fi
+
+Password=`cat $HOME/.sybpwd | grep -w ${serverName} | awk '{print $2}'`
+CurrentDate=`date '+%Y%m%d_%H:%M:%S'`
+LogFile=./output/${0}.${serverName}.${CurrentDate}
+
+date > ${LogFile}
+
+sqsh -Usa -S${serverName} -P${Password} << EOQ1 >> ${LogFile}
+
+USE master
+go
+EXEC sp_role 'grant','oper_role','cron_sa'
+go
+EXEC sp_modifylogin cron_sa, 'add default role', oper_role
+go
+EXEC sp_role 'grant','oper_role','hhelal'
+go
+EXEC sp_modifylogin hhelal, 'add default role', oper_role
+go
+EXEC sp_role 'grant','oper_role','jcui'
+go
+EXEC sp_modifylogin jcui, 'add default role', oper_role
+go
+EXEC sp_role 'grant','oper_role','aalb'
+go
+EXEC sp_modifylogin aalb, 'add default role', oper_role
+go
+EXEC sp_role 'grant','oper_role','jricha'
+go
+EXEC sp_modifylogin jricha, 'add default role', oper_role
+go
+
+go
+
+EOQ1
+
+cat ${LogFile}
+
+exit 0

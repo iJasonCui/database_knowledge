@@ -1,0 +1,409 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<TITLE>Sybase FAQ: 13/19 - ASE SQL (2 of 3)</TITLE>
+<script language="JavaScript1.2">
+function edc(s,s2)
+{document.write("<font face=\"Arial\"><A href=\"",s,"\" target=\"_blank\" onclick=\"window.open('",s,"','Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=720,height=530,left=30,top=43');return false;\" )>Not finding the answers you need?&nbsp;",s2,"Submit your question for others to see.</A></font>");}
+//-->
+</script>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<DIV ALIGN=CENTER>
+<SMALL>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  Part13 -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A>
+</SMALL>
+<BR><HR SIZE=2 WIDTH=600 NOSHADE>
+<P><H1>Sybase FAQ: 13/19 - ASE SQL (2 of 3)</H1>
+<table border="0" cellpadding="4" cellspacing="4" width="35%">
+<tr><td width="100%" align="center" bgcolor="#D6D6C0">
+<p align=center><small>
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part13/index.html","<br>");
+// --></script>
+</small></p>
+</td></tr>
+</table>
+ <br>
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="40%">
+<tr><td width="100%" align="center" bgcolor="#CCCCFF"><font face="Arial">There are reader questions on this topic!<a href="#ct"><br>Help
+others by sharing your knowledge</a></font></td></tr>
+</table></center></div>
+<HR SIZE=2 WIDTH=600 NOSHADE>
+</DIV>
+<PRE>
+Message-ID: &lt;databases/sybase-faq/part13_1074677126@rtfm.mit.edu&gt;
+X-Last-Updated: 2003/03/02
+From: dowen@midsomer.org (David Owen)
+Newsgroups: <A HREF="http://groups.google.com/groups?group=comp.databases.sybase" target="new">comp.databases.sybase</A>
+Subject: Sybase FAQ: 13/19 - ASE SQL (2 of 3)
+Reply-To: <A HREF="mailto:dowen@midsomer.org">dowen@midsomer.org</A> (David Owen)
+Keywords: FAQ, DATABASES, SYBASE, ASA, ASE, REP
+Date: 21 Jan 2004 09:26:06 GMT
+
+Archive-name: databases/sybase-faq/part13
+URL: <A HREF="http://www.isug.com/Sybase_FAQ">http://www.isug.com/Sybase_FAQ</A>
+Version: 1.7
+Maintainer: David Owen
+Last-modified: 2003/03/02
+Posting-Frequency: posted every 3rd month
+   A how-to-find-the-FAQ article is posted on the intervening months.
+
+                                 SQL Advanced                                  
+                                                                               
+ 
+
+    6.2.1    How to emulate the Oracle decode function/crosstab
+    6.2.2    How to implement if-then-else within a select-clause.
+    6.2.3    deleted due to copyright hassles with the publisher
+    6.2.4    How to pad with leading zeros an int or smallint.
+    6.2.5    Divide by zero and nulls.
+    6.2.6    Convert months to financial months.
+    6.2.7    Hierarchy traversal - BOMs.
+    6.2.8    Is it possible to call a UNIX command from within a stored
+    procedure or a trigger?
+    6.2.9    Information on Identities and Rolling your own Sequential Keys
+    6.2.10  How can I execute dynamic SQL with ASE
+    6.2.11  Is it possible to concatenate all the values from a column and
+    return a single row?
+    6.2.12  Selecting rows N to M without Oracle's rownum?
+    6.2.13  How can I return number of rows that are returned from a grouped
+    query without using a temporary table?
+   
+Useful SQL Tricks SQL Fundamentals ASE FAQ
+
+-------------------------------------------------------------------------------
+
+6.2.1: How to emulate the Oracle decode function/crosstab
+
+-------------------------------------------------------------------------------
+
+If you are using ASE version 11.5 or later, the simplest way to implement the
+Oracle decode is with the CASE statement. The following code snippet should be
+compared with the example using a characteristic function given below .
+
+SELECT STUDENT_ID,
+       (CASE WHEN COURSE_ID = 101 THEN 1 ELSE 0 END) AS COURSE_101,
+       (CASE WHEN COURSE_ID = 105 THEN 1 ELSE 0 END) AS COURSE_105,
+       (CASE WHEN COURSE_ID = 201 THEN 1 ELSE 0 END) AS COURSE_201,
+       (CASE WHEN COURSE_ID = 210 THEN 1 ELSE 0 END) AS COURSE_210,
+       (CASE WHEN COURSE_ID = 300 THEN 1 ELSE 0 END) AS COURSE_300
+GROUP BY STUDENT_ID
+ORDER BY STUDENT_ID
+
+However, if you have a version of ASE that does not support the case statement,
+then you will have to try the following. There may be other reasons to try
+characteristics functions. If you go to the Amazon web site and look for
+reviews for of Rozenshteins book, Advanced SQL, you will see that one reviewer
+believes that a true crosstab is not possible with the case statement. I am not
+sure. I have also not done any performance tests to see which is quicker.
+
+There is a neat way to use boolean logic to perform cross-tab or rotation
+queries easily, and very efficiently. Using the aggregate 'Group By' clause in
+a query and the ISNULL(), SIGN(), ABS(), SUBSTRING() and CHARINDEX() functions,
+you can create queries and views to perform all kinds of summarizations.
+
+    This technique does not produce easily understood SQL statements.
+   
+If you want to test a field to see if it is equal to a value, say 100, use the
+following code:
+
+SELECT (1- ABS( SIGN( ISNULL( 100 - &lt;field&gt;, 1))))
+
+The innermost function will return 1 when the field is null, a positive value
+if the field &lt; 100, a negative value if the field is &gt; 100 and will return 0 if
+the field = 100. This example is for Sybase or Microsoft SQL server, but other
+servers should support most of these functions or the COALESCE() function,
+which is the ANSI equivalent to ISNULL.
+
+The SIGN() function returns zero for a zero value, -1 for a negative value, 1
+for a positive value The ABS() function returns zero for a zero value, and &gt; 1
+for any non-zero value. In this case it will return 0 or 1 since the argument
+is the function SIGN(), thus acting as a binary switch.
+
+Put it all together and you get '0' if the value match, and '1' if they don't.
+This is not that useful, so we subtract this return value from '1' to invert
+it, giving us a TRUE value of '1' and a false value of '0'. These return values
+can then be multiplied by the value of another column, or used within the
+parameters of another function like SUBSTRING() to return a conditional text
+value.
+
+For example, to create a grid from a student registration table containing
+STUDENT_ID and COURSE_ID columns, where there are 5 courses (101, 105, 201,
+210, 300) use the following query:
+
+Compare this version with the case statement above.
+
+SELECT STUDENT_ID,
+    (1- ABS( SIGN( ISNULL( 101 - COURSE_ID, 1)))) COURSE_101,
+    (1- ABS( SIGN( ISNULL( 105 - COURSE_ID, 1)))) COURSE_105,
+    (1- ABS( SIGN( ISNULL( 201 - COURSE_ID, 1)))) COURSE_201,
+    (1- ABS( SIGN( ISNULL( 210 - COURSE_ID, 1)))) COURSE_210,
+    (1- ABS( SIGN( ISNULL( 300 - COURSE_ID, 1)))) COURSE_300
+GROUP BY STUDENT_ID
+ORDER BY STUDENT_ID 
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.2.2: How to implement if-then-else in a select clause
+
+-------------------------------------------------------------------------------
+
+ASE 11.5 introduced the case statement, which can be used to replace a lot of
+this 'trick' SQL with more readable (and standard) code. With a case statement,
+an if then else is as easy as:
+
+declare @val char(20)
+select @val = 'grand'
+
+select case when @val = 'small' then
+                'petit'
+            else
+                'grand'
+            end
+
+However, quite a number of people are still using pre-11.5 implementations,
+including those people using the free 11.0.3.3 Linux release. In that case you
+can use the following recipe.
+
+To implement the following condition in a select clause:
+
+if @val = 'small' then
+    print 'petit'
+else
+    print 'grand'
+fi
+
+in versions of ASE prior to 11.5 do the following:
+
+select isnull(substring('petit', charindex('small', @val), 255), 'grand')
+
+To test it out, try this:
+
+declare @val char(20)
+select @val = 'grand'
+select isnull(substring('petit', charindex('small', @val), 255), 'grand') 
+
+This code is not readily understandable by most programmers, so remember to
+comment it well.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.2.3: Removed
+
+-------------------------------------------------------------------------------
+
+6.2.4: How to pad with leading zeros an int or smallint.
+
+-------------------------------------------------------------------------------
+
+By example:
+
+declare @Integer        int
+
+/* Good for positive numbers only. */
+select @Integer = 1000
+
+select "Positives Only" =
+       right( replicate("0", 12) + convert(varchar, @Integer), 12)
+
+/* Good for positive and negative numbers. */
+select @Integer = -1000
+
+select "Both Signs" =
+       substring( "- +", (sign(@Integer) + 2), 1) +
+       right( replicate("0", 12) + convert(varchar, abs(@Integer)), 12)
+
+select @Integer = 1000
+
+select "Both Signs" =
+       substring( "- +", (sign(@Integer) + 2), 1) +
+       right( replicate("0", 12) + convert(varchar, abs(@Integer)), 12)
+
+go
+
+Produces the following results:
+
+ Positives Only
+ --------------
+ 000000001000
+
+ Both Signs
+ -------------
+ -000000001000
+
+ Both Signs
+ -------------
+ +000000001000
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.2.5: Divide by zero and nulls
+
+-------------------------------------------------------------------------------
+
+During processing, if a divide by zero error occurs you will not get the answer
+you want. If you want the result set to come back and null to be displayed
+where divide by zero occurs do the following:
+
+1&gt; select * from total_temp
+2&gt; go
+ field1      field2
+ ----------- -----------
+          10          10
+          10           0
+          10        NULL
+
+(3 rows affected)
+1&gt; select field1, field1/(field2*convert(int,
+                  substring('1',1,abs(sign(field2))))) from total_temp
+2&gt; go
+ field1
+ ----------- -----------
+          10           1
+          10        NULL
+          10        NULL
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.2.6: Convert months to financial months
+
+-------------------------------------------------------------------------------
+
+To convert months to financial year months (i.e. July = 1, Dec = 6, Jan = 7,
+June = 12 )
+
+Method #1
+
+select ... ((sign(sign((datepart(month,GetDate())-6) * -1)+1) *
+   (datepart(month, GetDate())+6))
+      + (sign(sign(datepart(month, GetDate())-7)+1) *
+   (datepart(month, GetDate())-6)))
+   ...
+  from ...
+
+Method #2
+
+select charindex(datename(month,getdate()),
+"          July      August    September October   November  December
+January   Febuary   March     April     May       June      "
+                     ) / 10
+
+In the above example, the embedded blanks are significant.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+</PRE>
+<DIV ALIGN=CENTER>
+<SMALL>
+<P><HR WIDTH=1900 NOSHADE><BR>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  Part13 -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A></SMALL>
+<P>
+<div align="center">
+
+<center>
+<form method="post" action="rateit.php">
+<table border="1" cellpadding="0" cellspacing="0" width="150" bgcolor="#ffcccc" style="WIDTH: 150px">
+<tr><td width="100%">
+<div align="center">
+<table border="0" cellpadding="2" width="100%" bgcolor="#ffcccc">
+<tr><td width="100%" height="14">
+<p align="center"><font face="Arial">Rate this FAQ</font></p>
+</td></tr>
+<tr><td width="100%" height="14">
+<p align="center">
+<INPUT TYPE=HIDDEN NAME="pid" VALUE="databases/sybase-faq/part13/index.html">
+<select size="1" name="D1" style="COLOR: darkmagenta; BACKGROUND-COLOR: cornsilk">
+<option selected value="0">N/A</option>
+<option value="1">Worst</option>
+<option value="2">Weak</option>
+<option value="3">OK</option>
+<option value="4">Good</option>
+<option value="5">Great</option>
+</select>
+</p>
+</td></tr>
+<tr><td width="100%" height="27">
+<p align="center">
+<IMG onclick="mystr='/frate.php?pid='+pid.value+'&vote='+D1.value;
+Popup=window.open(mystr,'Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=380,height=270,left=230,top=43'); 
+ return false;" height=28 src="/images/vote.gif" alt="Vote" width=83 border=0 ></p>
+</td></tr>
+</table>
+</div>
+</td></tr>
+</table>
+<font size="-1" face="Arial"><br><a href="/topRated.html">Current Top-Rated FAQs</a><br></font>
+</form>
+</center>
+
+</div>
+
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="100%">
+<tr><td width="100%" bgcolor="#D6D6C0">
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part13/index.html"," ");
+// --></script>
+<p><font face="Arial"><a name="ct">Are you an expert in this area?</a> Share your knowledge and earn expert points by giving answers or rating people's questions and answers! This section of FAQS.ORG is not sanctioned in any way by FAQ authors or maintainers.</font></p>
+<p><font face="Arial">Questions strongly related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-6730.html">How can I display the table sizes of ALL tables in a database?   </a> by Caspar (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9594.html">how to use nested cursors in a stored procedure in ASE ? is there any template to use !...</a> by nino (12/18/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3265.html">to connect sybase and c++,how to connect and access the data </a> by kumaran (9/2/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6741.html">how do u tell the last time update statistics has been run on a table (11.0.3) </a> by yujo (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11075.html">I need to Execute an SP & set its output to the insert statement. This will be occured for...</a> by rose (1/14/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9435.html">I wanted to know EXACT technical details about what ACTUALLY happens when u fire a simple...</a> by anu (12/15/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-8395.html">Is there anyway to start dataserver in ASE 11.9.2 with only the master and tempdb online...</a> by steve_2000g (11/28/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-854.html">i get an error on the "convert" when i try to run this line of code, why is this?   print...</a> by shugarhi (7/14/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11834.html">Hi  &nbsp; We're using Sybase ASE 12.0 running on SUN 4500 Cluster server. We cannot...</a> by KK (1/26/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6297.html">I am creating a stored proc to create a report of dependencies. &nbsp;We are creating...</a> by RR (10/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7388.html">How is this hazardous if we do not close a cursor? </a> by amar (11/11/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9827.html">How can i reduce my tempdb size once i have increased it by creating a device also? </a> by rajs (12/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12835.html">how can i transfer a table from cybase to db2? &nbsp;please sendme step by step method if...</a> by maulik (2/9/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3213.html">My database is in bypass recovery mode. How do I put it in normal mode? </a> by Lach (9/1/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-1435.html">Hi ,  &nbsp;We are using Sybase ASE 11.9.2 with SCO Unix 7.1.1 &nbsp;as the operating ...</a> by gowri (7/27/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-2412.html">were is a database that will bring up  a person address without there last name </a> by travis (8/15/2003)</font></li>
+</ul>
+<p><font face="Arial">Questions somewhat related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-2221.html">Guys!   See the Sybase query below: select convert(float,substring(&lt;field1&gt;,3,...</a> by pathfinder (8/12/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7790.html">What are the side-effects of turning-on the built-in auditing capabilities of sybase? </a> by Choy (11/17/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12136.html">When ever i execute select property('PROCESSCPU') i get the value 189 and whenever i...</a> by anilkumarsh (1/29/2004)</font></li>
+</ul>
+<p><font face="Arial">Other questions awaiting answers:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/related.html">10088 questions</a> related to other FAQs<br></font></li>
+<li><font face="Arial"><a href="/qa/unrelated.html">1765 general questions</a></font></li>
+<li><font face="Arial"><a href="/qa/answered.html">4091 answered questions</a><br></font></li>
+</ul>
+</td></tr></table> <br></center></div>
+<HR NOSHADE SIZE=2 WIDTH=450>
+[ <a href="/faqs/">Usenet FAQs</a> | <a href="/faqs/faqsearch.html">Search</a> | <a href="/contrib/">Web FAQs</a> | <a href="/docs/">Documents</a> | <a href="/rfcs/">RFC Index</a> ]
+<BR><HR NOSHADE SIZE=2 WIDTH=450>
+<P>
+<ADDRESS>
+Send corrections/additions to the FAQ Maintainer: <BR>dowen@midsomer.org (David Owen)
+</ADDRESS>
+<P>
+<SMALL>
+<STRONG>Last Update February 12 2004 @ 00:28 AM</STRONG>
+<BR>
+</SMALL>
+</DIV>
+</BODY>
+</HTML>
+

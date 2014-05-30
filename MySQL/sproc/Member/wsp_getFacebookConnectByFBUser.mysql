@@ -1,0 +1,26 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS wsp_getFacebookConnectByFBUser;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getFacebookConnectByFBUser (
+/***********************************************************************
+**
+** CREATION:
+**   Author:        Andy Tran
+**   Date:          January, 2011
+**   Description:   Gets FacebookConnect record by Facebook userId.
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+at_fbUserId  VARCHAR(24)
+)
+BEGIN
+    SELECT fc.llUserId
+      FROM FacebookConnect fc 
+     WHERE fc.fbUserId = at_fbUserId
+       AND fc.status = 'A';
+
+END;;
+DELIMITER ;

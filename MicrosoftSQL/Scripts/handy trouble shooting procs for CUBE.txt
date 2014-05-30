@@ -1,0 +1,30 @@
+--group 1:  find out what is on the waiting list in the queue
+exec succor.etl.pSLoadFile_Packages 
+exec succor.etl.pSLoadArchive_Packages 
+exec succor.etl.pSLoadArchive32Bit_Packages 
+exec succor.etl.pSLoadTable_Packages 4
+exec succor.etl.pSLoadCube_Packages 'Ivr',1
+exec succor.etl.pSLoadDimension_Packages
+exec succor.etl.pSLoadReport_Packages
+
+
+--group 2: check the load status
+
+--'a'= archive; 't'='table'; 'c'='cube'
+-- 4 = voice; 
+exec succor.audit.pSLoadStatusTail 'a'
+exec succor.audit.pSLoadStatusTail 't',4
+exec succor.audit.pSLoadStatusTail 'c',4
+
+-- group 3: 
+exec succor.etl.pSLoadFile_WaitingToLoad 318
+exec succor.etl.pSLoadFile_WaitingToLoad 274
+exec succor.etl.pSLoadArchive_WaitingToLoad 100
+exec succor.etl.pSLoadArchive_WaitingToLoad 319
+exec succor.etl.pSLoadArchive32Bit_WaitingToLoad 212
+exec succor.etl.pSLoadTable_WaitingToLoad 288
+exec succor.etl.pSLoadTable_WaitingToLoad 199
+exec succor.etl.pSLoadCube_WaitingToLoad 104
+exec succor.etl.pSLoadCube_WaitingToLoad 150
+exec succor.etl.pSLoadDimension_WaitingToLoad 86
+exec succor.etl.pSLoadReport_WaitingToLoad 372

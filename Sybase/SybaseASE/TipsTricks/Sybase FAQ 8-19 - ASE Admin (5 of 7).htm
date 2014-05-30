@@ -1,0 +1,1605 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<TITLE>Sybase FAQ: 8/19 - ASE Admin (5 of 7)</TITLE>
+<script language="JavaScript1.2">
+function edc(s,s2)
+{document.write("<font face=\"Arial\"><A href=\"",s,"\" target=\"_blank\" onclick=\"window.open('",s,"','Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=720,height=530,left=30,top=43');return false;\" )>Not finding the answers you need?&nbsp;",s2,"Submit your question for others to see.</A></font>");}
+//-->
+</script>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<DIV ALIGN=CENTER>
+<SMALL>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  Part8 -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A>
+</SMALL>
+<BR><HR SIZE=2 WIDTH=600 NOSHADE>
+<P><H1>Sybase FAQ: 8/19 - ASE Admin (5 of 7)</H1>
+<table border="0" cellpadding="4" cellspacing="4" width="35%">
+<tr><td width="100%" align="center" bgcolor="#D6D6C0">
+<p align=center><small>
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part8/index.html","<br>");
+// --></script>
+</small></p>
+</td></tr>
+</table>
+ <br>
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="40%">
+<tr><td width="100%" align="center" bgcolor="#CCCCFF"><font face="Arial">There are reader questions on this topic!<a href="#ct"><br>Help
+others by sharing your knowledge</a></font></td></tr>
+</table></center></div>
+<HR SIZE=2 WIDTH=600 NOSHADE>
+</DIV>
+<PRE>
+Message-ID: &lt;databases/sybase-faq/part8_1074677126@rtfm.mit.edu&gt;
+X-Last-Updated: 2003/03/02
+From: dowen@midsomer.org (David Owen)
+Newsgroups: <A HREF="http://groups.google.com/groups?group=comp.databases.sybase" target="new">comp.databases.sybase</A>
+Subject: Sybase FAQ: 8/19 - ASE Admin (5 of 7)
+Reply-To: <A HREF="mailto:dowen@midsomer.org">dowen@midsomer.org</A> (David Owen)
+Keywords: FAQ, DATABASES, SYBASE, ASA, ASE, REP
+Date: 21 Jan 2004 09:26:04 GMT
+
+Archive-name: databases/sybase-faq/part8
+URL: <A HREF="http://www.isug.com/Sybase_FAQ">http://www.isug.com/Sybase_FAQ</A>
+Version: 1.7
+Maintainer: David Owen
+Last-modified: 2003/03/02
+Posting-Frequency: posted every 3rd month
+   A how-to-find-the-FAQ article is posted on the intervening months.
+
+                            Performance and Tuning                             
+                                                                               
+ 
+
+    1.5.1   What are the nitty gritty details on Performance and Tuning?
+    1.5.2   What is best way to use temp tables in an OLTP environment?
+    1.5.3   What's the difference between clustered and non-clustered indexes?
+    1.5.4   Optimistic versus pessimistic locking?
+    1.5.5   How do I force an index to be used?
+    1.5.6   Why place tempdb and log on low numbered devices?
+    1.5.7   Have I configured enough memory for ASE?
+    1.5.8   Why should I use stored procedures?
+    1.5.9   I don't understand showplan's output, please explain.
+    1.5.10  Poor man's sp_sysmon.
+    1.5.11  View MRU-LRU procedure cache chain.
+    1.5.12  Improving Text/Image Type Performance
+   
+Server Monitoring General Troubleshooting ASE FAQ
+
+-------------------------------------------------------------------------------
+
+1.5.1: Sybase ASE Performance and Tuning
+
+-------------------------------------------------------------------------------
+
+Before going any further, Eric Miner (<A HREF="mailto:eric.miner@sybase.com">eric.miner@sybase.com</A>) has made available
+two presentations that he made at Techwave 1999.  The first covers the use of 
+optdiag.   The second covers features in the way the optimiser works in ASE
+11.9.2 and 12.  These are Powerpoint slides converted to web pages, so they
+might be tricky to read with a text based browser!
+
+All Components Affect Response Time &amp; Throughput
+
+We often think that high performance is defined as a fast data server, but the
+picture is not that simple. Performance is determined by all these factors:
+
+  * The client application itself:
+      + How efficiently is it written?
+      + We will return to this later, when we look at application tuning.
+  * The client-side library:
+      + What facilities does it make available to the application?
+      + How easy are they to use?
+  * The network:
+      + How efficiently is it used by the client/server connection?
+  * The DBMS:
+      + How effectively can it use the hardware?
+      + What facilities does it supply to help build efficient fast
+        applications?
+  * The size of the database:
+      + How long does it take to dump the database?
+      + How long to recreate it after a media failure?
+
+Unlike some products which aim at performance on paper, Sybase aims at solving
+the multi-dimensional problem of delivering high performance for real
+applications.
+
+OBJECTIVES
+
+To gain an overview of important considerations and alternatives for the
+design, development, and implementation of high performance systems in the
+Sybase client/server environment. The issues we will address are:
+
+  * Client Application and API Issues
+  * Physical Database Design Issues
+  * Networking Issues
+  * Operating System Configuration Issues
+  * Hardware Configuration Issues
+  * ASE Configuration Issues
+
+    Client Application and Physical Database Design design decisions will
+    account for over 80% of your system's "tuneable" performance so ... plan
+    your project resources accordingly !
+   
+It is highly recommended that every project include individuals who have taken
+Sybase Education's Performance and Tuning course. This 5-day course provides
+the hands-on experience essential for success.
+
+Client Application Issues
+
+  * Tuning Transact-SQL Queries
+  * Locking and Concurrency
+  * ANSI Changes Affecting Concurrency
+  * Application Deadlocking
+  * Optimizing Cursors in v10
+  * Special Issues for Batch Applications
+  * Asynchronous Queries
+  * Generating Sequential Numbers
+  * Other Application Issues
+
+Tuning Transact-SQL Queries
+
+  * Learn the Strengths and Weaknesses of the Optimizer
+  * One of the largest factors determining performance is TSQL! Test not only
+    for efficient plans but also semantic correctness.
+  * Optimizer will cost every permutation of accesses for queries involving 4
+    tables or less. Joins of more than 4 tables are "planned" 4-tables at a
+    time (as listed in the FROM clause) so not all permutations are evaluated.
+    You can influence the plans for these large joins by the order of tables in
+    the FROM clause.
+  * Avoid the following, if possible:
+      + What are SARGS?
+       
+        This is short for search arguments. A search argument is essentially a
+        constant value such as:
+          o "My company name"
+          o 3448
+       
+        but not:
+          o 344 + 88
+          o like "%what you want%"
+      + Mathematical Manipulation of SARGs
+       
+           
+            SELECT name FROM employee WHERE salary * 12 &gt; 100000
+           
+      + Use of Incompatible Datatypes Between Column and its SARG
+       
+           
+            Float &amp; Int, Char &amp; Varchar, Binary &amp; Varbinary are Incompatible;
+           
+            Int &amp; Intn (allow nulls) OK
+           
+      + Use of multiple "OR" Statements - especially on different columns in
+        same table. If any portion of the OR clause requires a table scan, it
+        will! OR Strategy requires additional cost of creating and sorting a
+        work table.
+      + Not using the leading portion of the index (unless the query is
+        completely covered)
+      + Substituting "OR" with "IN (value1, value2, ... valueN) Optimizer
+        automatically converts this to an "OR"
+      + Use of Non-Equal Expressions (!=) in WHERE Clause.
+  * Use Tools to Evaluate and Tune Important/Problem Queries
+      + Use the "set showplan on" command to see the plan chosen as "most
+        efficient" by optimizer. Run all queries through during development and
+        testing to ensure accurate access model and known performance.
+        Information comes through the Error Handler of a DB-Library
+        application.
+      + Use the "dbcc traceon(3604, 302, 310)" command to see each alternative
+        plan evaluated by the optimizer. Generally, this is only necessary to
+        understand why the optimizer won't give you the plan you want or need
+        (or think you need)!
+      + Use the "set statistics io on" command to see the number of logical and
+        physical i/o's for a query. Scrutinize those queries with high logical
+        i/o's.
+      + Use the "set statistics time on" command to see the amount of time
+        (elapsed, execution, parse and compile) a query takes to run.
+      + If the optimizer turns out to be a "pessimizer", use the "set forceplan
+        on" command to change join order to be the order of the tables in the
+        FROM clause.
+      + If the optimizer refuses to select the proper index for a table, you
+        can force it by adding the index id in parentheses after the table name
+        in the FROM clause.
+       
+           
+            SELECT * FROM orders(2), order_detail(1) WHERE ...
+           
+            This may cause portability issues should index id's vary/change by
+            site !
+           
+Locking and Concurrency
+
+  * The Optimizer Decides on Lock Type and Granularity
+  * Decisions on lock type (share, exclusive, or update) and granularity (page
+    or table) are made during optimization so make sure your updates and
+    deletes don't scan the table !
+  * Exclusive Locks are Only Released Upon Commit or Rollback
+  * Lock Contention can have a large impact on both throughput and response
+    time if not considered both in the application and database design !
+  * Keep transactions as small and short as possible to minimize blocking.
+    Consider alternatives to "mass" updates and deletes such as a v10.0 cursor
+    in a stored procedure which frequently commits.
+  * Never include any "user interaction" in the middle of transactions.
+  * Shared Locks Generally Released After Page is Read
+  * Share locks "roll" through result set for concurrency. Only "HOLDLOCK" or
+    "Isolation Level 3" retain share locks until commit or rollback. Remember
+    also that HOLDLOCK is for read-consistency. It doesn't block other readers
+    !
+  * Use optimistic locking techniques such as timestamps and the tsequal()
+    function to check for updates to a row since it was read (rather than
+    holdlock)
+
+ANSI Changes Affecting Concurrency
+
+  * Chained Transactions Risk Concurrency if Behavior not Understood
+  * Sybase defaults each DML statement to its own transaction if not specified
+    ;
+  * ANSI automatically begins a transaction with any SELECT, FETCH, OPEN,
+    INSERT, UPDATE, or DELETE statement ;
+  * If Chained Transaction must be used, extreme care must be taken to ensure
+    locks aren't left held by applications unaware they are within a
+    transaction! This is especially crucial if running at Level 3 Isolation
+  * Lock at the Level of Isolation Required by the Query
+  * Read Consistency is NOT a requirement of every query.
+  * Choose level 3 only when the business model requires it
+  * Running at Level 1 but selectively applying HOLDLOCKs as needed is safest
+  * If you must run at Level 3, use the NOHOLDLOCK clause when you can !
+  * Beware of (and test) ANSI-compliant third-party applications for
+    concurrency
+
+Application Deadlocking
+
+Prior to ASE 10 cursors, many developers simulated cursors by using two or more
+connections (dbproc's) and divided the processing between them. Often, this
+meant one connection had a SELECT open while "positioned" UPDATEs and DELETEs
+were issued on the other connection. The approach inevitably leads to the
+following problem:
+
+ 1. Connection A holds a share lock on page X (remember "Rows Pending" on SQL
+    Server leave a share lock on the "current" page).
+ 2. Connection B requests an exclusive lock on the same page X and waits...
+ 3. The APPLICATION waits for connection B to succeed before invoking whatever
+    logic will remove the share lock (perhaps dbnextrow). Of course, that never
+    happens ...
+
+Since Connection A never requests a lock which Connection B holds, this is NOT
+a true server-side deadlock. It's really an "application" deadlock !
+
+Design Alternatives
+
+ 1. Buffer additional rows in the client that are "nonupdateable". This forces
+    the shared lock onto a page on which the application will not request an
+    exclusive lock.
+ 2. Re-code these modules with CT-Library cursors (aka. server-side cursors).
+    These cursors avoid this problem by disassociating command structures from
+    connection structures.
+ 3. Re-code these modules with DB-Library cursors (aka. client-side cursors).
+    These cursors avoid this problem through buffering techniques and
+    re-issuing of SELECTs. Because of the re-issuing of SELECTs, these cursors
+    are not recommended for high transaction sites !
+
+Optimizing Cursors with v10.0
+
+  * Always Declare Cursor's Intent (i.e. Read Only or Updateable)
+  * Allows for greater control over concurrency implications
+  * If not specified, ASE will decide for you and usually choose updateable
+  * Updateable cursors use UPDATE locks preventing other U or X locks
+  * Updateable cursors that include indexed columns in the update list may
+    table scan
+  * SET Number of Rows for each FETCH
+  * Allows for greater Network Optimization over ANSI's 1- row fetch
+  * Rows fetched via Open Client cursors are transparently buffered in the
+    client:
+                    FETCH  -&gt;  Open Client &lt;- N rows
+                                   Buffers
+  * Keep Cursor Open on a Commit / Rollback
+  * ANSI closes cursors with each COMMIT causing either poor throughput (by
+    making the server re-materialize the result set) or poor concurrency (by
+    holding locks)
+  * Open Multiple Cursors on a Single Connection
+  * Reduces resource consumption on both client and Server
+  * Eliminates risk of a client-side deadlocks with itself
+
+Special Issues for Batch Applications
+
+ASE was not designed as a batch subsystem! It was designed as an RBDMS for
+large multi-user applications. Designers of batch-oriented applications should
+consider the following design alternatives to maximize performance :
+
+Design Alternatives :
+
+  * Minimize Client/Server Interaction Whenever Possible
+  * Don't turn ASE into a "file system" by issuing single table / single row
+    requests when, in actuality, set logic applies.
+  * Maximize TDS packet size for efficient Interprocess Communication (v10
+    only)
+  * New ASE 10.0 cursors declared and processed entirely within stored
+    procedures and triggers offer significant performance gains in batch
+    processing.
+  * Investigate Opportunities to Parallelize Processing
+  * Breaking up single processes into multiple, concurrently executing,
+    connections (where possible) will outperform single streamed processes
+    everytime.
+  * Make Use of TEMPDB for Intermediate Storage of Useful Data
+
+Asynchronous Queries
+
+Many, if not most, applications and 3rd Party tools are coded to send queries
+with the DB-Library call dbsqlexec( ) which is a synchronous call ! It sends a
+query and then waits for a response from ASE that the query has completed !
+
+Designing your applications for asynchronous queries provides many benefits:
+
+ 1. A "Cooperative" multi-tasking application design under Windows will allow
+    users to run other Windows applications while your long queries are
+    processed !
+ 2. Provides design opportunities to parallize work across multiple ASE
+    connections.
+
+Implementation Choices:
+
+  * System 10 Client Library Applications:
+  * True asynchronous behaviour is built into the entire library. Through the
+    appropriate use of call-backs, asynchronous behavior is the normal
+    processing paradigm.
+  * Windows DB-Library Applications (not true async but polling for data):
+  * Use dbsqlsend(), dbsqlok(), and dbdataready() in conjunction with some
+    additional code in WinMain() to pass control to a background process. Code
+    samples which outline two different Windows programming approaches (a
+    PeekMessage loop and a Windows Timer approach) are available in the
+    Microsoft Software Library on Compuserve (GO MSL). Look for SQLBKGD.ZIP
+  * Non-PC DB-Library Applications (not true async but polling for data):
+  * Use dbsqlsend(), dbsqlok(), and dbpoll() to utilize non-blocking functions.
+
+Generating Sequential Numbers Many applications use unique sequentially
+increasing numbers, often as primary keys. While there are good benefits to
+this approach, generating these keys can be a serious contention point if not
+careful. For a complete discussion of the alternatives, download Malcolm
+Colton's White Paper on Sequential Keys from the SQL Server Library of our
+OpenLine forum on Compuserve.
+
+The two best alternatives are outlined below.
+
+ 1. "Primary Key" Table Storing Last Key Assigned
+      + Minimize contention by either using a seperate "PK" table for each user
+        table or padding out each row to a page. Make sure updates are
+        "in-place".
+      + Don't include the "PK" table's update in the same transaction as the
+        INSERT. It will serialize the transactions.
+              BEGIN TRAN
+        
+                        UPDATE pk_table SET nextkey = nextkey + 1
+                        [WHERE table_name = @tbl_name]
+              COMMIT TRAN
+        
+              /* Now retrieve the information */
+              SELECT nextkey FROM pk_table
+              WHERE table_name = @tbl_name]
+              
+      + "Gap-less" sequences require additional logic to store and retrieve
+        rejected values
+ 2. IDENTITY Columns (v10.0 only)
+      + Last key assigned for each table is stored in memory and automatically
+        included in all INSERTs (BCP too). This should be the method of choice
+        for performance.
+      + Choose a large enough numeric or else all inserts will stop once the
+        max is hit.
+      + Potential rollbacks in long transactions may cause gaps in the sequence
+        !
+   
+    Other Application Issues
+   
+      + Transaction Logging Can Bottleneck Some High Transaction Environments
+      + Committing a Transaction Must Initiate a Physical Write for
+        Recoverability
+      + Implementing multiple statements as a transaction can assist in these
+        environment by minimizing the number of log writes (log is flushed to
+        disk on commits).
+      + Utilizing the Client Machine's Processing Power Balances Load
+      + Client/Server doesn't dictate that everything be done on Server!
+      + Consider moving "presentation" related tasks such as string or
+        mathematical manipulations, sorting, or, in some cases, even
+        aggregating to the client.
+      + Populating of "Temporary" Tables Should Use "SELECT INTO" - balance
+        this with dynamic creation of temporary tables in an OLTP environment.
+        Dynamic creation may cause blocks in your tempdb.
+      + "SELECT INTO" operations are not logged and thus are significantly
+        faster than there INSERT with a nested SELECT counterparts.
+      + Consider Porting Applications to Client Library Over Time
+      + True Asynchronous Behavior Throughout Library
+      + Array Binding for SELECTs
+      + Dynamic SQL
+      + Support for ClientLib-initiated callback functions
+      + Support for Server-side Cursors
+      + Shared Structures with Server Library (Open Server 10)
+   
+    Physical Database Design Issues
+   
+      + Normalized -vs- Denormalized Design
+      + Index Selection
+      + Promote "Updates-in-Place" Design
+      + Promote Parallel I/O Opportunities
+   
+    Normalized -vs- Denormalized
+   
+      + Always Start with a Completely Normalized Database
+      + Denormalization should be an optimization taken as a result of a
+        performance problem
+      + Benefits of a normalized database include :
+         1. Accelerates searching, sorting, and index creation since tables are
+            narrower
+         2. Allows more clustered indexes and hence more flexibility in tuning
+            queries, since there are more tables ;
+         3. Accelerates index searching since indexes tend to be narrower and
+            perhaps shorter ;
+         4. Allows better use of segments to control physical placement of
+            tables ;
+         5. Fewer indexes per table, helping UPDATE, INSERT, and DELETE
+            performance ;
+         6. Fewer NULLs and less redundant data, increasing compactness of the
+            database ;
+         7. Accelerates trigger execution by minimizing the extra integrity
+            work of maintaining redundant data.
+         8. Joins are Generally Very Fast Provided Proper Indexes are Available
+         9. Normal caching and cindextrips parameter (discussed in Server
+            section) means each join will do on average only 1-2 physical I/Os.
+        10. Cost of a logical I/O (get page from cache) only 1-2 milliseconds.
+ 3. There Are Some Good Reasons to Denormalize
+     1. All queries require access to the "full" set of joined data.
+     2. Majority of applications scan entire tables doing joins.
+     3. Computational complexity of derived columns require storage for SELECTs
+     4. Others ...
+   
+    Index Selection
+   
+      + Without a clustered index, all INSERTs and "out-of-place" UPDATEs go to
+        the last page. The lock contention in high transaction environments
+        would be prohibitive. This is also true for INSERTs to a clustered
+        index on a monotonically increasing key.
+      + High INSERT environments should always cluster on a key which provides
+        the most "randomness" (to minimize lock / device contention) that is
+        usable in many queries. Note this is generally not your primary key !
+      + Prime candidates for clustered index (in addition to the above) include
+        :
+          o Columns Accessed by a Range
+          o Columns Used with Order By, Group By, or Joins
+      + Indexes Help SELECTs and Hurt INSERTs
+      + Too many indexes can significantly hurt performance of INSERTs and
+        "out-of-place" UPDATEs.
+      + Prime candidates for nonclustered indexes include :
+          o Columns Used in Queries Requiring Index Coverage
+          o Columns Used to Access Less than 20% (rule of thumb) of the Data.
+      + Unique indexes should be defined as UNIQUE to help the optimizer
+      + Minimize index page splits with Fillfactor (helps concurrency and
+        minimizes deadlocks)
+      + Keep the Size of the Key as Small as Possible
+      + Accelerates index scans and tree traversals
+      + Use small datatypes whenever possible . Numerics should also be used
+        whenever possible as they compare faster than strings.
+   
+    Promote "Update-in-Place" Design
+   
+      + "Update-in-Place" Faster by Orders of Magnitude
+      + Performance gain dependent on number of indexes. Recent benchmark (160
+        byte rows, 1 clustered index and 2 nonclustered) showed 800%
+        difference!
+      + Alternative ("Out-of-Place" Update) implemented as a physical DELETE
+        followed by a physical INSERT. These tactics result in:
+         1. Increased Lock Contention
+         2. Increased Chance of Deadlock
+         3. Decreased Response Time and Throughput
+      + Currently (System 10 and below), Rules for "Update-in-Place" Behavior
+        Include :
+         1. Columns updated can not be variable length or allow nulls
+         2. Columns updated can not be part of an index used to locate the row
+            to update
+         3. No update trigger on table being updated (because the inserted and
+            deleted tables used in triggers get their data from the log)
+           
+               
+                In v4.9.x and below, only one row may be affected and the
+                optimizer must know this in advance by choosing a UNIQUE index.
+                System 10 eliminated this limitation.
+               
+    Promote Parallel I/O Opportunities
+   
+      + For I/O-bound Multi-User Systems, Use A lot of Logical and Physical
+        Devices
+      + Plan balanced separation of objects across logical and physical
+        devices.
+      + Increased number of physical devices (including controllers) ensures
+        physical bandwidth
+      + Increased number of logical Sybase devices ensures minimal contention
+        for internal resources. Look at SQL Monitor's Device I/O Hit Rate for
+        clues. Also watch out for the 128 device limit per database.
+      + Create Database (in v10) starts parallel I/O on up to 6 devices at a
+        time concurrently. If taken advantage of, expect an 800% performance
+        gain. A 2Gb TPC-B database that took 4.5 hours under 4.9.1 to create
+        now takes 26 minutes if created on 6 independent devices !
+      + Use Sybase Segments to Ensure Control of Placement
+       
+           
+            This is the only way to guarantee logical seperation of objects on
+            devices to reduce contention for internal resources.
+           
+      + Dedicate a seperate physical device and controller to the transaction
+        log in tempdb too.
+      + optimize TEMPDB Also if Heavily Accessed
+      + increased number of logical Sybase devices ensures minimal contention
+        for internal resources.
+      + systems requiring increased log throughput today must partition
+        database into separate databases
+       
+        Breaking up one logical database into multiple smaller databases
+        increases the number number of transaction logs working in parallel.
+       
+    Networking Issues
+   
+      + Choice of Transport Stacks
+      + Variable Sized TDS Packets
+      + TCP/IP Packet Batching
+   
+    Choice of Transport Stacks for PCs
+   
+      + Choose a Stack that Supports "Attention Signals" (aka. "Out of Band
+        Data")
+      + Provides for the most efficient mechanism to cancel queries.
+      + Essential for sites providing ad-hoc query access to large databases.
+      + Without "Attention Signal" capabilities (or the urgent flag in the
+        connection string), the DB-Library functions DBCANQUERY ( ) and
+        DBCANCEL ( ) will cause ASE to send all rows back to the Client
+        DB-Library as quickly as possible so as to complete the query. This can
+        be very expensive if the result set is large and, from the user's
+        perspective, causes the application to appear as though it has hung.
+      + With "Attention Signal" capabilities, Net-Library is able to send an
+        out-of-sequence packet requesting the ASE to physically throw away any
+        remaining results providing for instantaneous response.
+      + Currently, the following network vendors and associated protocols
+        support the an "Attention Signal" capable implementation:
+         1. NetManage NEWT
+         2. FTP TCP
+         3. Named Pipes (10860) - Do not use urgent parameter with this Netlib
+         4. Novell LAN Workplace v4.1 0 Patch required from Novell
+         5. Novell SPX - Implemented internally through an "In-Band" packet
+         6. Wollongong Pathway
+         7. Microsoft TCP - Patch required from Microsoft
+   
+    Variable-sized TDS Packets
+   
+    Pre-v4.6 TDS Does Not Optimize Network Performance Current ASE TDS packet
+    size limited to 512 bytes while network frame sizes are significantly
+    larger (1508 bytes on Ethernet and 4120 bytes on Token Ring).
+   
+        The specific protocol may have other limitations!
+       
+    For example:
+      + IPX is limited to 576 bytes in a routed network.
+      + SPX requires acknowledgement of every packet before it will send
+        another. A recent benchmark measured a 300% performance hit over TCP in
+        "large" data transfers (small transfers showed no difference).
+      + Open Client Apps can "Request" a Larger Packet Shown to have
+        significant performance improvement on "large" data transfers such as
+        BCP, Text / Image Handling, and Large Result Sets.
+          o clients:
+              # isql -Usa -Annnnn
+              # bcp -Usa -Annnnn
+              # ct_con_props (connection, CS_SET, CS_PACKETSIZE, &amp;packetsize,
+                sizeof(packetsize), NULL)
+          o An "SA" must Configure each Servers' Defaults Properly
+              # sp_configure "default packet size", nnnnn - Sets default packet
+                size per client connection (defaults to 512)
+              # sp_configure "maximum packet size", nnnnn - Sets maximum TDS
+                packet size per client connection (defaults to 512)
+              # sp_configure "additional netmem", nnnnn - Additional memory for
+                large packets taken from separate pool. This memory does not
+                come from the sp_configure memory setting.
+               
+                Optimal value = ((# connections using large packets large
+                packetsize * 3) + an additional 1-2% of the above calculation
+                for overhead)
+               
+                Each connection using large packets has 3 network buffers: one
+                to read; one to write; and one overflow.
+                  @ Default network memory - Default-sized packets come from
+                    this memory pool.
+                  @ Additional Network memory - Big packets come this memory
+                    pool.
+                   
+                    If not enough memory is available in this pool, the server
+                    will give a smaller packet size, down to the default
+                   
+    TCP/IP Packet Batching
+   
+      + TCP Networking Layer Defaults to "Packet Batching"
+      + This means that TCP/IP will batch small logical packets into one larger
+        physical packet by briefly delaying packets in an effort to fill the
+        physical network frames (Ethernet, Token-Ring) with as much data as
+        possible.
+      + Designed to improve performance in terminal emulation environments
+        where there are mostly only keystrokes being sent across the network.
+      + Some Environments Benefit from Disabling Packet Batching
+      + Applies mainly to socket-based networks (BSD) although we have seen
+        some TLI networks such as NCR's benefit.
+      + Applications sending very small result sets or statuses from sprocs
+        will usually benefit. Benchmark with your own application to be sure.
+      + This makes ASE open all connections with the TCP_NODELAY option.
+        Packets will be sent regardless of size.
+      + To disable packet batching, in pre-Sys 11, start ASE with the 1610
+        Trace Flag.
+       
+           
+            $SYBASE/dataserver -T1610 -d /usr/u/sybase/master.dat ...
+           
+        Your errorlog will indicate the use of this option with the message:
+       
+            ASE booted with TCP_NODELAY enabled.
+           
+    Operating System Issues
+   
+      + Never Let ASE Page Fault
+      + It is better to configure ASE with less memory and do more physical
+        database I/O than to page fault. OS page faults are synchronous and
+        stop the entire dataserver engine until the page fault completes. Since
+        database I/O's are asynchronous, other user tasks can continue!
+      + Use Process Affinitying in SMP Environments, if Supported
+      + Affinitying dataserver engines to specific CPUs minimizes overhead
+        associated with moving process information (registers, etc) between
+        CPUs. Most implementations will preference other tasks onto other CPUs
+        as well allowing even more CPU time for dataserver engines.
+      + Watch out for OS's which are not fully symmetric. Affinitying
+        dataserver engines onto CPUs that are heavily used by the OS can
+        seriously degrade performance. Benchmark with your application to find
+        optimal binding.
+      + Increase priority of dataserver engines, if supported
+      + Give ASE the opportunity to do more work. If ASE has nothing to do, it
+        will voluntarily yield the CPU.
+      + Watch out for OS's which externalize their async drivers. They need to
+        run too!
+      + Use of OS Monitors to Verify Resource Usage
+      + The OS CPU monitors only "know" that an instruction is being executed.
+        With ASE's own threading and scheduling, it can routinely be 90% idle
+        when the OS thinks its 90% busy. SQL Monitor shows real CPU usage.
+      + Look into high disk I/O wait time or I/O queue lengths. These indicate
+        physical saturation points in the I/O subsystem or poor data
+        distribution.
+      + Disk Utilization above 50% may be subject to queuing effects which
+        often manifest themselves as uneven response times.
+      + Look into high system call counts which may be symptomatic of problems.
+      + Look into high context switch counts which may also be symptomatic of
+        problems.
+      + Optimize your kernel for ASE (minimal OS file buffering, adequate
+        network buffers, appropriate KEEPALIVE values, etc).
+      + Use OS Monitors and SQL Monitor to Determine Bottlenecks
+      + Most likely "Non-Application" contention points include:
+           Resource                    Where to Look
+           ---------                   --------------
+           CPU Performance             SQL Monitor - CPU and Trends
+        
+           Physical I/O Subsystem      OS Monitoring tools - iostat, sar...
+        
+           Transaction Log             SQL Monitor - Device I/O and
+                                                     Device Hit Rate
+                                                     on Log Device
+        
+           ASE Network Polling  SQL Monitor - Network and Benchmark
+                                                     Baselines
+        
+           Memory                      SQL Monitor - Data and Cache
+                                                     Utilization
+                                                
+      + Use of Vendor-support Striping such as LVM and RAID
+      + These technologies provide a very simple and effective mechanism of
+        load balancing I/O across physical devices and channels.
+      + Use them provided they support asynchronous I/O and reliable writes.
+      + These approaches do not eliminate the need for Sybase segments to
+        ensure minimal contention for internal resources.
+      + Non-read-only environments should expect performance degradations when
+        using RAID levels other than level 0. These levels all include fault
+        tolerance where each write requires additional reads to calculate a
+        "parity" as well as the extra write of the parity data.
+   
+    Hardware Configuration Issues
+   
+      + Number of CPUs
+      + Use information from SQL Monitor to assess ASE's CPU usage.
+      + In SMP environments, dedicate at least one CPU for the OS.
+      + Advantages and scaling of VSA is application-dependent. VSA was
+        architected with large multi-user systems in mind.
+      + I/O Subsystem Configuration
+      + Look into high Disk I/O Wait Times or I/O Queue Lengths. These may
+        indicate physical I/O saturation points or poor data distribution.
+      + Disk Utilization above 50% may be subject to queuing effects which
+        often manifest themselves as uneven response times.
+      + Logical Volume configurations can impact performance of operations such
+        as create database, create index, and bcp. To optimize for these
+        operations, create Logical Volumes such that they start on different
+        channels / disks to ensure I/O is spread across channels.
+      + Discuss device and controller throughput with hardware vendors to
+        ensure channel throughput high enough to drive all devices at maximum
+        rating.
+   
+    General ASE Tuning
+   
+      + Changing Values with sp_configure or buildmaster
+       
+           
+            It is imperative that you only use sp_configure to change those
+            parameters that it currently maintains because the process of
+            reconfiguring actually recalculates a number of other buildmaster
+            parameters. Using the Buildmaster utility to change a parameter
+            "managed" by sp_configure may result in a mis-configured server and
+            cause adverse performance or even worse ...
+           
+      + Sizing Procedure Cache
+          o ASE maintains an MRU-LRU chain of stored procedure query plans. As
+            users execute sprocs, ASE looks in cache for a query plan to use.
+            However, stored procedure query plans are currently not re-entrant!
+            If a query plan is available, it is placed on the MRU and execution
+            begins. If no plan is in memory, or if all copies are in use, a new
+            copy is read from the sysprocedures table. It is then optimized and
+            put on the MRU for execution.
+          o Use dbcc memusage to evaluate the size and number of each sproc
+            currently in cache. Use SQL Monitor's cache statistics to get your
+            average cache hit ratio. Ideally during production, one would hope
+            to see a high hit ratio to minimize the procedure reads from disk.
+            Use this information in conjuction with your desired hit ratio to
+            calculate the amount of memory needed.
+      + Memory
+          o Tuning memory is more a price/performance issue than anything else
+            ! The more memory you have available, the greater than probability
+            of minimizing physical I/O. This is an important goal though. Not
+            only does physical I/O take significantly longer, but threads doing
+            physical I/O must go through the scheduler once the I/O completes.
+            This means that work on behalf of the thread may not actually
+            continue to execute for quite a while !
+          o There are no longer (as of v4.8) any inherent limitations in ASE
+            which cause a point of diminishing returns on memory size.
+          o Calculate Memory based on the following algorithm :
+           
+               
+                Total Memory = Dataserver Executable Size (in bytes) +
+                Static Overhead of 1 Mb +
+                User Connections x 40,960 bytes +
+                Open Databases x 644 bytes +
+                Locks x 32 bytes +
+                Devices x 45,056 bytes +
+                Procedure Cache +
+                Data Cache
+               
+      + Recovery Interval
+          o As users change data in ASE, only the transaction log is written to
+            disk right away for recoverability. "Dirty" data and index pages
+            are kept in cache and written to disk at a later time. This
+            provides two major benefits:
+             1. Many transactions may change a page yet only one physical write
+                is done
+             2. ASE can schedule the physical writes "when appropriate"
+          o ASE must eventually write these "dirty" pages to disk.
+          o A checkpoint process wakes up periodically and "walks" the cache
+            chain looking for dirty pages to write to disk
+          o The recovery interval controls how often checkpoint writes dirty
+            pages.
+      + Tuning Recovery Interval
+          o A low value may cause unnecessary physical I/O lowering throughput
+            of the system. Automatic recovery is generally much faster during
+            boot-up.
+          o A high value minimizes unnecessary physical I/O and helps
+            throughput of the system. Automatic recovery may take substantial
+            time during boot-up.
+   
+    Audit Performance Tuning for v10.0
+   
+      + Potentially as Write Intensive as Logging
+      + Isolate Audit I/O from other components.
+      + Since auditing nearly always involves sequential writes, RAID Level 0
+        disk striping or other byte-level striping technology should provide
+        the best performance (theoretically).
+      + Size Audit Queue Carefully
+      + Audit records generated by clients are stored in an in memory audit
+        queue until they can be processed.
+      + Tune the queue's size with sp_configure "audit queue size", nnnn (in
+        rows).
+      + Sizing this queue too small will seriously impact performance since all
+        user processes who generate audit activity will sleep if the queue
+        fills up.
+      + Size Audit Database Carefully
+      + Each audit row could require up to 416 bytes depending on what is
+        audited.
+      + Sizing this database too small will seriously impact performance since
+        all user processes who generate audit activity will sleep if the
+        database fills up.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+1.5.2: Temp Tables and OLTP
+
+-------------------------------------------------------------------------------
+
+(Note from Ed: It appears that with ASE 12, Sybase have solved the problem of
+select/into locking the system tables for the duration of the operation. The
+operation is now split into two parts, the creation of the table followed byt
+the insert. The system tables are only locked for the first part, and so, to
+all intents and purposes, the operation acts like a create/insert pair whilst
+remaining minimally logged.
+
+Our shop would like to inform folks of a potential problem when using temporary
+tables in an OLTP environment. Using temporary tables dynamically in a OLTP
+production environment may result in blocking (single-threading) as the number
+of transactions using the temporary tables increases.
+
+Does it affect my application?
+
+This warning only applies for SQL that is being invoked frequently in an OLTP
+production environment, where the use of "select into..." or "create table #
+temp" is common. Application using temp tables may experience blocking problems
+as the number of transactions increases.
+
+This warning does not apply to SQL that may be in a report or that is not used
+frequently. Frequently is defined as several times per second.
+
+Why? Why? Why?
+
+Our shop was working with an application owner to chase down a problem they
+were having during peak periods. The problem they were having was severe
+blocking in tempdb.
+
+What was witnessed by the DBA group was that as the number of transactions
+increased on this particular application, the number of blocks in tempdb also
+increased.
+
+We ran some independent tests to simulate a heavily loaded server and
+discovered that the data pages in contention were in tempdb's syscolumns table.
+
+This actually makes sense because during table creation entries are added to
+this table, regardless if it's a temporary or permanent table.
+
+We ran another simulation where we created the tables before the stored
+procedure used it and the blocks went away. We then performed an additional
+test to determine what impact creating temporary tables dynamically would have
+on the server and discovered that there is a 33% performance gain by creating
+the tables once rather than re-creating them.
+
+Your mileage may vary.
+
+How do I fix this?
+
+To make things better, do the 90's thing -- reduce and reuse your temp tables.
+During one application connection/session, aim to create the temp tables only
+once.
+
+Let's look at the lifespan of a temp table. If temp tables are created in a
+batch within a connection, then all future batches and stored procs will have
+access to such temp tables until they're dropped; this is the reduce and reuse
+strategy we recommend. However, if temp tables are created in a stored proc,
+then the database will drop the temp tables when the stored proc ends, and this
+means repeated and multiple temp table creations; you want to avoid this.
+
+Recode your stored procedures so that they assume that the temporary tables
+already exist, and then alter your application so that it creates the temporary
+tables at start-up -- once and not every time the stored procedure is invoked.
+
+That's it! Pretty simple eh?
+
+Summary
+
+The upshot is that you can realize roughly a 33% performance gain and not
+experience the blocking which is difficult to quantify due to the specificity
+of each application.
+
+Basically, you cannot lose.
+
+Solution in pseudo-code
+
+If you have an application that creates the same temp table many times within
+one connection, here's how to convert it to reduce and reuse temp table
+creations. Raymond Lew has supplied a detailed example for trying this.
+
+Old
+
+open connection
+  loop until time to go
+    exec procedure vavoom_often
+      /* vavoom_often creates and uses #gocart for every call */
+      /* eg: select * into #gocart from gocart */
+    go
+          .
+          .
+          .
+  loop-end
+close connection
+
+New
+
+open connection
+  /* Create the temporary table outside of the sproc */
+  select * into #gocart from gocart where 1 =2 ;
+  go
+  loop until time to go
+    exec procedure vavoom_often
+      /* vavoom_often reuses #gocart which */
+      /*   was created before exec of vavoom_often */
+      /* - First statement may be a truncate table #gocart */
+      /* - Execute with recompile */
+      /*   if your table will have more than 10 data pages */
+      /*   as the optimizer will assume 10 data pages for temp tables */
+    go
+          .
+          .
+          .
+  loop-end
+close connection
+
+Note that it is necessary to call out the code to create the table and it
+becomes a pain in the butt because the create-table statement will have to be
+replicated in any stored proc and in the initialization part of the application
+- this can be a maintenance nuisance. This can be solved by using any macro
+package such as m4 or cpp. or by using and adapting the scripts from Raymond
+Lew.
+
+-------------------------------------------------------------------------------
+
+Brian Black posted a stronger notice than this to the SYBASE-L list, and I
+would agree, that any use of select/into in a production environments should
+looked at very hard.  Even in DSS environments, especially if they share tempdb
+with an OLTP environment, should use select/into with care.
+
+-------------------------------------------------------------------------------
+
+From: Raymond Lew
+
+At our company, we try to keep the database and the application loosely coupled
+to allow independent changes at the frontend or the backend as long as the
+interface stays the same. Embedding temp table definitions in the frontend
+would make this more difficult.
+
+To get away from having to embed the temp table definitions in the frontend
+code, we are storing the temp table definitions in the database. The frontend
+programs retrieve the definitions and declare the tables dynamically at the
+beginning of each session. This allows for the change of backend procedures
+without changes in the frontend when the API does not change.
+
+Enclosed below are three scripts. The first is an isql script to create the
+tables to hold the definitions. The second is a shell script to set up a sample
+procedure named vavoom. The third is shell script to demonstrate the structure
+of application code.
+
+I would like to thank Charles Forget and Gordon Rees for their assistance on
+these scripts.
+
+--start of setup------------------------------------------------------
+/* Raymond Lew - 1996-02-20 */
+/* This isql script will set up the following tables:
+   gocart - sample table
+   app_temp_defn - where temp table definitions are stored
+   app_temp_defn_group - a logical grouping of temp table definitions
+                         for an application function
+*/
+
+/******************************/
+/* gocart table - sample table*/
+/******************************/
+drop table gocart
+go
+create table gocart
+(
+  cartname    char(10) null
+ ,cartcolor   char(30) null
+)
+go
+create unique clustered index  gocart1 on gocart (cartname)
+go
+insert into gocart values ('go1','blue ')
+insert into gocart values ('go2','pink ')
+insert into gocart values ('go3','green ')
+insert into gocart values ('go4','red ')
+go
+
+
+/****************************************************************/
+/* app_temp_defn - definition of temp tables with their indexes */
+/****************************************************************/
+drop table app_temp_defn
+go
+create table app_temp_defn
+(
+  /* note: temp tables are unique only in first 13 chars */
+  objectname  char(20)     not null
+ ,seq_no      smallint     not null
+ ,defntext    char(255)    not null
+)
+go
+create unique clustered index  app_temp_defn1
+  on app_temp_defn (objectname,seq_no)
+go
+insert into app_temp_defn
+values ('#gocart',1,'select * into #gocart')
+insert into app_temp_defn
+values ('#gocart',2,' from gocart where 1=2 ')
+go
+insert into app_temp_defn
+values ('#gocartindex',1,
+ "create unique index gocartindex on #gocart (cartname) ")
+go
+insert into app_temp_defn
+values ('#gocart1',1, 'select * into #gocart1  from gocart where 1=2')
+go
+
+
+
+
+/***********************************************************************/
+/* app_temp_defn_group - groupings of temp definitions by applications */
+/***********************************************************************/
+drop table app_temp_defn_group
+go
+create table app_temp_defn_group
+(
+  appname     char(8)  not null
+ ,objectname  char(20) not null
+)
+go
+create unique clustered index  app_temp_defn_group1
+ on app_temp_defn_group (appname,objectname)
+go
+insert into app_temp_defn_group values('abc','#gocart')
+insert into app_temp_defn_group values('abc','#gocartindex')
+go
+
+
+
+/***********************************************************/
+/* get_temp_defn - proc for getting the temp defn by group */
+/***********************************************************/
+drop procedure get_temp_defn
+go
+create procedure get_temp_defn
+(
+@appname               char(8)
+)
+as
+
+if @appname = ''
+  select defntext
+    from app_temp_defn
+    order by objectname, seq_no
+else
+  select defntext
+    from app_temp_defn a
+       , app_temp_defn_group b
+   where a.objectname = b.objectname
+     and b.appname = @appname
+   order by a.objectname, a.seq_no
+
+return
+go
+
+/* let's try some tests */
+exec get_temp_defn ''
+go
+exec get_temp_defn 'abc'
+go
+--end of setup      --------------------------------------------------
+
+
+
+
+
+
+--- start of make.vavoom --------------------------------------------
+#!/bin/sh
+# Raymond Lew - 1996-02-20
+#
+# bourne shell script for creating stored procedures using
+# app_temp_defn table
+#
+# demo procedure vavoom created here
+#
+# note: you have to change the passwords, id and etc. for your site
+# note: you might have to some inline changes to make this work
+#       check out the notes within the body
+
+
+# get the table defn's into a text file
+#
+# note: next line :you will need to end the line immediately after eot \
+isql -Ukryten -Pjollyguy -Sstarbug  -w255 &lt;&lt; eot \
+| grep -v '\-\-\-\-' | grep -v 'defntext  ' | grep -v ' affected' &gt; tabletext
+exec get_temp_defn ''
+go
+eot
+# note: prev line :you will need to have a newline immediately after eot
+
+# go mess around in vi
+vi tabletext
+
+#
+# create the proc vavoom after running the temp defn's into db
+#
+isql -Ukryten -Pjollyguy -Sstarbug  -e &lt;&lt; eot |more
+`cat tabletext`
+go
+drop procedure vavoom
+go
+create procedure vavoom
+(
+@color               char(10)
+)
+as
+truncate table #gocart1 /* who knows what lurks in temp tables */
+if @color = ''
+  insert #gocart1 select * from gocart
+else
+  insert #gocart1 select * from gocart where cartcolor=@color
+select @color '@color', * from #gocart1
+return
+go
+exec vavoom ''
+go
+exec vavoom 'blue'
+go
+eot
+# note: prev line :you will need to have a newline immediately after eot
+
+exit
+# end of unix script
+---   end of make.vavoom --------------------------------------------
+
+
+
+
+
+--- start of defntest.sh -------------------------------------------
+#!/bin/sh
+# Raymond Lew 1996-02-01
+#
+# test script: demonstrate with a bourne shell how an application
+# would use the temp table definitions stored in the database
+#
+# note: you must run setup and make.vavoom first
+#
+# note: you have to change the passwords, id and etc. for your site
+# note: you might have to some inline changes to make this work
+#       check out the notes within the body
+
+# get the table defn's into a text file
+#
+# note: next line :you will need to end the line immediately after eot \
+isql -Ukryten -Pjollyguy -Sstarbug  -w255 &lt;&lt; eot \
+| grep -v '\-\-\-\-' | grep -v 'defntext  ' | grep -v ' affected' &gt; tabletext
+exec get_temp_defn ''
+go
+eot
+# note: prev line :you will need to have a newline immediately after eot
+
+# go mess around in vi
+vi tabletext
+
+isql -Ukryten -Pjollyguy -Sstarbug   -e &lt;&lt; eot | more
+`cat tabletext`
+go
+exec vavoom ''
+go
+exec vavoom 'blue'
+go
+eot
+# note: prev line :you will need to have a newline immediately after eot
+
+exit
+# end of unix script
+---   end of defntest.sh -------------------------------------------
+
+
+That's all, folks. Have Fun
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+1.5.3: Differences between clustered and non-clustered
+
+-------------------------------------------------------------------------------
+
+Preface
+
+I'd like to talk about the difference between a clustered and a non-clustered
+index. The two are very different and it's very important to understand the
+difference between the two to in order to know when and how to use each.
+
+I've pondered hard to find the best analogy that I could think of and I've come
+up with ... the phone book. Yes, a phone book.
+
+Imagine that each page in our phone book is equivalent to a Sybase 2K data
+page. Every time we read a page from our phone book it is equivalent to one
+disk I/O.
+
+Since we are imagining, let's also imagine that our mythical ASE (that runs
+against the phone book) has only enough data cache to buffer 200 phone pages.
+When our data cache gets full we have to flush an old page out so we can read
+in a new one.
+
+Fasten your seat belts, because here we go...
+
+Clustered Index
+
+A phone book lists everyone by last name. We have an A section, we have a B
+section and so forth. Within each section my phone book is clever enough to
+list the starting and ending names for the given page.
+
+The phone book is clustered by last name.
+
+    create clustered index on phone_book (last_name)
+   
+It's fast to perform the following queries on the phone book:
+
+  * Find the address of those whose last name is Cisar.
+  * Find the address of those whose last name is between Even and Fa
+
+Searches that don't work well:
+
+  * Find the address of those whose phone number is 440-1300.
+  * Find the address of those whose prefix is 440
+
+In order to determine the answer to the two above we'd have to search the
+entire phone book. We can call that a table scan.
+
+Non-Clustered Index
+
+To help us solve the problem above we can build a non-clustered index.
+
+    create nonclustered index on phone_book (phone_number)
+   
+Our non-clustered index will be built and maintained by our Mythical ASE as
+follows:
+
+ 1. Create a data structure that will house a phone_number and information
+    where the phone_number exists in the phone book: page number and the row
+    within the page.
+   
+    The phone numbers will be kept in ascending order.
+   
+ 2. Scan the entire phone book and add an entry to our data structure above for
+    each phone number found.
+ 3. For each phone number found, note along side it the page number that it was
+    located and which row it was in.
+
+any time we insert, update or delete new numbers, our M-ASE will maintain this
+secondary data structure. It's such a nice Server.
+
+Now when we ask the question:
+
+    Find the address of those whose phone number is 440-1300
+   
+we don't look at the phone book directly but go to our new data structure and
+it tells us which page and row within the page the above phone number can be
+found. Neat eh?
+
+Draw backs? Well, yes. Because we probably still can't answer the question:
+
+    Find the address of those whose prefix is 440
+   
+This is because of the data structure being used to implement non-clustered
+indexes. The structure is a list of ordered values (phone numbers) which point
+to the actual data in the phone book. This indirectness can lead to trouble
+when a range or a match query is issued.
+
+The structure may look like this:
+
+------------------------------------
+|Phone Number   |  Page Number/Row |
+====================================
+| 440-0000      |  300/23          |
+| 440-0001      |  973/45          |
+| 440-0002      |   23/2           |
+| ...           |                  |
+| 440-0030      |  973/45          |
+| 440-0031      |  553/23          |
+| ...           |                  |
+------------------------------------ 
+
+As one can see, certain phone numbers may map to the same page. This makes
+sense, but we need to consider one of our constraints: our Server only has room
+for 200 phone pages.
+
+What may happen is that we re-read the same phone page many times. This isn't a
+problem if the phone page is in memory. We have limited memory, however, and we
+may have to flush our memory to make room for other phone pages. So the
+re-reading may actually be a disk I/O.
+
+The Server needs to decide when it's best to do a table scan versus using the
+non-clustered index to satisfy mini-range type of queries. The way it decides
+this is by applying a heuristic based on the information maintained when an
+update statistics is performed.
+
+In summary, non-clustered indexes work really well when used for highly
+selective queries and they may work for short, range type of queries.
+
+Suggested Uses
+
+Having suffered many table corruption situations (with 150 ASEs who wouldn't? :
+-)), I'd say always have a clustered index. With a clustered index you can fish
+data out around the bad spots on the table thus having minimal data loss.
+
+When you cluster, build the cluster to satisfy the largest percentage of range
+type queries. Don't put the clustered index on your primary key because
+typically primary keys are increasing linearly. What happens is that you end up
+inserting all new rows at the end of the table thus creating a hot spot on the
+last data page.
+
+For detail rows, create the clustered index on the commonly accessed foreign
+key. This will aid joins from the master to it.
+
+Use nonclustered index to aid queries where your selection is very selective.
+For example, primary keys. :-)
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+1.5.4: Optimistic versus Pessimistic locking?
+
+-------------------------------------------------------------------------------
+
+This is the same problem another poster had ... basically locking a record to
+ensure that it hasn't changed underneath ya.
+
+<A HREF="mailto:fcasas@ix.netcom.com">fcasas@ix.netcom.com</A> has a pretty nifty solution if you are using ct-lib (I'll
+include that below -- hope it's okay Francisco ... :-)) ...
+
+Basically the problem you are facing is one of being a pessimist or an
+optimist.
+
+I contend that your business really needs to drive this.
+
+Most businesses (from my experience) can be optimistic.
+
+That is, if you are optimistic that the chances that someone is going to change
+something from underneath the end-user is low, then do nothing about it.
+
+On the other hand, if you are pessimistic that someone may change something
+underneath the end-user, you can solve it at least as follows:
+
+Solution #1
+
+Use a timestamp on a header table that would be shared by the common data. This
+timestamp field is a Sybase datatype and has nothing to do with the current
+time. Do not attempt to do any operations on this column other than
+comparisons. What you do is when you grab data to present to the end-user, have
+the client software also grab the timestamp column value. After some thing
+time, if the end-user wishes to update the database, compare the client
+timestamp with what's in the database and it it's changed, then you can take
+appropriate action: again this is dictated by the business.
+
+Problem #1
+
+If users are sharing tables but columns are not shared, there's no way to
+detect this using timestamps because it's not sufficiently granular.
+
+Solution #2 (presented by fcasas)
+
+... Also are you coding to ct-lib directly? If so there's something that you
+could have done, or may still be able to do if you are using cursors.
+
+With ct-lib there's a ct_describe function that lets you see key data. This
+allows you to implement optimistic locking with cursors and not need
+timestamps. Timestamps are nice, but they are changed when any column on a row
+changes, while the ct_describe mechanism detects changes at the columns level
+for a greater degree of granularity of the change. In other words, the
+timestamp granularity is at the row, while ct_describes CS_VERSION_KEY provides
+you with granularity at the column level.
+
+Unfortunately this is not well documented and you will have to look at the
+training guide and the manuals very closely.
+
+Further if you are using cursors do not make use of the
+
+    [for {read only | update [of column_name_list]}]
+   
+of the select statement. Omitting this clause will still get you data that can
+still be updated and still only place a shared lock on the page. If you use the
+read only clause you are acquiring shared locks, but the cursor is not
+updatable. However, if you say
+
+    update [of ...
+   
+will place updated locks on the page, thus causing contention. So, if you are
+using cursors don't use the above clause. So, could you answer the following
+three questions:
+
+ 1. Are you using optimistic locking?
+ 2. Are you coding to ct-lib?
+ 3. Are you using cursors?
+
+Problem #2
+
+You need to be coding with ct-lib ...
+
+Solution #3
+
+Do nothing and be optimistic. We do a lot of that in our shop and it's really
+not that big of a problem.
+
+Problem #3
+
+Users may clobber each other's changes ... then they'll come looking for you to
+clobber you! :-)
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+1.5.5: How do I force an index to be used?
+
+-------------------------------------------------------------------------------
+
+System 11
+
+In System 11, the binding of the internal ordinal value is alleviated so that
+instead of using the ordinal index value, the index name can be used instead:
+
+select ... from my_table (index my_first_index)
+
+Sybase 4.x and Sybase System 10
+
+All indexes have an ordinal value assigned to them. For example, the following
+query will return the ordinal value of all the indexes on my_table:
+
+select name, indid
+  from sysindexes
+where id = object_id("my_table")
+
+Assuming that we wanted to force the usuage of index numbered three:
+
+select ... from my_table(3)
+
+Note: using a value of zero is equivalent to forcing a table scan.  Whilst this
+sounds like a daft thing to do, sometimes a table scan is a better solution
+than heavy index scanning.
+
+It is essential that all index hints be well documented.  This is good DBA
+practice.  It is especially true for Sybase System 10 and below.
+
+One scheme that I have used that works quite well is to implement a table
+similar to sysdepends in the database that contains the index hints.
+
+create table idxdepends
+    (
+    tblname   varchar(32) not null -- Table being hinted
+   ,depname   varchar(50) not null -- Proc, trigger or app that
+                                   -- contains hint.
+   ,idxname   varchar(32) not null -- Index being hinted at
+ --,hintcount         int     null -- You may want to count the
+                                   -- number of hints per proc.
+    )
+
+Obviously it is a manual process to keep the table populated, but it can save a
+lot of trouble later on.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+1.5.6: Why place tempdb and log on low numbered devices?
+
+-------------------------------------------------------------------------------
+
+System 10 and below.
+
+In System 10 and Sybase 4.X, the I/O scheduler starts at logical device (ldev)
+zero and works up the ldev list looking for outstanding I/O's to process.
+Taking this into consideration, the following device fragments (disk init)
+should be added before any others:
+
+ 1. tempdb
+ 2. log
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+</PRE>
+<DIV ALIGN=CENTER>
+<SMALL>
+<P><HR WIDTH=1900 NOSHADE><BR>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  Part8 -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A></SMALL>
+<P>
+<div align="center">
+
+<center>
+<form method="post" action="rateit.php">
+<table border="1" cellpadding="0" cellspacing="0" width="150" bgcolor="#ffcccc" style="WIDTH: 150px">
+<tr><td width="100%">
+<div align="center">
+<table border="0" cellpadding="2" width="100%" bgcolor="#ffcccc">
+<tr><td width="100%" height="14">
+<p align="center"><font face="Arial">Rate this FAQ</font></p>
+</td></tr>
+<tr><td width="100%" height="14">
+<p align="center">
+<INPUT TYPE=HIDDEN NAME="pid" VALUE="databases/sybase-faq/part8/index.html">
+<select size="1" name="D1" style="COLOR: darkmagenta; BACKGROUND-COLOR: cornsilk">
+<option selected value="0">N/A</option>
+<option value="1">Worst</option>
+<option value="2">Weak</option>
+<option value="3">OK</option>
+<option value="4">Good</option>
+<option value="5">Great</option>
+</select>
+</p>
+</td></tr>
+<tr><td width="100%" height="27">
+<p align="center">
+<IMG onclick="mystr='/frate.php?pid='+pid.value+'&vote='+D1.value;
+Popup=window.open(mystr,'Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=380,height=270,left=230,top=43'); 
+ return false;" height=28 src="/images/vote.gif" alt="Vote" width=83 border=0 ></p>
+</td></tr>
+</table>
+</div>
+</td></tr>
+</table>
+<font size="-1" face="Arial"><br><a href="/topRated.html">Current Top-Rated FAQs</a><br></font>
+</form>
+</center>
+
+</div>
+
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="100%">
+<tr><td width="100%" bgcolor="#D6D6C0">
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part8/index.html"," ");
+// --></script>
+<p><font face="Arial"><a name="ct">Are you an expert in this area?</a> Share your knowledge and earn expert points by giving answers or rating people's questions and answers! This section of FAQS.ORG is not sanctioned in any way by FAQ authors or maintainers.</font></p>
+<p><font face="Arial">Questions strongly related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-6730.html">How can I display the table sizes of ALL tables in a database?   </a> by Caspar (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9594.html">how to use nested cursors in a stored procedure in ASE ? is there any template to use !...</a> by nino (12/18/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3265.html">to connect sybase and c++,how to connect and access the data </a> by kumaran (9/2/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6741.html">how do u tell the last time update statistics has been run on a table (11.0.3) </a> by yujo (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11075.html">I need to Execute an SP & set its output to the insert statement. This will be occured for...</a> by rose (1/14/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9435.html">I wanted to know EXACT technical details about what ACTUALLY happens when u fire a simple...</a> by anu (12/15/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-8395.html">Is there anyway to start dataserver in ASE 11.9.2 with only the master and tempdb online...</a> by steve_2000g (11/28/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-854.html">i get an error on the "convert" when i try to run this line of code, why is this?   print...</a> by shugarhi (7/14/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11834.html">Hi  &nbsp; We're using Sybase ASE 12.0 running on SUN 4500 Cluster server. We cannot...</a> by KK (1/26/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6297.html">I am creating a stored proc to create a report of dependencies. &nbsp;We are creating...</a> by RR (10/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7388.html">How is this hazardous if we do not close a cursor? </a> by amar (11/11/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9827.html">How can i reduce my tempdb size once i have increased it by creating a device also? </a> by rajs (12/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12835.html">how can i transfer a table from cybase to db2? &nbsp;please sendme step by step method if...</a> by maulik (2/9/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3213.html">My database is in bypass recovery mode. How do I put it in normal mode? </a> by Lach (9/1/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-1435.html">Hi ,  &nbsp;We are using Sybase ASE 11.9.2 with SCO Unix 7.1.1 &nbsp;as the operating ...</a> by gowri (7/27/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-2412.html">were is a database that will bring up  a person address without there last name </a> by travis (8/15/2003)</font></li>
+</ul>
+<p><font face="Arial">Questions somewhat related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-2221.html">Guys!   See the Sybase query below: select convert(float,substring(&lt;field1&gt;,3,...</a> by pathfinder (8/12/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7790.html">What are the side-effects of turning-on the built-in auditing capabilities of sybase? </a> by Choy (11/17/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12136.html">When ever i execute select property('PROCESSCPU') i get the value 189 and whenever i...</a> by anilkumarsh (1/29/2004)</font></li>
+</ul>
+<p><font face="Arial">Other questions awaiting answers:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/related.html">10088 questions</a> related to other FAQs<br></font></li>
+<li><font face="Arial"><a href="/qa/unrelated.html">1765 general questions</a></font></li>
+<li><font face="Arial"><a href="/qa/answered.html">4091 answered questions</a><br></font></li>
+</ul>
+</td></tr></table> <br></center></div>
+<HR NOSHADE SIZE=2 WIDTH=450>
+[ <a href="/faqs/">Usenet FAQs</a> | <a href="/faqs/faqsearch.html">Search</a> | <a href="/contrib/">Web FAQs</a> | <a href="/docs/">Documents</a> | <a href="/rfcs/">RFC Index</a> ]
+<BR><HR NOSHADE SIZE=2 WIDTH=450>
+<P>
+<ADDRESS>
+Send corrections/additions to the FAQ Maintainer: <BR>dowen@midsomer.org (David Owen)
+</ADDRESS>
+<P>
+<SMALL>
+<STRONG>Last Update February 12 2004 @ 00:28 AM</STRONG>
+<BR>
+</SMALL>
+</DIV>
+</BODY>
+</HTML>
+

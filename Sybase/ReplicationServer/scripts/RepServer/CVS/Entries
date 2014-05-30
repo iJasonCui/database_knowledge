@@ -1,0 +1,147 @@
+/CheckSetRepTable.sh/1.1/Fri Jul 22 19:57:54 2005//
+/DBName/1.1/Thu Dec 22 16:08:18 2005//
+/DBName.ini/1.1/Thu Dec 22 16:08:18 2005//
+/RepServerStatus.Mobile.out/1.1/Wed Jun  3 13:40:43 2009//
+/Session_redDef.list/1.1/Thu Dec 22 16:08:19 2005//
+/SwitchWarmStandby.ini/1.3/Tue Oct  4 20:10:37 2005//
+/SwitchWarmStandby.ini.2006Aug02/1.1/Tue Aug  1 20:37:53 2006//
+/SwitchWarmStandby.ini.2007Dec12/1.1/Tue Dec 11 21:00:26 2007//
+/SwitchWarmStandby.ini.20080408.ContentMonitor/1.1/Mon Apr  6 13:49:56 2009//
+/SwitchWarmStandby.ini.20080408.IVRMobile/1.1/Mon Apr  6 13:49:57 2009//
+/SwitchWarmStandby.ini.20080408.LPortal/1.1/Mon Apr  6 13:49:57 2009//
+/SwitchWarmStandby.ini.20080408.TrialDb/1.1/Mon Apr  6 13:49:57 2009//
+/SwitchWarmStandby.ini.20080408.audit/1.1/Mon Apr  6 13:49:57 2009//
+/SwitchWarmStandby.ini.2008Jun04.Plus45/1.1/Wed Jun 25 16:32:26 2008//
+/SwitchWarmStandby.ini.2008Mar19.crm/1.1/Tue Mar 18 20:38:09 2008//
+/SwitchWarmStandby.ini.2008May16.Mobile/1.1/Thu May 29 12:32:59 2008//
+/SwitchWarmStandby.ini.2008May29.SMS/1.1/Thu May 29 12:45:24 2008//
+/SwitchWarmStandby.ini.2008Nov12.dnrLL/1.1/Wed Nov 12 16:04:07 2008//
+/SwitchWarmStandby.ini.2008Nov13/1.1/Wed Nov 12 16:06:23 2008//
+/SwitchWarmStandby.ini.2008Nov18.chiLL/1.1/Tue Nov 18 14:19:41 2008//
+/SwitchWarmStandby.ini.2008Nov20.western/1.1/Wed Nov 19 21:06:19 2008//
+/SwitchWarmStandby.ini.2008Nov26.LLF/1.1/Wed Nov 26 14:34:35 2008//
+/SwitchWarmStandby.ini.2008Nov27.900/1.1/Thu Nov 27 14:34:25 2008//
+/SwitchWarmStandby.ini.20090422.IVRPictures/1.1/Tue Apr 21 14:46:10 2009//
+/SwitchWarmStandby.ini.20090603.Mobile/1.1/Wed Jun  3 13:40:43 2009//
+/SwitchWarmStandby.ini.20090812.ContentMonitor/1.1/Mon Aug 10 20:01:14 2009//
+/SwitchWarmStandby.ini.2009Jan20.crm/1.1/Mon Jan 19 21:35:58 2009//
+/SwitchWarmStandby.ini.stlLL/1.1/Wed Oct 15 02:11:41 2008//
+/SwitchWarmStandby_IVR.sh/1.2/Fri Oct 17 20:24:52 2008//
+/SwitchWarmStandby_Mobile.sh/1.1/Wed Jun  3 13:40:43 2009//
+/SwitchWarmStandby_crm.sh/1.1/Mon Jan 19 21:35:25 2009//
+/UserDefinedRepLatency.sh/1.1/Mon Mar 20 18:48:49 2006//
+/add_Alias_BothActiveStandbySRV.sh/1.1/Wed Sep 21 16:03:42 2005//
+/batch_20090225.sh/1.1/Tue Feb 24 20:29:44 2009//
+/batch_20090304.sh/1.1/Tue Mar  3 20:20:22 2009//
+/create-proc-sp__dbo_only.sql/1.1/Tue Sep 20 18:09:58 2005//
+/create_RepTest.sqsh/1.1/Thu Feb  3 14:24:48 2005//
+/drop-sub-Profile_view.sql/1.1/Sun Apr  9 17:12:12 2006//
+/drop_Alias_Add_as_user_OnActiveSRV.sh/1.1/Wed Sep 21 16:01:20 2005//
+/drop_Alias_OnActiveSRV.sh/1.1/Wed Oct 19 12:11:48 2005//
+/figure-out-latency.sh/1.5/Mon Mar 20 18:49:08 2006//
+/figure-out-latency.sqsh/1.2/Thu Dec 22 16:08:19 2005//
+/gen_setRepCol.sqsh/1.1/Thu Feb  3 14:39:09 2005//
+/gen_setRepTable.sqsh/1.1/Thu Feb  3 14:15:05 2005//
+/genrd_WEB.sh/1.1/Wed Sep 14 14:33:00 2005//
+/genrdsub_WEB.sh/1.1/Wed Sep 14 14:33:00 2005//
+/runScript.sh/1.1/Fri Jul 22 15:57:21 2005//
+/runScript.sqsh/1.2/Wed Sep 14 14:32:55 2005//
+/run_genrd.sh/1.2/Thu Dec 22 16:08:19 2005//
+/run_gensub.sh/1.1/Wed Sep 14 14:32:55 2005//
+/set_dboption.sh/1.2/Tue Mar 10 20:27:57 2009//
+/settrunc_OnActiveSRV.sh/1.1/Thu Dec 22 16:08:19 2005//
+/settrunc_rep_agent_disable_OnStandbySRV.sh/1.1/Wed Sep 21 16:02:28 2005//
+/switch_20090311.sh/1.2/Tue Mar 10 20:26:14 2009//
+/unset_dboption.sh/1.2/Tue Mar 10 20:27:49 2009//
+/w151dbp03.Profile_ar.repdefs.log/1.1/Thu Dec 22 16:08:19 2005//
+/w151rep01.rs_config/1.1/Fri Nov 25 20:02:47 2005//
+/w151rssd02.rs_config/1.1/Fri Jun 27 18:55:42 2008//
+/w151rssd03.rs_config/1.1/Fri Jun 27 19:06:11 2008//
+/webalpha.rs_config/1.2/Fri Jun 27 18:47:30 2008//
+/webdb28p.USI.repdefs.log/1.1/Thu Dec 22 16:08:19 2005//
+/webgamma.rs_config/1.1/Fri Nov 25 20:02:48 2005//
+/webphi.rs_config/1.1/Fri Nov 25 20:02:48 2005//
+/webtheta.rs_config/1.1/Fri Nov 25 20:02:48 2005//
+D/Accounting////
+D/Admin////
+D/Associate////
+D/Chargeback////
+D/Content////
+D/ContentJava////
+D/IQDB1////
+D/IVROnWeb////
+D/IVRPictures////
+D/Jump////
+D/LavaForum////
+D/Mailbox////
+D/Member////
+D/Msg_ad////
+D/Msg_ai////
+D/Msg_ar////
+D/Msg_md////
+D/Msg_mi////
+D/Msg_mr////
+D/Msg_wd////
+D/Msg_wi////
+D/Msg_wr////
+D/PartyMember////
+D/Plus45////
+D/Profile_ad////
+D/Profile_ai////
+D/Profile_ar////
+D/Profile_md////
+D/Profile_mi////
+D/Profile_mr////
+D/Profile_wd////
+D/Profile_wi////
+D/Profile_wr////
+D/SMSGateway////
+D/Session////
+D/SuccessStory////
+D/SurveyPoll////
+D/Tracking////
+D/USI////
+D/crm////
+D/output////
+D/primary////
+D/replicate////
+/AuditRepProcs.sh.USI/1.1/Mon Nov 30 18:31:23 2009//
+/AuditSetRepTable_All.sh/1.1/Mon Nov 30 18:31:24 2009//
+/AuditSetRepTable.sh/1.1/Mon Nov 30 18:31:24 2009//
+/SwitchWarmStandby.ini.2009Dec03.nyc/1.1/Wed Dec  2 21:02:09 2009//
+D/SMS////
+D/w151rep01////
+D/w151rep02////
+D/w151rep03////
+D/m151rep01////
+D/v151rep01////
+D/v104dbrep////
+D/ContentMonitor////
+/AuditRepMarker.sh/1.1/Mon Nov 30 18:31:22 2009//
+/AuditRepMarker_All.sh/1.1/Mon Nov 30 18:31:22 2009//
+/AuditRepProcs.sh/1.1/Mon Nov 30 18:31:23 2009//
+/SwitchWarmStandby_ChargebackLoad.sh/1.2/Wed Apr 14 13:32:49 2010//
+/SwitchWarmStandby.ini.20100922.audit/1.1/Wed Sep 22 00:37:43 2010//
+/SwitchWarmStandby.ini.20100922.IVRPictures/1.1/Wed Sep 22 00:38:41 2010//
+/SwitchWarmStandby.ini.20100922.TrialDb/1.1/Wed Sep 22 00:34:19 2010//
+/SwitchWarmStandby.ini.2010Mar3.tor/1.1/Tue Mar  2 20:49:46 2010//
+/SwitchWarmStandby.ini.2010Sep22.ContentMonitor/1.1/Wed Sep 22 00:30:42 2010//
+/SwitchWarmStandby_pgs.sh/1.3/Wed Sep 22 01:00:05 2010//
+D/c151rep01////
+D/Account////
+/drop_Alias_OnActiveSRV_w151dbp02.sh/1.1/Fri Mar  9 15:03:15 2012//
+/settrunc_rep_agent_disable_OnStandbySRV_w151dbp05.sh/1.1/Fri Mar  9 14:45:31 2012//
+/drop_connection_w151dbp05.sql/1.2/Fri Mar  9 14:23:50 2012//
+D/rs_configure////
+D/c151rep44////
+D/m151rep45////
+D/w151rep41////
+D/w151rep42////
+D/w151rep43////
+/v151dbp03ivr.qstLL.repdefs.log/1.1/Tue Apr 17 20:48:44 2012//
+/w151dbp04.Member.repdefs.log/1.1/Mon Sep 13 13:16:15 2010//
+/SwitchWarmStandby.sh/1.7/Wed Sep 14 11:17:24 2011//
+/add_Alias_BothActiveStandbySRV_w151dbp02.sh/1.2/Fri Mar  9 17:35:42 2012//
+/add_Alias_BothActiveStandbySRV_w151dbp05.sh/1.2/Fri Mar  9 17:36:08 2012//
+/resume_connection_w151dbp05.sql/1.2/Fri Mar  9 17:36:55 2012//
+D/my_quote////

@@ -1,0 +1,70 @@
+Tue Nov 27 16:50:01 EST 2007
+ 
+Displaying all partitions known to 'rep2p'.
+ 
+ Logical Name                   Size (MB)   Segments Allocated (MB)
+ ------------------------------ ----------- -----------------------
+ rep2p_SD_L01                           500                       1
+ rep2p_SD_L02                           500                       7
+ rep2p_SD_L03                           500                       1
+ rep2p_SD_L06                          1000                       3
+ rep2p_SD_L07                          1000                       5
+
+(return status = 0)
+ 
+Displaying all partitions known to 'rep3p'.
+ 
+ Logical Name                   Size (MB)   Segments Allocated (MB)
+ ------------------------------ ----------- -----------------------
+ rep3p_SD_L01                           500                       5
+ rep3p_SD_L02                           500                       5
+ rep3p_SD_L03                           500                       3
+ rep3p_SD_L04                           500                       4
+ rep3p_SD_L05                          1000                       8
+
+(return status = 0)
+ 
+Displaying all partitions known to 'rep4p'.
+ 
+ Logical Name                   Size (MB)   Segments Allocated (MB)
+ ------------------------------ ----------- -----------------------
+ rep4p_SD_L01                          2000                      48
+
+(return status = 0)
+ 
+Displaying all partitions known to 'rep5p'.
+ 
+ Logical Name                   Size (MB)   Segments Allocated (MB)
+ ------------------------------ ----------- -----------------------
+ rep5p_SD_L01                          2000                      37
+
+(return status = 0)
+ 
+Displaying all partitions known to 'w151rep01'.
+ 
+ Logical Name                   Size (MB)   Segments Allocated (MB)
+ ------------------------------ ----------- -----------------------
+ w151rep01_SD_L01                      2000                       4
+ w151rep01_SD_L02                       512                       2
+ w151rep01_SD_L03                       512                       1
+ w151rep01_SD_L04                       512                       3
+ w151rep01_SD_L05                       512                      11
+
+(return status = 0)
+ 
+Displaying all partitions known to 'v104dbrep'.
+ 
+ Logical Name                   Size (MB)   Segments Allocated (MB)
+ ------------------------------ ----------- -----------------------
+ v104dbrep_SD_L02                      2000                      13
+ v104dbrep_SD_L01                      2000                      40
+
+(return status = 0)
+ 
+Displaying all partitions known to 'm104dbrep'.
+ 
+ Logical Name                   Size (MB)   Segments Allocated (MB)
+ ------------------------------ ----------- -----------------------
+ m104dbrep_SD_L01                      2000                       2
+
+(return status = 0)

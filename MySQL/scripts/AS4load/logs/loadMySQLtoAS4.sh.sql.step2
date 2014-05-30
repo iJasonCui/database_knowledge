@@ -1,0 +1,10 @@
+SELECT cookieId 
+      ,CONCAT(LTRIM(RTRIM(affiliateId)), ' ') 
+      ,dateCreated 
+      ,552589 AS loadArchiveKey 
+INTO OUTFILE '/data/dump/w151dbp30_7100/bcp/Jump/AffiliateUser.2013-12-10.367.552589.out' 
+FIELDS TERMINATED BY '|~|'  
+LINES TERMINATED BY '|@|\n' 
+FROM Jump.AffiliateUser 
+WHERE dateCreated >= '2013-12-10 4:00:00' 
+  AND dateCreated <  TIMESTAMPADD(day, 1, '2013-12-10 4:00:00'); 

@@ -1,0 +1,34 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updCouponRedemption;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updCouponRedemption (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu 
+**   Date:  March 10 2008
+**   Description:  update CouponRedemption data
+**
+** REVISION(S):
+**   Author: 
+**   Date:
+**   Description: 
+**
+******************************************************************************/
+   at_userId DECIMAL(12, 0),
+   at_status CHAR(1)
+)
+BEGIN
+   DECLARE at_dateNow DATETIME;
+
+   SET at_dateNow = UTC_TIMESTAMP();
+
+   IF (SELECT 1 FROM CouponRedemption WHERE userId = at_userId) IS NOT NULL THEN 
+         UPDATE CouponRedemption 
+            SET status = at_status,
+                dateModified = at_dateNow
+          WHERE userId = at_userId;
+   END IF;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

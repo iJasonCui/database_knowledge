@@ -1,0 +1,31 @@
+1. Check List of webdb9p’s system environment 
+PathFileRemark$HOME.sybpwdDone$HOMEInterfacesDoneRcp from 0pSsh 9p on 1p without promptDoneSymbolic linkDonesp_addserver lname, localDone$HOMEWebdb*p.cfg $HOME/installRun filesCron tab
+2. At 5:10am (9p), ftp database dumps of  Profile_ar and Profile_ad from 4p to 9p (According to the daily load stats of 0p, it takes 15 minutes to rcp both two databases dumps from 4p to 0p sequentially)
+3. At 5:25am (9p), load databases on 9p (According to the daily load stats of 0p, it takes 20 minutes to load two databases sequentially)
+4. (9p) While loading the databases into 9p, copy all transaction dumps from 4p to 9p.  After loading database, load those transactions.
+5. At 5:45am (1p), shutdown the web site and shutdown 4p/20p/23p/24p servers / rep server
+6. At 5:50am (webgamma), change rep server interfaces files as maintenance mode (play a trick on the port number of 4p 20p 23p 24p) 
+7. At 5:55am (1p), startup 4m/20m/23m/24m and rep server as maintenance mode 
+8. (rep2p on webgamma) Wait a few minutes until replicate system quiesce. make sure the system quiesce with using “admin quiesce_check” or “admin health”
+9. At 6:00 AM (old 4p) Dump the last transaction on 4p and copy to 9p and then load tran into 9p’s Profile_ar and Profile_ad
+10. (1p) shut down rep2p and RSM and rep agents on old 4p 
+11. (old 4p) shut down old 4p
+12. Ask Medhat or Thave to rename 9p as new 4p.
+13. (9p, new 4p) double check suid of “rep2p_maint”
+14. (9p, new 4p) sp_configure ’enable rep agent threads’ and check local server
+15. (9p, new 4p) sp_config_rep_agent Profile_ad, ’enable’, ’rep2p’, ’rep2p_ra’, ’rs_password’ (already done after load db)
+16. (9p) sp_config_rep_agent Profile_ar, ’enable’, ’rep2p’, ’rep2p_ra’, ’rs_password’ (already done after load db)
+17. (9p) use Profile_ad; dbcc settrunc(‘ltm’,’ignore’)
+18. (9p) use Profile_ad; dbcc settrunc(‘ltm’,’valid’)
+19. (9p) use Profile_ar; dbcc settrunc(‘ltm’,’ignore’)
+20. (9p) use Profile_ar; dbcc settrunc(‘ltm’,’valid’)
+21. (rssd) rs_zeroltm webdb4p,Profile_ad;
+22. (rssd) rs_zeroltm webdb4p,Profile_ar;
+23. (9p, new 4p) sp_start_rep_agent Profile_ad ; sp_start_rep_agent Profile_ar
+24. (webgamma) start up rep2p and RSM
+25. (9p, new 4p) testing rep server system with inserting into the RepTest table and checking replicate databases.
+26. If pass the previous test, shutdown rep server and sql servers 4m/20m/23m/24m.
+27.  (webgamma) change interfaces into production port number
+28. startup rep server and sql servers 4p/20p/23p/24p as production
+29. test rep server system again by inserting to table RepTest 
+30. ask M & T to bring up the web site if it pass the exam.

@@ -1,0 +1,139 @@
+#-----------------------------
+CREATE DATABASE `Chargeback` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_bin */;
+
+#-----------------------------
+# /etc/w151dbp10_5100.cnf
+#-----------------------------
+
+binlog-do-db =  Msg_ad
+binlog-do-db =  Msg_ai
+binlog-do-db =  Msg_ar
+binlog-do-db =  Msg_md
+binlog-do-db =  Msg_mi
+binlog-do-db =  Msg_mr
+binlog-do-db =  Msg_wd
+binlog-do-db =  Msg_wi
+binlog-do-db =  Msg_wr
+binlog-do-db =  Msg
+binlog-do-db =  Profile_ad
+binlog-do-db =  Profile_ar
+binlog-do-db =  Profile_ai
+binlog-do-db =  Profile_md
+binlog-do-db =  Profile_mi
+binlog-do-db =  Profile_mr
+binlog-do-db =  Profile_wd
+binlog-do-db =  Profile_wi
+binlog-do-db =  Profile_wr
+binlog-do-db =  Profile
+
+
+binlog-do-db = IVROnWeb
+binlog-do-db = LavaForum
+binlog-do-db = PartyMember
+binlog-do-db = SpeedDating
+binlog-do-db = SuccessStory
+binlog-do-db = Tracking
+binlog-do-db = USI
+
+binlog-do-db = Accounting
+binlog-do-db = Admin
+binlog-do-db = Associate
+binlog-do-db = Chargeback
+binlog-do-db = Content
+binlog-do-db = ContentJava
+binlog-do-db = Jump
+binlog-do-db = Member
+binlog-do-db = Session
+binlog-do-db = SurveyPoll
+
+#----------------------
+# replication set up
+#----------------------
+
+CHANGE MASTER TO
+    MASTER_HOST='10.50.4.30',
+    MASTER_PORT=4100,
+    MASTER_USER='rep_user',
+    MASTER_PASSWORD='63vette',
+    MASTER_LOG_FILE='w151dbp30_4100-bin.000006',
+    MASTER_LOG_POS=107;
+
+CHANGE MASTER TO
+    MASTER_HOST='10.50.4.40',
+    MASTER_PORT=4100,
+    MASTER_USER='rep_user',
+    MASTER_PASSWORD='63vette',
+    MASTER_LOG_FILE='w151dbp40_4100-bin.000002',
+    MASTER_LOG_POS=107;
+
+CHANGE MASTER TO
+    MASTER_HOST='10.10.96.221',
+    MASTER_PORT=7200,
+    MASTER_USER='rep_user',
+    MASTER_PASSWORD='63vette',
+    MASTER_LOG_FILE='v151dbp04_7200-bin.000003',
+    MASTER_LOG_POS=107;
+
+#------------
+# shutdown
+
+mysqladmin -h127.0.0.1 -P4010 -uroot -p shutdown
+
+#---------------
+# start up
+
+mysqld_safe --defaults-file=/etc/g151db01_4020.cnf &
+
+#-----------------
+# migrate data
+
+./dataMigrationSybMysql.sh  g151dbr07 Plus45 10.20.1.50 4010 Jump
+
+#---------------------------
+--dump table
+
+mysqldump -d -h127.0.0.1 -P4010 -uroot -p --database Plus45 --add-drop-table >g151db01_4010_Plus45.dump
+mysqldump -d -h127.0.0.1 -P4010 -uroot -p --database Plus45  >g151db01_4010_Plus45.dump
+scp g151db01_4010_Plus45.dump jcui@gxcvs1:/home/jcui/web/javalife/mydb/scripts/initial/
+
+#---------------------
+
+scp -p -r /var/lib/w151dbp10_4100/ /data/w151dbp10_vol_1/db/
+rm -r -f /var/lib/w151dbp10_4100/
+ln -s /data/w151dbp10_vol_1/db/w151dbp10_4100 /var/lib/w151dbp10_4100
+
+chown -R mysql:mysql /data/w151dbp20_vol_1
+
+
+
+#-------------------
+# reverse engineer
+#--------------------
+[sybase@ivrdb1r:/data/dumps/software]$ scp create_table_Chargeback.mysql jcui@gxcvs1:/home/jcui/web/javalife/mydb/scripts/initial
+
+
+:%s/float/decimal/g 
+:%s/numeric/decimal/g 
+%s/decimal(10,0) not null auto_increment/int not null auto_increment/g
+%s/decimal(12,0) not null auto_increment/int not null auto_increment/g
+%s/getdate()/19000101/g
+%s/ show / `show` /g
+%s/dbo.//g
+
+
+sed -i 's/Profile_ad/Profile_md/g' create_table_Profile_md.mysql
+sed -i 's/a_/m_/g' create_table_Profile_md.mysql
+
+#----------------------
+# select count(*) 
+# truncate all tables
+#----------------------
+mysql -Nse 'show tables' Plus45 -h10.50.4.10 -P4100 -uroot -p63vette | while read table; do mysql -e "truncate table $table" Plus45 -h10.50.4.10 -P4100 -uroot -p63vette ; done
+
+mysql -Nse 'show tables' Plus45 -h10.50.4.10 -P4100 -uroot -p63vette | while read table; do mysql -e "select count(*) from $table" Plus45 -h10.50.4.10 -P4100 -uroot -p63vette ; done
+mysql -Nse 'show tables' Plus45 -h10.50.4.20 -P4100 -uroot -p63vette | while read table; do mysql -e "select count(*) from $table" Plus45 -h10.50.4.20 -P4100 -uroot -p63vette ; done
+mysql -Nse 'show tables' Plus45 -h10.10.96.221 -P7100 -uroot -p63vette | while read table; do mysql -e "select count(*) from $table" Plus45 -h10.10.96.221 -P7100 -uroot -p63vette ; done
+mysql -Nse 'show tables' Plus45 -h10.10.26.40 -P7100 -uroot -p63vette | while read table; do mysql -e "select count(*) from $table" Plus45 -h10.10.26.40 -P7100 -uroot -p63vette ; done
+mysql -Nse 'show tables' Plus45 -h10.50.4.30 -P7100 -uroot -p63vette | while read table; do mysql -e "select count(*) from $table" Plus45 -h10.50.4.30 -P7100 -uroot -p63vette ; done
+
+

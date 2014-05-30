@@ -1,0 +1,58 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getUserInfoPrefByUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getUserInfoPrefByUserId (
+/***********************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga
+**   Date:  June 6 2002
+**   Description:  Retrieves prefered infor for a given user id
+**
+** REVISION(S):
+**   Author:  Malay Dave
+**   Date:  Mar 4 2004
+**   Description:  Add new col 'pref_clubll_signup' - for storing clubll signup preference
+**
+** REVISION(S):
+**   Author:  Travis McCauley
+**   Date:  June 1, 2004
+**   Description:  get timezone from cityDb timezone. Requires null check on return value in application
+**
+** REVISION(S):
+**   Author:  Valeri Popov
+**   Date:  July 27, 2004
+**   Description:  added localePref
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date: Oct 2005
+**   Description: eliminated references to removed columns from user_info
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date: June 2006
+**   Description: added mediaReleaseFlag
+**
+**   Author:       Andy Tran
+**   Date:         Feb 2007
+**   Description:  always returns 'N' for mail preference (collect call not accecpted)
+**
+*************************************************************************/
+at_userId DECIMAL(12,0)
+)
+BEGIN
+     SELECT preferred_units
+           ,pref_last_on
+           ,'N' ##--mail_dating
+           ,'N' ##--mail_romance
+           ,'N' ##--mail_intimate
+           ,pref_clubll_signup
+           ,localePref
+           ,searchLanguageMask
+           ,IFNULL(pref_community_checkbox,'MMM')
+           ,IFNULL(mediaReleaseFlag, 'Y')
+       FROM user_info left join City on user_info.cityId = City.cityId
+      WHERE user_info.user_id = at_userId ;
+
+END;;
+DELIMITER ;

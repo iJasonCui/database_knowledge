@@ -1,0 +1,54 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_transPurchaseHistForAdmin;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_transPurchaseHistForAdmin (
+at_userId         DECIMAL(12, 0),
+at_xactionId         DECIMAL(12, 0),
+at_xactionTypeId     TINYINT,
+at_dateCreated       DATETIME,
+at_cost              DECIMAL(10, 2), 
+at_costUSD           DECIMAL(5, 2),
+at_tax               DECIMAL(10, 2), 
+at_taxUSD            DECIMAL(5, 2), 
+at_purchaseTypeId    TINYINT,  
+at_paymentNumber     VARCHAR(40),    
+at_creditCardId      INT,            
+at_offerDetailId     SMALLINT,       
+at_currencyId        TINYINT,       
+at_cardProcessor     CHAR(1),        
+at_billingLocationId SMALLINT,       
+at_refXactionId      DECIMAL(12, 0), 
+at_contentId         SMALLINT,       
+at_description       VARCHAR(255),   
+at_adminUserId       INT,            
+at_purchaseType      VARCHAR(2),        
+at_userIP            DECIMAL(12, 0), 
+at_discountFlag      CHAR(1),
+at_taxCountryId      SMALLINT,
+at_taxJurisdictionId INT,
+at_taxCodeName       VARCHAR(203),
+OUT at_subRecordCount    TINYINT
+)
+BEGIN
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+        ROLLBACK;
+END;
+DECLARE EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+        ROLLBACK;
+END;
+
+START TRANSACTION;
+SET at_subRecordCount = at_subRecordCount + 1;
+         
+INSERT INTO tmp_purchaseHistory(userId,xactionId,xactionTypeId,dateCreated,cost,costUSD,tax,taxUSD,purchaseTypeId,paymentNumber,creditCardId,offerDetailId,currencyId,cardProcessor,
+            billingLocationId,refXactionId,contentId,description,adminUserId,purchaseType,userIP,discountFlag,taxCountryId,taxJurisdictionId,taxCodeName)
+   VALUES(at_userId,at_xactionId,at_xactionTypeId,at_dateCreated,at_cost,at_costUSD,at_tax,at_taxUSD,at_purchaseTypeId,at_paymentNumber,at_creditCardId,at_offerDetailId,at_currencyId,at_cardProcessor,
+            at_billingLocationId,at_refXactionId,at_contentId,at_description,at_adminUserId,at_purchaseType,at_userIP,at_discountFlag,at_taxCountryId,at_taxJurisdictionId,at_taxCodeName);
+
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

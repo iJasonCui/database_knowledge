@@ -1,0 +1,40 @@
+--insert Negativegraph
+
+select 'InputYearJan' as Month,
+SUM(creditConsumedInputYearDec) as creditConsumed,
+SUM(case when creditConsumedInputYearDec < 0 then 1 else 0 end) as userCount,
+
+SUM(case when creditConsumedInputYearDec < 0 and creditConsumedInputYearNov = 0 and creditConsumedInputYearOct = 0 and creditConsumedInputYearSep = 0
+and creditConsumedInputYearAug < 0 then creditConsumedInputYearDec else 0 end ) as creditConsumedM3,
+SUM(case when creditConsumedInputYearDec < 0 and creditConsumedInputYearNov = 0 and creditConsumedInputYearOct = 0 and creditConsumedInputYearSep = 0
+and creditConsumedInputYearAug < 0 then 1 else 0 end ) as countM3 ,
+
+SUM(case when creditConsumedInputYearDec < 0 and creditConsumedInputYearNov = 0 and creditConsumedInputYearOct = 0 and creditConsumedInputYearSep = 0
+and creditConsumedInputYearAug = 0 and creditConsumedInputYearJul < 0 then creditConsumedInputYearDec else 0 end ) as creditConsumedM4,
+SUM(case when creditConsumedInputYearDec < 0 and creditConsumedInputYearNov = 0 and creditConsumedInputYearOct = 0 and creditConsumedInputYearSep = 0
+and creditConsumedInputYearAug = 0 and creditConsumedInputYearJul < 0 then 1 else 0 end ) as countM4 ,
+
+SUM(case when creditConsumedInputYearDec < 0 and creditConsumedInputYearNov = 0 and creditConsumedInputYearOct = 0 and creditConsumedInputYearSep = 0
+and creditConsumedInputYearAug = 0 and creditConsumedInputYearJul = 0 and creditConsumedInputYearJun < 0 
+then creditConsumedInputYearDec else 0 end ) as creditConsumedM5,
+SUM(case when creditConsumedInputYearDec < 0 and creditConsumedInputYearNov = 0 and creditConsumedInputYearOct = 0 and creditConsumedInputYearSep = 0
+and creditConsumedInputYearAug = 0 and creditConsumedInputYearJul = 0 and creditConsumedInputYearJun < 0 then 1 else 0 end ) as countM5,
+
+SUM(case when creditConsumedInputYearDec < 0 and creditConsumedInputYearNov = 0 and creditConsumedInputYearOct = 0 and creditConsumedInputYearSep = 0
+and creditConsumedInputYearAug = 0 and creditConsumedInputYearJul = 0 and creditConsumedInputYearJun = 0  and creditConsumedInputYearMay < 0
+then creditConsumedInputYearDec else 0 end ) as creditConsumedM6,
+SUM(case when creditConsumedInputYearDec < 0 and creditConsumedInputYearNov = 0 and creditConsumedInputYearOct = 0 and creditConsumedInputYearSep = 0
+and creditConsumedInputYearAug = 0 and creditConsumedInputYearJul = 0 and creditConsumedInputYearJun = 0 and creditConsumedInputYearMay < 0
+then 1 else 0 end ) as countM6,
+
+SUM(case when creditConsumedInputYearDec < 0 and creditConsumedInputYearNov = 0 and creditConsumedInputYearOct = 0 and creditConsumedInputYearSep = 0
+and creditConsumedInputYearAug = 0 and creditConsumedInputYearJul = 0 and creditConsumedInputYearJun = 0 and creditConsumedInputYearMay = 0  
+and firstPurchaseDate < 'Apr 1 InputYear' then creditConsumedInputYearDec else 0 end ) as creditConsumedM7,
+SUM(case when creditConsumedInputYearDec < 0 and creditConsumedInputYearNov = 0 and creditConsumedInputYearOct = 0 and creditConsumedInputYearSep = 0
+and creditConsumedInputYearAug = 0 and creditConsumedInputYearJul = 0 and creditConsumedInputYearJun = 0 and creditConsumedInputYearMay = 0 
+and firstPurchaseDate < 'Apr 1 InputYear' then 1 else 0 end ) as countM7
+
+from DeferredRev.NegativeChart${RepMon}${RepYear} 
+go
+
+

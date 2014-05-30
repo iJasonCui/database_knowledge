@@ -1,0 +1,41 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updCreditCardEnc;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updCreditCardEnc (
+
+/******************************************************************************
+ **
+ ** CREATION:
+ **   Author:       Andy Tran
+ **   Date:         February 2008
+ **   Description:  replace encodedCardNum with encodedCardId.
+ **
+ ** REVISION(S):
+ **   Author:
+ **   Date:
+ **   Description:
+ **
+ ******************************************************************************/
+ at_encodedCardNum VARCHAR(64)
+,at_encodedCardId  INT
+)
+BEGIN
+
+DECLARE at_dateNowGMT  DATETIME;
+DECLARE at_timeStamp   VARCHAR(64);
+
+SET at_dateNowGMT = UTC_TIMESTAMP();
+
+SET at_timeStamp = CAST(TIMESTAMPDIFF(second, '1970-01-01 00:00:00', at_dateNowGMT) AS CHAR);
+
+IF (SELECT 1 FROM CreditCard WHERE encodedCardNum = at_encodedCardNum) IS NOT NULL THEN
+            UPDATE CreditCard
+               SET encodedCardNum = at_timeStamp -- keep unique index
+                  ,encodedCardId = at_encodedCardId
+                  ,dateModified = at_dateNowGMT
+             WHERE encodedCardNum = at_encodedCardNum;
+
+END IF;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,30 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAllCreditTypes;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAllCreditTypes (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  May 21, 2003
+**   Description:  retrieves all credit types
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+)
+  BEGIN  
+	SELECT 
+          creditTypeId,
+          contentId,
+          ordinal,
+          duration
+        FROM CreditType
+        ORDER BY creditTypeId ;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,22 @@
+step 1: create route
+
+
+[30] w151rep02..1> create route to g151rep07 set username g151rep07_rsi_user set password "password"
+[30] w151rep02..2> go
+Msg 15191, Level 12, State 0
+Server 'w151rep02'
+Log transfer for the RSSD 'w151rssd02.w151rep02_RSSD' is OFF. To be able to create a route from this site, log transfer must be ON.
+[31] w151rep02..1> 
+
+
+step 2: alter connection 
+
+alter connection to w151rssd02.w151rep02_RSSD set log transfer on 
+
+sp_config_rep_agent w151rep02_RSSD, 'enable', 'w151rep02', 'w151rep02_ra_user', 'password'
+
+sp_config_rep_agent w151rep02_RSSD, 'disable'
+
+sp_start_rep_agent  w151rep02_RSSD
+
+dbcc gettrunc

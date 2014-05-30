@@ -1,0 +1,16 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS `wsp_GetDateGMT`;
+
+CREATE DEFINER=`root`@`10.10.26.21` PROCEDURE `wsp_GetDateGMT`(
+     OUT  getDateGMT_in DATETIME 
+)
+BEGIN
+
+   DECLARE getdate_in DATETIME ;
+
+   SET getdate_in = NOW();
+
+   CALL wsp_ConvertDateGMT(getdate_in, getDateGMT_in); 
+
+END;;
+DELIMITER ;

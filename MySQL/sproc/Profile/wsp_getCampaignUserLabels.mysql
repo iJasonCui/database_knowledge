@@ -1,0 +1,16 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getCampaignUserLabels;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getCampaignUserLabels (
+ at_campaignId int 
+,at_userId int
+)
+BEGIN    
+
+SELECT labelId
+FROM CampaignUserLabel 
+WHERE userId=at_userId
+and campaignId=at_campaignId 
+order by dateModified DESC;
+
+END;;
+DELIMITER ;

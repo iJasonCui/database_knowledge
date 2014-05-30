@@ -1,0 +1,54 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_cursorUpsellExpiry;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_cursorUpsellExpiry (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu 
+**   Date:  May 2 2008
+**   Description:  retrieves all expired upsells, which are marked ianctive.
+**
+** REVISION:
+**   Author:  
+**   Date:   
+**   Description: 
+**
+**
+******************************************************************************/
+at_dateNow DATETIME
+)
+BEGIN
+
+DECLARE at_userId DECIMAL(12, 0);
+DECLARE at_subscriptionOfferDetailId SMALLINT;
+
+DECLARE done INT DEFAULT FALSE;
+DECLARE CUR_upsellExpiry CURSOR FOR 
+   	   SELECT userId, subscriptionOfferDetailId  
+     	   	  FROM UserSubscriptionAccount
+    		  WHERE subscriptionStatus <> 'I'
+      		  	AND IFNULL(subscriptionEndDate, '20521231') < at_dateNow
+      			AND autoRenew = 'N'
+      			AND subscriptionOfferDetailId IN (SELECT subscriptionOfferDetailId FROM SubscriptionOfferDetail WHERE premiumId > 0)
+   		  ORDER BY userId ASC ;
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+OPEN CUR_upsellExpiry ;
+
+read_loop: LOOP 
+   FETCH CUR_upsellExpiry INTO at_userId, at_subscriptionOfferDetailId;
+
+   IF done THEN
+      LEAVE read_loop;
+   END IF;
+ 
+   CALL wsp_transUpsellExpiry (at_dateNow, at_userId, at_subscriptionOfferDetailId);
+
+END LOOP;
+ 
+CLOSE CUR_upsellExpiry; 
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,123 @@
+
+1,install ASE 15 in different directory
+  generate license key and copy to $SYBASE/SYSAM-2_0/licenses/servername.lic
+
+2, check and adjust servers to be upgraded
+ 
+(1) set OLDSYBASE, OLDSYBASE_ASE,OLDSYBASE_OCS environment variables to point to the old installation of ASE
+Run preupgrade to check and report upgrade problems such as reserved words conflict and space issue.
+ 
+$SYBASE/$SYBASE_ASE/upgrade/preupgrade -Usa -Swebdb0g -I$OLDSYBASE/interfaces. .
+
+(2)according to output of preupgrade,  change parameters to make them eligible for new version
+
+NOTE: if the following parameters are greater than the following respective values, DO NOT reconfigure them.
+
+sp_configure 'procedure cache size',12000   *
+sp_configure 'default database size',3           *
+sp_configure 'number of aux scan descriptors',256 *
+sp_configure 'number of locks',10000                     *
+sp_configure 'max network packet size',2048
+sp_configure 'default network packet size',2048
+sp_configure 'dtm detach timeout period',300
+
+(3) extend database to accommodate more info needed by new version
+make sure the size of the following db is greater than respective values, if they are already greater, DO NOT extend them any more
+eg: alter database model on master = '2M'
+tempdb  3+1M
+model 2+2M
+sybsystemdb 3+1M
+sybsystemprocs 132+55
+and userdb as well
+
+For new device,
+disk init
+name=tempdb_device?
+physname=/data/db/tempdb_device.dat
+size='100M'
+dsync=false
+
+For existing device,
+disk resize 
+name=device1
+size='100M'
+
+Alter database tempdb on tempdb_device = '100m'
+
+(4) change all config and run pregrade again until no error occured
+
+
+3, If the users of old and new installation of ASE are different, please grant read and write privileges of  all related files in old installation to new user.
+NOTE: make sure all device files are accessible by new user
+
+Chmod  -R g+rw * (suppose they have the same group)
+
+4, upgrade Adaptive Server
+ 
+(1) copy upgrade resource file at $SYBASE/$SYBASE_ASE/init/sample_resource_files/sqlupgrade.adaptive_server.rs and edit the file
+
+(2) make sure environment variables are correct, otherwise we need to run '. SYBASE.sh'
+
+(3) comment out cron job on opsdb2p which gets sysmon report every 5 minutes.
+
+(4) suspend all connection to the server to be upgraded.
+
+(5) run the following command
+  $SYBASE/$SYBASE_ASE/bin/sqlupgraderes -r upgrade.ase15.rs
+  
+  It usually takes over 25 minutes , depends on different   configuration and databases of servers.And the new server will start up automatically.
+  Check the output to make sure everything is OK.
+
+(6) resume connections
+
+(7) uncomment cron job on opsdb2p
+
+5, Upgrade backup Server
+(1) edit resource file and run sqlupgrade
+(2) shutdown and restart backup server
+
+6, check environment variable, RUN file, interface file,   log file and permissions,make some changes if necessary (eg: log file).
+
+7, replicated database can't be online automatically ,    dbcc dbrepair(CCEncrypted, ltmignore),then online    database manually.
+
+=======================================
+output of sqlupgrade: 
+
+Copying interfaces file entry to new directory...
+The interfaces file entry has been copied to the new directory.
+Running preupgrade program...
+The preupgrade program has completed successfully.
+Checking reserved words in each database...
+No reserved word conflicts were found.
+Checkpointing all databases...
+All databases have been checkpointed.
+Copying configuration file to new directory...
+The configuration file has been copied to the new directory.
+Updating RUN_SERVER file...
+The RUN_SERVER file has been updated.
+Doing pre-upgrade modifications...
+Pre-upgrade modifications succeeded.
+Restarting Adaptive Server....
+Adaptive Server has been restarted.
+Running upgrade program...
+The upgrade program has completed successfully.
+Restarting Adaptive Server....
+Adaptive Server has been restarted.
+Running installmaster script...
+installmaster: 10% complete.
+installmaster: 20% complete.
+installmaster: 30% complete.
+installmaster: 40% complete.
+installmaster: 50% complete.
+installmaster: 60% complete.
+installmaster: 100% complete.
+The installmaster script has been successfully installed.
+Running installcommit script...
+The installcommit script has been successfully installed.
+Installing common character sets (Code Page 437, Code Page 850, ISO Latin-1, 
+Macintosh and HP Roman-8)...
+Character sets installed.
+Restarting Adaptive Server....
+Adaptive Server has been restarted.
+
+

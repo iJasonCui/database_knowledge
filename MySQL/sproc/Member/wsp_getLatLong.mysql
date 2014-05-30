@@ -1,0 +1,27 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getLatLong;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getLatLong (
+at_lat_rad int
+,at_long_rad int
+,at_countryId smallint
+,at_cityId int
+,OUT at_lat_rad1 INT 
+,OUT at_long_rad1 INT 
+)
+BEGIN
+
+IF ((at_countryId = 244 OR at_countryId = 40) AND (at_lat_rad>157079) AND (at_long_rad>0))
+THEN
+    SET at_lat_rad1  = at_lat_rad - 157079 ;
+    SET at_long_rad1 = at_long_rad * (-1) ;
+END IF;
+
+IF ((at_lat_rad1 is null OR at_long_rad1 is null) AND at_cityId > 0)
+THEN
+    SELECT latitudeRad, longitudeRad INTO at_lat_rad1, at_long_rad1
+      FROM City 
+     WHERE cityId=at_cityId ;
+END IF;
+
+END;;
+DELIMITER ;

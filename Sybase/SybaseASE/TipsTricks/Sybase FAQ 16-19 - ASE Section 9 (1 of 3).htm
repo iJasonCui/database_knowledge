@@ -1,0 +1,654 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<TITLE>Sybase FAQ: 16/19 - ASE Section 9 (1 of 3)</TITLE>
+<script language="JavaScript1.2">
+function edc(s,s2)
+{document.write("<font face=\"Arial\"><A href=\"",s,"\" target=\"_blank\" onclick=\"window.open('",s,"','Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=720,height=530,left=30,top=43');return false;\" )>Not finding the answers you need?&nbsp;",s2,"Submit your question for others to see.</A></font>");}
+//-->
+</script>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<DIV ALIGN=CENTER>
+<SMALL>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  Part16 -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A>
+</SMALL>
+<BR><HR SIZE=2 WIDTH=600 NOSHADE>
+<P><H1>Sybase FAQ: 16/19 - ASE Section 9 (1 of 3)</H1>
+<table border="0" cellpadding="4" cellspacing="4" width="35%">
+<tr><td width="100%" align="center" bgcolor="#D6D6C0">
+<p align=center><small>
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part16/index.html","<br>");
+// --></script>
+</small></p>
+</td></tr>
+</table>
+ <br>
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="40%">
+<tr><td width="100%" align="center" bgcolor="#CCCCFF"><font face="Arial">There are reader questions on this topic!<a href="#ct"><br>Help
+others by sharing your knowledge</a></font></td></tr>
+</table></center></div>
+<HR SIZE=2 WIDTH=600 NOSHADE>
+</DIV>
+<PRE>
+Message-ID: &lt;databases/sybase-faq/part16_1074677126@rtfm.mit.edu&gt;
+X-Last-Updated: 2003/03/02
+From: dowen@midsomer.org (David Owen)
+Newsgroups: <A HREF="http://groups.google.com/groups?group=comp.databases.sybase" target="new">comp.databases.sybase</A>
+Subject: Sybase FAQ: 16/19 - ASE Section 9 (1 of 3)
+Reply-To: <A HREF="mailto:dowen@midsomer.org">dowen@midsomer.org</A> (David Owen)
+Keywords: FAQ, DATABASES, SYBASE, ASA, ASE, REP
+Date: 21 Jan 2004 09:26:08 GMT
+
+Archive-name: databases/sybase-faq/part16
+URL: <A HREF="http://www.isug.com/Sybase_FAQ">http://www.isug.com/Sybase_FAQ</A>
+Version: 1.7
+Maintainer: David Owen
+Last-modified: 2003/03/02
+Posting-Frequency: posted every 3rd month
+   A how-to-find-the-FAQ article is posted on the intervening months.
+
+                                   Freeware                                    
+                                                                               
+ 
+
+Sybase Tech Docs Open Client ASE FAQ
+
+ 
+
+The best place to search for Sybase freeware is Ed Barlow (<A HREF="mailto:sqltech@tiac.net">sqltech@tiac.net</A>)'s
+site (<A HREF="http://www.edbarlow.com">http://www.edbarlow.com</A>).   He is likely to spend more time maintaining
+his list than I will spend on this.   I will do my best!
+
+    9.0      Where is all the code and why does Section 9 suddenly load in a
+    reasonable amount of time?
+   
+    Stored Procedures
+   
+    9.1.1      sp_freedevice - lists device, size, used and free.
+    9.1.2      sp_dos - This procedure graphically displays the scope of a
+    object
+    9.1.3      sp_whodo - augments sp_who by including additional columns: cpu,
+    I/O...
+    9.1.4      sp__revroles - creates DDL to sp_role a mirror of your SQL
+    Server
+    9.1.5      sp__rev_configure - creates DDL to sp_configure a mirror of your
+    SQL Server
+    9.1.6      sp_servermap - overview of your SQL Server
+    9.1.7      sp__create_crosstab - simplify crosstable queries
+    9.1.8      sp_ddl_create_table - creates DDL for all user tables in the
+    current database
+    9.1.9      sp_spaceused_table
+    9.1.10    SQL to determine the space used for an index.
+    9.1.11    sp_helpoptions - Shows what options are set for a database.
+    9.1.12    sp_days - returns days in current month.
+    9.1.13    sp__optdiag - optdiag from within isql
+    9.1.14    sp_desc - a simple list of a tables' columns
+    9.1.15    sp_lockconfig - Displays locking schemes for tables.
+   
+    Shell Scripts
+   
+    9.2.1      SQL and sh(1)to dynamically generate a dump/load database
+    command.
+    9.2.2      update statistics script
+   
+    Perl/Sybperl
+   
+    9.3.1      SybPerl - Perl interface to Sybase.
+    9.3.2      dbschema.pl - Sybperl script to reverse engineer a database.
+    9.3.3      ddl_insert.pl - creates insert DDL for a table.
+    9.3.4      int.pl - converts interfaces file to tli
+    9.3.5      Sybase::Xfer.pm - Module to transfer data between two servers.
+    9.3.6      sybmon.pl - realtime process and lock monitor
+    9.3.7      showserver.pl - shows the servers on a particular machine in a
+    nice format.
+    9.3.8      Collection of Perl Scripts
+   
+    Sybtcl
+   
+    9.4.1      Sybtcl - TCL interface to Sybase.
+    9.4.2      sybdump - a Tcl script for dumping a database schema to disk
+    9.4.3      wisql - graphical sql editor and more
+   
+    Python
+   
+    9.5.1      Sybase Module for Python.
+   
+    Tools, Utilities and Packages
+   
+    9.6.1      sqsh - a superset of dsql with local variables, redirection,
+    pipes and all sorts of goodies.
+    9.6.2      lightweight Sybase Access via Win95/NT
+    9.6.3      BCPTool - a utility for trasferring data from ASE to another
+    (inc. native port to Linux).
+   
+    'Free' Versions of ASE
+   
+    The next couple of questions will move to the OS section (real) soon.
+   
+    9.7.1      How to access a SQL Server using Linux see also Q11.4.6
+    9.7.2      Sybase on Linux Linux Penguin
+    9.7.3      How to configure shared-memory for Linux
+    9.7.4      Sybase now available on Free BSD
+   
+    Other Sites of Interest
+   
+    9.8.1      Ed Barlow's collection of Stored Procedures.
+   
+    9.8.2      Examples of Open Client and Open Server programs -- see Q11.4.14
+    .
+    9.8.3      xsybmon - an X interface to sp_monitor
+
+Sybase Tech Docs Open Client ASE FAQ
+
+-------------------------------------------------------------------------------
+
+9.0: Where is all the code and why does Section 9 suddenly load in a reasonable
+amount of time?
+
+-------------------------------------------------------------------------------
+
+This section was in need of a spring clean, and it has now had it. I have
+tested all of the stored procs included here against all versions of Sybase
+that I have to hand. (11.0.3.3, 11.9.2 and 12.5 on Linux, 11.9.2 and 12 on
+Solaris and 11.9.2 and 12 on NT.) If Pablo or the supplier documented that he
+had tested it on other versions, then I have included those comments. Just
+remember that I did not test them on anything pre-11.0.3.3. If you are still
+using them on a pre-11.0.3.3 release (I know of at least one place that is
+still running 4.9.2!) then let me know and I will add a suitable comment.
+
+I have actually taken the code away and built a set of packages. First and
+foremost is the stored proc package, then there is a shell script package, a
+perl package and finally there is the archive package, which contains any stuff
+specific to non-current releases of ASE.
+
+In addition to wrenching out the code I have added some samples of the output
+generated by the scripts. It occurred to me that people will be better able to
+see if the stored proc does what they want if they can see what it produces.
+
+Finally, part of the reason that this is here is so that people can examine the
+code and see how other people write stored procs etc. Each stored proc is in a
+file of its own so that you can choose which ones you wish to browse on-line
+and then cut and paste them without having to go through the hassle of
+un-htmling them.
+
+Back to top
+
+9.1.1: sp_freedevice
+
+-------------------------------------------------------------------------------
+
+This script displays the size of the devices configured for a server, together
+with the free and used allocations.
+
+Get it as part of the bundle (zip or tarball) or individually from here.
+
+Output:
+
+[30] BISCAY.master.1&gt; sp_freedevice
+[30] BISCAY.master.2&gt;&gt; go
+ total                 used                  free
+ --------------------- --------------------- ---------------------
+             950.00 MB             750.00 MB             200.00 MB
+
+(1 row affected)
+ devname                        size                  used                  free
+ ------------------------------ --------------------- --------------------- ---------------------
+ db01                                       100.00 MB              72.00 MB              28.00 MB
+ db02                                       100.00 MB               0.00 MB             100.00 MB
+ log01                                      100.00 MB              51.00 MB              49.00 MB
+ master                                      50.00 MB              27.00 MB              23.00 MB
+ sysprocsdev                                200.00 MB             200.00 MB               0.00 MB
+ tlg01                                      200.00 MB             200.00 MB               0.00 MB
+ tmp01                                      200.00 MB             200.00 MB               0.00 MB
+
+(7 rows affected, return status = 0)
+[31] BISCAY.master.1&gt;
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.1.2: sp_dos
+
+-------------------------------------------------------------------------------
+
+sp_dos displays the scope of an object within a database. What tables it
+references, what other procedures it calls etc. Very useful for trying to
+understand an application that you have just inherited.
+
+Get it as part of the bundle (zip or tarball) or individually from here.
+
+The output looks like this:
+
+1&gt; sp_dos sp_helpkey
+2&gt; go
+
+** Utility by David Pledger, Strategic Data Systems, Inc.  **
+**         PO Box 498, Springboro, OH  45066               **
+
+         SCOPE OF EFFECT FOR OBJECT:  sp_helpkey
++------------------------------------------------------------------+
+(P) sp_helpkey
+|
++--(S) sysobjects
+|
++--(S) syskeys
+|
++--(P) sp_getmessage
+   |
+   +--(S) sysusermessages
+   |
+   +--(P) sp_validlang
+
+(return status = 0)
+1&gt;
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.1.3: sp_whodo
+
+-------------------------------------------------------------------------------
+
+Sybase System 10.x and above
+
+sp_whodo is an enhanced version of sp_who, with cpu and io usage for each user.
+Note that this proc is now a little out of date since Sybase introduced the fid
+column, so subordinate threads are unlikely to be grouped with their parent.
+
+Get it as part of the bundle (zip or tarball) or individually from here.
+
+Output:
+
+1&gt; sp_whodo
+2&gt; go
+ spid   status       loginame     hostname   blk blk_sec program
+         dbname  cmd              cpu    io      tran_name
+ ------ ------------ ------------ ---------- --- ------- ----------------
+        ------- ---------------- ------ ------- ----------------
+      2 sleeping     NULL                    0   0
+         master  NETWORK HANDLER  0      0
+      4 sleeping     NULL                    0   0
+         master  DEADLOCK TUNE    0      0
+      5 sleeping     NULL                    0   0
+         master  MIRROR HANDLER   0      0
+      6 sleeping     NULL                    0   0       &lt;astc&gt;
+         master  ASTC HANDLER     0      0
+      7 sleeping     NULL                    0   0
+         master  CHECKPOINT SLEEP 0      128
+      8 sleeping     NULL                    0   0
+         master  HOUSEKEEPER      0      33
+     17 running      sa           n-utsire.m 0   0       ctisql
+         master  SELECT           0      1
+
+(7 rows affected)
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.1.4: sp__revroles
+
+-------------------------------------------------------------------------------
+
+Well, I cannot get this one to do what it is supposed to, I am not sure if it
+is just that it was written for a different release of Sybase and 11.9.2 and
+above has changed the way that roles are built, or what. Anyway, I may work on
+it some more.
+
+Get it as part of the bundle (zip or tarball) or individually from here.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.1.5: sp__rev_configure
+
+-------------------------------------------------------------------------------
+
+This proc reverse engineers the configure settings. It produces a set of calls
+to sp_configure for those values that appear in syscurconfigs. I am not sure
+how relevant this is with the ability to save and load the config file.
+
+Get it as part of the bundle (zip or tarball) or individually from here.
+
+The output is as follows, however, I have edited away some of the values since
+my list was considerably longer than this.
+
+ -- sp_configure settings
+ -------------------------------------------------------------
+ sp_configure 'recovery interval', 5
+go
+ sp_configure 'allow updates', 0
+go
+ sp_configure 'user connections', 25
+go
+ sp_configure 'memory', 14336
+go
+ sp_configure 'default character set id', 2
+go
+ sp_configure 'stack size', 65536
+go
+ sp_configure 'password expiration interval', 0
+go
+ sp_configure 'audit queue size', 100
+go
+ sp_configure 'additional netmem', 0
+go
+ sp_configure 'default network packet size', 512
+go
+ sp_configure 'maximum network packet size', 512
+go
+ sp_configure 'extent i/o buffers',
+go
+ sp_configure 'identity burning set factor', 5000
+go
+ sp_configure 'size of auto identity', 10
+go
+ sp_configure 'identity grab size', 1
+go
+ sp_configure 'lock promotion threshold', 200
+go
+
+(41 rows affected)
+(return status = 0)
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.1.6: sp_servermap
+
+-------------------------------------------------------------------------------
+
+A one stop shop for a quick peek at everything on the server.
+
+Get it as part of the bundle (zip or tarball) or individually from here.
+
+The output for a brand new 11.0.3.3 ASE on Linux server is as follows:
+
+                                Current Date/Time
+ ------------------------------ --------------------------
+ TRAFALGAR                             Jan 14 2001  1:48PM
+
+ Version
+
+ -------------------------------------------------------------------------------------------------
+
+ SQL Server/11.0.3.3 ESD#6/P-FREE/Linux Intel/Linux 2.2.14 i686/1/OPT/Fri Mar 17 15:45:30 CET 2000
+
+A - DATABASE SEGMENT MAP
+************************
+ db              dbid   segmap      segs device fragment start (pg)  size (MB)
+ --------------- ------ ----------- ---- --------------- ----------- ---------
+ master               1           7  LDS master                    4    3.00
+ master               1           7  LDS master                 3588    2.00
+ tempdb               2           7  LDS master                 2564    2.00
+ model                3           7  LDS master                 1540    2.00
+ sybsystemprocs       4           7  LDS sysprocsdev        16777216  150.00
+ sybsecurity          5          15 ULDS sybsecurity        33554432  300.00
+
+Segment Codes:
+U=User-defined segment on this device fragment
+L=Database Log may be placed on this device fragment
+D=Database objects may be placed on this device fragment by DEFAULT
+S=SYSTEM objects may be placed on this device fragment
+
+
+B - DATABASE INFORMATION
+************************
+ db              dbid   size (MB) db status codes    created
+         dump tran
+ --------------- ------ --------- ------------------ ---------------
+        ---------------
+ master               1    5.00                      01 Jan 00 00:00
+         07 Jan 01 04:01
+ tempdb               2    2.00   A                  14 Jan 01 13:46
+         14 Jan 01 13:47
+ model                3    2.00                      01 Jan 00 00:00
+         07 Jan 01 03:38
+ sybsystemprocs       4  150.00    B                 07 Jan 01 03:32
+         14 Jan 01 13:43
+ sybsecurity          5  300.00    B                 07 Jan 01 04:01
+         07 Jan 01 04:55
+
+Status Code Key
+
+Code       Status
+----       ----------------------------------
+ A         select into/bulk copy allowed
+ B         truncate log on checkpoint
+ C         no checkpoint on recovery
+ D         db in load-from-dump mode
+ E         db is suspect
+ F         ddl in tran
+ G         db is read-only
+ H         db is for dbo use only
+ I         db in single-user mode
+ J         db name has been changed
+ K         db is in recovery
+ L         db has bypass recovery set
+ M         abort tran on log full
+ N         no free space accounting
+ O         auto identity
+ P         identity in nonunique index
+ Q         db is offline
+ R         db is offline until recovery completes
+
+
+C - DEVICE ALLOCATION MAP
+*************************
+ device fragment start (pg)  size (MB) db              lstart      segs
+ --------------- ----------- --------- --------------- ----------- ----
+ master                    4    3.00   master                    0  LDS
+ master                 1540    2.00   model                     0  LDS
+ master                 2564    2.00   tempdb                    0  LDS
+ master                 3588    2.00   master                 1536  LDS
+ sybsecurity        33554432  300.00   sybsecurity               0 ULDS
+ sysprocsdev        16777216  150.00   sybsystemprocs            0  LDS
+
+Segment Codes:
+U=USER-definedsegment on this device fragment
+L=Database LOG may be placed on this device fragment
+D=Database objects may be placed on this device fragment by DEFAULT
+S=SYSTEM objects may be placed on this device fragment
+
+
+D - DEVICE NUMBER, DEFAULT &amp; SPACE USAGE
+****************************************
+ device          vdevno default disk? total (MB) used    free
+ --------------- ------ ------------- ---------- ------- -------
+ master               0     Y          100.00       9.00   91.00
+ sysprocsdev          1     N          150.00     150.00    0.00
+ sybsecurity          2     N          300.00     300.00    0.00
+
+E - DEVICE LOCATION
+*******************
+ device          location
+ --------------- ------------------------------------------------------------
+ master          d_master
+ sybsecurity     /d/TRAFALGAR/3/sybsecur.dat
+ sysprocsdev     /d/TRAFALGAR/2/sybprocs.dat
+
+NO DEVICES ARE MIRRORED
+(return status = 0)
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.1.7: sp__create_crosstab
+
+-------------------------------------------------------------------------------
+
+Hmmm... not quite sure about this one. Was not 100% sure about how to set it
+up. From the description it builds a cross tab query. If someone knows how to
+use this, then let me know how to set it up and I will improve the description
+here and provide some output.
+
+Get it as part of the bundle (zip or tarball) or individually from here.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.1.8: sp_ddl_create_table
+
+-------------------------------------------------------------------------------
+
+Well, you all know what a create table statement looks like... This produces
+the table definitions in their barest form (lacking in constraints etc) and the
+resulting DDL is perhaps not as elegant as some other utilities, but far be it
+from me to blow dbschema's trumpet :-), but it is worth a look just for the
+query. The layout of the carriage returns being embedded within strings is
+deliberate!
+
+Get it as part of the bundle (zip or tarball) or individually from here.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.1.9: sp_spaceused_table
+
+-------------------------------------------------------------------------------
+
+Brief
+
+In environment where there are a lot of temporary tables #x being created, how
+do you tell who is using how much space ? The answer is sp_spaceused_table,
+which basically lists the tables in a database with rowcount and space usage
+statistics. I have replaced the original proc with K-shell script for a single
+proc. I think that it is easier to compare if it is all in one listing.
+However, if you disagree I will add the original code to the archive package,
+just let me know.
+
+Get it as part of the bundle (zip or tarball) or individually from here.
+
+The output of the proc is as follows: (I used sqsh, hence the prompt, since it
+auto-resizes its width as you resize the xterm.)
+
+[25] N_UTSIRE.tempdb.1&gt; sp_spaceused_table
+[25] N_UTSIRE.tempdb.2&gt; go
+ name                                          rowtotal    reserved        data            index_size      unused
+ --------------------------------------------- ----------- --------------- --------------- --------------- ---------------
+ #matter______00000010014294376                12039       3920 KB         3910 KB         0 KB            10 KB
+ #synopsis____00000010014294376                6572        15766 KB        274 KB          15472 KB        20 KB
+ #hearing_____00000010014294376                5856        572 KB          568 KB          0 KB            4 KB
+ #hearing2____00000010014294376                5856        574 KB          568 KB          0 KB            6 KB
+ #hearing3____00000010014294376                5856        574 KB          568 KB          0 KB            6 KB
+ #synopsis2___00000010014294376                6572        15820 KB        274 KB          15472 KB        74 KB
+
+(return status = 0)
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+</PRE>
+<DIV ALIGN=CENTER>
+<SMALL>
+<P><HR WIDTH=1900 NOSHADE><BR>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  Part16 -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A></SMALL>
+<P>
+<div align="center">
+
+<center>
+<form method="post" action="rateit.php">
+<table border="1" cellpadding="0" cellspacing="0" width="150" bgcolor="#ffcccc" style="WIDTH: 150px">
+<tr><td width="100%">
+<div align="center">
+<table border="0" cellpadding="2" width="100%" bgcolor="#ffcccc">
+<tr><td width="100%" height="14">
+<p align="center"><font face="Arial">Rate this FAQ</font></p>
+</td></tr>
+<tr><td width="100%" height="14">
+<p align="center">
+<INPUT TYPE=HIDDEN NAME="pid" VALUE="databases/sybase-faq/part16/index.html">
+<select size="1" name="D1" style="COLOR: darkmagenta; BACKGROUND-COLOR: cornsilk">
+<option selected value="0">N/A</option>
+<option value="1">Worst</option>
+<option value="2">Weak</option>
+<option value="3">OK</option>
+<option value="4">Good</option>
+<option value="5">Great</option>
+</select>
+</p>
+</td></tr>
+<tr><td width="100%" height="27">
+<p align="center">
+<IMG onclick="mystr='/frate.php?pid='+pid.value+'&vote='+D1.value;
+Popup=window.open(mystr,'Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=380,height=270,left=230,top=43'); 
+ return false;" height=28 src="/images/vote.gif" alt="Vote" width=83 border=0 ></p>
+</td></tr>
+</table>
+</div>
+</td></tr>
+</table>
+<font size="-1" face="Arial"><br><a href="/topRated.html">Current Top-Rated FAQs</a><br></font>
+</form>
+</center>
+
+</div>
+
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="100%">
+<tr><td width="100%" bgcolor="#D6D6C0">
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part16/index.html"," ");
+// --></script>
+<p><font face="Arial"><a name="ct">Are you an expert in this area?</a> Share your knowledge and earn expert points by giving answers or rating people's questions and answers! This section of FAQS.ORG is not sanctioned in any way by FAQ authors or maintainers.</font></p>
+<p><font face="Arial">Questions strongly related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-6730.html">How can I display the table sizes of ALL tables in a database?   </a> by Caspar (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9594.html">how to use nested cursors in a stored procedure in ASE ? is there any template to use !...</a> by nino (12/18/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3265.html">to connect sybase and c++,how to connect and access the data </a> by kumaran (9/2/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6741.html">how do u tell the last time update statistics has been run on a table (11.0.3) </a> by yujo (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11075.html">I need to Execute an SP & set its output to the insert statement. This will be occured for...</a> by rose (1/14/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9435.html">I wanted to know EXACT technical details about what ACTUALLY happens when u fire a simple...</a> by anu (12/15/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-8395.html">Is there anyway to start dataserver in ASE 11.9.2 with only the master and tempdb online...</a> by steve_2000g (11/28/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-854.html">i get an error on the "convert" when i try to run this line of code, why is this?   print...</a> by shugarhi (7/14/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11834.html">Hi  &nbsp; We're using Sybase ASE 12.0 running on SUN 4500 Cluster server. We cannot...</a> by KK (1/26/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6297.html">I am creating a stored proc to create a report of dependencies. &nbsp;We are creating...</a> by RR (10/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7388.html">How is this hazardous if we do not close a cursor? </a> by amar (11/11/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9827.html">How can i reduce my tempdb size once i have increased it by creating a device also? </a> by rajs (12/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12835.html">how can i transfer a table from cybase to db2? &nbsp;please sendme step by step method if...</a> by maulik (2/9/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3213.html">My database is in bypass recovery mode. How do I put it in normal mode? </a> by Lach (9/1/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-1435.html">Hi ,  &nbsp;We are using Sybase ASE 11.9.2 with SCO Unix 7.1.1 &nbsp;as the operating ...</a> by gowri (7/27/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-2412.html">were is a database that will bring up  a person address without there last name </a> by travis (8/15/2003)</font></li>
+</ul>
+<p><font face="Arial">Questions somewhat related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-2221.html">Guys!   See the Sybase query below: select convert(float,substring(&lt;field1&gt;,3,...</a> by pathfinder (8/12/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7790.html">What are the side-effects of turning-on the built-in auditing capabilities of sybase? </a> by Choy (11/17/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12136.html">When ever i execute select property('PROCESSCPU') i get the value 189 and whenever i...</a> by anilkumarsh (1/29/2004)</font></li>
+</ul>
+<p><font face="Arial">Other questions awaiting answers:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/related.html">10088 questions</a> related to other FAQs<br></font></li>
+<li><font face="Arial"><a href="/qa/unrelated.html">1765 general questions</a></font></li>
+<li><font face="Arial"><a href="/qa/answered.html">4091 answered questions</a><br></font></li>
+</ul>
+</td></tr></table> <br></center></div>
+<HR NOSHADE SIZE=2 WIDTH=450>
+[ <a href="/faqs/">Usenet FAQs</a> | <a href="/faqs/faqsearch.html">Search</a> | <a href="/contrib/">Web FAQs</a> | <a href="/docs/">Documents</a> | <a href="/rfcs/">RFC Index</a> ]
+<BR><HR NOSHADE SIZE=2 WIDTH=450>
+<P>
+<ADDRESS>
+Send corrections/additions to the FAQ Maintainer: <BR>dowen@midsomer.org (David Owen)
+</ADDRESS>
+<P>
+<SMALL>
+<STRONG>Last Update February 12 2004 @ 00:28 AM</STRONG>
+<BR>
+</SMALL>
+</DIV>
+</BODY>
+</HTML>
+

@@ -1,0 +1,33 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getPayPalUserSubsByProfId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getPayPalUserSubsByProfId (
+
+/*******************************************************************
+**
+** CREATION:
+**   Author:      Andy Tran
+**   Date:        July 2009 
+**   Description: Returns record in PayPalUserSubscription
+**                by recurringProfileId
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*******************************************************************/
+
+ at_recurringProfileId  VARCHAR(14)
+)
+
+BEGIN
+	SELECT userId
+	      ,subscriptionOfferDetailId
+          ,subscriptionStatus
+          ,subscriptionEndDate
+      FROM PayPalUserSubscription
+     WHERE recurringProfileId = at_recurringProfileId;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

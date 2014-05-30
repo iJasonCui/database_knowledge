@@ -1,0 +1,148 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updDebitCard;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updDebitCard (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         June 29, 2004
+**   Description:  Update debit card. Create one if it does not exist.
+**
+** REVISION(S):
+**   Author:       Andy Tran
+**   Date:         Feb 17, 2005
+**   Description:  Added realCardTypeId.
+**
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+     at_creditCardId      INT
+    ,at_userId            DECIMAL(12,0)
+    ,at_cardTypeId        SMALLINT
+    ,at_cardNum           VARCHAR(64)
+    ,at_encodedCardNum    VARCHAR(64)
+    ,at_partialCardNum    CHAR(8)
+    ,at_cardExpiry        CHAR(4)
+    ,at_cardNickname      VARCHAR(40)
+    ,at_nameOnCard        VARCHAR(40)
+    ,at_address           VARCHAR(80)
+    ,at_city              VARCHAR(32)
+    ,at_country           VARCHAR(24)
+    ,at_countryArea       VARCHAR(32)
+    ,at_zipCode           VARCHAR(10)
+    ,at_cvv               CHAR(3)
+    ,at_status            CHAR(1)
+    ,at_realCardTypeId    SMALLINT
+    ,at_issueNumber       CHAR(2)
+    ,at_cardStartDate     CHAR(4)
+)
+BEGIN
+DECLARE at_GetDateGMT  DATETIME;
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+   ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+   ROLLBACK;
+END;
+
+SET at_nameOnCard = UPPER(at_nameOnCard);
+
+SET at_GetDateGMT = UTC_TIMESTAMP();
+
+START TRANSACTION;
+
+IF (SELECT 1 FROM CreditCard WHERE creditCardId = at_creditCardId) IS NOT NULL 
+THEN
+            UPDATE CreditCard
+               SET cardTypeId = at_cardTypeId
+                  ,cardExpiry = at_cardExpiry
+                  ,cardNickname = at_cardNickname
+                  ,nameOnCard = at_nameOnCard
+                  ,address = at_address
+                  ,city = at_city
+                  ,country = at_country
+                  ,countryArea = at_countryArea
+                  ,zipCode = at_zipCode
+                  ,status = at_status
+                  ,dateModified = at_GetDateGMT
+             WHERE creditCardId = at_creditCardId;
+
+            UPDATE DebitCard
+               SET issueNumber = at_issueNumber
+                  ,cardStartDate = at_cardStartDate
+                  ,dateModified = at_GetDateGMT
+             WHERE cardId = at_creditCardId;
+ELSE
+            INSERT CreditCard (
+                 creditCardId
+                ,userId
+                ,cardTypeId
+                ,cardNum
+                ,encodedCardNum
+                ,partialCardNum
+                ,cardExpiry
+                ,cardNickname
+                ,nameOnCard
+                ,address
+                ,city
+                ,country
+                ,countryArea
+                ,zipCode
+                ,cvv
+                ,status
+                ,dateModified
+                ,dateCreated
+                ,realCardTypeId
+            )
+            VALUES (
+                 at_creditCardId
+                ,at_userId
+                ,at_cardTypeId
+                ,at_cardNum
+                ,at_encodedCardNum
+                ,at_partialCardNum
+                ,at_cardExpiry
+                ,at_cardNickname
+                ,at_nameOnCard
+                ,at_address
+                ,at_city
+                ,at_country
+                ,at_countryArea
+                ,at_zipCode
+                ,at_cvv
+                ,at_status
+                ,at_GetDateGMT
+                ,at_GetDateGMT
+                ,at_realCardTypeId
+            );
+
+            INSERT DebitCard (
+                 cardId
+                ,userId
+                ,issueNumber
+                ,cardStartDate
+                ,dateModified
+                ,dateCreated
+            )
+            VALUES (
+                 at_creditCardId
+                ,at_userId
+                ,at_issueNumber
+                ,at_cardStartDate
+                ,at_GetDateGMT
+                ,at_GetDateGMT
+            );
+
+END IF;
+
+COMMIT;
+
+END;;
+DELIMITER ;

@@ -1,0 +1,30 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAllSubscriptionOffers;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAllSubscriptionOffers (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  Nov, 2004
+**   Description:  retrieves all subscription offers
+**
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date: Feb 3, 2006
+**   Description: also return expired subscription offers
+**
+******************************************************************************/
+)
+BEGIN  
+	SELECT 
+          subscriptionOfferId,
+          currencyId,
+          dateExpiry,
+          description
+        FROM SubscriptionOffer
+        ORDER BY subscriptionOfferId ;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

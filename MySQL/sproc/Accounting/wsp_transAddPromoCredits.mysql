@@ -1,0 +1,99 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_transAddPromoCredits;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_transAddPromoCredits (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  Sept 9, 2003
+**   Description:  adds some promo credits for user
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+at_xactionId INT,
+at_userId DECIMAL(12,0),
+at_productCode CHAR(1),
+at_communityCode CHAR(1),
+at_creditTypeId TINYINT,
+at_xactionTypeId TINYINT,
+at_contentId SMALLINT,
+at_credits SMALLINT,
+at_balance INT,
+at_dateNow DATETIME,
+at_dateExpiry DATETIME
+)
+BEGIN
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+   ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+   ROLLBACK;
+END;
+
+START TRANSACTION;
+
+INSERT INTO AccountTransaction 
+        (   xactionId,
+            userId,
+            product,
+            community,
+            creditTypeId,
+            xactionTypeId,
+            contentId,
+            credits,
+            balance,
+            dateCreated
+        )
+        VALUES 
+        (   at_xactionId,
+            at_userId,
+            at_productCode,
+            at_communityCode,
+            at_creditTypeId,
+            at_xactionTypeId,
+            at_contentId,
+            at_credits,
+            at_balance,
+            at_dateNow
+        );
+
+IF (SELECT 1 FROM CreditBalance WHERE userId = at_userId AND creditTypeId = at_creditTypeId) IS NOT NULL THEN 
+   UPDATE CreditBalance 
+                            SET credits = credits + at_credits,
+                                dateModified = at_dateNow,
+                                dateExpiry = at_dateExpiry
+                            WHERE userId = at_userId AND creditTypeId = at_creditTypeId;
+                            
+ELSE
+   INSERT INTO CreditBalance
+                            (   userId,
+                                creditTypeId,
+                                credits,
+                                dateExpiry,
+                                dateModified,
+                                dateCreated
+                            )
+                            VALUES 
+                            (   at_userId,
+                                at_creditTypeId,
+                                at_credits,
+                                at_dateExpiry,
+                                at_dateNow,
+                                at_dateNow
+                            );
+END IF;
+
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

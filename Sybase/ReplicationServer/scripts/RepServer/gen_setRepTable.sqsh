@@ -1,0 +1,11 @@
+select name from sysobjects  where type = "U" and name not like "rs%"
+\do
+   \echo "select getdate()"
+   \echo "exec sp_setreptable #1, true"
+   \echo "select getdate()"
+   \echo "go"
+\done
+go
+
+
+

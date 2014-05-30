@@ -1,0 +1,35 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_cntDailyPurchaseDeclines;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_cntDailyPurchaseDeclines (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  October 2003
+**   Description:
+**
+** REVISION(S):
+**   Author:  Andy Tran
+**   Date:  December 2007
+**   Description:  Added xactionTypeId = 44
+**
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+
+ at_fromDate 				DATETIME
+,at_toDate 				DATETIME
+)
+BEGIN
+
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+SELECT COUNT(*),COUNT(DISTINCT userId) 
+FROM Purchase 
+WHERE dateCreated >= at_fromDate AND dateCreated <= at_toDate
+AND xactionTypeId IN (7, 44);
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

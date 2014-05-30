@@ -1,0 +1,28 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_chkPayPalNotifyByPymtNumbr;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_chkPayPalNotifyByPymtNumbr (
+
+/*******************************************************************
+**
+** CREATION:
+**   Author:      Andy Tran
+**   Date:        July 2009 
+**   Description: Returns record in PayPalNotify by paymentNumber
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*******************************************************************/
+ at_paymentNumber  VARCHAR(19)
+)
+BEGIN
+
+SELECT 1 AS isExisted
+          FROM PayPalNotify
+         WHERE paymentNumber = at_paymentNumber;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

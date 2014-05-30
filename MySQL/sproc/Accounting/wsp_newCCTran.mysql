@@ -1,0 +1,83 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newCCTran;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newCCTran (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Jason Cui
+**   Date:    May 16 2005
+**   Description:  Insert a row to CreditCardTransaction to mark a credit card transaction which has been authorized
+**
+** REVISION(S):
+**   Author:  Jeff Yang
+**   Date:  June 7 2008
+**   Description: Insert a row to SettlementQueue first if exists row in AccountFlag for Admin to review
+**
+******************************************************************************/
+at_xactionId  DECIMAL(12,0)
+)
+BEGIN
+
+DECLARE at_rowcount INT;
+DECLARE at_error    INT;
+DECLARE at_dateGMT	DATETIME;
+DECLARE at_productId INT;
+DECLARE at_userId   DECIMAL(12,0);
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+   ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+   ROLLBACK;
+END;
+
+SET at_dateGMT = UTC_TIMESTAMP();
+
+START TRANSACTION;
+  
+SELECT userId INTO at_userId FROM PaymentechRequest WHERE xactionId=at_xactionId;
+
+IF at_userId IS NOT NULL AND 
+                       (SELECT 1 FROM AccountFlag flag, UserAccount ua 
+                                 WHERE flag.userId = at_userId 
+                                   and flag.userId=ua.userId 
+                                   and reviewed <>'Y' 
+                                   and ua.accountType="S" 
+                                   and ua.dateCreated > TIMESTAMPADD(DAY, -550, now())) IS NOT NULL THEN 
+   SELECT productId INTO at_productId 
+     FROM UserAccount u, BillingLocation bl 
+     WHERE u.userId=at_userId AND u.billingLocationId=bl.billingLocationId;
+
+   INSERT SettlementQueue 
+           (xactionId, dateCreated, status, productId )
+     VALUES
+           (at_xactionId, at_dateGMT, 0, at_productId); -- 0 MEANS "PENDING for admin approval"
+     
+   INSERT CreditCardTransaction
+              (xactionId, dateCreated, CCTranStatusId )
+        VALUES
+              (at_xactionId, at_dateGMT, 6); -- 6 MEANS "PEDNING for admin approval"
+ELSE 
+   INSERT CreditCardTransaction
+           (xactionId,
+            dateCreated,
+            CCTranStatusId )
+     VALUES
+           (at_xactionId,
+            at_dateGMT,
+            1); -- 1 MEANS "NEW/PENDING"
+END IF; 
+
+SET at_error = 0;
+SET at_rowcount = ROW_COUNT();
+
+COMMIT;
+
+SELECT at_error AS RESULT, at_rowcount AS ROWCNT, at_xactionId AS PRIMKEY;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,55 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newIDebitResponse;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newIDebitResponse (
+
+/*******************************************************************
+**
+** CREATION:
+**   Author:      Andy Tran
+**   Date:        November 2006
+**   Description: Inserts row into IDebitResponse
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*******************************************************************/
+     at_xactionId     DECIMAL(12,0)
+    ,at_iDebitTrack2  VARCHAR(60)
+    ,at_iDebitIssConf VARCHAR(30)
+    ,at_iDebitIssName VARCHAR(40)
+    ,at_iDebitIssLang VARCHAR(2)
+    ,at_iDebitVersion VARCHAR(2)
+    ,at_errorMessage  VARCHAR(255)
+)
+BEGIN
+
+DECLARE at_dateCreated DATETIME;
+
+SET at_dateCreated = UTC_TIMESTAMP();
+
+INSERT INTO IDebitResponse (
+         xactionId
+        ,iDebitTrack2
+        ,iDebitIssConf
+        ,iDebitIssName
+        ,iDebitIssLang
+        ,iDebitVersion
+        ,errorMessage
+        ,dateCreated
+    )
+    VALUES (
+         at_xactionId
+        ,at_iDebitTrack2
+        ,at_iDebitIssConf
+        ,at_iDebitIssName
+        ,at_iDebitIssLang
+        ,at_iDebitVersion
+        ,at_errorMessage
+        ,at_dateCreated
+    );
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,47 @@
+Replicate Database Migration 
+(without database connection and subscription)
+
+1. (20p) create database device and create db Profile_ai for load
+2. (20p) rcp Profile_ai’s database dump from webdb25p to webdb20p
+3. (20p) load database Profile_ai from 25p’s Profile_ai db dump
+4. (20p) fix sysusers 
+update Profile_ai..sysusers set suid = 3 where name = 'web'
+update Profile_ai..sysusers set suid = 5 where name = 'webmaint'
+
+5. (20p)  turn on “dbo use only “ on Profile_ai
+6. (webgamma) add db connection to webdb25p.Profile_ai with rs_init ( repserver@webgamma:~/REP-12_6/install]$ /opt/etc/repserver126/REP-12_6/install/rs_init -r /opt/etc/repserver126/REP-12_6/init/logs/resource.Profile_ai.rep.24p )
+7. (rep2p) define/validate/activate subscription for webdb20p.Profile_ai (at this moment, the connection of webdb20p.Profile_ai might be suspended because of data discrepancy. The script is under ‘user@webccs:~/src/javalife/db/scripts/RepServer/Profile_ai’.)
+8. (25p) “dbo use only” on webdb25p.Profile_ai
+9. insert a row into 29p’s RepTest
+10. (rep2p) suspend log transfer from webdb29p.Profile_ai 
+11. (rep2p) checking whether the rep system is quiesce or not by using “admin health” or “admin quiesce_check”; also check whether the small transaction is delivered to 25p.
+12. (rep2p) After the rep system quiesce, suspend connection to webdb20p.Profile_ai and suspend connection to webdb25p.Profile_ai
+13. [rep2p] sysadmin hibernate_on 
+14. admin who to figure out the queue Id
+15. [rep2p] sysadmin sqm_purge_queue, 426, 0
+16. [rep2p] sysadmin hibernate_off
+17. (rep2p) resume log transfer from webdb29p.Profile_ai
+18. (24p) dump db Profile_ai  and copy to destination server
+19.  (rep5p) ignore loss from webdb5p.Profile_ai to w151dbp03L.Profile_ai_view; ignore loss from  webgamma.rep2p_RSSD to webtheta.rep5p_RSSD (it might need to ignore loss after hibernation)
+20. (rep2p) once finished dump db Profile_ai on webdb21p, then resume connection to webdb21p.Profile_ai
+21. (21p) once the queue caught up, turn off “dbo use only” on Profile_ai 
+22. (20p) load db Profile_ai and online database Profile_ai
+(20p) double check the Profile_ai (users, aliases, indexes, tables and stored procedures) 
+update Profile_ai..sysusers set suid = 3 where name = 'web'
+update Profile_ai..sysusers set suid = 5 where name = 'webmaint'
+
+23. (rep2p) resume connection to webdb20p.Profile_ai 
+24. (20p) after outbound queue catch up, do a rep test and if passed,  turn off “dbo use only” on Profile_ai
+25. (20p) turn on “truncate log when checkpoint” before the crontab of dump db and transaction is ready
+
+
+
+
+
+
+2007-1-10
+
+
+
+
+

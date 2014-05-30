@@ -1,0 +1,1215 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<TITLE>Sybase FAQ: 5/19 - ASE Admin (2 of 7)</TITLE>
+<script language="JavaScript1.2">
+function edc(s,s2)
+{document.write("<font face=\"Arial\"><A href=\"",s,"\" target=\"_blank\" onclick=\"window.open('",s,"','Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=720,height=530,left=30,top=43');return false;\" )>Not finding the answers you need?&nbsp;",s2,"Submit your question for others to see.</A></font>");}
+//-->
+</script>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<DIV ALIGN=CENTER>
+<SMALL>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  Part5 -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A>
+</SMALL>
+<BR><HR SIZE=2 WIDTH=600 NOSHADE>
+<P><H1>Sybase FAQ: 5/19 - ASE Admin (2 of 7)</H1>
+<table border="0" cellpadding="4" cellspacing="4" width="35%">
+<tr><td width="100%" align="center" bgcolor="#D6D6C0">
+<p align=center><small>
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part5/index.html","<br>");
+// --></script>
+</small></p>
+</td></tr>
+</table>
+ <br>
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="40%">
+<tr><td width="100%" align="center" bgcolor="#CCCCFF"><font face="Arial">There are reader questions on this topic!<a href="#ct"><br>Help
+others by sharing your knowledge</a></font></td></tr>
+</table></center></div>
+<HR SIZE=2 WIDTH=600 NOSHADE>
+</DIV>
+<PRE>
+Message-ID: &lt;databases/sybase-faq/part5_1074677126@rtfm.mit.edu&gt;
+X-Last-Updated: 2003/03/02
+From: dowen@midsomer.org (David Owen)
+Newsgroups: <A HREF="http://groups.google.com/groups?group=comp.databases.sybase" target="new">comp.databases.sybase</A>
+Subject: Sybase FAQ: 5/19 - ASE Admin (2 of 7)
+Reply-To: <A HREF="mailto:dowen@midsomer.org">dowen@midsomer.org</A> (David Owen)
+Keywords: FAQ, DATABASES, SYBASE, ASA, ASE, REP
+Date: 21 Jan 2004 09:26:03 GMT
+
+Archive-name: databases/sybase-faq/part5
+URL: <A HREF="http://www.isug.com/Sybase_FAQ">http://www.isug.com/Sybase_FAQ</A>
+Version: 1.7
+Maintainer: David Owen
+Last-modified: 2003/03/02
+Posting-Frequency: posted every 3rd month
+   A how-to-find-the-FAQ article is posted on the intervening months.
+
+                         User Database Administration                          
+                                                                               
+ 
+
+    1.2.1    Changing varchar(m) to varchar(n)
+    1.2.2    Frequently asked questions on Table partitioning
+    1.2.3    How do I manually drop a table?
+    1.2.4    Why not create all my columns varchar(255)?
+    1.2.5    What's a good example of a transaction?
+    1.2.6    What's a natural key?
+    1.2.7    Making a Stored Procedure invisible
+    1.2.8    Saving space when inserting rows monotonically
+    1.2.9    How to compute database fragmentation
+    1.2.10  Tasks a DBA should do...
+    1.2.11  How to implement database security
+    1.2.12  How to shrink a database
+    1.2.13  How do I turn on auditing of all SQL text sent to the server
+    1.2.14  sp_helpdb/sp_helpsegment is returning negative numbers
+   
+Advanced Administration Basic Administration ASE FAQ
+
+-------------------------------------------------------------------------------
+
+1.2.1: Changing varchar(m) to varchar(n)
+
+-------------------------------------------------------------------------------
+
+Before you start:
+
+    select max(datalength(column_name))
+      from affected_table
+
+In other words, please be sure you're going into this with your head on
+straight.
+
+How To Change System Catalogs
+
+This information is Critical To The Defense Of The Free World, and you would be
+Well Advised To Do It Exactly As Specified:
+
+use master
+go
+sp_configure "allow updates", 1
+go
+reconfigure with override /* System 10 and below */
+go
+use victim_database
+go
+select name, colid
+from syscolumns
+where id = object_id("affected_table")
+go
+begin tran
+go
+update syscolumns
+set length = new_value
+where id = object_id("affected_table")
+  and colid = value_from_above
+go
+update sysindexes
+set maxlen = maxlen + increase/decrease?
+where id=object_id("affected_table")
+  and indid = 0
+go
+/* check results... cool?  Continue... else rollback tran */
+commit tran
+go
+use master
+go
+sp_configure "allow updates", 0
+go
+reconfigure /* System 10 and below */
+go
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.2.2: FAQ on partitioning
+
+-------------------------------------------------------------------------------
+
+Index of Sections
+
+  * What Is Table Partitioning?
+      + Page Contention for Inserts
+      + I/O Contention
+      + Caveats Regarding I/O Contention
+  * Can I Partition Any Table?
+      + How Do I Choose Which Tables To Partition?
+  * Does Table Partitioning Require User-Defined Segments?
+  * Can I Run Any Transact-SQL Command on a Partitioned Table?
+  * How Does Partition Assignment Relate to Transactions?
+  * Can Two Tasks Be Assigned to the Same Partition?
+  * Must I Use Multiple Devices to Take Advantage of Partitions?
+  * How Do I Create A Partitioned Table That Spans Multiple Devices?
+  * How Do I Take Advantage of Table Partitioning with bcp in?
+  * Getting More Information on Table Partitioning
+
+What Is Table Partitioning?
+
+Table partitioning is a procedure that creates multiple page chains for a
+single table.
+
+The primary purpose of table partitioning is to improve the performance of
+concurrent inserts to a table by reducing contention for the last page of a
+page chain.
+
+Partitioning can also potentially improve performance by making it possible to
+distribute a table's I/O over multiple database devices.
+
+Page Contention for Inserts
+
+By default, ASE stores a table's data in one double-linked set of pages called
+a page chain. If the table does not have a clustered index, ASE makes all
+inserts to the table in the last page of the page chain.
+
+When a transaction inserts a row into a table, ASE holds an exclusive page lock
+on the last page while it inserts the row. If the current last page becomes
+full, ASE allocates and links a new last page.
+
+As multiple transactions attempt to insert data into the table at the same
+time, performance problems can occur. Only one transaction at a time can obtain
+an exclusive lock on the last page, so other concurrent insert transactions
+block each other.
+
+Partitioning a table creates multiple page chains (partitions) for the table
+and, therefore, multiple last pages for insert operations. A partitioned table
+has as many page chains and last pages as it has partitions.
+
+I/O Contention
+
+Partitioning a table can improve I/O contention when ASE writes information in
+the cache to disk. If a table's segment spans several physical disks, ASE
+distributes the table's partitions across fragments on those disks when you
+create the partitions.
+
+A fragment is a piece of disk on which a particular database is assigned space.
+Multiple fragments can sit on one disk or be spread across multiple disks.
+
+When ASE flushes pages to disk and your fragments are spread across different
+disks, I/Os assigned to different physical disks can occur in parallel.
+
+To improve I/O performance for partitioned tables, you must ensure that the
+segment containing the partitioned table is composed of fragments spread across
+multiple physical devices.
+
+Caveats Regarding I/O Contention
+
+Be aware that when you use partitioning to balance I/O you run the risk of
+disrupting load balancing even as you are trying to achieve it. The following
+scenarios can keep you from gaining the load balancing benefits you want:
+
+  * You are partitioning an existing table. The existing data could be sitting
+    on any fragment. Because partitions are randomly assigned, you run the risk
+    of filling up a fragment. The partition will then steal space from other
+    fragments, thereby disrupting load balancing.
+  * Your fragments differ in size.
+  * The segment maps are configured such that other objects are using the
+    fragments to which the partitions are assigned.
+  * A very large bcp job inserts many rows within a single transaction. Because
+    a partition is assigned for the lifetime of a transaction, a huge amount of
+    data could go to one particular partition, thus filling up the fragment to
+    which that partition is assigned.
+
+Can I Partition Any Table?
+
+No. You cannot partition the following kinds of tables:
+
+ 1. Tables with clustered indexes (as of release 11.5 it is possible to have a
+    clustered index on a partitioned table)
+ 2. ASE system tables
+ 3. Work tables
+ 4. Temporary tables
+ 5. Tables that are already partitioned. However, you can unpartition and then
+    re-partition tables to change the number of partitions.
+
+How Do I Choose Which Tables To Partition?
+
+You should partition heap tables that have large amounts of concurrent insert
+activity. (A heap table is a table with no clustered index.) Here are some
+examples:
+
+ 1. An "append-only" table to which every transaction must write
+ 2. Tables that provide a history or audit list of activities
+ 3. A new table into which you load data with bcp in. Once the data is loaded
+    in, you can unpartition the table. This enables you to create a clustered
+    index on the table, or issue other commands not permitted on a partition
+    table.
+
+Does Table Partitioning Require User-Defined Segments?
+
+No. By design, each table is intrinsically assigned to one segment, called the
+default segment. When a table is partitioned, any partitions on that table are
+distributed among the devices assigned to the default segment.
+
+In the example under "How Do I Create A Partitioned Table That Spans Multiple
+Devices?", the table sits on a user-defined segment that spans three devices.
+
+Can I Run Any Transact-SQL Command on a Partitioned Table?
+
+No. Once you have partitioned a table, you cannot use any of the following
+Transact-SQL commands on the table until you unpartition it:
+
+ 1. drop table
+ 2. sp_placeobject
+ 3. truncate table
+ 4. alter table table_name partition n
+
+On releases of ASE prior to 11.5 it was not possible to create a clustered
+index on a partitioned table either.
+
+How Does Partition Assignment Relate to Transactions?
+
+A user is assigned to a partition for the duration of a transaction. Assignment
+of partitions resumes with the first insert in a new transaction. The user
+holds the lock, and therefore partition, until the transaction ends.
+
+For this reason, if you are inserting a great deal of data, you should batch it
+into separate jobs, each within its own transaction. See "How Do I Take
+Advantage of Table Partitioning with bcp in?", for details.
+
+Can Two Tasks Be Assigned to the Same Partition?
+
+Yes. ASE randomly assigns partitions. This means there is always a chance that
+two users will vie for the same partition when attempting to insert and one
+would lock the other out.
+
+The more partitions a table has, the lower the probability of users trying to
+write to the same partition at the same time.
+
+Must I Use Multiple Devices to Take Advantage of Partitions?
+
+It depends on which type of performance improvement you want.
+
+Table partitioning improves performance in two ways: primarily, by decreasing
+page contention for inserts and, secondarily, by decreasing i/o contention.
+"What Is Table Partitioning?" explains each in detail.
+
+If you want to decrease page contention you do not need multiple devices. If
+you want to decrease i/o contention, you must use multiple devices.
+
+How Do I Create A Partitioned Table That Spans Multiple Devices?
+
+Creating a partitioned table that spans multiple devices is a multi-step
+procedure. In this example, we assume the following:
+
+  * We want to create a new segment rather than using the default segment.
+  * We want to spread the partitioned table across three devices, data_dev1,
+    data_dev2, and data_dev3.
+
+Here are the steps:
+
+ 1. Define a segment:
+   
+       
+        sp_addsegment newsegment, my_database,data_dev1
+       
+ 2. Extend the segment across all three devices:
+   
+       
+        sp_extendsegment newsegment, my_database, data_dev2
+        sp_extendsegment newsegment, my_database, data_dev3
+       
+ 3. Create the table on the segment:
+   
+       
+        create table my_table
+        (names, varchar(80) not null)
+        on newsegment
+       
+ 4. Partition the table:
+   
+       
+        alter table my_table partition 30
+       
+How Do I Take Advantage of Table Partitioning with bcp in?
+
+You can take advantage of table partitioning with bcp in by following these
+guidelines:
+
+ 1. Break up the data file into multiple files and simultaneously run each of
+    these files as a separate bcp job against one table.
+   
+    Running simultaneous jobs increases throughput.
+   
+ 2. Choose a number of partitions greater than the number of bcp jobs.
+   
+    Having more partitions than processes (jobs) decreases the probability of
+    page lock contention.
+   
+ 3. Use the batch option of bcp in. For example, after every 100 rows, force a
+    commit. Here is the syntax of this command:
+   
+       
+        bcp table_name in filename -b100
+       
+    Each time a transaction commits, ASE randomly assigns a new partition for
+    the next insert. This, in turn, reduces the probability of page lock
+    contention.
+   
+Getting More Information on Table Partitioning
+
+For more information on table partitioning, see the chapter on controlling
+physical data placement in the ASE Performance and Tuning Guide.
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.2.3: How to manually drop a table
+
+-------------------------------------------------------------------------------
+
+Occasionally you may find that after issuing a drop table command that the ASE
+crashed and consequently the table didn't drop entirely. Sure you can't see it
+but that sucker is still floating around somewhere.
+
+Here's a list of instructions to follow when trying to drop a corrupt table:
+
+ 1.     sp_configure allow, 1
+        go
+        reconfigure with override
+        go
+        
+ 2. Write db_id down.
+        use db_name
+        go
+        select db_id()
+        go
+ 3. Write down the id of the bad_table:
+        select id
+         from sysobjects
+        where name = bad_table_name
+        go
+ 4. You will need these index IDs to run dbcc extentzap. Also, remember that if
+    the table has a clustered index you will need to run extentzap on index
+    "0", even though there is no sysindexes entry for that indid.
+        select indid
+         from sysindexes
+        where id = table_id
+        go
+ 5. This is not required but a good idea:
+        begin transaction
+        go
+ 6. Type in this short script, this gets rid of all system catalog information
+    for the object, including any object and procedure dependencies that may be
+    present.
+   
+    Some of the entries are unnecessary but better safe than sorry.
+   
+         declare @obj int
+         select @obj = id from sysobjects where name = 
+         delete syscolumns where id = @obj
+         delete sysindexes where id = @obj
+         delete sysobjects where id = @obj
+         delete sysprocedures where id in
+            (select id from sysdepends where depid = @obj)
+         delete sysdepends where depid = @obj
+         delete syskeys where id = @obj
+         delete syskeys where depid = @obj
+         delete sysprotects where id = @obj
+         delete sysconstraints where tableid = @obj
+         delete sysreferences where tableid = @obj
+         delete sysdepends where id = @obj
+         go
+ 7. Just do it!
+        commit transaction
+        go
+ 8. Gather information to run dbcc extentzap:
+        use master
+        go
+        sp_dboption db_name, read, true
+        go
+        use db_name
+        go
+        checkpoint
+        go
+ 9. Run dbcc extentzap once for each index (including index 0, the data level)
+    that you got from above:
+        use master
+        go
+        dbcc traceon (3604)
+        go
+        dbcc extentzap (db_id, obj_id, indx_id, 0)
+        go
+        dbcc extentzap (db_id, obj_id, indx_id, 1)
+        go
+   
+       
+        Notice that extentzap runs twice for each index. This is because the
+        last parameter (the sort bit) might be 0 or 1 for each index, and you
+        want to be absolutely sure you clean them all out.
+       
+10. Clean up after yourself.
+        sp_dboption db_name, read, false
+        go
+        use db_name
+        go
+        checkpoint
+        go
+        sp_configure allow, 0
+        go
+        reconfigure with override
+        go
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.2.4: Why not max out all my columns?
+
+-------------------------------------------------------------------------------
+
+People occasionally ask the following valid question:
+
+    Suppose I have varying lengths of character strings none of which should
+    exceed 50 characters.
+   
+    Is there any advantage of last_name varchar(50) over this last_name varchar
+    (255)?
+   
+    That is, for simplicity, can I just define all my varying strings to be
+    varchar(255) without even thinking about how long they may actually be? Is
+    there any storage or performance penalty for this.
+   
+There is no performance penalty by doing this but as another netter pointed
+out:
+
+    If you want to define indexes on these fields, then you should specify the
+    smallest size because the sum of the maximal lengths of the fields in the
+    index can't be greater than 256 bytes.
+   
+and someone else wrote in saying:
+
+    Your data structures should match the business requirements. This way the
+    data structure themselves becomes a data dictionary for others to model
+    their applications (report generation and the like).
+   
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.2.5: What's a good example of a transaction?
+
+-------------------------------------------------------------------------------
+
+   
+    This answer is geared for Online Transaction Processing (OTLP)
+    applications.
+   
+To gain maximum throughput all your transactions should be in stored procedures
+- see Q1.5.8. The transactions within each stored procedure should be short and
+simple. All validation should be done outside of the transaction and only the
+modification to the database should be done within the transaction. Also, don't
+forget to name the transaction for sp_whodo - see Q9.2.
+
+The following is an example of a good transaction:
+
+/* perform validation */
+select ...
+if ... /* error */
+   /* give error message */
+else   /* proceed */
+   begin
+      begin transaction acct_addition
+      update ...
+      insert ...
+      commit transaction acct_addition
+   end
+
+The following is an example of a bad transaction:
+
+begin transaction poor_us
+update X ...
+select ...
+if ... /* error */
+   /* give error message */
+else   /* proceed */
+   begin
+      update ...
+      insert ...
+   end
+commit transaction poor_us
+
+This is bad because:
+
+  * the first update on table X is held throughout the transaction. The idea
+    with OLTP is to get in and out fast.
+  * If an error message is presented to the end user and we await their
+    response, we'll maintain the lock on table X until the user presses return.
+    If the user is out in the can we can wait for hours.
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.2.6: What's a natural key?
+
+-------------------------------------------------------------------------------
+
+Let me think back to my database class... okay, I can't think that far so I'll
+paraphrase... essentially, a natural key is a key for a given table that
+uniquely identifies the row. It's natural in the sense that it follows the
+business or real world need.
+
+For example, assume that social security numbers are unique (I believe it is
+strived to be unique but it's not always the case), then if you had the
+following employee table:
+
+employee:
+
+        ssn     char(09)
+        f_name  char(20)
+        l_name  char(20)
+        title   char(03)
+
+Then a natural key would be ssn. If the combination of _name and l_name were
+unique at this company, then another natural key would be f_name, l_name. As a
+matter of fact, you can have many natural keys in a given table but in practice
+what one does is build a surrogate (or artificial) key.
+
+The surrogate key is guaranteed to be unique because (wait, get back, here it
+goes again) it's typically a monotonically increasing value. Okay, my
+mathematician wife would be proud of me... really all it means is that the key
+is increasing linearly: i+1
+
+The reason one uses a surrogate key is because your joins will be faster.
+
+If we extended our employee table to have a surrogate key:
+
+employee:
+
+        id      identity
+        ssn     char(09)
+        f_name  char(20)
+        l_name  char(20)
+        title   char(03)
+
+Then instead of doing the following:
+
+ where a.f_name = b.f_name
+   and a.l_name = a.l_name 
+
+we'd do this:
+
+ where a.id = b.id 
+
+We can build indexes on these keys and since Sybase's atomic storage unit is
+2K, we can stash more values per 2K page with smaller indexes thus giving us
+better performance (imagine the key being 40 bytes versus being say 4 bytes...
+how many 40 byte values can you stash in a 2K page versus a 4 byte value? --
+and how much wood could a wood chuck chuck, if a wood chuck could chuck wood?)
+
+Does it have anything to do with natural joins?
+
+Um, not really... from "A Guide to Sybase..", McGovern and Date, p. 112:
+
+    The equi-join by definition must produce a result containing two identical
+    columns. If one of those two columns is eliminated, what is left is called
+    the natural join.
+   
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.2.7: Making a Stored Procedure invisible
+
+-------------------------------------------------------------------------------
+
+System 11.5 and above
+
+It is now possible to encrypt your stored procedure code that is stored in the
+syscomments table. This is preferred than the old method of deleting the data
+as deleting will impact future upgrades. You can encrypt the text with the
+sp_hidetext system procedure.
+
+Pre-System 11.5
+
+Perhaps you are trying to prevent the buyer of your software from defncopy'ing
+all your stored procedures. It is perfectly safe to delete the syscomments
+entries of any stored procedures you'd like to protect:
+
+sp_configure "allow updates", 1
+go
+reconfigure with override /* System 10 and below */
+go
+use affected_database
+go
+delete syscomments where id = object_id("procedure_name")
+go
+use master
+go
+sp_configure "allow updates", 0
+go
+
+I believe in future releases of Sybase we'll be able to see the SQL that is
+being executed. I don't know if that would be simply the stored procedure name
+or the SQL itself.
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.2.8: Saving space when inserting rows monotonically
+
+-------------------------------------------------------------------------------
+
+If the columns that comprise the clustered index are monotonically increasing
+(that is, new row key values are greater than those previously inserted) the
+following System 11 dbcc tune will not split the page when it's half way full.
+Rather it'll let the page fill and then allocate another page:
+
+dbcc tune(ascinserts, 1, "my_table")
+
+By the way, SyBooks is wrong when it states that the above needs to be reset
+when ASE is rebooted. This is a permanent setting.
+
+To undo it:
+
+dbcc tune(ascinserts, 0, "my_table")
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.2.9: How to compute database fragmentation
+
+-------------------------------------------------------------------------------
+
+Command
+
+dbcc traceon(3604)
+go
+dbcc tab(production, my_table, 0)
+go
+
+Interpretation
+
+A delta of one means the next page is on the same track, two is a short seek,
+three is a long seek. You can play with these constants but they aren't that
+important.
+
+A table I thought was unfragmented had L1 = 1.2 L2 = 1.8
+
+A table I thought was fragmented had L1 = 2.4 L2 = 6.6
+
+How to Fix
+
+You fix a fragmented table with clustered index by dropping and creating the
+index. This measurement isn't the correct one for tables without clustered
+indexes. If your table doesn't have a clustered index, create a dummy one and
+drop it.
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.2.10: Tasks a DBA should do...
+
+-------------------------------------------------------------------------------
+
+A good presentation of a DBA's duties has been made available by Jeff Garbus (
+<A HREF="mailto:jeffg@soaringeagleltd.com">jeffg@soaringeagleltd.com</A>) of Soaring Eagle Consulting Ltd (http://
+www.soaringeagleltd.com) and numerous books can be found here.  These are
+Powerpoint slides converted to web pages and so may be difficult to view with a
+text browser!
+
+An alternative view is catalogued below.  (OK, so this list is crying out for a
+bit of a revamp since checkstorage came along  Ed!)
+
+                                 DBA Tasks                                 
+  +-------------------------------------------------------------------------+  
+  |          Task          |    Reason     |             Period             |  
+  |------------------------+---------------+--------------------------------|  
+  |                        | I consider    | If your ASE permits, daily     |  
+  |                        | these the     | before your database dumps. If |  
+  | dbcc checkdb,          | minimal       | this is not possible due to    |  
+  | checkcatalog,          | dbcc's to     | the size of your databases,    |  
+  | checkalloc             | ensure the    | then try the different options |  
+  |                        | integrity of  | so that the end of, say, a     |  
+  |                        | your database | week, you've run them all.     |  
+  |------------------------+---------------+--------------------------------|  
+  | Disaster recovery      | Always be     |                                |  
+  | scripts - scripts to   | prepared for  |                                |  
+  | rebuild your ASE in    | the worst.    |                                |  
+  | case of hardware       | Make sure to  |                                |  
+  | failure                | test them.    |                                |  
+  |------------------------+---------------+--------------------------------|  
+  | scripts to logically   |               |                                |  
+  | dump your master       | You can       |                                |  
+  | database, that is bcp  | selectively   |                                |  
+  | the critical system    | rebuild your  |                                |  
+  | tables: sysdatabases,  | database in   | Daily                          |  
+  | sysdevices, syslogins, | case of       |                                |  
+  | sysservers, sysusers,  | hardware      |                                |  
+  | syssegments,           | failure       |                                |  
+  | sysremotelogins        |               |                                |  
+  |------------------------+---------------+--------------------------------|  
+  |                        | A system      |                                |  
+  |                        | upgrade is    | After any change as well as    |  
+  | %ls -la &lt;disk_devices&gt; | known to      | daily                          |  
+  |                        | change the    |                                |  
+  |                        | permissions.  |                                |  
+  |------------------------+---------------+--------------------------------|  
+  | dump the user          | CYA*          | Daily                          |  
+  | databases              |               |                                |  
+  |------------------------+---------------+--------------------------------|  
+  | dump the transaction   | CYA           | Daily                          |  
+  | logs                   |               |                                |  
+  |------------------------+---------------+--------------------------------|  
+  | dump the master        | CYA           | After any change as well as    |  
+  | database               |               | daily                          |  
+  |------------------------+---------------+--------------------------------|  
+  |                        | This is the   |                                |  
+  | System 11 and beyond - | configuration |                                |  
+  | save the $DSQUERY.cfg  | that you've   | After any change as well as    |  
+  | to tape                | dialed in,    | daily                          |  
+  |                        | why redo the  |                                |  
+  |                        | work?         |                                |  
+  |------------------------+---------------+--------------------------------|  
+  |                        |               | Depending on how often your    |  
+  |                        |               | major tables change. Some      |  
+  |                        |               | tables are pretty much static  |  
+  |                        |               | (e.g. lookup tables) so they   |  
+  | update statistics on   | To ensure the | don't need an update           |  
+  | frequently changed     | performance   | statistics, other tables       |  
+  | tables and             | of your ASE   | suffer severe trauma (e.g.     |  
+  | sp_recompile           |               | massive updates/deletes/       |  
+  |                        |               | inserts) so an update stats    |  
+  |                        |               | needs to be run either nightly |  
+  |                        |               | /weekly/monthly. This should   |  
+  |                        |               | be done using cronjobs.        |  
+  |------------------------+---------------+--------------------------------|  
+  | create a dummy ASE and |               |                                |  
+  | do bad things to it:   | See disaster  | When time permits              |  
+  | delete devices,        | recovery!     |                                |  
+  | destroy permissions... |               |                                |  
+  |------------------------+---------------+--------------------------------|  
+  | Talk to the            | It's better   |                                |  
+  | application            | to work with  | As time permits.               |  
+  | developers.            | them than     |                                |  
+  |                        | against them. |                                |  
+  |------------------------+---------------+--------------------------------|  
+  | Learn new tools        | So you can    | As time permits.               |  
+  |                        | sleep!        |                                |  
+  |------------------------+---------------+--------------------------------|  
+  | Read                   | Passes the    | Priority One!                  |  
+  | comp.databases.sybase  | time.         |                                |  
+  +-------------------------------------------------------------------------+  
+
+* Cover Your Ass
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.2.11: How to implement database security
+
+-------------------------------------------------------------------------------
+
+This is a brief run-down of the features and ideas you can use to implement
+database security:
+
+Logins, Roles, Users, Aliases and Groups
+
+  * sp_addlogin - Creating a login adds a basic authorisation for an account -
+    a username and password - to connect to the server. By default, no access
+    is granted to any individual databases.
+  * sp_adduser - A user is the addition of an account to a specific database.
+  * sp_addalias - An alias is a method of allowing an account to use a specific
+    database by impersonating an existing database user or owner.
+  * sp_addgroup - Groups are collections of users at the database level. Users
+    can be added to groups via the sp_adduser command.
+   
+    A user can belong to only one group - a serious limitation that Sybase
+    might be addressing soon according to the ISUG enhancements requests.
+    Permissions on objects can be granted or revoked to or from users or
+    groups.
+   
+  * sp_role - A role is a high-level Sybase authorisation to act in a specific
+    capacity for administration purposes. Refer to the Sybase documentation for
+    details.
+
+Recommendations
+
+Make sure there is a unique login account for each physical person and/or
+process that uses the server. Creating generic logins used by many people or
+processes is a bad idea - there is a loss of accountability and it makes it
+difficult to track which particular person is causing server problems when
+looking at the output of sp_who. Note that the output of sp_who gives a
+hostname - properly coded applications will set this value to something
+meaningful (ie. the machine name the client application is running from) so you
+can see where users are running their programs. Note also that if you look at
+master..sysprocesses rather than just sp_who, there is also a program_name.
+Again, properly coded applications will set this (eg. to 'isql') so you can see
+which application is running. If you're coding your own client applications,
+make sure you set hostname and program_name via the appropriate Open Client
+calls. One imaginative use I've seen of the program_name setting is to
+incorporate the connection time into the name, eg APPNAME-DDHHMM (you have 16
+characters to play with), as there's no method of determining this otherwise.
+
+Set up groups, and add your users to them. It is much easier to manage an
+object permissions system in this way. If all your permissions are set to
+groups, then adding a user to the group ensures that users automatically
+inherit the correct permissions - administration is *much* simpler.
+
+Objects and Permissions
+
+Access to database objects is defined by granting and/or revoking various
+access rights to and from users or groups. Refer to the Sybase documentation
+for details.
+
+Recommendations
+
+The ideal setup has all database objects being owned by the dbo, meaning no
+ordinary users have any default access at all. Specific permissions users
+require to access the database are granted explicitly. As mentioned above - set
+permissions for objects to a group and add users to that group. Any new user
+added to the database via the group then automatically obtains the correct set
+of permissions.
+
+Preferably, no access is granted at all to data tables, and all read and write
+activity is accomplished through stored procedures that users have execute
+permission on. The benefit of this from a security point of view is that access
+can be rigidly controlled with reference to the data being manipulated, user
+clearance levels, time of day, and anything else that can be programmed via
+T-SQL. The other benefits of using stored procedures are well known (see Q1.5.8
+). Obviously whether you can implement this depends on the nature of your
+application, but the vast majority of in-house-developed applications can rely
+solely on stored procedures to carry out all the work necessary. The only
+server-side restriction on this method is the current inability of stored
+procedures to adequately handle text and image datatypes (see Q1.5.12). To get
+around this views can be created that expose only the necessary columns to
+direct read or write access.
+
+Views
+
+Views can be a useful general security feature. Where stored procedures are
+inappropriate views can be used to control access to tables to a lesser extent.
+They also have a role in defining row-level security - eg. the underlying table
+can have a security status column joined to a user authorisation level table in
+the view so that users can only see data they are cleared for. Obviously they
+can also be used to implement column-level security by screening out sensitive
+columns from a table.
+
+Triggers
+
+Triggers can be used to implement further levels of security - they could be
+viewed as a last line of defence in being able to rollback unauthorised write
+activity (they cannot be used to implement any read security). However, there
+is a strong argument that triggers should be restricted to doing what they were
+designed for - implementing referential integrity - rather being loaded up with
+application logic.
+
+Administrative Roles
+
+With Sybase version 10 came the ability to grant certain administrative roles
+to user accounts. Accounts can have sa-level privilege, or be restricted to
+security or operator roles - see sp_role.
+
+Recommendations
+
+The use of any generic account is not a good idea. If more than one person
+requires access as sa to a server, then it is more accountable and traceable if
+they each have an individual account with sa_role granted.
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.2.12: How to Shrink a Database
+
+-------------------------------------------------------------------------------
+
+   
+    Warning: This document has not been reviewed. Treat it as alpha-test
+    quality information and report any problems and suggestions to 
+    <A HREF="mailto:bret@sybase.com">bret@sybase.com</A>
+   
+It has historically been difficult to shrink any database except tempdb
+(because it is created fresh every boot time). The two methods commonly used
+have been:
+
+ 1. Ensure that you have scripts for all your objects (some tools like SA
+    Companion, DB Artisan or dbschema.pl from Sybperl can create scripts from
+    an existing database), then bcp out your data, drop the database, recreate
+    it smaller, run your scripts, and bcp in your data.
+ 2. Use a third-party tool such as DataTool's SQL Backtrack, which in essence
+    automates the first process.
+
+This technote outlines a third possibility that can work in most cases.
+
+An Unsupported Method to Shrink a Database
+
+This process is fairly trivial in some cases, such as removing a recently added
+fragment or trimming a database that has a log fragment as its final
+allocation, but can also be much more complicated or time consuming than the
+script and bcp method.
+
+General Outline
+
+The general outline of how to do it is:
+
+ 1. Make a backup of the current database
+ 2. Migrate data from sysusages fragments with high lstart values to fragments
+    with low lstart values.
+ 3. Edit sysusages to remove high lstart fragments that no longer have data
+    allocations.
+ 4. Reboot ASE.
+
+Details
+
+ 1. Dump your database. If anything goes wrong, you will need to recover from
+    this backup!
+ 2. Decide how many megabytes of space you wish to remove from your database.
+ 3. Examine sysusages for the database. You will be shrinking the database by
+    removing the fragments with the highest lstart values. If the current
+    fragments are not of appropriate sizes, you may need to drop the database,
+    recreate it so there are more fragments, and reload the dump.
+   
+       
+        A trivial case: An example of a time when you can easily shrink a
+        database is if you have just altered it and are sure there has been no
+        activity on the new fragment. In this case, you can directly delete the
+        last row in sysusages for the db (this row was just added by alter db)
+        and reboot the server and it should come up cleanly.
+       
+ 4. Change the segmaps of the fragments you plan to remove to 0. This will
+    prevent future data allocations to these fragments.
+   
+       
+        Note: If any of the fragments you are using have user defined segments
+        on them, drop those segments before doing this.
+       
+        sp_configure "allow updates", 1
+        go
+        reconfigure with override  -- not necessary in System 11
+        go
+        update sysusages
+           set segmap = 0
+         where dbid   = &lt;dbid&gt;
+           and lstart = &lt;lstart&gt;
+        go
+        dbcc dbrepair(&lt;dbname&gt;, remap)
+        go 
+   
+    Ensure that there is at least one data (segmap 3) and one log (segmap 4)
+    fragment, or one mixed (segmap 7) fragment.
+   
+    If the server has been in use for some time, you can shrink it by deleting
+    rows from sysusages for the db, last rows first, after making sure that no
+    objects have any allocations on the usages.
+   
+ 5. Determine which objects are on the fragments you plan to remove.
+        traceon(3604)
+        go
+        dbcc usedextents( dbid,0,0,1)
+        go 
+   
+    Find the extent with the same value as the lstart of the first fragment you
+    plan to drop. You need to migrate every object appearing from this point on
+    in the output.
+   
+ 6. Migrate these objects onto earlier fragments in the database.
+   
+    Objids other than 0 or 99 are objects that you must migrate or drop. You
+    can migrate a user table by building a new clustered index on the table
+    (since the segmap was changed, the new allocations will not go on this
+    fragment).
+   
+    You can migrate some system tables (but not all) using the sp_fixindex
+    command to rebuild its clustered index. However, there are a few system
+    tables that cannot have their clustered indexes rebuilt, and if they have
+    any allocations on the usage, you are out of luck.
+   
+    If the objid is 8, then it is the log. You can migrate the log by ensuring
+    that another usage has a log segment (segmap 4 or 7). Do enough activity on
+    the database to fill an extents worth of log pages, then checkpoint and
+    dump tran.
+   
+    Once you have moved all the objects, delete the row from sysusages and
+    reboot the server.
+   
+    Run dbcc checkdb and dbcc checkalloc on the database to be sure you are ok,
+    then dump the database again.
+   
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.2.13: How do I audit the SQL sent to the server?
+
+-------------------------------------------------------------------------------
+
+This does not seem to be well documented, so here is a quick means of auditing
+the SQL text that is sent to the server.  Note that this simply audits the SQL 
+sent to the server.  So, if your user process executes a big stored procedure,
+all you will see here is a call to the stored procedure.  None of the SQL that
+is executed as part of the stored procedure will be listed.
+
+Firstly, you need to have installed Sybase security (which involves installing
+the sybsecurity database and loading it using the script $SYBASE/scripts/
+installsecurity).   Read the Sybase Security Administration Manual, you may
+want to enable a threshold procedure to toggle between a couple of audit
+tables.  Be warned, that the default configuration option "suspend auditing
+when device full" is set to 1.   This means that the server will suspend all
+normal SQL operations if the audit database becomes full and the sso logs in
+and gets rid of some data.  You might want to consider changing this to 0
+unless yours is a particularly sensitive installation.
+
+Once that is done, you need to enable auditing.  If you haven't already, you
+will need to restart ASE in order to start the audit subsystem.  Then comes the
+bit that does not seem well documented, you need to select an appropriate audit
+option, and the one for the SQL text is "cmdtext".  From the sybsecurity
+database, issue
+
+sp_audit "cmdtext",&lt;username&gt;,"all","on"
+
+for each user on the system that wish to collect the SQL for.  sp_audit seems
+to imply that you can replace "&lt;username&gt;" with all, but I get the error
+message "'all' is not a valid user name".  Finally, enable auditing for the
+system as a whole using
+
+sp_configure "auditing",1
+go
+
+If someone knows where in the manuals this is well documented, I will add a
+link/reference.
+
+Note: The stored procedure sp_audit had a different name under previous
+releases.  I think that it was called sp_auditoption.  Also, to get a full list
+of the options and their names, go into sybsecurity and simply run sp_audit
+with no arguments.
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.2.14: sp_helpdb/sp_helpsegment is returning negative numbers
+
+-------------------------------------------------------------------------------
+
+A number of releases of ASE return negative numbers for sp_helpdb. One solution
+given by Sybase is to restart the server. Hmm... not always possible. An
+alternative is to use the dbcc command 'usedextents'. Issue the following:
+
+dbcc traceon(3604)
+dbcc usedextents(, 0, 1, 1)
+
+and the problem should disappear. This is actually a solved case, Sybase solved
+case no: 10454336, go to <A HREF="http://info.sybase.com/resolution/detail.stm?id_number">http://info.sybase.com/resolution/detail.stm?id_number</A>
+=10454336 to see more information.
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+Advanced Administration Basic Administration ASE FAQ
+
+</PRE>
+<DIV ALIGN=CENTER>
+<SMALL>
+<P><HR WIDTH=1900 NOSHADE><BR>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  Part5 -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A></SMALL>
+<P>
+<div align="center">
+
+<center>
+<form method="post" action="rateit.php">
+<table border="1" cellpadding="0" cellspacing="0" width="150" bgcolor="#ffcccc" style="WIDTH: 150px">
+<tr><td width="100%">
+<div align="center">
+<table border="0" cellpadding="2" width="100%" bgcolor="#ffcccc">
+<tr><td width="100%" height="14">
+<p align="center"><font face="Arial">Rate this FAQ</font></p>
+</td></tr>
+<tr><td width="100%" height="14">
+<p align="center">
+<INPUT TYPE=HIDDEN NAME="pid" VALUE="databases/sybase-faq/part5/index.html">
+<select size="1" name="D1" style="COLOR: darkmagenta; BACKGROUND-COLOR: cornsilk">
+<option selected value="0">N/A</option>
+<option value="1">Worst</option>
+<option value="2">Weak</option>
+<option value="3">OK</option>
+<option value="4">Good</option>
+<option value="5">Great</option>
+</select>
+</p>
+</td></tr>
+<tr><td width="100%" height="27">
+<p align="center">
+<IMG onclick="mystr='/frate.php?pid='+pid.value+'&vote='+D1.value;
+Popup=window.open(mystr,'Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=380,height=270,left=230,top=43'); 
+ return false;" height=28 src="/images/vote.gif" alt="Vote" width=83 border=0 ></p>
+</td></tr>
+</table>
+</div>
+</td></tr>
+</table>
+<font size="-1" face="Arial"><br><a href="/topRated.html">Current Top-Rated FAQs</a><br></font>
+</form>
+</center>
+
+</div>
+
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="100%">
+<tr><td width="100%" bgcolor="#D6D6C0">
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part5/index.html"," ");
+// --></script>
+<p><font face="Arial"><a name="ct">Are you an expert in this area?</a> Share your knowledge and earn expert points by giving answers or rating people's questions and answers! This section of FAQS.ORG is not sanctioned in any way by FAQ authors or maintainers.</font></p>
+<p><font face="Arial">Questions strongly related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-6730.html">How can I display the table sizes of ALL tables in a database?   </a> by Caspar (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9594.html">how to use nested cursors in a stored procedure in ASE ? is there any template to use !...</a> by nino (12/18/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3265.html">to connect sybase and c++,how to connect and access the data </a> by kumaran (9/2/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6741.html">how do u tell the last time update statistics has been run on a table (11.0.3) </a> by yujo (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11075.html">I need to Execute an SP & set its output to the insert statement. This will be occured for...</a> by rose (1/14/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9435.html">I wanted to know EXACT technical details about what ACTUALLY happens when u fire a simple...</a> by anu (12/15/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-8395.html">Is there anyway to start dataserver in ASE 11.9.2 with only the master and tempdb online...</a> by steve_2000g (11/28/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-854.html">i get an error on the "convert" when i try to run this line of code, why is this?   print...</a> by shugarhi (7/14/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11834.html">Hi  &nbsp; We're using Sybase ASE 12.0 running on SUN 4500 Cluster server. We cannot...</a> by KK (1/26/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6297.html">I am creating a stored proc to create a report of dependencies. &nbsp;We are creating...</a> by RR (10/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7388.html">How is this hazardous if we do not close a cursor? </a> by amar (11/11/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9827.html">How can i reduce my tempdb size once i have increased it by creating a device also? </a> by rajs (12/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12835.html">how can i transfer a table from cybase to db2? &nbsp;please sendme step by step method if...</a> by maulik (2/9/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3213.html">My database is in bypass recovery mode. How do I put it in normal mode? </a> by Lach (9/1/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-1435.html">Hi ,  &nbsp;We are using Sybase ASE 11.9.2 with SCO Unix 7.1.1 &nbsp;as the operating ...</a> by gowri (7/27/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-2412.html">were is a database that will bring up  a person address without there last name </a> by travis (8/15/2003)</font></li>
+</ul>
+<p><font face="Arial">Questions somewhat related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-2221.html">Guys!   See the Sybase query below: select convert(float,substring(&lt;field1&gt;,3,...</a> by pathfinder (8/12/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7790.html">What are the side-effects of turning-on the built-in auditing capabilities of sybase? </a> by Choy (11/17/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12136.html">When ever i execute select property('PROCESSCPU') i get the value 189 and whenever i...</a> by anilkumarsh (1/29/2004)</font></li>
+</ul>
+<p><font face="Arial">Other questions awaiting answers:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/related.html">10088 questions</a> related to other FAQs<br></font></li>
+<li><font face="Arial"><a href="/qa/unrelated.html">1765 general questions</a></font></li>
+<li><font face="Arial"><a href="/qa/answered.html">4091 answered questions</a><br></font></li>
+</ul>
+</td></tr></table> <br></center></div>
+<HR NOSHADE SIZE=2 WIDTH=450>
+[ <a href="/faqs/">Usenet FAQs</a> | <a href="/faqs/faqsearch.html">Search</a> | <a href="/contrib/">Web FAQs</a> | <a href="/docs/">Documents</a> | <a href="/rfcs/">RFC Index</a> ]
+<BR><HR NOSHADE SIZE=2 WIDTH=450>
+<P>
+<ADDRESS>
+Send corrections/additions to the FAQ Maintainer: <BR>dowen@midsomer.org (David Owen)
+</ADDRESS>
+<P>
+<SMALL>
+<STRONG>Last Update February 12 2004 @ 00:28 AM</STRONG>
+<BR>
+</SMALL>
+</DIV>
+</BODY>
+</HTML>
+

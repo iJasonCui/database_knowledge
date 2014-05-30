@@ -1,0 +1,26 @@
+#!/bin/sh
+
+if [ $# -ne 2 ] ; then
+  echo "Usage: <Database Name> <Database Identifier>"
+  exit 1
+fi
+
+#
+# Initialize arguments
+#
+
+DatabaseName=$1
+DatabaseIdentifier=$2
+
+SYBDUMP=/dumps
+
+. /home/sybase/.bash_profile
+Password=`cat $HOME/.sybpwd | grep $DSQUERY | awk '{print $2}'`
+$SYBASE/$SYBASE_OCS/bin/isql -S${DSQUERY} -Usa -P${Password} <<EOF1
+
+DUMP DATABASE ${DatabaseName} TO "$SYBDUMP/${DatabaseName}/${DatabaseName}-db${DatabaseIdentifier}"
+go
+EOF1
+
+
+exit 0

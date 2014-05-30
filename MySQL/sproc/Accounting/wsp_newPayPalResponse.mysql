@@ -1,0 +1,51 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newPayPalResponse;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newPayPalResponse (
+
+/*******************************************************************
+**
+** CREATION:
+**   Author:      Andy Tran
+**   Date:        July 2009
+**   Description: Inserts row into PayPalResponse
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*******************************************************************/
+
+ at_xactionId     DECIMAL(12,0)
+,at_tokenId       VARCHAR(20)
+,at_payerId       VARCHAR(17)
+,at_responseCode  VARCHAR(5)
+,at_correlationId VARCHAR(20)
+)
+BEGIN
+
+DECLARE at_dateNow DATETIME;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+INSERT INTO PayPalResponse (
+         xactionId
+        ,tokenId
+        ,payerId
+        ,responseCode
+        ,correlationId
+        ,dateCreated
+    )
+    VALUES (
+         at_xactionId
+        ,at_tokenId
+        ,at_payerId
+        ,at_responseCode
+        ,at_correlationId
+        ,at_dateNow
+    );
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

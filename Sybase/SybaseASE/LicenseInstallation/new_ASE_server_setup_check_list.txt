@@ -1,0 +1,526 @@
+[VIP note]
+================================
+pre installation
+================================
+1.  useradd sybase or /usr/sbin/useradd sybase 
+1.1 passwd sybase
+
+
+5. tar -xvf ase1570_linx8664_64_02.tgz
+6. /usr/sbin/useradd sybase157
+7. passwd sybase157
+8. At the command line, enter:
+./setup.bin -i console
+
+2.  download sybase tar file
+2.1 cd /; mkdir /ccs; 
+2.2 cd /ccs; mkdir sybase15-0_2; 
+2.3 cd /ccs; mkdir scripts;
+2.4 cd /ccs/scripts; mkdir maint;
+2.5 chown -R sybase:sybase /ccs/scripts;
+2.6 chown -R sybase:sybase /ccs/sybase15-0_2;
+
+3.  copy it to /ccs/sybase15_0_3
+3.1 login in as sybase@w151dbp20
+3.2 cd /ccs/sybase15-0_2; scp -p /ccs/sybase15-0_2/*.* sybase@w151dbp30:/ccs/sybase15-0_2;
+3.3 cd /ccs/sybase15-0_2; scp -p /ccs/sybase15-0_2/*.* sybase@w151dbp40:/ccs/sybase15-0_2;
+
+4.  su - sybase; cd /ccs/sybase15-0_2; tar -xvf EBF15967.tar
+4.1 https://sybase.subscribenet.com/
+4.2 jason.cui@lavalife.com  Net....123.
+4.3 download on PC and then ftp into Linux server
+
+OR
+
+4.1 go to sybase web site https://sybase.subscribenet.com/control/sybs/download?element=4270541
+4.2 enter user name and password
+4.3 find the product cd and copy the link
+4.4 on the linux server g151db01, wget "[the link]"
+    cd /ccs; wget  "https://esdhttp.flexnetoperations.com/cgi-bin/download?rid=2687818211&rp=DTM20131209211548OTg1MzEwNTgy"
+
+
+5.  su; cd /ccs/sybase15-0_2/ebf15967 ; ./setup -console
+5.1 chown -R sybase:sybase /opt/sybase;
+5.2 hostid for linux: /sbin/ifconfig eth0  (the HWaddr 00:14:4F:A8:52:60)
+5.3 generate the license from sybase web site 
+5.4 cd /opt/sybase/SYSAM-2_0/licenses; vi w151dbp30.lic
+5.5 cd /opt/sybase/SYSAM-2_0/licenses; vi w151dbp40.lic
+5.6 yum -y install compat-libstdc++-296 compat-libstdc++-33 (only something wrong)
+
+6. create directory and symbolic link /data/syb_db and /data/syb_dump
+6.1 cd /data/w151dbp30_vol_1; mkdir syb_dump; mkdir syb_db;
+6.2 cd /data/w151dbp40_vol_1; mkdir syb_dump; mkdir syb_db;
+6.3 chown -R sybase:sybase /data/w151dbp30_vol_1/syb_db;
+6.4 chown -R sybase:sybase /data/w151dbp30_vol_1/syb_dump;
+6.5 ln -s /data/w151dbp30_vol_1/syb_db /data/syb_db; 
+6.6 ln -s /data/w151dbp30_vol_1/syb_dump /data/syb_dump; 
+6.7 cd /opt/sybase/ASE-15_0/install ; mkdir logs
+6.8 cd /data/syb_db; mkdir w151dbp30; 
+6.9 cd /data/syb_dump; mkdir w151dbp30; 
+
+6.8 cd ; rm .bash_profile; vi .bash_profile
+
+####################################
+# .bash_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+        . ~/.bashrc
+fi
+
+# User specific environment and startup programs
+
+PATH=$PATH:$HOME/bin
+
+export PATH
+
+. /opt/sybase/SYBASE.sh
+
+SYBMAINT="/ccs/scripts/maint"
+export SYBMAINT 
+
+SYBDUMP="/data/syb_dump"
+export SYBDUMP
+######################################
+
+7.  srvbuild 
+7.1 cd /ccs/sybase15-0_2; vi srvbuild_w151dbp30.rs
+
+7.2 [sybase@w151dbp10 sybase15-0_2]$ 
+cd /ccs/sybase15-0_2; srvbuild -r srvbuild_w151dbp30_BS.rs
+[ASE 15.7] srvbuildres -r srvbuild_w151dbp30_BS.rs
+
+7.3 [sybase@w151dbp10 sybase15-0_2]$ 
+cd /ccs/sybase15-0_2; srvbuild -r srvbuild_w151dbp30.rs
+
+7.4 ERROR IS AS FOLLOWS:  
+Building Adaptive Server 'w151dbp10':
+Writing entry into directory services...
+Directory services entry complete.
+Building master device...
+Task failed
+/opt/sybase/ASE-15_0/bin/dataserver: error while loading shared libraries: libstdc++.so.5: cannot open shared object file: No such file or directory
+Server 'w151dbp10' was not created.
+
+7.5 solution for it:
+yum -y install compat-libstdc++-296 compat-libstdc++-33
+
+
+================================================
+
+1. switch the ip between 26p and 28p (UNIX)
+2. change local interfaces file (ip address)
+3. make sure dsync on for 28p
+
+step 1: passwd sybase
+[root@newSRV] passwd sybase
+
+step 2: .bashrc
+[jasonc@webccs] scp ~/src/javalife/db/scripts/maint/.bashrc sybase@[newSRV]:/opt/etc/sybase12_52
+
+make /data/db,  /data/dump and /opt/etc/sybase owned by SYBASE
+
+step 3: DSQUERY and SYBDUMP
+[sybase@newSRV] vi $HOME/.bash_profile AND replace "export DSQUERY=webalpha" with "export DSQUERY=[newSRV]"
+and change "export SYBDUMP=/data/dump"
+
+step 4: startserver
+[sybase@newSRV]
+if [ -not exists /opt/etc/sybase12_52/install/startserver]
+cp /opt/etc/sybase12_52/ASE-12_5/install/startserver /opt/etc/sybase12_52/install
+
+step 5: RUN files
+
+sybase@webdb31p:~/install]$ scp /opt/etc/sybase12_52/install/[RS]* sybase@dr-db2:~/install
+RUN_SYB_BACKUP  RUN_[newSRV]m    RUN_[newSRV]p    STOP_[newSRV]m   STOP_[newSRV]p
+
+============================================
+[sybase@w151dbp10 install]$ more RUN_w151dbp10
+#!/bin/sh
+#
+# ASE page size (KB):   2k
+# Master device path:   /data/syb_db/w151dbp10/master.dat
+# Error log path:       /opt/sybase/ASE-15_0/install/logs/w151dbp10.log
+# Configuration file path:      /opt/sybase/ASE-15_0/w151dbp10.cfg
+# Directory for shared memory files:    /opt/sybase/ASE-15_0
+# Adaptive Server name: w151dbp10
+#
+
+LOGDIR=/opt/sybase/ASE-15_0/install/logs/
+mv $LOGDIR/w151dbp10.log $LOGDIR/w151dbp10.log.`date +%Y%m%d%H%M`
+
+/opt/sybase/ASE-15_0/bin/dataserver \
+-d/data/syb_db/w151dbp10/master.dat \
+-e/opt/sybase/ASE-15_0/install/logs/w151dbp10.log \
+-c/opt/sybase/ASE-15_0/w151dbp10.cfg \
+-M/opt/sybase/ASE-15_0 \
+-sw151dbp10 \
+
+==================================================
+
+[sybase@w151dbp10 install]$ more RUN_w151dbp10_BS 
+#!/bin/sh
+#
+# Error log path:       /opt/sybase/ASE-15_0/install/logs/w151dbp10_BS.log
+# Maximum number of network connections:        25
+# Maximum number of server connections: 20
+# Multibuf executable path:     /opt/sybase/ASE-15_0/bin/sybmultbuf
+# Backup Server name:   w151dbp10_BS
+#
+
+LOGDIR=/opt/sybase/ASE-15_0/install/logs/
+mv $LOGDIR/w151dbp10_BS.log $LOGDIR/w151dbp10_BS.log.`date +%Y%m%d%H%M`
+
+/opt/sybase/ASE-15_0/bin/backupserver \
+-e/opt/sybase/ASE-15_0/install/logs/w151dbp10_BS.log \
+-N25 \
+-C20 \
+-M/opt/sybase/ASE-15_0/bin/sybmultbuf \
+-Sw151dbp10_BS \
+
+=================================================
+
+step 6: interfaces file
+
+[sybase@webdb29p:~]$ scp interfaces sybase@webdb26p:~/interfaces.webdb29p
+
+step 7: config file
+
+[sybase@webdb29p:~]$ scp webdb29p.cfg sybase@webdb26p:~/webdb29p.cfg
+
+step 8: shared memory of UNIX
+
+step 8.1: change /etc/hosts file
+
+===================================
+ERROR:  WHEN LOGIN FROM CLIENT.....
+
+[sybase@wxdbmaint sybase15_0]$ sqsh -Usa -Sw151dbp10
+sqsh-2.1.5 Copyright (C) 1995-2001 Scott C. Gray
+Portions Copyright (C) 2004-2008 Michael Peppler
+This is free software with ABSOLUTELY NO WARRANTY
+For more information type '\warranty'
+Password: 
+Open Client Message
+Layer 5, Origin 3, Severity 5, Number 4
+OS Error: Socket connect failed - errno 111 Connection refused
+ct_connect(): network packet layer: internal net library error: Net-Lib protocol driver call to connect two endpoints failed
+=========================================================================
+
+THE SAMPLE OF /etc/hosts file is follows:
+
+==========================================
+
+[sybase@c151dbp06 etc]$ more /etc/hosts
+# Do not remove the following line, or various programs
+# that require network functionality will fail.
+127.0.0.1               localhost.localdomain localhost
+::1             localhost6.localdomain6 localhost6
+
+===========================================
+
+
+step 9: startup server in "m" mode
+
+step 10: syslogins and roles
+
+--####################################################
+
+--===============
+--both
+--===============
+use tempdb
+go
+/*
+--ase 12.5
+CREATE TABLE dbo.sysloginsSource
+(
+    suid        smallint      NOT NULL,
+    status      smallint      NOT NULL,
+    accdate     datetime      NOT NULL,
+    totcpu      int           NOT NULL,
+    totio       int           NOT NULL,
+    spacelimit  int           NOT NULL,
+    timelimit   int           NOT NULL,
+    resultlimit int           NOT NULL,
+    dbname      varchar(30)   NOT NULL,
+    name        varchar(30)   NOT NULL,
+    password    varbinary(30) NULL,
+    language    varchar(30)   NULL,
+    pwdate      datetime      NULL,
+    audflags    int           NULL,
+    fullname    varchar(30)   NULL,
+    srvname     varchar(30)   NULL,
+    logincount  smallint      NULL,
+    procid      int        null
+)
+*/
+--ASE 15
+CREATE TABLE dbo.sysloginsSource
+(
+    suid          int            NOT NULL,
+    status        smallint       NOT NULL,
+    accdate       datetime       NOT NULL,
+    totcpu        int            NOT NULL,
+    totio         int            NOT NULL,
+    spacelimit    int            NOT NULL,
+    timelimit     int            NOT NULL,
+    resultlimit   int            NOT NULL,
+    dbname        varchar(30)    NULL,
+    name          varchar(30)    NOT NULL,
+    password      varbinary(128) NULL,
+    language      varchar(30)    NULL,
+    pwdate        datetime       NULL,
+    audflags      int            NULL,
+    fullname      varchar(30)    NULL,
+    srvname       varchar(30)    NULL,
+    logincount    smallint       NULL,
+    procid        int            NULL,
+    lastlogindate datetime       NULL,
+    crdate        datetime       NULL,
+    locksuid      int            NULL,
+    lockreason    int            NULL,
+    lockdate      datetime       NULL
+)
+LOCK DATAROWS
+go
+
+CREATE TABLE dbo.sysloginrolesSource
+(
+    suid   smallint NOT NULL,
+    srid   smallint NOT NULL,
+    status smallint NOT NULL
+)
+--======================
+--source
+--=======================
+insert tempdb..sysloginsSource
+select  * from  master..syslogins where suid > = 3
+
+insert tempdb..sysloginrolesSource
+select * from  master..sysloginroles where suid > = 3
+
+--generate the scripts from DB artisan
+
+--==================
+--dest
+--==================
+insert master..syslogins
+select * from tempdb..sysloginsSource where suid > = 3
+
+insert master..sysloginroles
+select * from tempdb..sysloginrolesSource where suid > = 3
+
+select * from  master..sysloginroles where suid > = 3 and suid < 23
+--delete from  master..sysloginroles where suid > = 3 and suid < 23
+--delete from  master..syslogins where suid > = 3
+
+select * from master..syslogins where suid = 27
+
+--dest
+--delete  from master..sysloginroles where suid = 1 and status = 0
+select * from master..sysloginroles where suid = 1 and status = 0
+--update master..syslogins set name = "ccdmaint" where suid = 27
+
+--##########################################
+
+
+
+step 11: disk-init and extend tempdb
+
+###########################################
+
+USE master
+go
+DISK INIT
+    NAME='tempdb_dev',
+    PHYSNAME='/data/syb_db/w151dbp30/tempdb_dev.dat',
+    VDEVNO=3,
+    SIZE=524288,
+    VSTART=0,
+    CNTRLTYPE=0, 
+    DSYNC=false
+go
+EXEC sp_diskdefault 'tempdb_dev',defaultoff
+go
+IF EXISTS (SELECT * FROM master.dbo.sysdevices WHERE name='tempdb_dev')
+    PRINT '<<< CREATED DATABASE DEVICE tempdb_dev >>>'
+ELSE
+    PRINT '<<< FAILED CREATING DATABASE DEVICE tempdb_dev >>>'
+go
+
+
+USE master
+go
+ALTER DATABASE tempdb 
+    ON tempdb_dev=1024
+go
+
+USE tempdb
+go
+IF EXISTS (SELECT * FROM syssegments WHERE name='default')
+BEGIN
+    EXEC sp_dropsegment 'default', 'tempdb','master'
+    PRINT '<<< DROPPED SEGMENT MAPPING FROM DEVICE master >>>'
+END
+go
+
+USE tempdb
+go
+EXEC sp_extendsegment 'logsegment','tempdb','tempdb_dev'
+go
+
+
+USE tempdb
+go
+IF EXISTS (SELECT * FROM syssegments WHERE name='logsegment')
+BEGIN
+    EXEC sp_dropsegment 'logsegment', 'tempdb','master'
+    PRINT '<<< DROPPED SEGMENT MAPPING FROM DEVICE master >>>'
+END
+go
+
+USE tempdb
+go
+IF EXISTS (SELECT * FROM syssegments WHERE name='system')
+BEGIN
+    EXEC sp_dropsegment 'system', 'tempdb','master'
+    PRINT '<<< DROPPED SEGMENT MAPPING FROM DEVICE master >>>'
+END
+go
+
+
+################################################
+
+
+step 12: create db for load
+
+step 13: scp database dump from other servers
+
+step 14: load database 
+
+step 15: online database
+
+step 16: sp_dboption "dbo user only", true for all user database
+
+step 17: add role "read_un_limited"
+
+step 18: check_ase_log
+
+step 19: send_mail
+
+step 20: $SYBMAINT scripts (dump db and dump tran and so on)
+
+step 21: set up crontab
+
+step 22: sysusers
+
+select * from  Profile_ai..sysusers
+update Profile_ai..sysusers set suid = 3 where name = "web"
+update Profile_ai..sysusers set suid = 5 where name = "webmaint"
+select * from master..syslogins
+
+*****27p and 30p x2kcco user and webrealm (password "BadIdea2")
+*****webmaint user has select priviledge on syslogshold table
+--=============================================
+EXEC sp_adduser 'webmaint','webmaint','public'
+go
+IF USER_ID('webmaint') IS NOT NULL
+    PRINT '<<< CREATED USER webmaint >>>'
+ELSE
+    PRINT '<<< FAILED CREATING USER webmaint >>>'
+go
+GRANT SELECT ON dbo.syslogshold TO webmaint
+go
+--==============================================
+
+step 23: check rep2p_maint_user as alias of dbo
+
+step 24: remote server and local server setup
+
+step 25: MDA table setup
+
+step 26: check trust relationship
+
+two way trust relationship between 0r and 29p
+two way trust relationship between webdb28p and 29p 
+one way trust from 29p to opsdb1p (run "ssh  -l backmon  opsdb1p" on 29p )
+one way trust from websrvr-115 TO 29p (run "ssh webdb29p" on websrvr-115 )
+
+
+step 27: check whether the new server can send out e-mail or not
+
+
+step 28: performance tuning
+
+EXEC sp_cacheconfig "default data cache", 5600MB
+EXEC sp_deviceattr tempdbdev, "dsync", false
+EXEC sp_configure 'number of oam trips',5
+EXEC sp_configure 'number of index trips',5
+
+
+step 30: online index maintenance
+
+step 31: sp__dbo_only (user defined system procs)
+
+31.1 [jcui@gxcvs1 sybsystemprocs]$ cd /home/jcui/web/javalife/db/sproc/sybsystemprocs
+31.2 vi $SYBASE/interfaces root password "401to427"
+31.3 vi $HOME/.sybpwd
+
+step 32: wxdbmaint (sp_sysmon db stats)
+
+32.1 vi $SYBASE/interfaces root password "401to427"
+32.2 vi $HOME/.sybpwd
+32.3 change crontab
+32.4 
+
+step 33: add the new server into Nagios (add into interfaces and set up threshold)
+
+33.1 login as root on 'w151monitor' 
+33.2 su - sybase; vi $SYBASE/interfaces 
+33.3 sybase disk space threshold "; su - nagios; cd /usr/local/nagios/libexec; vi sybase.cf
+33.4 sybase connection; su - nagios; cd /usr/local/nagios/libexec; vi "syb.cfg"
+33.5 From the grep "check_dbperf" in the /usr/local/nagios/etc/objects/commands.cfg file
+33.6 sybase performance; 
+
+step 34: set up database backup and set up backupMonitor system
+
+step 35: add the graph into "webccs"
+
+step 36: g104iqdb01 (add into MDA collection)
+
+
+
+================ tuning tips =============
+
+  Tuning Recommendations for Transaction Management                             
+  -------------------------------------------------                             
+  - Consider decreasing the 'user log cache size'
+    configuration parameter if it is greater than the
+    logical database page size.
+
+
+  Tuning Recommendations for Lock Management                                    
+  ------------------------------------------                                    
+  - Consider increasing the 'deadlock checking period' parameter
+    by 50 ms.
+
+
+    Tuning Recommendations for Data cache : default data cache                  
+    -------------------------------------                                       
+    - Consider using 'relaxed LRU replacement policy'
+      for this cache.
+ 
+    - Consider adding a large I/O pool for this cache.
+ 
+    - Consider using Named Caches or Cache partitions or both.
+
+
+
+
+
+
+
+
+
+

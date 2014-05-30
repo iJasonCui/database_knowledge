@@ -1,0 +1,35 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updRealCardTypeByCardId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updRealCardTypeByCardId (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         July 13, 2010
+**   Description:  Update realCardTypeId by cardId
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_creditCardId INT
+,at_cardTypeId   SMALLINT
+)
+BEGIN
+
+DECLARE at_dateNow      DATETIME;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+UPDATE CreditCard
+           SET realCardTypeId = at_cardTypeId
+              ,dateModified = at_dateNow
+              ,dateLastUsed = at_dateNow
+         WHERE creditCardId = at_creditCardId;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,129 @@
+#!/bin/bash
+
+. $HOME/.bash_profile
+
+cd /opt/etc/sybase12_52/maint/repLatency
+
+if [ $# -ne 2 ] ; then
+  echo "Usage: <DBServer> <LoginName>"
+  exit 1
+fi
+
+DBServer=$1
+LoginName=$2
+
+yyyymmddHHMMSS=`date '+%Y%m%d_%H%M%S'`
+Password=`cat $HOME/.sybpwd | grep -w $DBServer | awk '{print $2}'`
+PasswordOps=`cat $HOME/.sybpwd | grep -w opsdb2p | awk '{print $2}'`
+logFile=output/$0.${DBServer}.${yyyymmddHHMMSS}
+
+sqsh -U${LoginName} -S${DBServer} -P ${Password} <<EOQ1 > ${logFile}
+
+use tempdb
+go
+
+IF OBJECT_ID('dbo.RepLatency') IS NOT NULL
+    drop table RepLatency 
+go
+
+CREATE TABLE dbo.RepLatency 
+(
+    dBServer               varchar(30) NOT NULL,
+    dBName                 varchar(30) NOT NULL,
+    primaryDBID            int         NOT NULL,
+    latencyInSec           int         NOT NULL,
+    lastXactOriginTime     datetime    NOT NULL,
+    lastXactDestCommitTime datetime    NOT NULL,
+    dateCreated            datetime    NOT NULL
+)
+LOCK ALLPAGES
+go
+IF OBJECT_ID('dbo.RepLatency') IS NOT NULL
+    PRINT '<<< CREATED TABLE dbo.RepLatency >>>'
+ELSE
+    PRINT '<<< FAILED CREATING TABLE dbo.RepLatency >>>'
+go
+
+set nocount on
+select name 
+from   master..sysdatabases 
+where  name not in ('master', 'model', 'tempdb', 'sybsystemdb', 'sybsystemprocs', 'sybsyntax', 'dbload')
+\do
+
+\echo "#=========================================#"
+\echo #1
+\echo "#-----------------------------------------#"
+use #1
+go
+
+set rowcount 1
+go
+
+if OBJECT_ID('rs_lastcommit') IS NOT NULL
+begin
+
+declare @dateCreated datetime
+select  @dateCreated = getdate() 
+
+insert tempdb..RepLatency
+(
+    dBServer               ,
+    dBName                 ,
+    primaryDBID            ,
+    latencyInSec           ,
+    lastXactOriginTime     ,
+    lastXactDestCommitTime ,
+    dateCreated            
+)
+select 
+   '${DBServer}' as DBServer,
+   "#1"          as DBName,       
+   PrimaryDBID = origin,
+   LatencyInSec = datediff(ss, origin_time, dest_commit_time),
+   LastXactOriginTime = convert(varchar(40), origin_time, 109),
+   LastXactDestCommitTime = convert(varchar(40), dest_commit_time, 109),
+   @dateCreated as dateCreated
+from  #1..rs_lastcommit
+where origin > 0
+order by origin_time desc
+
+end
+else begin
+     print "there is no rs_lastcommit"
+end
+
+go
+
+\done
+
+EOQ1
+
+sqsh -U${LoginName} -S${DBServer} -P ${Password} <<EOQ2 > ${logFile}
+
+--declare @dateCreated datetime
+--select  @dateCreated = getdate()
+
+select
+    dBServer               ,
+    dBName                 ,
+    primaryDBID            ,
+    latencyInSec           ,
+    lastXactOriginTime     ,
+    lastXactDestCommitTime ,
+    dateCreated 
+from tempdb..RepLatency
+\bcp repStats..RepLatency -U${LoginName} -Sopsdb2p -P${PasswordOps}
+
+go
+
+EOQ2
+
+cat ${logFile}
+
+#--------------------------------#
+# house keeping 
+#--------------------------------#
+/usr/bin/find /opt/etc/sybase12_52/maint/repLatency/output/ -name "figure-out-latency.sh.*" -mtime +1 -exec rm -f {} \; 2>&1 > /dev/null
+
+exit 0
+

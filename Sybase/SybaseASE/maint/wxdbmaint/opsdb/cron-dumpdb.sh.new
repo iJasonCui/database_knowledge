@@ -1,0 +1,68 @@
+#!/bin/sh
+
+if [ $# -ne 3 ] ; then
+  echo "Usage: <Database Name> <jobId> <scheduleId>"
+  exit 1
+fi
+
+#
+# Initialize arguments
+#
+
+DatabaseName=$1
+jobId=$2
+scheduleId=$3
+
+SYBDUMP=/dumps
+
+. /home/sybase/.bash_profile
+Password=`cat $HOME/.sybpwd | grep $DSQUERY | awk '{print $2}'`
+
+$SYBMAINT/run_sql.sh dumpdb_${DatabaseName} ${DSQUERY} master 1 dumpdb_${DatabaseName}
+
+ERROR_CODE=$?
+
+function ErrorHandler
+{
+
+echo "######################"
+echo " EXECUTING FUNCTION   "
+echo "${jobId},${scheduleId},${executionNote},${executionStatus},${jobSpecificCode},${logLocation}"
+echo "######################"
+
+$SYBMAINT/executionInsert.sh ${jobId} ${scheduleId} "${executionNote}" ${executionStatus} ${jobSpecificCode} ${logLocation}
+
+}
+
+
+# Returns true if either condition1 or condition2 holds true...
+if [ ${ERROR_CODE} -ne 0 ]; then
+
+        jobId=${jobId}
+        scheduleId=${scheduleId}
+        executionNote="opsdb1p.${DatabaseName} daily dump failed. CALL DBM "
+        executionStatus="2"
+        jobSpecificCode="1"
+        logLocation="/dumps/scripts/maint/cromdumpdb-${DatabaseName}.out"
+
+
+        ErrorHandler $jobId,$scheduleId},${executionId},"${executionNote}",${executionStatus},${jobSpecificCode},${logLocation}
+
+else
+
+
+
+        jobId=${jobId}
+        scheduleId=${scheduleId}
+        executionNote="opsdb1p.${DatabaseName} daily dump FINISHED OK"
+        executionStatus="1"
+        jobSpecificCode="1"
+        logLocation="/dumps/scripts/maint/cromdumpdb-${DatabaseName}.out"
+
+        ErrorHandler $jobId,${scheduleId},${executionId},"${executionNote}",${executionStatus},${jobSpecificCode},${logLocation}
+
+
+fi
+
+
+exit 0

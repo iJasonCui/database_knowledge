@@ -1,0 +1,61 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_saveSubTransaction;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_saveSubTransaction (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu 
+**   Date:  April 11 2008 
+**   Description:  save subscription transaction 
+**
+** REVISION(S):
+**   Author: 
+**   Date: 
+**   Description:
+**
+******************************************************************************/
+   at_xactionId                 INT,
+   at_creditCardId              INT,
+   at_userId                    DECIMAL(12,0),
+   at_xactionTypeId             TINYINT,
+   at_contentId                 SMALLINT,
+   at_subscriptionTypeId        SMALLINT,
+   at_duration                  SMALLINT,
+   at_userTrans                 BIT, 
+   at_description               VARCHAR(255),
+   at_durationUnit              CHAR(1),
+   at_dateNow                   DATETIME,
+   at_subscriptionOfferDetailId INT
+)
+BEGIN
+
+INSERT INTO SubscriptionTransaction(xactionId,
+                                       cardId,
+                                       userId,
+                                       xactionTypeId,
+                                       contentId,
+                                       subscriptionTypeId,
+                                       duration,
+                                       userTrans,
+                                       description,
+                                       dateCreated,
+                                       durationUnits,
+                                       subscriptionOfferDetailId)
+   VALUES(at_xactionId,
+          at_creditCardId,
+          at_userId,
+          at_xactionTypeId,
+          at_contentId,
+          at_subscriptionTypeId,
+          at_duration,
+          at_userTrans,
+          at_description,
+          at_dateNow,
+          at_durationUnit,
+          at_subscriptionOfferDetailId);
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

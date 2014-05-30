@@ -1,0 +1,28 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_expireCredits;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_expireCredits (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs/Jack Veiga
+**   Date:  October 2003
+**   Description:
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+)
+BEGIN
+
+DECLARE at_dateNow 		DATETIME;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+CALL wsp_cursorExpireCredits (at_dateNow);
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

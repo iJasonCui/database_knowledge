@@ -1,0 +1,24 @@
+Replicate Database Migration 2nd level
+(without database connection and subscription)
+
+1. (w151dbr02) create database device and create db Profile_ar for load
+2. (w151dbr02’s Profile_ar) rcp Profile_ar’s database dump from w151dbr01 to w151dbr02
+3. (w151dbr02) load database Profile_ar from w151dbr01’s Profile_ar 
+4. (w151rep01) add db connection to w151dbr02.Profile_ar with rs_init
+5. change the rep_maint_user into dbo
+6. insert one row into RepTest
+7. (syntax) suspend log transfer from { data_server.database | all} 
+8. (w151rep01) suspend log transfer from w151dbp03.Profile_ar
+9. (w151rep01) checking whether the rep system is quiesce or not by using “admin health” or “admin quiesce_check”
+10. (w151rep01) After the rep system quiesce, suspend connection to w151dbr02.Profile_ar and suspend connection to w151dbr01.Profile_ar
+11. (w151dbr01 and 02) turn on “dbo use only “ on Profile_ar
+12. (w151rep01) define/validate/activate subscription for webdbw151dbr02.Profile_ar
+13. (w151rep01) resume log transfer from w151dbp03.Profile_ar
+14.  (20p) dump db and the last transaction of Profile_ar on w151dbr01 
+15. (w151rep01) resume connection to w151dbr01.Profile_ar
+16. (20p) once the queue caught up, turn off “dbo use only” on 20p’s Profile_ar 
+17.  (w151dbr02) load db and the last transaction into Profile_ar on w151dbr02 and online database Profile_ar
+18. (w151dbr02) double check the Profile_ar (users, aliases, indexes, tables and stored procedures)
+19. (w151rep01) resume connection to w151dbr02.Profile_ar 
+20. (24p) after outbound queue catch up, do a rep test and if passed,  turn off “dbo use only” on Profile_ar
+21. (w151dbr02) turn on “truncate log when checkpoint” before the crontab of dump db and transaction is ready

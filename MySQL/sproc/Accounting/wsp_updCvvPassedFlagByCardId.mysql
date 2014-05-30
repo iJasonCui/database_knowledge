@@ -1,0 +1,34 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updCvvPassedFlagByCardId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updCvvPassedFlagByCardId (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Mike Stairs
+**   Date:         Aug 2, 2005
+**   Description:  Update cvvPassedFlag by cardId
+**
+** REVISION(S):
+**   Author:  Mike Stairs
+**   Date:    Feb 27, 2006
+**   Description: also update dateLastUsed column
+**
+******************************************************************************/
+     at_creditCardId      int
+    ,at_cvvPassedFlag     CHAR(1)
+)
+BEGIN
+DECLARE at_GetDateGMT  DATETIME;
+
+SET at_GetDateGMT = UTC_TIMESTAMP();
+
+UPDATE CreditCard
+           SET cvvPassedFlag = at_cvvPassedFlag
+              ,dateModified = at_GetDateGMT
+              ,dateLastUsed = at_GetDateGMT
+         WHERE creditCardId = at_creditCardId;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

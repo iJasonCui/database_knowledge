@@ -1,0 +1,46 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newAccountFlag;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newAccountFlag (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Slobodan Kandic
+**   Date:  Aug 12, 2003
+**   Description:  Inserts row into AccountFlag table. Note that there can only be one non-reviewed flag per account.
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date:  Oct 2003
+**   Description: added dateModified
+**
+******************************************************************************/
+
+ at_userId DECIMAL(12,0)
+,at_reasonContentId SMALLINT
+)
+BEGIN
+
+DECLARE  at_dateCreated       DATETIME;
+        
+SET at_dateCreated = UTC_TIMESTAMP();
+     
+INSERT AccountFlag
+(
+userId
+,reasonContentId
+,reviewed
+,dateCreated
+,dateModified
+)
+VALUES
+(
+at_userId
+,at_reasonContentId
+,"N"
+,at_dateCreated
+,at_dateCreated
+);
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

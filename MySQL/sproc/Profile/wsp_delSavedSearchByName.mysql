@@ -1,0 +1,27 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_delSavedSearchByName;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_delSavedSearchByName (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga/Michael Stairs
+**   Date:  October 16 2002
+**   Description:  Deletes row from SavedSearch by savedSearchName
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_productCode		CHAR(1)
+,at_communityCode		CHAR(1)
+,at_userId            DECIMAL(12,0)
+,at_savedSearchName   VARCHAR(255)
+)
+BEGIN 
+    DELETE FROM SavedSearch
+	WHERE userId = at_userId
+	AND savedSearchName = at_savedSearchName;
+END;;
+DELIMITER ;

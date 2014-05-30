@@ -1,0 +1,238 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getPurchaseHistForAdmin;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getPurchaseHistForAdmin (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Mike Stairs
+**   Date:         Oct 1, 2003
+**   Description:  retrieves purchase transactions for the specified user
+**
+** REVISION(S):
+**   Author:       Mike Stairs
+**   Date:         November 26, 2004
+**   Description:  retrieve subcription related info too
+**
+**   Author:       Andy Tran
+**   Date:         December 2005
+**   Description:  use union to retrieve both regular and subscription purchases
+**
+**   Author:       Andy Tran
+**   Date:         August 2006
+**   Description:  added userIP (the IP number at time of purchase)
+**
+**   Author:       Yan Liu 
+**   Date:         April 2008
+**   Description:  rewrite this proc for upsell 
+**
+**   Author:       Eugene Huang 
+**   Date:         February 2009
+**   Description:  added fetching for X for Y Subscription purchases,
+*                  and append discountCode to description
+**
+**   Author:       Andy Tran 
+**   Date:         July 2009
+**   Description:  added SpeedDating purchases
+**
+**   Author:       TK Chan  
+**   Date:         May 2010
+**   Description:  added support to show Tax codes
+**
+******************************************************************************/
+   at_userId    DECIMAL(12, 0),
+   at_startDate DATETIME
+)
+BEGIN
+
+DECLARE at_xactionId         DECIMAL(12, 0);
+DECLARE at_xactionTypeId     TINYINT;        
+DECLARE at_dateCreated       DATETIME;       
+DECLARE at_cost              DECIMAL(10, 2); 
+DECLARE at_costUSD           DECIMAL(5, 2);
+DECLARE at_tax               DECIMAL(10, 2); 
+DECLARE at_taxUSD            DECIMAL(5, 2);  
+DECLARE at_purchaseTypeId    TINYINT;        
+DECLARE at_paymentNumber     VARCHAR(40);    
+DECLARE at_creditCardId      INT;            
+DECLARE at_creditDetailId    SMALLINT;       
+DECLARE at_subDetailId       SMALLINT;       
+DECLARE at_offerDetailId     SMALLINT;       
+DECLARE at_currencyId        TINYINT;        
+DECLARE at_cardProcessor     CHAR(1);        
+DECLARE at_billingLocationId SMALLINT;       
+DECLARE at_refXactionId      DECIMAL(12, 0); 
+DECLARE at_contentId         SMALLINT;       
+DECLARE at_description       VARCHAR(255);   
+DECLARE at_adminUserId       INT;            
+DECLARE at_purchaseType      VARCHAR(2);        
+DECLARE at_userIP            DECIMAL(12, 0); 
+DECLARE at_discountFlag      CHAR(1);
+DECLARE at_taxCountryId      SMALLINT;
+DECLARE at_taxJurisdictionId INT;
+DECLARE at_taxCodeName       VARCHAR(203);
+
+DECLARE at_subRecordCount    TINYINT;
+   
+DECLARE done INT DEFAULT FALSE;
+DECLARE CUR_purchaseHist CURSOR FOR
+    SELECT xactionId, xactionTypeId, dateCreated, cost, costUSD, tax, taxUSD, purchaseTypeId, paymentNumber, 
+           creditCardId, purchaseOfferDetailId, subscriptionOfferDetailId, 
+           currencyId, cardProcessor,billingLocationId, refXactionId, userIP, discountFlag, taxCountryId, taxJurisdictionId 
+    FROM Purchase WHERE userId = at_userId AND dateCreated >= at_startDate ORDER BY xactionId ASC;
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+CREATE TEMPORARY TABLE IF NOT EXISTS tmp_purchaseHistory
+(
+      userId             DECIMAL(12, 0) NOT NULL, 
+      xactionId          DECIMAL(12, 0) NOT NULL,
+      xactionTypeId      TINYINT        NOT NULL,
+      dateCreated        DATETIME       NOT NULL,
+      cost               DECIMAL(10, 2) NULL,
+      costUSD            DECIMAL(5, 2)  NULL,
+      tax                DECIMAL(10, 2) NULL,
+      taxUSD             DECIMAL(5, 2)  NULL,
+      purchaseTypeId     TINYINT        NULL,
+      paymentNumber      VARCHAR(40)    NULL,
+      creditCardId       INT            NULL,
+      offerDetailId      SMALLINT       NULL,
+      currencyId         TINYINT        NULL,
+      cardProcessor      CHAR(1)        NULL,
+      billingLocationId  SMALLINT       NOT NULL,
+      refXactionId       DECIMAL(12, 0) NULL,
+      contentId          SMALLINT       NULL,
+      description        VARCHAR(255)   NULL,
+      adminUserId        INT            NULL,
+      purchaseType       VARCHAR(2)     NOT NULL,
+      userIP             DECIMAL(12, 0) NULL,
+      discountFlag       CHAR(1)        NULL,
+      taxCountryId       smallint       NULL,
+      taxJurisdictionId  int            NULL,
+      taxCodeName        VARCHAR(203)   NULL
+) ENGINE=MEMORY;
+
+DELETE FROM tmp_purchaseHistory;
+
+OPEN CUR_purchaseHist;
+
+CUR_purchaseHist_loop: LOOP
+
+   FETCH CUR_purchaseHist INTO at_xactionId,at_xactionTypeId,at_dateCreated,at_cost,at_costUSD,at_tax,at_taxUSD,at_purchaseTypeId,at_paymentNumber,     
+                               at_creditCardId,at_creditDetailId,at_subDetailId,      
+                               at_currencyId,at_cardProcessor,at_billingLocationId,at_refXactionId,at_userIP,at_discountFlag,at_taxCountryId,at_taxJurisdictionId;
+   IF done THEN
+      LEAVE CUR_purchaseHist_loop;
+   END IF;
+         
+   SET at_taxCodeName = 
+         CASE WHEN at_taxCountryId IS NULL AND at_taxJurisdictionId IS NULL THEN 'N/A'
+              WHEN at_taxCountryId = -1 AND at_taxJurisdictionId = -1 THEN 'UNKNOWN'
+              WHEN at_taxCountryId = 0  AND at_taxJurisdictionId = 0 THEN 'NO TAX'
+              WHEN at_taxCountryId > 0 AND at_taxJurisdictionId = -1 THEN (SELECT countryName FROM CountryTaxRate WHERE countryId = at_taxCountryId AND dateExpired IS NULL)
+              ELSE (SELECT countryName FROM CountryTaxRate WHERE countryId = at_taxCountryId AND dateExpired IS NULL) + ' - ' +
+                   (SELECT jurisdictionName FROM JurisdictionTaxRate WHERE jurisdictionId = at_taxJurisdictionId AND dateExpired IS NULL)
+              END;
+
+   SET at_contentId = NULL;
+   SET at_description = NULL;
+   SET at_adminUserId = NULL;
+
+   IF (at_creditDetailId > 0) 
+   THEN
+      SET at_offerDetailId = at_creditDetailId;
+      IF (at_purchaseTypeId = 18)
+      THEN 
+         SET at_purchaseType = 'SD';
+      ELSE
+         SET at_purchaseType = 'P';
+      END IF;
+   ELSE
+      SET at_purchaseType = 'S';
+      IF (at_subDetailId > 0)
+      THEN
+         SET at_offerDetailId = at_subDetailId;
+      END IF;
+   END IF; 
+
+   IF (at_purchaseType = 'SD')
+   THEN
+      IF (SELECT 1 FROM SDTransaction WHERE xactionId = at_xactionId) IS NOT NULL
+      THEN
+         SELECT contentId INTO at_contentId FROM SDTransaction WHERE xactionId = at_xactionId;
+      END IF;
+   ELSEIF (at_purchaseType = 'P')
+   THEN
+      IF (SELECT 1 FROM AccountTransaction WHERE xactionId = at_xactionId) IS NOT NULL
+      THEN
+         SELECT contentId, description INTO at_contentId, at_description FROM AccountTransaction WHERE xactionId = at_xactionId;
+      END IF;
+   ELSE
+      IF (at_subDetailId > 0)
+	  THEN
+         IF (SELECT 1 FROM SubscriptionTransaction WHERE xactionId = at_xactionId AND subscriptionOfferDetailId = at_subDetailId) IS NOT NULL
+         THEN
+            SELECT contentId,description INTO at_contentId,at_description FROM SubscriptionTransaction WHERE xactionId = at_xactionId AND subscriptionOfferDetailId = at_subDetailId;
+         END IF;
+      ELSEIF (at_subDetailId is null and at_discountFlag = 'Y')
+	  THEN
+         IF (SELECT 1 FROM SubscriptionTransaction WHERE xactionId = at_xactionId) IS NOT NULL 
+         THEN
+            SELECT contentId, description INTO at_contentId, at_description FROM SubscriptionTransaction WHERE xactionId = at_xactionId;
+         END IF; 
+      END IF;
+   END IF;
+
+   IF (SELECT 1 FROM AdminAccountTransaction WHERE xactionId = at_xactionId) IS NOT NULL
+   THEN
+      SELECT adminUserId INTO at_adminUserId FROM AdminAccountTransaction WHERE xactionId = at_xactionId;
+   END IF;
+
+   IF (at_creditDetailId IS NULL AND at_subDetailId IS NULL) -- AND at_discountFlag != 'Y')
+   THEN
+      -- --------------- subscription detail  --------------
+      SET at_subRecordCount = 0;
+      
+      CALL wsp_cursorPurchaseSubDetail (at_userId,at_xactionId,at_xactionTypeId,at_dateCreated,at_purchaseTypeId,at_paymentNumber,at_creditCardId,at_currencyId,at_cardProcessor,
+      	   			       at_billingLocationId,at_refXactionId,at_adminUserId,at_purchaseType,at_userIP,at_discountFlag,at_taxCountryId,at_taxJurisdictionId,
+				       at_taxCodeName,at_subRecordCount);
+
+      -- --------------- fetch subscription detail line item end --------------
+      -- --------------- fetch credit detail line items --------------
+      -- SELECT at_subRecordCount = 0
+
+      CALL wsp_cursorPurchaseCreditDetail (at_userIdat_xactionId,at_xactionTypeId,at_dateCreated,at_purchaseTypeId,at_paymentNumber,at_creditCardId,at_currencyId,at_cardProcessor,
+                                       at_billingLocationId,at_refXactionId,at_adminUserId,at_purchaseType,at_userIP,at_discountFlag,at_taxCountryId,at_taxJurisdictionId,
+                                       at_taxCodeName,at_subRecordCount);
+
+      -- ------------- fetch credit line item end  --------------
+      -- ------------- means no line items? --------------
+      IF at_subRecordCount = 0 
+      THEN
+         SELECT IFNULL(amount/100,0), CONCAT('code=', responseCode, ' cavvResponse=', cavvResponseCode) INTO at_cost, at_description FROM PaymentechResponse where xactionId = at_xactionId;
+	 CALL wsp_transPurchaseHistForAdmin (at_userId,at_xactionId,at_xactionTypeId,at_dateCreated,at_cost,at_costUSD,at_tax,at_taxUSD,at_purchaseTypeId,at_paymentNumber,at_creditCardId,
+                                            at_offerDetailId,at_currencyId,at_cardProcessor,at_billingLocationId,at_refXactionId,at_contentId,at_description,at_adminUserId,
+                                            at_purchaseType,at_userIP,at_discountFlag,at_taxCountryId,at_taxJurisdictionId,at_taxCodeName,at_subRecordCount);
+      END IF;
+   ELSE
+      CALL wsp_transPurchaseHistForAdmin (at_userId,at_xactionId,at_xactionTypeId,at_dateCreated,at_cost,at_costUSD,at_tax,at_taxUSD,at_purchaseTypeId,at_paymentNumber,at_creditCardId,
+                                            at_offerDetailId,at_currencyId,at_cardProcessor,at_billingLocationId,at_refXactionId,at_contentId,at_description,at_adminUserId,
+                                            at_purchaseType,at_userIP,at_discountFlag,at_taxCountryId,at_taxJurisdictionId,at_taxCodeName,at_subRecordCount);
+   END IF;
+
+END LOOP;
+
+CLOSE CUR_purchaseHist;
+
+SELECT t.xactionId, t.xactionTypeId,t.dateCreated,t.cost,t.costUSD,t.tax,t.taxUSD,t.purchaseTypeId,t.paymentNumber,
+          t.creditCardId,t.offerDetailId,t.currencyId,t.cardProcessor,t.billingLocationId,t.refXactionId,t.contentId,
+          (CASE t.discountFlag WHEN 'Y'
+              THEN CASE p.discountCode WHEN NULL
+                 THEN t.description
+                 ELSE coalesce(t.description,'') + ' discount code: ' + p.discountCode END
+              ELSE t.description END),
+          t.adminUserId,t.purchaseType,t.userIP,t.taxCodeName 
+     FROM tmp_purchaseHistory t LEFT JOIN PurchaseDiscount p ON t.xactionId = p.xactionId AND t.offerDetailId = p.offerDetailId 
+     WHERE t.userId = at_userId;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,32 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getLocationByLatLong;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getLocationByLatLong (
+/******************************************************************************
+**
+** CREATION:
+**   Author: Jack Veiga
+**   Date:  June 4 2002
+**   Description: Retrieves geographical information by latitude and longtitude
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_lat_rad   INT
+,at_long_rad  INT
+)
+BEGIN
+     SELECT l.country,country_id,region_id,l.country_area,country_area_id,metrocode
+       FROM metro m, location l
+      WHERE web='Y'
+        AND m.country_area = l.country_area
+        AND m.country_area = l.country_area
+        AND at_lat_rad  <= lat_rad_tl
+        AND at_lat_rad >= lat_rad_br
+        AND at_long_rad <= long_rad_tl
+        AND at_long_rad >= long_rad_br ;
+
+END;;
+DELIMITER ;

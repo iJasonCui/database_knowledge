@@ -1,0 +1,78 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_cursorConsumeCredits;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_cursorConsumeCredits (
+ at_userId 			DECIMAL(12,0)
+,at_xactionTypeId		INT
+,at_contentId			SMALLINT
+,at_product			CHAR(1)
+,at_community			CHAR(1)
+,at_userType			CHAR(1)
+,at_noOfCreditsToConsume	SMALLINT 
+,at_balance			SMALLINT
+,at_dateNow 			DATETIME
+)
+BEGIN
+
+DECLARE at_creditTypeId	SMALLINT;
+DECLARE at_credits      SMALLINT;
+DECLARE at_xactionId 	INT;
+
+DECLARE done INT DEFAULT FALSE;
+DECLARE CreditBalance_cursor CURSOR FOR 
+ SELECT CreditBalance.creditTypeId,credits 
+   FROM CreditBalance, CreditType
+  WHERE userId = at_userId 
+    AND dateExpiry >= at_dateNow 
+    AND CreditBalance.creditTypeId = CreditType.creditTypeId 
+  ORDER BY dateExpiry ASC,ordinal DESC;
+
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+OPEN  CreditBalance_cursor;
+
+read_loop: LOOP
+   
+   FETCH CreditBalance_cursor INTO at_creditTypeId,at_credits;
+
+   IF done 
+   THEN
+      SELECT 99;
+      LEAVE read_loop;
+   END IF;
+
+   IF at_credits > at_noOfCreditsToConsume
+   THEN 
+      CALL wsp_XactionId (at_xactionId);
+	  
+      SET at_balance = at_balance - at_noOfCreditsToConsume;
+ 	 
+      CALL wsp_transUpdateConsumeCredits (at_userId, at_xactionTypeId, at_contentId, at_product, at_community, at_userType, 
+           at_noOfCreditsToConsume, at_balance,at_dateNow,at_creditTypeId,at_credits,at_xactionId);
+      
+      SET at_noOfCreditsToConsume = 0;
+
+   ELSEIF at_credits <= at_noOfCreditsToConsume AND at_credits > 0
+   THEN 
+      CALL wsp_XactionId (at_xactionId);
+
+      SET at_balance = at_balance - at_credits;
+         
+      CALL wsp_transDeleteConsumeCredits (at_userId,at_xactionTypeId,at_contentId,at_product,at_community,at_userType,
+           at_noOfCreditsToConsume, at_balance,at_dateNow,at_creditTypeId,at_credits,at_xactionId);
+
+      SET at_noOfCreditsToConsume = at_noOfCreditsToConsume - at_credits;
+
+   END IF;
+
+   IF at_noOfCreditsToConsume <= 0
+   THEN
+      SELECT 0;
+      LEAVE read_loop;
+   END IF;
+
+END LOOP;
+
+CLOSE CreditBalance_cursor;
+
+END;;
+DELIMITER ;

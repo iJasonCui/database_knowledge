@@ -1,0 +1,10 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getViewedMe;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getViewedMe (
+    at_userId     DECIMAL(12, 0)
+   ,at_targetUserId DECIMAL(12, 0)
+)
+BEGIN
+    SELECT seen, dateCreated FROM ViewedMe WHERE userId = at_userId AND targetUserId=at_targetUserId;
+END;;
+DELIMITER ;

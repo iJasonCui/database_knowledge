@@ -1,0 +1,58 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_expireInactiveCredits;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_expireInactiveCredits (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  March 2004
+**   Description:
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+at_userId                DECIMAL(12,0)
+)
+BEGIN
+
+DECLARE at_dateNow               DATETIME;
+DECLARE at_creditTypeId          SMALLINT;
+DECLARE at_credits               SMALLINT;
+DECLARE at_xactionId             INT;
+DECLARE at_balance               SMALLINT;
+
+DECLARE done INT DEFAULT FALSE;
+DECLARE CreditBalance_cursor CURSOR FOR SELECT creditTypeId,credits FROM CreditBalance WHERE userId = at_userId;
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+SELECT SUM(credits) INTO at_balance FROM CreditBalance WHERE userId=at_userId;
+
+OPEN  CreditBalance_cursor;
+
+
+read_loop: LOOP
+   FETCH CreditBalance_cursor INTO  at_creditTypeId, at_credits;
+
+   IF done
+   THEN
+      LEAVE read_loop;
+   END IF;
+
+   CALL wsp_XactionId (at_xactionId);
+
+   SET at_balance = at_balance - at_credits;
+
+   CALL wsp_transExpireInactiveCredits (at_userId, at_dateNow, at_creditTypeId, at_credits, at_xactionId, at_balance);
+
+END LOOP;
+
+CLOSE CreditBalance_cursor;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,17 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getJurisdictions;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getJurisdictions (
+at_countryId smallint
+)
+begin
+
+   select a.jurisdictionId, a.parentId, a.countryId, a.jurisdictionName, a.jurisdictionTypeId, b.jurisdictionTypeLabel, a.loc_ca
+     from Jurisdiction a, JurisdictionType b
+    where a.jurisdictionTypeId = b.jurisdictionTypeId
+      and a.countryId = at_countryId
+      and a.parentId = a.jurisdictionId 
+      and a.displayInLists = 1
+    order by a.jurisdictionName ;
+
+END;;
+DELIMITER ;

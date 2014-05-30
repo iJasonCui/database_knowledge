@@ -1,0 +1,7 @@
+E. 2006/07/18 13:51:03. ERROR #2020 DSI(326 w151dbp03.Profile_ad_view) - s/prslex.c(1105)
+        Line 1, character 85: The identifier that begins with ';TRAN_updProfileOnlineByUId np' is too long. The maximum length allowable is 30.
+E. 2006/07/18 13:51:03. ERROR #5035 DSI(326 w151dbp03.Profile_ad_view) - /dsiutil.c(2346)
+        Error from unpacker or parser. See previous message for more information.
+I. 2006/07/18 13:51:03. The DSI thread for database 'w151dbp03.Profile_ad_view' is shutdown. 
+I. 2006/07/18 13:52:36. Connection to server 'w151dbp02' as user 'rep5p_maint_user' has been faded out (closed). 
+I. 2006/07/18 13:52:38. ...... connected to server 'w151dbp02' as user 'rep5p_maint_user'. 

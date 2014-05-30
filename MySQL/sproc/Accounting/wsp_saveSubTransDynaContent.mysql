@@ -1,0 +1,45 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_saveSubTransDynaContent;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_saveSubTransDynaContent (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu 
+**   Date:  Janunary 29 2009 
+**   Description:  save SubTransactionDynaContent 
+**
+** REVISION(S):
+**   Author: 
+**   Date: 
+**   Description:
+**
+******************************************************************************/
+   at_xactionId  INT,
+   at_sequenceId TINYINT,
+   at_content    VARCHAR(255)
+)
+BEGIN
+
+DECLARE at_dateNowGMT DATETIME;
+
+SET at_dateNowGMT = UTC_TIMESTAMP();
+
+IF (SELECT 1 FROM SubTransactionDynaContent 
+                  WHERE xactionId = at_xactionId
+                    AND sequenceId = at_sequenceId) IS NOT NULL THEN 
+
+         INSERT INTO SubTransactionDynaContent(xactionId,
+                                               sequenceId,
+                                               content,  
+                                               dateCreated) 
+         VALUES(at_xactionId,
+                at_sequenceId,
+                at_content,
+                at_dateNowGMT);
+
+END IF;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

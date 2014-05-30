@@ -1,0 +1,184 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_saveUserInfo;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_saveUserInfo (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga/Jeff Yang
+**   Date:  June 10 2002
+**   Description:  Inserts/Updates row in user_info and web900create
+**
+** REVISION(S):  
+**   Author:  Jack Veiga/Francisc Schnoberger
+**   Date:  October 8 2002
+**   Description:  Add return codes for duplicate username/email
+**
+**   Author:  Malay Dave
+**   Date:  Mar 4 2004
+**   Description:  Add new col 'pref_clubll_signup' - for storing clubll signup preference
+**
+**   Author:  Valeri Popov
+**   Date:  Apr. 16 2004
+**   Description:  Add languagesSpokenMask, countryId, jurisdictionId, secondJursidictionId,
+**                 cityId
+**
+**   Author:  Travis McCauley
+**   Date:  July 19, 2004
+**   Description:  Added localePref
+**
+**   Author:  Travis McCauley
+**   Date:  August 5, 2004
+**   Description:  Added signupLocalePref
+**
+**   Author:  Malay Dave
+**   Date:  May 6, 2005
+**   Description:  Added searchLanguageMask
+**
+**   Author: Mike Stairs
+**   Date: Oct 2005
+**   Description: eliminated references to removed columns from user_info
+**
+**   Author: Yan L 
+**   Date: December 2 2005
+**   Description: fix the positional problem in this proc. 
+**
+**   Author: Andy Tran 
+**   Date: Aug 2006
+**   Description: Added signupIP 
+**
+******************************************************************************/
+OUT at_userId             DECIMAL(12,0) 
+,at_user_id            DECIMAL(12,0)
+,at_username           VARCHAR(129)
+,at_user_type          CHAR(1)
+,at_password           VARCHAR(16)
+,at_gender             CHAR(1)
+,at_status             CHAR(1)
+,at_signuptime         INT
+,at_laston             INT
+,at_height_cm          INT
+,at_birthdate          DATETIME
+,at_email              VARCHAR(129)
+,at_lat_rad            INT
+,at_long_rad           INT
+,at_zipcode            VARCHAR(10)
+,at_ethnic             CHAR(1)
+,at_religion           CHAR(1)
+,at_smoke              CHAR(1)
+,at_body_type          CHAR(1)
+,at_pref_last_on       CHAR(1)
+,at_preferred_units    CHAR(1)
+,at_signup_adcode      VARCHAR(30)
+,at_user_agent         VARCHAR(80)
+,at_signup_context     CHAR(3)
+,at_emailStatus        CHAR(1)
+,at_pref_clubll_signup CHAR(1)
+,at_languagesSpokenMask INT
+,at_countryId          SMALLINT
+,at_jurisdictionId     SMALLINT
+,at_secondJurisdictionId SMALLINT
+,at_cityId             INT
+,at_localePref         INT
+,at_signupLocalePref   INT
+,at_searchLanguageMask INT
+,at_signupIP           DECIMAL(12,0)
+)
+proc_label:
+BEGIN
+
+DECLARE at_RETURN INT ;
+SET at_RETURN = 0 ;
+
+IF (SELECT 1 FROM user_info WHERE status != 'J' AND user_id != at_user_id 
+              AND username = at_username AND user_type in ('F','P')) IS NOT NULL
+THEN
+    SET at_RETURN = at_RETURN + 1 ;
+END IF;
+
+IF (SELECT 1 FROM user_info WHERE status != 'J' AND user_id != at_user_id 
+              AND email = at_email AND user_type in ('F','P')) IS NOT NULL
+THEN
+    SET at_RETURN = at_RETURN + 2 ;
+END IF;
+
+IF at_RETURN != 0
+THEN
+    LEAVE proc_label;  
+ELSE
+
+  IF at_user_id = 0
+  THEN
+      CALL wsp_newUserInfo(  at_userId 
+                            ,at_username
+                            ,at_user_type
+                            ,at_password
+                            ,at_gender
+                            ,at_status
+                            ,at_signuptime
+                            ,at_laston
+                            ,at_height_cm
+                            ,at_birthdate
+                            ,at_email
+                            ,at_lat_rad
+                            ,at_long_rad
+                            ,at_zipcode
+                            ,at_ethnic
+                            ,at_religion
+                            ,at_smoke
+                            ,at_body_type
+                            ,at_pref_last_on
+                            ,at_preferred_units
+                            ,at_signup_adcode
+                            ,at_signup_context
+                            ,at_user_agent
+			    ,at_emailStatus
+			    ,at_pref_clubll_signup
+			    ,at_languagesSpokenMask
+                            ,at_countryId
+                            ,at_jurisdictionId
+                            ,at_secondJurisdictionId
+                            ,at_cityId
+                            ,at_localePref
+                            ,at_signupLocalePref
+                            ,at_searchLanguageMask
+                            ,at_signupIP ) ;
+
+    ELSE
+        CALL wsp_updUserInfo(at_user_id
+                            ,at_username
+                            ,at_user_type
+                            ,at_password
+                            ,at_gender
+                            ,at_status
+                            ,at_signuptime
+                            ,at_laston
+                            ,at_height_cm
+                            ,at_birthdate
+                            ,at_email
+                            ,at_lat_rad
+                            ,at_long_rad
+                            ,at_zipcode
+                            ,at_ethnic
+                            ,at_religion
+                            ,at_smoke
+                            ,at_body_type
+                            ,at_pref_last_on
+                            ,at_preferred_units
+                            ,at_signup_adcode
+                            ,at_signup_context
+                            ,at_user_agent
+			    ,at_emailStatus
+			    ,at_pref_clubll_signup
+			    ,at_languagesSpokenMask
+                            ,at_countryId
+                            ,at_jurisdictionId
+                            ,at_secondJurisdictionId
+                            ,at_cityId
+                            ,at_searchLanguageMask ) ;
+    END IF;
+END IF;
+
+SELECT at_user_id INTO at_userId;
+
+END;;
+DELIMITER ;

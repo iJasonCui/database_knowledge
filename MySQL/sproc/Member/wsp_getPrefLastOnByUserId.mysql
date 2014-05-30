@@ -1,0 +1,12 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getPrefLastOnByUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getPrefLastOnByUserId (
+ at_userId DECIMAL (12,0)
+)
+BEGIN
+     SELECT pref_last_on, acceptImOn 
+       FROM user_info 
+      WHERE user_id = at_userId ;
+
+END;;
+DELIMITER ;

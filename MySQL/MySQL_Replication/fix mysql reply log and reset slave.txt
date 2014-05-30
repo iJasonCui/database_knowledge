@@ -1,0 +1,68 @@
+Missing Relay Log File After MySQL Crash
+JUN 11TH, 2011 | COMMENTS
+One of our slave databases crashed few days ago due to some disk issues.
+
+After everything is back to operational - I noticed that the replication has stopped in this slave. I tried to restart the replication 
+but it was unsuccessful.
+
+I then checked the MySQL log and found the following:
+
+1
+2
+3
+4
+5
+[bash]
+110606 17:01:30 [ERROR] Failed to open the relay log './forbes-relay-bin.785212' (relay_log_pos 14931)
+110606 17:01:30 [ERROR] Could not find target log during relay log initialization
+110606 17:01:30 [ERROR] Failed to initialize the master info structure
+[/bash]
+And so MySQL is complaining that it can’t find the relay log file and sure enough I had a look into the directory, I couldn’t find it.
+
+So what to do? I Googled around for some magic solutions - this link came up on top. The proposed solution was to:
+
+CHANGE MASTER TO the positon _on the master_ where the slave was, the slave will get the transactions from the master binary logs again 
+and you will lose nothing. Requires that the master still has those binary logs.
+
+However this is not the problem, it is not that the slave doesn’t know the master bin log position. 
+My guess is the relay log is now outdated and needs to be regenerated.
+
+So what we really need to do is to tell the slave to regenerate its relay log files.
+
+Here are the steps to do it:
+
+1. On the crashed slave - record the last Master bin log file and position before the crash
+2. The slave should not be running - if it is - issue STOP SLAVE
+3. And then issue RESET SLAVE command
+4. Go to the MySQL directory - ensure that relay logs, master info and relay-log.info are deleted - they should be deleted when you run RESET SLAVE. 
+Note: When I did this the first time - MySQL didn’t delete the relay logs - running RESET SLAVE the second time fixed it
+5. Now issue CHANGE_MASTER log position to the position that you have recorded on step 1 above
+6. Issue START SLAVE
+7. Now the replication should start again - you will notice that the relay log files are re-numbered from the beginning ie: suffix 00001.
+
+
+[trouble shooting]
+If a statement that succeeded on the master refuses to run on the slave, try the following procedure if it is not feasible to do a full database 
+resynchronization by deleting the slave's databases and copying a new snapshot from the master:
+
+1. Determine whether the affected table on the slave is different from the master table. Try to understand how this happened. 
+Then make the slave's table identical to the master's and run START SLAVE.
+
+2. If the preceding step does not work or does not apply, try to understand whether it would be safe to make the update manually (if needed) 
+and then ignore the next statement from the master.
+
+3. If you decide that the slave can skip the next statement from the master, issue the following statements:
+
+mysql> SET GLOBAL sql_slave_skip_counter = N;
+mysql> START SLAVE;
+The value of N should be 1 if the next statement from the master does not use AUTO_INCREMENT or LAST_INSERT_ID(). Otherwise, the value should be 2. 
+The reason for using a value of 2 for statements that use AUTO_INCREMENT or LAST_INSERT_ID() is that they take two events in the binary log of the master.
+
+See also Section 13.4.2.4, “SET GLOBAL sql_slave_skip_counter Syntax”.
+
+If you are sure that the slave started out perfectly synchronized with the master, and that no one has updated the tables involved outside of 
+the slave thread, then presumably the discrepancy is the result of a bug. If you are running the most recent version of MySQL, 
+please report the problem. If you are running an older version, try upgrading to the latest production release to determine whether 
+the problem persists.
+
+

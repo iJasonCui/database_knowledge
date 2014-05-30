@@ -1,0 +1,21 @@
+#!/bin/sh
+
+if [ $# -ne 2 ] ; then
+  echo "Usage: <DB_SERVER> <Database> "
+  exit 1
+fi
+
+echo ""
+echo ""
+
+
+  DB_SERVER=$1
+  DATABASE=$2
+
+  echo -n "Display status of index create on ${DB_SERVER}.${DATABASE}:"
+  grep -e "Creation SUCCEEDED" $SYBMAINT/rec_index/output/${DB_SERVER}/${DATABASE}/rec_index_sql.out | wc -l;grep -e "<<<<<<<" $SYBMAINT/rec_index/output/${DB_SERVER}/${DATABASE}/rec_index_sql.out;tail -1 $SYBMAINT/rec_index/output/${DB_SERVER}/${DATABASE}/rec_index_sql.out
+  echo ""
+
+echo ""
+echo ""
+

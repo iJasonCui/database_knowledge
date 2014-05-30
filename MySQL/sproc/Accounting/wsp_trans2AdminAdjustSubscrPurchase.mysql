@@ -1,0 +1,65 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_trans2AdminAdjustSubscrPurchase;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_trans2AdminAdjustSubscrPurchase (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  Feb 16, 2006
+**   Description:  adjust  subscription purchase for user
+**
+**
+******************************************************************************/
+at_userId        DECIMAL(12, 0),
+at_xactionId     DECIMAL(12, 0),
+at_refXactionId  DECIMAL(12, 0),
+at_contentId     SMALLINT,
+at_xactionTypeId TINYINT,
+at_cardProcessor CHAR(1),
+at_adminUserId   INT,
+at_adminNote     VARCHAR(255),
+at_dateNow       DATETIME,
+at_currencyId    TINYINT,
+at_purchaseTypeId     TINYINT,
+at_billingLocationId  SMALLINT,
+at_creditCardId       INT,
+at_subscriptionOfferDetailId SMALLINT
+)
+BEGIN
+
+DECLARE at_subscriptionTypeId TINYINT;
+DECLARE at_durationUnits      CHAR(1);
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+        ROLLBACK;
+END;
+DECLARE EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+        ROLLBACK;
+END;
+
+START TRANSACTION;
+SELECT subscriptionTypeId, durationUnits INTO at_subscriptionTypeId, at_durationUnits FROM SubscriptionTransaction
+                   WHERE xactionId = at_refXactionId AND subscriptionOfferDetailId = at_subscriptionOfferDetailId;
+IF (at_subscriptionTypeId IS NULL)
+THEN
+   SET at_subscriptionTypeId = 1;
+END IF;
+IF (at_durationUnits IS NULL)
+THEN
+   SET at_durationUnits = 'M';
+END IF;
+INSERT INTO SubscriptionTransaction(xactionId,userId,cardId,subscriptionTypeId,xactionTypeId,contentId,duration,userTrans,durationUnits,description,dateCreated,subscriptionOfferDetailId)
+   VALUES(at_xactionId,at_userId,at_creditCardId,at_subscriptionTypeId,at_xactionTypeId,at_contentId,0,0,at_durationUnits,at_adminNote,at_dateNow,at_subscriptionOfferDetailId);
+INSERT INTO Purchase(xactionId,purchaseTypeId,billingLocationId,subscriptionOfferDetailId,currencyId,cost,costUSD,tax,taxUSD,userId,dateCreated,creditCardId,cardProcessor,xactionTypeId,refXactionId)
+   VALUES(at_xactionId,at_purchaseTypeId,at_billingLocationId,at_subscriptionOfferDetailId,at_currencyId,0,0,0,0,at_userId,at_dateNow,at_creditCardId,at_cardProcessor,at_xactionTypeId,
+	at_refXactionId);
+IF (SELECT 1 FROM AdminAccountTransaction WHERE xactionId = at_xactionId) IS NULL 
+THEN
+   INSERT INTO AdminAccountTransaction(xactionId,adminUserId,userId,dateCreated) VALUES(at_xactionId,at_adminUserId,at_userId,at_dateNow);
+END IF;
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

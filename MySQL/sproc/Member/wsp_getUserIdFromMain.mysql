@@ -1,0 +1,33 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getUserIdFromMain;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getUserIdFromMain (
+/***********************************************************************
+**
+** CREATION:
+**   Author: Generator 
+**   Date: at_TIMESTAMPat_ 
+**   Description: getUserIdFromMain 
+**
+*************************************************************************/
+    at_password varchar(8),
+    at_email varchar(100)
+)
+BEGIN
+
+   DECLARE at_llUserId DECIMAL(10,0) ;
+   DECLARE at_userId DECIMAL(10,0) ;
+
+   SET at_email = UPPER(at_email) ;
+   SET at_password = UPPER(at_password) ;
+
+   SELECT user_id INTO at_llUserId
+   FROM user_info
+   WHERE email=at_email 
+     AND password=at_password ;
+  
+   CALL wsp_UserId(at_userId);
+
+   SELECT at_userId as userId, at_llUserId as llUserId;     
+
+END;;
+DELIMITER ;

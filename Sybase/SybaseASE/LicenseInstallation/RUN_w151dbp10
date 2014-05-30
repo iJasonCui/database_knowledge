@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# ASE page size (KB):	2k
+# Master device path:	/data/syb_db/w151dbp10/master.dat
+# Error log path:	/opt/sybase/ASE-15_0/install/logs/w151dbp10.log
+# Configuration file path:	/opt/sybase/ASE-15_0/w151dbp10.cfg
+# Directory for shared memory files:	/opt/sybase/ASE-15_0
+# Adaptive Server name:	w151dbp10
+#
+
+LOGDIR=/opt/sybase/ASE-15_0/install/logs/
+mv $LOGDIR/w151dbp10.log $LOGDIR/w151dbp10.log.`date +%Y%m%d%H%M`
+
+/opt/sybase/ASE-15_0/bin/dataserver \
+-d/data/syb_db/w151dbp10/master.dat \
+-e/opt/sybase/ASE-15_0/install/logs/w151dbp10.log \
+-c/opt/sybase/ASE-15_0/w151dbp10.cfg \
+-M/opt/sybase/ASE-15_0 \
+-sw151dbp10 \
+

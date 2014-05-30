@@ -1,0 +1,13 @@
+select o.name, c.name   
+from   dbo.syscolumns c, dbo.systypes t, dbo.sysobjects o
+where  c.id = o.id 
+and    c.usertype = t.usertype
+and    t.name = "text"
+and    o.type = "U" and o.name not like "rs%"
+\do
+   \echo "select getdate()"
+   \echo "exec sp_setrepcol #1, #2, replicate_if_changed "  
+   \echo "select getdate()"
+   \echo "go"
+\done
+go

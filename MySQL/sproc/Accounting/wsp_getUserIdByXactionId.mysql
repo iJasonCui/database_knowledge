@@ -1,0 +1,26 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getUserIdByXactionId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getUserIdByXactionId (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  September 2003
+**   Description:  returns userId for given purchase xactionId
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_xactionId 				DECIMAL(12,0)
+)
+BEGIN
+
+  SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+  SELECT userId FROM Purchase WHERE xactionId = at_xactionId;
+  
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

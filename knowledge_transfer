@@ -1,0 +1,42 @@
+1. Lavalife.com (Liliana)
+
+1.1  The diagram of database servers  X
+
+1.2  The credential of database servers  X
+1.2.1  How to login to Linux server?
+
+1.2.2  How to login to Mysql instance?
+
+     
+1.3  How to start up the Mysql instance? 
+1.4  How to shutdown the Mysql instance properly?
+1.5  How to start up Sybase instance?
+1.6  How to shutdown Sybase instance properly?
+1.7  Database backup and restore
+1.8  Version control of database scripts and stored procedure
+1.9  Monitoring tool for Lavalife.com database servers
+1.10 Inform NOC that replace Jason with Liliana on Tier 3 support
+1.11 Production implementation
+1.12 Prepare database enviroment for testing and developing 
+1.13 Solving production known issues listed on RT system
+1.14 verify database connection and process
+1.15 database cron server (wxdbmaint 10.10.86.73) 
+
+2. New Lavalife.com (Liliana)
+
+2.1  Database design E-R (Entity and Relationship) Chart 
+2.2  Database physical design (Table, index and Primary Key)
+2.3  Put the database schema into version control system (cvs)
+2.4  Implement the database schema into development MySQL database server
+2.5  Install Sybase Powerdesigner 
+
+3. Financial Report (TK and Bahram)
+3.1  All database scripts for financial report has been push into version control
+3.2  Meet with Finance team, TK and Bahram 
+
+4. AS4 Cube (TK and Bahram)
+4.1  Flow chart of AS4 Cube
+4.2  The credential of AS4 Cube
+4.3  Verify AS4 Cube is up to date
+4.4  Trouble shooting tips 
+ 

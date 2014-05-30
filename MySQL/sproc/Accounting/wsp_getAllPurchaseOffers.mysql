@@ -1,0 +1,37 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAllPurchaseOffers;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAllPurchaseOffers (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  May 21, 2003
+**   Description:  retrieves all offers
+**
+**
+** REVISION(S):
+**   Author:  Andy Tran
+**   Date:  January, 2007
+**   Description:  add billingLocationId and baseOfferFlag
+**
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+)
+  BEGIN  
+	SELECT 
+          purchaseOfferId,
+          currencyId,
+          accountType,
+          dateExpiry,
+          description,
+          billingLocationId,
+          baseOfferFlag
+        FROM PurchaseOffer
+        ORDER BY purchaseOfferId ;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

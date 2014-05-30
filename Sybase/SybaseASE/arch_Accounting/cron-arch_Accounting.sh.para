@@ -1,0 +1,1849 @@
+#!/bin/ksh
+
+. $HOME/.bash_profile
+
+dbLog=DataLoadLog
+dbLoad=AccountingLoad
+dbSource=Accounting
+
+##serverSource=webdb30p
+serverSource=w151dbp01
+serverDest=webdb0r
+
+Password0r=`cat $HOME/.sybpwd | grep -w ${serverDest} | awk '{print $2}'`
+PasswdSource=`cat $HOME/.sybpwd | grep -w ${serverSource} | awk '{print $2}'`
+
+LogFile=cron-arch_Accounting.$1.$2
+mailList=ana.radu@lavalife.com,databasemanagementteam@lavalife.com,anthony.mcnamee@lavalife.com,isa.wong@lavalife.com
+LogDir=$SYBMAINT/arch_Accounting/log/
+WhatDay=`date | grep E | cut -c1-3 `
+
+cd $SYBMAINT/arch_Accounting
+
+####### usage ###########################
+#
+if (($# !=2))   # 2 parameters needed
+then
+        echo "###################################################################"      
+        echo "Usage:  ./cron-arch_Accounting.sh.para <fileId> <fielDate> "
+        echo "###################################################################"
+        exit 1
+else 
+        fileId=$1
+        fileDate=$2     
+fi
+
+###### Function ErrorHandler #################
+function ErrorHandler
+{
+isql -Ucron_sa -P${Password0r} -S${serverDest}  >> ${LogFile} <<EOF1
+set nocount on
+exec ${dbLog}..p_insert_BatchLogFailOver ${batchId},${fileId},${fileDate}
+go
+EOF1
+
+mailx -s "Error when processing "${LogFile} ${mailList} < ${LogFile}
+mv ${LogFile} ${LogDir}${LogFile}.${WhatDay}
+rm $SYBMAINT/arch_Accounting/FileTable_Accounting.$fileId.$fileDate
+exit 1
+}
+
+function ErrorHandler2
+{
+mailx -s "Error when processing "${LogFile} ${mailList} < ${LogFile}
+mv ${LogFile} ${LogDir}${LogFile}.${WhatDay}
+rm $SYBMAINT/arch_Accounting/FileTable_Accounting.$fileId.$fileDate
+exit 1
+}
+
+####### generate the list and get fileName,	tableNameBcpIn,	storedProcName #####
+
+bcp ${dbLog}..v_FileTableMatch_Accounting out FileTable_Accounting.$1.$2 -c -Ucron_sa -Swebdb0r -P${Password0r} -e FileTable_Accnting.err.$1.$2
+
+fileName=`cat FileTable_Accounting.$1.$2 | grep $fileId | awk '{print $2}'`
+tableNameBcpIn=`cat FileTable_Accounting.$1.$2 | grep $fileId | awk '{print $3}'`
+storedProcName=`cat FileTable_Accounting.$1.$2 | grep $fileId | awk '{print $4}'`
+
+############### check database connection #####
+
+isql -Ucron_sa -P${Password0r} -S${serverDest} >> ${LogFile} <<EOF10
+set nocount on
+use ${dbLoad}
+go
+EOF10
+
+ErrorMsg=`grep error ${LogFile} | wc -l | awk '{print $1}'`
+if (( ErrorMsg > 0 ))
+then
+   echo "error: database connection to "${serverDest} >> ${LogFile}
+   ErrorHandler  ${LogFile}     
+fi
+
+isql -Ucron_sa -P${PasswdSource} -S${serverSource} >> ${LogFile} <<EOF20
+set nocount on
+use ${dbSource}
+go
+EOF20
+
+ErrorMsg=`grep error ${LogFile} | wc -l | awk '{print $1}'`
+if (( ErrorMsg > 0 ))
+then
+   echo "error: database connection to "${serverSource} >> ${LogFile}
+   ErrorHandler  ${LogFile} 
+fi
+
+######### check out whether the file has been processed or not #################
+
+isql -Ucron_sa -P${Password0r} -S${serverDest}  >> ${LogFile} <<EOF30
+set nocount on
+go
+declare @batchIdExisted int
+
+exec ${dbLog}..p_check_BatchLog ${fileId},${fileDate},@batchIdExisted output 
+select  "[batIdExisted] " + convert(varchar(10),@batchIdExisted)
+go
+
+EOF30
+
+batchIdExisted=`cat ${LogFile} | grep batIdExisted | awk '{print $2}'`
+
+if (($batchIdExisted>0 ))
+then
+    echo "error: the file has been processed, cannot do it again where fileId="${fileId}" and fileDate="${fileDate} >> ${LogFile}
+    ErrorHandler2  ${LogFile}
+fi
+
+###### get the batchId for this session ########
+isql -Ucron_sa -P${Password0r} -S${serverDest} >> ${LogFile} <<EOF40
+set nocount on
+go
+declare @batchId int
+exec ${dbLog}..p_get_BatchId @batchId output
+select "[batchId] " + convert(varchar(20),@batchId)
+go
+
+select "==== truncate table " + '${dbLoad}' + ".." +  '${tableNameBcpIn}'
+truncate table ${dbLoad}..${tableNameBcpIn}
+go
+
+EOF40
+
+batchId=`cat ${LogFile} | grep batchId | awk '{print $2}'`
+echo "[batchId] "$batchId
+
+isql -Ucron_sa -P${Password0r} -S${serverDest} >> ${LogFile} <<EOF45
+set nocount on
+go
+exec ${dbLog}..p_insert_BatchLog_FTP ${batchId},${fileId},${fileDate}
+go
+
+EOF45
+
+
+###### bcp data directly from Web databases ##########
+
+case $fileId in
+
+1001)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+userId,
+reasonContentId,
+reviewed,
+adminUserId,
+dateCreated,
+dateModified
+FROM AccountFlag
+WHERE 
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+	or
+	(dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1002)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+xactionId,
+userId,
+xactionTypeId,
+creditTypeId,
+contentId,
+product,
+community,
+credits,
+balance,
+userType,
+description,
+dateCreated
+FROM AccountTransaction
+WHERE 
+	dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate))) 
+	and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1003)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT
+userId
+FROM AccountTransactionBalance
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF50
+;;
+
+1004)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+userId,
+eventType,
+xactionId,
+cardNum,
+encodedCardNum,
+dateCreated,
+encodedCardId
+FROM AccountingEvent
+WHERE 
+    dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate)))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1005)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+xactionId,
+adminUserId,
+dateCreated
+FROM AdminAccountTransaction
+WHERE 
+	dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate))) 
+		and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1006)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+creditCardId,
+reasonContentId,
+reason,
+status,
+dateCreated,
+dateModified
+FROM BadCreditCard
+WHERE 
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1007)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+billingLocationId,
+billingLocationCode,
+billingLocationDesc,
+currencyId,
+merchantId,
+displayTax,
+displayInterac,
+productId,
+dateCreated,
+dateModified
+FROM BillingLocation
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1008)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+cardTypeId,
+nicknameContentId,
+contentId,
+currencyId,
+merchantId,
+displayOrdinal,
+debitFlag,
+bankCardFlag,
+expiryRequiredFlag,
+startDateRequiredFlag,
+cvvRequiredFlag
+FROM CardType
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1009)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+compensationId,
+usageTypeId,
+adminUserId,
+userCount,
+creditCount,
+compensationDesc,
+dateCompensated,
+dateUnavailableFrom,
+dateUnavailableTo,
+dateCreated
+FROM Compensation
+WHERE 
+    dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+        and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate)))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1010)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+compensationId
+FROM CompensationId
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1011)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+contentId,
+contentDesc,
+dateCreated,
+dateModified,
+dateCreated,
+dateModified
+FROM Content
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1012)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+userId,
+creditTypeId,
+credits,
+dateExpiry,
+dateCreated,
+dateModified
+FROM CreditBalance
+WHERE 
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1013)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+creditCardId,
+userId,
+cardTypeId,
+cardNum,
+encodedCardNum,
+partialCardNum,
+status,
+nameOnCard,
+cardNickname,
+country,
+countryArea,
+city,
+address,
+zipCode,
+cardExpiry,
+cvv,
+dateCreated,
+dateModified,
+realCardTypeId,
+encodedCardId,
+productId
+FROM CreditCard
+WHERE 
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1014)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+creditCardId
+FROM CreditCardId
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1015)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+creditTypeId,
+contentId,
+ordinal,
+duration,
+dateCreated,
+dateModified
+FROM CreditType
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1016)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+currencyId,
+currencyCode,
+currencyDesc,
+currencySymbol,
+convertUSD,
+precisionDigits,
+dateCreated,
+dateModified,
+contentId
+FROM Currency
+WHERE 
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1017)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+currencyId,
+convertUSD,
+adminUserId,
+dateCreated
+FROM CurrencyHistory
+WHERE 
+    dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+        and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate)))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1018)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+billingLocationId,
+defaultPurchaseOfferId,
+defaultAccountType,
+defaultUsageCellId,
+dateCreated,
+dateModified 
+FROM DefaultUserAccount
+--WHERE 
+--    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+--    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+--    or
+--    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+--    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1019)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+localeId,
+isoDesc
+FROM Locale
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1020)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+localeId,
+contentId,
+contentText
+FROM LocaleContent
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1021)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+merchantId,
+merchantCode,
+cardProcessor,
+description
+FROM Merchant
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1022)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+xactionId,
+userId,
+purchaseTypeId,
+purchaseOfferDetailId,
+billingLocationId,
+currencyId,
+xactionTypeId,
+creditCardId,
+refXactionId,
+cost,
+costUSD,
+tax,
+taxUSD,
+cardProcessor,
+paymentNumber,
+dateCreated,
+subscriptionOfferDetailId,
+userIP,
+discountFlag
+FROM Purchase
+WHERE 
+    dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate))) 
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1023)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+xactionId,
+paymentNumber
+FROM PurchaseDecline
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1024)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+purchaseOfferId,
+currencyId,
+accountType,
+description,
+dateCreated,
+unused1,
+billingLocationId,
+baseOfferFlag,
+dateExpiry,
+dateModified,
+productId
+FROM PurchaseOffer
+WHERE 
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+        and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+      or
+      (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+      and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1025)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+purchaseOfferDetailId,
+purchaseOfferId,
+contentId,
+restrictedPurchaseTypeId,
+ordinal,
+cost,
+credits,
+duration,
+bonusCredits,
+dateCreated,
+dateExpiry,
+dateModified,
+productId
+FROM PurchaseOfferDetail
+WHERE 
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+        and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+      or
+      (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+      and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1026)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+purchaseTypeId,
+description,
+dateCreated,
+dateModified
+FROM PurchaseType
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1027)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+billingLocationId,
+rate,
+dateCreated,
+dateExpired
+FROM TaxRate
+WHERE 
+    dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+        and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate)))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1028)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+usageCellId,
+description,
+dateCreated
+FROM UsageCell
+WHERE 
+    dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+        and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate)))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1029)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+usageCellId,
+usageTypeId,
+credits,
+duration
+FROM UsageCellDetail
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1030)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+usageTypeId,
+contentId,
+xactionTypeId,
+hasDuration,
+description,
+appletDesc
+FROM UsageType
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1031)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+userId,
+billingLocationId,
+purchaseOfferId,
+usageCellId,
+accountType,
+dateCreated,
+dateModified,
+subscriptionOfferId
+FROM UserAccount
+WHERE 
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1032)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+xactionId
+FROM XactionId
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1033)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+xactionTypeId,
+description,
+dateCreated,
+dateModified
+FROM XactionType
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+
+#############################DANIAL##########################
+#############################DANIAL##########################
+1034)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+nonFinancialXActionId  
+FROM NonFinancialXActionId 
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF50
+;;
+
+1035)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT
+cancelCodeId, 
+contentId, 
+customerChoice, 
+ordinal, 
+description,
+cancelCodeMaskId 
+FROM SubscriptionCancelCode 
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF50
+;;
+
+1036)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT
+eligibilityId,
+subscriptionOfferId,
+localeId,
+billingLocationId,
+cityId,
+jurisdictionId,
+secondJurisdictionId,
+countryId,
+product,
+community,
+userType,
+brand,
+gender,
+dateCreated,
+dateModified
+FROM SubscriptionEligibility
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF50
+;;
+
+1037)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT
+nonFinancialXActionId,
+cardId,
+userId,
+contentId,
+subscriptionTypeId,
+duration,
+description,
+dateCreated
+FROM SubscriptionNonfinancialTrans 
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF50
+;;
+
+1038)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT
+subscriptionOfferId,
+currencyId,
+description,
+dateCreated,
+dateExpiry,
+productId,
+dateModified
+FROM SubscriptionOffer 
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF50
+;;
+
+1039)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT
+subscriptionOfferDetailId,
+subscriptionOfferId,
+subscriptionTypeId,
+contentId,
+ordinal,
+cost,
+duration,
+description,
+dateCreated,
+dateExpiry,
+durationUnits,
+freeTrialDuration,
+freeTrialDurationUnits,
+promoFlag,
+autoRenewOfferDetailId,
+premiumId,
+masterOfferDetailId ,
+productId,
+dateModified
+FROM SubscriptionOfferDetail 
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF50
+;;
+
+1040)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT
+xactionId,
+cardId,
+userId,
+xactionTypeId,
+contentId,
+subscriptionTypeId,
+duration,
+userTrans,
+description,
+dateCreated,
+durationUnits,
+subscriptionOfferDetailId
+FROM SubscriptionTransaction 
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF50
+;;
+
+1041)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT
+subscriptionTypeId,
+contentId,
+description,
+dateCreated,
+dateModified
+FROM SubscriptionType 
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF50
+;;
+
+1042)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT
+userId,
+cardId,
+subscriptionOfferDetailId,
+subscriptionStatus,
+autoRenew,
+subscriptionEndDate,
+dateCreated,
+dateModified
+FROM UserSubscriptionAccount 
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF50
+;;
+
+1043)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT
+userId,
+cardId,
+subscriptionOfferDetailId,
+subscriptionStatus,
+autoRenew,
+subscriptionEndDate,
+cancelCodeId,
+userCancelReason,
+dateCreated,
+dateModified,
+cancelCodeMask 
+FROM UserSubscriptionAccountHistory 
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF50
+;;
+
+#-----------------paymentTech tables --------------#
+1044)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+BatchId,
+dateCreated
+FROM BatchIdLog
+WHERE 
+    dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate)))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1045)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+CCTranStatusId,
+dateCreated,
+dateModified,
+CCTranStatusCode,
+CCTranStatusName
+FROM CCTranStatus
+WHERE 
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1046)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+xactionId,
+dateCreated,
+CCTranStatusId,
+batchId,
+dateVoided,
+dateExtracted,
+dateSettled,
+responseCode
+FROM CreditCardTransaction
+WHERE 
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateSettled >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateSettled < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateVoided >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateVoided < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1047)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+userId,
+xactionId,
+merchantId,
+actionCode,
+cardType,
+cardNumber,
+cardExpiryMonth,
+cardExpiryYear,
+amount,
+currencyCode,
+cardHolderName,
+userStreet,
+userCity,
+userState,
+userCountryCode,
+userPostalCode,
+cardSecurityValue,
+cardSecurityPresence,
+cardIssueNumber,
+cardStartMonth,
+cardStartYear,
+dateCreated,
+encodedCardId
+FROM PaymentechRequest
+WHERE 
+    dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate)))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1048)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+xactionId,
+responseCode,
+responseDate,
+approvalCode,
+avsResponseCode,
+securityResponseCode,
+cardNumber,
+cardExpiryMonth,
+cardExpiryYear,
+cardType,
+recurringPaymentCode,
+cavvResponseCode,
+amount,
+errorMessage,
+dateCreated,
+encodedCardId
+FROM PaymentechResponse
+WHERE 
+    dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate)))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1049)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile} 
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+xactionId,
+responseCode,
+responseDate,
+cardNumber,
+partialCardNumber,
+cardType,
+amount,
+merchantId,
+currencyCode,
+dateCreated,
+encodedCardId
+FROM SettlementResponse
+WHERE 
+    dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate)))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+
+1050)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT
+userId,            
+billingLocationId, 
+purchaseOfferId,   
+usageCellId,       
+accountType,       
+dateCreated,       
+dateModified,      
+dateExpiry,        
+subscriptionOfferId
+FROM UserAccountHistory
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF50
+;;
+
+
+#------------------ the end of payment tech tables --------------#
+
+1051)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT
+premiumId,         
+premiumDesc,
+contentId,   
+dateCreated,       
+dateExpiry,
+features
+FROM Premium
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+--    or
+--    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+--    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF50
+;;
+
+1052)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT
+xactionId,
+subscriptionOfferDetailId,
+cost,
+costUSD,       
+tax,
+taxUSD,
+dateCreated
+FROM PurchaseSubscriptionDetail
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF50
+;;
+
+1053)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF53
+SELECT
+declineCode,
+description,
+retrialFlag,
+dateCreated,
+dateModified
+FROM DeclineCode
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF53
+;;
+
+1054)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF54
+SELECT
+    userId ,
+    status,
+    origXactionId,
+    retryCounter,
+    nextRetryDate,
+    dateCreated ,
+    dateModified,
+    subscriptionOfferDetailId
+FROM RenewalRetryQueue
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF54
+;;
+
+1055)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF55
+SELECT
+    userId,
+    status,
+    xactionId,
+    origXactionId,
+    retryCounter,
+    declineCode,
+    dateCreated
+FROM RenewalRetryHistory
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF55
+;;
+
+1056)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF56
+SELECT
+    xactionId ,
+    sessionAdcode ,
+    sessionMember ,
+    dateCreated,
+    context 
+FROM SessionPurchase
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF56
+;;
+
+1057)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF57
+SELECT
+    xactionId ,
+    discountSeqId,
+    discountTypeId,
+    discountCode,
+    discountAmt,
+    discountAmtUSD,
+    dateCreated ,
+    offerDetailId 
+FROM PurchaseDiscount
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF57
+;;
+
+1058)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF58
+SELECT
+    xactionId,
+    sequenceId,
+    content ,
+    dateCreated
+FROM SubTransactionDynaContent
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF58
+;;
+
+1059)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF59
+SELECT
+    userId       ,
+    passOfferId  ,
+    dateCreated  ,
+    dateModified ,
+    dateExpiry 
+FROM SDAccount
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF59
+;;
+
+1060)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF60
+SELECT
+    userId      ,
+    passTypeId  ,
+    balance     ,
+    dateCreated ,
+    dateModified,
+    dateExpiry  
+FROM SDBalance
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF60
+;;
+
+1061)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF61
+SELECT
+    billingLocationId  ,
+    defaultPassOfferId ,
+    dateCreated        ,
+    dateModified      
+FROM SDDefaultAccount
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF61
+;;
+
+1062)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF62
+SELECT
+    passTypeId   ,
+    passTypeDesc 
+    ordinal     ,
+    dateCreated 
+FROM SDPassType
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF62
+;;
+
+1063)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF63
+SELECT
+    xactionId    ,
+    userId       ,
+    eventId      ,
+    passTypeId   ,
+    passes       ,
+    xactionTypeId,
+    contentId    ,
+    dateCreated 
+FROM SDTransaction
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF63
+;;
+
+1064)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF64
+SELECT
+    userId   ,
+    cardId  ,
+    upsellId ,   
+    active    , 
+    autoRenew ,
+    endDate  ,
+    dateCreated ,
+    dateModified
+FROM UpsellAccount
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF64
+;;
+
+1065)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF65
+SELECT
+    xactionId     ,
+    userId        ,
+    upsellId      ,
+    xactionTypeId ,
+    cancelCode    ,
+    cost          ,
+    dateCreated   
+FROM UpsellTransaction
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF65
+;;
+
+1066)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF66
+SELECT
+    xactionId ,
+    userId     , 
+    totalAmount,
+    currencyCode,
+    dateCreated 
+FROM PayPalRequest    
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF66
+;;
+
+1067)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF67
+SELECT
+     xactionId   , 
+     tokenId      ,
+     payerId     ,
+     responseCode , 
+     correlationId,
+     dateCreated 
+FROM PayPalResponse   
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF67
+;;
+
+1068)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF68
+SELECT
+     xactionId     ,
+     paymentNumber ,
+     paymentType  ,
+     paymentStatus,
+     paymentDate   ,
+     paymentAmount,
+     feeAmount   ,
+     currencyCode , 
+     pendingReason,
+     dateCreated 
+FROM PayPalTransaction
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF68
+;;
+
+1069)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF69
+SELECT
+     xactionId        ,
+     refPaymentNumber,
+     refundType     ,
+     refundAmount  ,
+     currencyCode ,
+     dateCreated 
+FROM PayPalRefund
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF69
+;;
+
+1070)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF70
+SELECT
+     userId               ,     
+     recurringProfileId    ,   
+     subscriptionOfferDetailId,
+     subscriptionStatus      ,
+     subscriptionEndDate    ,
+     dateCreated           ,
+     dateModified         
+FROM PayPalUserSubscription
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF70
+;;
+
+1071)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF71
+SELECT
+     userId                    ,
+     recurringProfileId       ,
+     subscriptionOfferDetailId,
+     subscriptionStatus      ,
+     subscriptionEndDate    ,
+     dateCreated           ,
+     dateModified         ,
+     cancelCodeId        ,
+     cancelCodeMask     ,
+     userCancelReason  
+FROM PayPalUserSubscriptionHistory
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+    or
+    (dateModified >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateModified < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF71
+;;
+
+1072)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF72
+SELECT
+     paymentNumber  ,     
+     paymentType     ,   
+     paymentStatus    , 
+     paymentDate      ,
+     paymentAmount   ,
+     feeAmount      ,
+     currencyCode  ,
+     invoiceNumber  ,       
+     receiverId      ,     
+     receiverEmail    ,   
+     payerId           , 
+     payerEmail        ,
+     recurringProfileId,
+     profileStatus    ,
+     nextPaymentDate ,
+     dateCreated    
+FROM PayPalNotify
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF72
+;;
+
+1073)
+echo "==== sqsh bcp  "${tableName}"  =========== " >> ${LogFile}
+sqsh  -Ucron_sa -P${PasswdSource} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF73
+SELECT
+   xactionId            ,
+   purchaseOfferDetailId,
+   cost                 ,
+   costUSD              ,
+   tax                  ,
+   taxUSD               ,
+   dateCreated
+FROM PurchaseCreditDetail   
+WHERE
+    (dateCreated >= dateadd(hh, 6, convert(datetime, convert(char(8),$fileDate)))
+    and dateCreated < dateadd(hh, 30, convert(datetime, convert(char(8),$fileDate))))
+\bcp ${dbLoad}..${tableNameBcpIn} -Ucron_sa -P${Password0r} -S${serverDest} -b 1000
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount)
+go
+EOF73
+;;
+
+esac
+
+
+############## p_update_BatchLog_BCP
+rowCountBcp=`grep rowCountBcp ${LogFile} | awk '{print $2}'`
+echo "[rowcountBcp] "${rowCountBcp}     
+
+echo "updating the BatchLog about rowcount of bcp in" >> ${LogFile}
+isql -Ucron_sa -P${Password0r} -S${serverDest}  >> ${LogFile} <<EOF60
+set nocount on
+go
+exec ${dbLog}..p_update_BatchLog_BCP ${batchId},${rowCountBcp}
+go
+EOF60
+
+###### processing data with StoredProcedure ######
+echo "====== processing data with StoredProcedure ==========" >> ${LogFile}
+date >> ${LogFile}
+
+isql -Ucron_sa -P${Password0r} -S${serverDest}  >> ${LogFile} <<EOF70
+exec ${dbLoad}..${storedProcName} ${batchId},${fileId},${fileDate}
+go
+EOF70
+
+##### make sure stored procedure was well done without error #####
+ErrorMsg=`grep Msg ${LogFile} | wc -l | awk '{print $1}'`                                
+if (( ErrorMsg > 0 ))
+then
+        ErrorHandler ${LogFile}
+fi 
+
+########### house keeping #############
+mv ${LogFile} ${LogDir}${LogFile}.${WhatDay}
+rm FileTable_Accounting.$1.$2
+
+exit 0
+

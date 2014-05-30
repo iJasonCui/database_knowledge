@@ -1,0 +1,72 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_transInsUserSubscriptAccount;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_transInsUserSubscriptAccount (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  November 25, 2004
+**   Description:  updates user account subscription info
+**
+**
+** REVISION(S):
+**   Author: Marc Henderson
+**   Date: January 21 2005
+**   Description: update so that GMT time is instead of passed in dateNow which will be timezone of app server - in our case EST time.
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date: January 21 2005
+**   Description: fixed app so it passes in correct GMT time, so when we reverse subscription we can make expiryDate = dateNow 
+**
+** REVISION(S):
+**   Author: Yan Liu 
+**   Date: Feb 26 2008
+**   Description: avoid duplication in UserSubscriptionAccountHistory 
+**
+** REVISION(S):
+**   Author: Yan Liu 
+**   Date: April 10 2008
+**   Description: adjust unique index of UserSubscriptionAccount. 
+**
+** REVISION(S):
+**   Author: Yan Liu
+**   Date: June 3 2008
+**   Description: Rewrite insert part to simplify business logic.
+**
+******************************************************************************/
+   at_userId                    DECIMAL(12,0),
+   at_subscriptionOfferDetailId SMALLINT,
+   at_subscriptionStatus        CHAR(1),
+   at_autoRenew                 CHAR(1),
+   at_dateExpiry                DATETIME,
+   at_dateNowGMT                DATETIME,
+   at_cancelCodeMask            INT,
+   at_userCancelReason          VARCHAR(255),
+   at_cardId                    INT
+)
+BEGIN
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+   ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+   ROLLBACK;
+END;
+
+START TRANSACTION;
+INSERT INTO UserSubscriptionAccount(userId,cardId,subscriptionOfferDetailId,subscriptionStatus,autoRenew,subscriptionEndDate,dateCreated,dateModified) 
+         VALUES(at_userId,at_cardId,at_subscriptionOfferDetailId,at_subscriptionStatus,at_autoRenew,at_dateExpiry,at_dateNowGMT,at_dateNowGMT);
+
+INSERT INTO UserSubscriptionAccountHistory(userId,cardId,subscriptionOfferDetailId,subscriptionStatus,autoRenew,subscriptionEndDate,cancelCodeId,userCancelReason,
+                                                 dateCreated,dateModified,cancelCodeMask) 
+	     SELECT userId,cardId,subscriptionOfferDetailId,subscriptionStatus,autoRenew,subscriptionEndDate,0,at_userCancelReason,dateCreated,dateModified,at_cancelCodeMask
+	             FROM UserSubscriptionAccount WHERE userId = at_userId AND subscriptionOfferDetailId = at_subscriptionOfferDetailId;
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

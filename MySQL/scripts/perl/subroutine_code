@@ -1,0 +1,66 @@
+#! /usr/bin/perl -w
+
+sub marine 
+{
+    $n += 2; 
+    print "Hello, sailor number $n!\n";
+}
+
+&marine;
+&marine;
+
+sub sum_of_fred_and_barney
+{
+    print "Hey, you called the sum_of_fred_and_barney suroutine!\n";
+    $fred + $barney; 
+}
+
+$fred = 3;
+$barney = 4;
+$wilma = &sum_of_fred_and_barney; #$wilma =7
+print "\$wilma is $wilma.\n";
+$betty = 3 * &sum_of_fred_and_barney; #$betty =21
+print "\$betty is $betty.\n";
+
+sub max
+{
+    if($_[0] > $_[1]) 
+    {
+       $_[0];
+    }
+    else 
+    {
+       $_[1];
+    }
+}
+
+$max_num = &max(10,16,26);
+print "\$max_num is $max_num\n";
+
+$maximum = &max(3,5,10,4,6, 10,11, 20);
+print "\$maximum is $maximum\n";
+
+sub max {
+    my($max_so_far) = shift @_;
+    foreach (@_){
+            if ($_>$max_so_far){
+               $max_so_far=$_;
+            }
+    }
+    $max_so_far;
+}
+
+
+foreach (1 ..10){
+    my ($num) = @_; 
+    print "the array is @_\n";
+
+    my $num = @_;
+    print "the \$num is $num\n";    
+
+    my($square) = $_*$_; 
+    print "$_ squared is $square\n";
+}
+
+
+

@@ -1,0 +1,36 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_remSDSession;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_remSDSession (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         June 1, 2009
+**   Description:  Remove SD session (refund)
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_userId             DECIMAL(12,0)
+,at_eventId            DECIMAL(12,0)
+,at_xactionTypeId      TINYINT
+,at_contentId          SMALLINT
+)
+BEGIN
+
+DECLARE at_passTypeId         SMALLINT;
+DECLARE at_passes             SMALLINT;
+
+-- set other attributes (for SD refund)
+SET at_passTypeId = 2;
+SET at_passes = 1;
+
+CALL wsp_newSDTransaction(at_userId, at_eventId, at_passTypeId, at_passes, at_xactionTypeId, at_contentId);
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

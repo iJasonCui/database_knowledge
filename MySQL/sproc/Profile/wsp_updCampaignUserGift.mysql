@@ -1,0 +1,25 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updCampaignUserGift;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updCampaignUserGift (
+/*
+* File Name: wsp_updCampaignUserGift
+* Description: update Campaign User Gift
+* Created: Apr. 2010 
+*/
+    at_campaignId                      int,
+    at_userId                          DECIMAL(12,0),
+    at_targetUserId                    DECIMAL(12,0),
+    at_giftId                          int
+)
+BEGIN
+DECLARE at_dateModified DATETIME;
+
+CALL wsp_GetDateGMT(at_dateModified);
+    
+UPDATE CampaignUserGift	
+        set giftId=at_giftId, dateModified=at_dateModified, seen='N'
+        where campaignId=at_campaignId and
+        senderUserId=at_userId and
+        targetUserId= at_targetUserId;
+END;; 
+DELIMITER ;

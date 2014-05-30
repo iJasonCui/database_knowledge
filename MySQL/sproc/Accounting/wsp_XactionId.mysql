@@ -1,0 +1,42 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_XactionId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_XactionId (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  Sept 2003
+**   Description:  Generation of XactionId
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+OUT at_xactionId INT
+)
+BEGIN 
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+   SET at_xactionId = 0;
+   ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+   SET at_xactionId = 0;
+   ROLLBACK;
+END;
+
+START TRANSACTION;
+    
+    UPDATE XactionId SET xactionId = xactionId + 1;
+    SELECT xactionId INTO at_xactionId FROM XactionId;
+
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

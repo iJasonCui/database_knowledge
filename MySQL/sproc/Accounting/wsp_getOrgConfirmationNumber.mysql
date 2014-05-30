@@ -1,0 +1,20 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getOrgConfirmationNumber;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getOrgConfirmationNumber (
+    at_xactionId  int,
+    at_prefix     varchar(2)
+)
+BEGIN
+
+  -- SET ROWCOUNT 1
+  SELECT opr.confirmationNumber
+    FROM OptimalPaymentsResponse opr
+    WHERE opr.activityId = at_xactionId
+    AND opr.merchantRefNum = CONCAT(rtrim(at_prefix), convert(at_xactionId, char));
+    -- p.activityId = pr.activityId
+    -- AND p.activityId = at_xactionId
+    
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

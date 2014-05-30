@@ -1,0 +1,37 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAllDefaultUserAccounts;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAllDefaultUserAccounts (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  May 21, 2003
+**   Description:  retrieves all default user accounts
+**
+**
+** REVISION(S):
+**   Author:        Andy Tran
+**   Date:          June 9, 2004
+**   Description:   Added ORDER BY billingLocationId
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+)
+  BEGIN  
+	SELECT 
+          billingLocationId,
+          defaultAccountType,
+          defaultPurchaseOfferId,
+          defaultUsageCellId,
+          defaultSubscriptionOfferId
+        FROM DefaultUserAccount
+        ORDER BY billingLocationId;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

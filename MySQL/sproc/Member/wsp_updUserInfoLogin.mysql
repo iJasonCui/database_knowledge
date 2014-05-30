@@ -1,0 +1,42 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updUserInfoLogin;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updUserInfoLogin (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga/Jeff Yang
+**   Date:  June 10 2002
+**   Description:  Updates row in user_info
+**
+**   Author: Mike Stairs
+**   Date: Oct 2005
+**   Description: added dateModified to user_info
+**
+**   Author: Andy Tran
+**   Date: Jul 30 2008
+**   Description: use email address as username
+**
+******************************************************************************/
+ at_userId             DECIMAL(12,0)
+,at_username           VARCHAR(129)
+,at_password           VARCHAR(16)
+,at_email         VARCHAR(129)
+,at_emailStatus        CHAR(1)
+)
+BEGIN
+
+DECLARE at_dateNow DATETIME ;
+
+CALL wsp_GetDateGMT(at_dateNow);
+	
+UPDATE user_info 
+SET
+       username=LTRIM(UPPER(at_username))
+      ,password=LTRIM(UPPER(at_password))
+      ,email=LTRIM(UPPER(at_email))
+      ,emailStatus=at_emailStatus
+      ,dateModified=at_dateNow
+WHERE user_id = at_userId ;
+
+END;;
+DELIMITER ;

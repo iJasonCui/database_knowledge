@@ -1,0 +1,18 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getOfferCount;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getOfferCount (
+/******************************************************************************
+******************************************************************************/
+at_offerId int,
+at_offerType char(1)
+)
+
+BEGIN  
+   SELECT offerCount 
+   FROM OfferCounter 
+   WHERE offerId = at_offerId
+     AND offerType = at_offerType;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

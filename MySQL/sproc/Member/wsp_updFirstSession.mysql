@@ -1,0 +1,13 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updFirstSession;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updFirstSession (
+at_userId DECIMAL(12,0)
+)
+BEGIN	
+
+    UPDATE user_info 
+       SET firstSession = 0
+     WHERE user_id = at_userId ;
+ 
+END;;
+DELIMITER ;

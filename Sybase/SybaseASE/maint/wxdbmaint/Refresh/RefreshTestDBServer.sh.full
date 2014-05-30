@@ -1,0 +1,203 @@
+#!/bin/bash
+
+#!/bin/bash
+
+. $HOME/.bash_profile
+#. /ccs/sybase15/SYBASE.sh
+
+set -u
+set -x
+
+#-----------------------------------------#
+#  Usage 
+#-----------------------------------------#
+
+if [ $# -ne "1" ]
+then
+   echo "#-------------------------------------------------#"
+   echo "# Usage: $0 <SQL_SERVER_NAME> "
+   echo "#-------------------------------------------------#"
+   exit 1
+else
+   SERVER_NAME=${1}
+fi
+
+#---------------------------------------------#
+#  Initialization 
+#---------------------------------------------#
+SQL_USER=cron_sa
+OPS_SERVER_NAME=g151opsdb02
+OPS_DB=DbaTasks
+PASSWORD=`cat $HOME/.sybpwd | grep -w ${OPS_SERVER_NAME} | awk '{print $2}' `
+
+YEAR_MON_DAY=`date '+%a %b %e %Y' `
+YEAR_MON_DAY_HMS=` date '+%Y%m%d_%H:%M:%S ' `
+LOG_FILE=${SYBMAINT}/Refresh/output/${0}.log.${SERVER_NAME}.${YEAR_MON_DAY_HMS}
+
+MAIL_LIST="${SYBMAINT}/send_mail/mail_list.txt"
+MAIL_SCRIPT="${SYBMAINT}/send_mail/send_mail.sh"
+
+date > ${LOG_FILE}
+
+#---------------------------------------------#
+#  Figure out whether refresh or not 
+#---------------------------------------------#
+sqsh -U${SQL_USER} -S${OPS_SERVER_NAME} -P${PASSWORD} -D${OPS_DB} <<EOQ1 >> ${LOG_FILE}
+
+SET NOCOUNT ON
+
+DECLARE 
+    @WeekDay           char(3),
+    @DayDevideBy7      int,
+    @WeekDayCount      tinyint,
+    @CurrentDate       datetime, 
+    @returnMsg         varchar(250),
+    @serverId          int
+
+SELECT  @CurrentDate  = GETDATE()
+SELECT  @WeekDay      = SUBSTRING(DATENAME(dw,GETDATE()),1,3)
+
+SELECT  @DayDevideBy7 = datepart(dd,getdate())
+
+IF @DayDevideBy7 = 7 OR @DayDevideBy7 = 14 OR @DayDevideBy7 = 21 OR @DayDevideBy7 =28
+BEGIN
+   SELECT  @WeekDayCount = @DayDevideBy7 / 7
+END
+ELSE BEGIN 
+   SELECT  @WeekDayCount = round(@DayDevideBy7 / 7 , 0) + 1 
+END
+
+SELECT @serverId = serverId
+FROM   WebTestServer
+WHERE  sqlServerName = "${SERVER_NAME}" and validFlag= "A" and refreshDayFactor = @WeekDayCount and refreshDay = @WeekDay
+
+IF @serverId IS NULL SELECT @serverId = 0
+
+SELECT @returnMsg = "[serverId] " + convert(varchar(20), @serverId)
+PRINT @returnMsg
+
+go
+
+EOQ1
+
+serverId=`cat ${LOG_FILE} |  grep -w serverId | awk '{print $2}'`
+echo ${serverId}
+
+if [ ${serverId} -eq "0" ]
+then 
+  echo  "Msg error: Today, ${YEAR_MON_DAY}  is not the refreshment day for server = ${SERVER_NAME} " >> ${LOG_FILE}
+  date  >> ${LOG_FILE}
+  ${MAIL_SCRIPT} ${LOG_FILE} ${0} 'failure' ${MAIL_LIST}
+  exit 1
+fi
+
+#---------------------------------------#
+# There is batch inserted or not cancel or not 
+#---------------------------------------#
+
+sqsh -U${SQL_USER} -S${OPS_SERVER_NAME} -P${PASSWORD} -D${OPS_DB} <<EOQ1 >> ${LOG_FILE}
+
+SET NOCOUNT ON
+
+DECLARE
+    @batchId           int,
+    @returnMsg         varchar(250)
+
+SELECT @batchId = l.batchId
+FROM   WebTestDbSrvRefreshLog l                
+WHERE  l.serverId = ${serverId} AND CONVERT(VARCHAR(20),l.dateCreated,107) = CONVERT(VARCHAR(20),getdate(),107)
+
+IF @batchId IS NULL  SELECT @batchId = 0
+
+SELECT @returnMsg = "[batchId] " + convert(varchar(20), @batchId)
+PRINT @returnMsg
+
+go
+
+EOQ1
+
+batchId=`cat ${LOG_FILE} |  grep -w batchId | awk '{print $2}'`
+
+if [ ${batchId} -eq "0" ]
+then
+  echo  "Msg error: There is no batchId for server = ${SERVER_NAME} and date = ${YEAR_MON_DAY}" >> ${LOG_FILE}
+  date  >> ${LOG_FILE}
+  ${MAIL_SCRIPT} ${LOG_FILE} ${0} 'failure' ${MAIL_LIST}
+  exit 1
+fi
+
+
+#---------------------------------------#
+# cancel or not
+#---------------------------------------#
+
+sqsh -U${SQL_USER} -S${OPS_SERVER_NAME} -P${PASSWORD} -D${OPS_DB} <<EOQ1 >> ${LOG_FILE}
+
+SET NOCOUNT ON
+
+DECLARE
+    @adminUserId       int,
+    @adminUserName     varchar(30), 
+    @returnMsg         varchar(250)
+
+SELECT @adminUserId = l.adminUserIdCancelledBy, @adminUserName = u.adminUserName 
+FROM   WebTestDbSrvRefreshLog l, WebTestSrvAdministrator u
+WHERE  l.batchId = ${batchId} AND l.adminUserIdCancelledBy = u.adminUserId 
+
+SELECT @returnMsg = "[adminUserId] " + convert(varchar(20), @adminUserId)
+PRINT @returnMsg
+SELECT @returnMsg = "[adminUserName] " + @adminUserName 
+PRINT @returnMsg
+
+go
+
+EOQ1
+
+adminUserId=`cat ${LOG_FILE} |  grep -w adminUserId | awk '{print $2}'`
+adminUserName=`cat ${LOG_FILE} |  grep -w adminUserName | awk '{print $2}'`
+
+if [ ${adminUserId} -ne "0" ]
+then
+  echo  "Msg error: The refreshment task for server = ${SERVER_NAME} and date = ${YEAR_MON_DAY} has been cancelled by ${adminUserName}" >> ${LOG_FILE}
+  date  >> ${LOG_FILE}
+  ${MAIL_SCRIPT} ${LOG_FILE} ${0} 'failure' ${MAIL_LIST}
+  exit 1
+fi
+
+#cd /opt/etc/sybase12_52/maint/Refresh
+cd /opt/scripts/maint/web/Refresh
+
+##./001-dump-seed-DB.sh ${SERVER_NAME}
+
+./010-startDBServerMaint.sh ${SERVER_NAME}
+
+sleep 150
+
+./020-load-all-db.sh ${SERVER_NAME}m 
+
+case ${SERVER_NAME} in
+
+"webdb1g")
+./030-postLoad.sh ${SERVER_NAME}m t
+;;
+
+"webdb1d")
+./030-postLoad.sh ${SERVER_NAME}m d
+;;
+
+"webdb0g")
+./030-postLoad.sh ${SERVER_NAME}m t
+;;
+
+"webdb0t")
+./030-postLoad.sh ${SERVER_NAME}m t
+;;
+
+esac
+
+###./030-postLoad.sh ${SERVER_NAME}m t
+
+./040-shutdownDBServerMaint.sh ${SERVER_NAME} 
+
+exit 0
+

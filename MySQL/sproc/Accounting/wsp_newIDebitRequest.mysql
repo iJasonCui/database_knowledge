@@ -1,0 +1,45 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newIDebitRequest;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newIDebitRequest (
+
+/*******************************************************************
+**
+** CREATION:
+**   Author:      Andy Tran
+**   Date:        November 2006
+**   Description: Inserts row into IDebitRequest
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*******************************************************************/
+     at_userId       DECIMAL(12,0)
+    ,at_xactionId    DECIMAL(12,0)
+    ,at_totalAmount  DECIMAL(12,0)
+    ,at_currencyCode CHAR(3)
+)
+BEGIN
+DECLARE at_dateCreated DATETIME;
+
+SET at_dateCreated = UTC_TIMESTAMP();
+
+INSERT INTO IDebitRequest (
+         userId
+        ,xactionId
+        ,totalAmount
+        ,currencyCode
+        ,dateCreated
+    )
+    VALUES (
+         at_userId
+        ,at_xactionId
+        ,at_totalAmount
+        ,at_currencyCode
+        ,at_dateCreated
+    );
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

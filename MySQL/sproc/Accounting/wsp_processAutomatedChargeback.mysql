@@ -1,0 +1,153 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_processAutomatedChargeback;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_processAutomatedChargeback (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  May 29, 2006
+**   Description:  attempt to chargeback purchase if it exists. First check if
+**                 refXactionId exists, else check by cardNumber/date
+**
+**   Author: Andy Tran
+**   Date: May 5, 2010
+**   Description: add location tax IDs
+**
+******************************************************************************/
+at_refXactionId DECIMAL(12,0),
+at_encodedCardNumber VARCHAR(64),
+at_cost DECIMAL (10,2),
+at_fromDateCreated DATETIME,
+at_toDateCreated DATETIME
+)
+proc_label:BEGIN
+
+DECLARE at_return			 INT;
+DECLARE at_userId                        DECIMAL(12,0);
+DECLARE at_credits                       SMALLINT;
+DECLARE at_creditTypeId                  TINYINT;
+DECLARE at_dateNow                       DATETIME;
+DECLARE at_balance                       INT;
+DECLARE at_costUSD                       DECIMAL (5,2);
+DECLARE at_tax                           DECIMAL (10,2);
+DECLARE at_taxUSD                        DECIMAL (5,2);
+DECLARE at_currencyId                    TINYINT;
+DECLARE at_purchaseOfferDetailId         SMALLINT;
+DECLARE at_purchaseTypeId                TINYINT;
+DECLARE at_billingLocationId             SMALLINT;
+DECLARE at_creditCardId                  INT;
+DECLARE at_xactionId                     DECIMAL(12,0);
+DECLARE at_contentId                     SMALLINT;
+DECLARE at_found                         INT;
+DECLARE at_subscriptionOfferDetailId     SMALLINT;
+DECLARE at_xactionTypeId                 TINYINT;
+DECLARE at_subscriptionTypeId            SMALLINT;
+DECLARE at_duration                      SMALLINT;
+DECLARE at_durationUnits                 CHAR(1);
+DECLARE at_type                          CHAR(1);
+DECLARE at_partialCardNumber             CHAR(8);
+DECLARE at_cardStatus                    CHAR(1);
+DECLARE at_cvvResponseCode               CHAR(1);
+DECLARE at_avsResponseCode               CHAR(1);
+DECLARE at_taxCountryId                  SMALLINT;
+DECLARE at_taxJurisdictionId             INT;
+
+SET at_creditCardId = -1;
+SET at_found = -1;
+SET at_xactionTypeId = 39; -- automated chargeback xactionTypeId
+SET at_contentId = 54; -- Admin purchase reversal - Adjustment 
+
+-- first see if row exists by refXactionId
+IF (SELECT 1 FROM Purchase WHERE xactionId = at_refXactionId AND at_refXactionId > 0) IS NOT NULL THEN 
+  SET at_found = 1;
+  SELECT creditCardId, userId INTO at_creditCardId, at_userId FROM Purchase WHERE xactionId = at_refXactionId;
+  SELECT partialCardNum, status INTO at_partialCardNumber, at_cardStatus FROM CreditCard WHERE creditCardId=at_creditCardId;
+-- else check by cardnumber and date
+ELSE
+    -- create temporary table with list of creditCardIds for this encodedCardNum for efficiency sake
+    -- CREATE TEMPORARY TABLE tmp_processAutomatedChargeback AS (SELECT creditCardId FROM CreditCard WHERE encodedCardNum =  at_encodedCardNumber);
+    -- return first matching purchase for this card that doesn't already have a charge associated with it for this day
+
+    SELECT xactionId, creditCardId, userId INTO at_refXactionId, at_creditCardId, at_userId FROM Purchase WHERE
+               creditCardId IN (SELECT creditCardId FROM CreditCard WHERE encodedCardNum =  at_encodedCardNumber) AND
+               cost + tax = at_cost AND
+               dateCreated < at_toDateCreated AND
+               dateCreated >= at_fromDateCreated AND
+               xactionId NOT IN (
+                  SELECT IFNULL(refXactionId,-9999) FROM Purchase WHERE
+                  cost + tax = -at_cost AND
+                  xactionTypeId IN (39,8) AND
+                  dateCreated >= at_fromDateCreated AND
+                  creditCardId IN (SELECT creditCardId FROM CreditCard WHERE encodedCardNum =  at_encodedCardNumber)) LIMIT 1;
+
+    IF at_creditCardId > 0 THEN 
+      SET at_found = 1;
+      SELECT partialCardNum, status INTO at_partialCardNumber, at_cardStatus FROM CreditCard WHERE creditCardId=at_creditCardId;
+    END IF;
+END IF;
+
+-- record not found just return
+IF at_found != 1 THEN
+   LEAVE proc_label;
+END IF; 
+
+SELECT securityResponseCode, avsResponseCode INTO at_cvvResponseCode, at_avsResponseCode FROM PaymentechResponse WHERE xactionId = at_refXactionId;
+
+IF (SELECT 1 FROM SubscriptionTransaction WHERE xactionId=at_refXactionId) IS NOT NULL 
+THEN 
+   SET at_type = 'S';
+ELSE
+   SET at_type = 'C';
+END IF;
+
+SET at_dateNow = UTC_TIMESTAMP();
+	
+IF (at_type = 'C') 
+THEN 
+   CALL wsp_getTotalCredits(at_userId, at_balance);
+
+   SELECT cost, costUSD, tax, taxUSD, credits, creditTypeId, creditCardId, currencyId, purchaseOfferDetailId, billingLocationId, purchaseTypeId, taxCountryId, taxJurisdictionId 
+          INTO at_cost, at_costUSD, at_tax, at_taxUSD, at_credits, at_creditTypeId, at_creditCardId, at_currencyId, 
+          at_purchaseOfferDetailId, at_billingLocationId, at_purchaseTypeId, at_taxCountryId, at_taxJurisdictionId 
+        FROM AccountTransaction,Purchase 
+        WHERE AccountTransaction.xactionId=at_refXactionId AND AccountTransaction.xactionId=Purchase.xactionId;
+-- ---------------------
+   IF FOUND_ROWS() = 0 
+   THEN
+      SELECT at_userId, at_creditCardId, at_cardStatus, at_partialCardNumber,at_xactionId,at_cvvResponseCode,at_avsResponseCode,at_refXactionId;
+      LEAVE proc_label;
+   END IF;     
+-- ----------------
+   SET at_balance = at_balance - at_credits;
+
+   CALL wsp_XactionId(at_xactionId);
+
+   IF !(at_xactionId > 0) THEN
+      LEAVE proc_label;
+   END IF;
+
+   CALL wsp_transProcAutomatedChargeback (at_userId,at_xactionId,at_creditTypeId,at_xactionTypeId,at_contentId,at_credits,at_balance,at_dateNow,at_purchaseTypeId,
+					at_billingLocationId,at_creditCardId,at_purchaseOfferDetailId,at_currencyId,at_cost,at_costUSD,at_tax,at_taxUSD,at_refXactionId,
+					at_taxCountryId,at_taxJurisdictionId,at_partialCardNumber,at_cardStatus,at_cvvResponseCode,at_avsResponseCode);
+ELSE  -- process subscription chargeback
+   SELECT cost, costUSD, tax, taxUSD, subscriptionTypeId, creditCardId, currencyId, duration, Purchase.subscriptionOfferDetailId, billingLocationId,
+          purchaseTypeId, durationUnits, taxCountryId, taxJurisdictionId
+        INTO at_cost, at_costUSD, at_tax, at_taxUSD, at_subscriptionTypeId, at_creditCardId, at_currencyId, at_duration, at_subscriptionOfferDetailId, at_billingLocationId, 
+          at_purchaseTypeId, at_durationUnits, at_taxCountryId, at_taxJurisdictionId 
+        FROM SubscriptionTransaction,Purchase 
+        WHERE SubscriptionTransaction.xactionId=at_refXactionId AND SubscriptionTransaction.xactionId=Purchase.xactionId;
+
+   CALL wsp_XactionId(at_xactionId);
+
+   IF !(at_xactionId > 0) THEN 
+      LEAVE proc_label;
+   END IF;
+
+   CALL wsp_transProcSubsAutomChargeback (at_userId,at_xactionId,at_xactionTypeId,at_contentId,at_subscriptionOfferDetailId,at_subscriptionTypeId,at_duration,at_durationUnits,
+   					 at_dateNow,at_purchaseTypeId,at_billingLocationId,at_creditCardId,at_currencyId,at_cost,at_costUSD,at_tax,at_taxUSD,at_refXactionId,
+					 at_taxCountryId,at_taxJurisdictionId,at_partialCardNumber,at_cardStatus,at_cvvResponseCode,at_avsResponseCode);
+END IF;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

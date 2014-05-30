@@ -1,0 +1,47 @@
+      DSI EXEC   Down                 130(1) webdb20p.Profile_ad              
+      DSI EXEC   Down                 131(1) webdb20p.Profile_ar              
+      DSI EXEC   Down                 174(1) webdb21p.Profile_ad              
+      DSI EXEC   Down                 118(1) webdb21p.Profile_ai              
+      DSI EXEC   Down                 175(1) webdb21p.Profile_ar              
+      DSI EXEC   Down                 114(1) webdb23p.Profile_ad              
+      DSI EXEC   Down                 122(1) webdb23p.Profile_ar              
+      DSI EXEC   Down                 115(1) webdb24p.Profile_ad              
+      DSI EXEC   Suspended            124(1) webdb24p.Profile_ar              
+      DSI        Suspended            124 webdb24p.Profile_ar                 
+      DSI EXEC   Down                 396(1) webdb25p.Profile_ad              
+      DSI EXEC   Down                 119(1) webdb25p.Profile_ai              
+      DSI EXEC   Down                 397(1) webdb25p.Profile_ar    
+
+sysadmin hibernate_on
+
+sysadmin sqm_purge_queue, 130, 0
+sysadmin sqm_purge_queue, 131, 0
+sysadmin sqm_purge_queue, 174, 0
+sysadmin sqm_purge_queue, 118, 0
+sysadmin sqm_purge_queue, 175, 0
+sysadmin sqm_purge_queue, 114, 0
+sysadmin sqm_purge_queue, 122, 0
+sysadmin sqm_purge_queue, 115, 0
+sysadmin sqm_purge_queue, 124, 0
+sysadmin sqm_purge_queue, 396, 0
+sysadmin sqm_purge_queue, 119, 0
+sysadmin sqm_purge_queue, 397, 0
+
+sysadmin hibernate_off
+
+;TRAN_updProfileOnlineByUId np
+
+
+
+sysadmin dump_file,"filename"
+go
+sysadmin dump_queue,326,0,-1,-1,50
+go
+
+
+sysadmin sqm_zap_command, 326, 0, 56537,43,7
+
+sysadmin sqm_purge_queue, 131, 0
+sysadmin sqm_purge_queue, 122, 0
+sysadmin sqm_purge_queue, 124, 0
+sysadmin sqm_purge_queue, 397, 0

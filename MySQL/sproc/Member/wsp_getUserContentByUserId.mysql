@@ -1,0 +1,32 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getUserContentByUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getUserContentByUserId (
+/***********************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu/Jack Veiga
+**   Date:  July 2003
+**   Description:  Retrieves user content for a given user id
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+at_userId DECIMAL(12,0)
+)
+BEGIN
+     SELECT UserContent.productCode
+           ,UserContent.communityCode
+           ,UserContent.userContentType
+           ,UserContent.dateCreated
+           ,UserContent.currentValue
+           ,UserContent.proposedValue
+           ,UserContentDesc.userContentDesc
+      FROM UserContent,UserContentDesc
+     WHERE userId = at_userId
+       AND UserContent.userContentDescId = UserContentDesc.userContentDescId ;
+
+END;;
+DELIMITER ;

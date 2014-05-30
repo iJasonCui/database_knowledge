@@ -1,0 +1,27 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getNewKissByReceiverUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getNewKissByReceiverUserId (
+/***********************************************************************
+**
+** CREATION:
+**   Author:        Yadira Genoves Xolalpa
+**   Date:          April 2010
+**   Description:   Get New kisses by userId and community, seen = N = No
+**
+** REVISION:
+**   Author:        
+**   Date:          
+**   Description:   
+*************************************************************************/
+ at_campaignId                 INT,
+ at_targetUserId               DECIMAL(12,0)
+)
+BEGIN
+   SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;
+   SELECT senderUserId
+    FROM CampaignUserGift
+    WHERE campaignId = at_campaignId
+    AND targetUserId = at_targetUserId 
+    AND seen = 'N';
+END;;
+DELIMITER ;

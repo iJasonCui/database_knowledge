@@ -1,0 +1,90 @@
+To:erick.sanchez@lavalife.com
+Subject: Test
+Content-Type: text/plain
+X-Priority: 1 (Highest)
+X-MSMail-Priority: High  
+     
+ -------- 
+ <legend> 
+
+(1 row affected)
+ Daily Backup Alert Report                                             
+ --------------------------------------------------------------------- 
+ This report ran at Dec  6 2004  2:00PM                                
+
+(1 row affected)
+                      
+ -------------------- 
+ </legend><TABLE><TR> 
+
+(1 row affected)
+                                                                                
+ ------------------------------------------------------------------------------ 
+ <th bgcolor='#CCCCCC'width='52'><font face=arial size=-3/>Alert Id</font></th> 
+
+(1 row affected)
+                                                                                    
+ ---------------------------------------------------------------------------------- 
+ <th bgcolor='#CCCCCC'width='52'><font face=arial size=-3/>Execution Id</font></th> 
+
+(1 row affected)
+                                                                                 
+ ------------------------------------------------------------------------------- 
+ <th bgcolor='#CCCCCC'width='52'><font face=arial size=-3/>Host Name</font></th> 
+
+(1 row affected)
+                                                                              
+ ---------------------------------------------------------------------------- 
+ <th bgcolor='#CCCCCC'width='52'><font face=arial size=-3/>Job Id</font></th> 
+
+(1 row affected)
+                                                                                
+ ------------------------------------------------------------------------------ 
+ <th bgcolor='#CCCCCC'width='52'><font face=arial size=-3/>Job Desc</font></th> 
+
+(1 row affected)
+                                                                                  
+ -------------------------------------------------------------------------------- 
+ <th bgcolor='#CCCCCC'width='52'><font face=arial size=-3/>Group Name</font></th> 
+
+(1 row affected)
+                                                                                   
+ --------------------------------------------------------------------------------- 
+ <th bgcolor='#CCCCCC'width='52'><font face=arial size=-3/>Schedule ID</font></th> 
+
+(1 row affected)
+                                                                                     
+ ----------------------------------------------------------------------------------- 
+ <th bgcolor='#CCCCCC'width='52'><font face=arial size=-3/>Schedule Desc</font></th> 
+
+(1 row affected)
+                                                                                   
+ --------------------------------------------------------------------------------- 
+ <th bgcolor='#CCCCCC'width='52'><font face=arial size=-3/>Date Create</font></th> 
+
+(1 row affected)
+                                                                            
+ -------------------------------------------------------------------------- 
+ <th bgcolor='#CCCCCC'width='52'><font face=arial size=-3/>Note</font></th> 
+
+(1 row affected)
+       
+ ----- 
+ </TR> 
+
+(1 row affected)
+                                               alertId                                                                  executionId                                                              hostName                                                                          jobId                                                                    jobDesc                                                                                               groupName                                                                                   scheduleId                                                               scheduleDesc                                                                                          dateCreated                                                                             Note                                                                                                                                                                                                                                                                           
+ --------------------------------------------- ----------- -------------- --------------------------------------------- ----------- -------------- --------------------------------------------- -------------------- -------------- --------------------------------------------- ----------- -------------- --------------------------------------------- ---------------------------------------- -------------- --------------------------------------------- ------------------------------ -------------- --------------------------------------------- ----------- -------------- --------------------------------------------- ---------------------------------------- -------------- --------------------------------------------- -------------------------- -------------- --------------------------------------------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -------------- 
+ \t<td width='11'><font face=Tahoma size=-2 />        4912 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />        NULL </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> INTRANET             </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />         285 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> Weekly backups                           </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> NTS                            </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />         288 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />                                          </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />        Dec  5 2004  9:30AM </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> Schedule ' ' for job 'Intranet' did not report in !!! Call NTS.                                                                                                                                                                                                 </font></td>\n 
+ \t<td width='11'><font face=Tahoma size=-2 />        4913 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />        NULL </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> TOR-VRU1             </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />         260 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> Daily ivr backup                         </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> NTS                            </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />         263 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> daily ivr backup                         </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />        Dec  5 2004 11:00AM </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> Schedule 'tor-vru' for job 'tor-vru' did not report in !!! Call NTS.                                                                                                                                                                                            </font></td>\n 
+ \t<td width='11'><font face=Tahoma size=-2 />        4914 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />        NULL </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> THUMPER              </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />           4 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> Daily dump of arch_CM                    </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> DBM                            </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />           4 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> daily dump of arch_CM db.                </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />        Dec  5 2004 11:50AM </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> Schedule 'arch_CM' for job 'arch_CM' did not report in !!! Call DBM.                                                                                                                                                                                            </font></td>\n 
+ \t<td width='11'><font face=Tahoma size=-2 />        4915 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />       75431 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> VMASTER              </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />         170 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> vmaster                                  </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> NTS                            </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />         149 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> vmaster                                  </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />        Dec  5 2004  2:11PM </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> Backup for server vmaster  returned no status! - please contact NTS                                                                                                                                                                                             </font></td>\n 
+ \t<td width='11'><font face=Tahoma size=-2 />        4916 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />       75432 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> THUMPER              </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />         169 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> thumper                                  </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> NTS                            </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />         148 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> thumper                                  </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />        Dec  5 2004  2:11PM </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> Backup for server thumper  returned status non 0 - please contact NTS                                                                                                                                                                                           </font></td>\n 
+ \t<td width='11'><font face=Tahoma size=-2 />        5037 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />        NULL </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> THUMPER              </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />           4 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> Daily dump of arch_CM                    </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> DBM                            </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />           4 </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> daily dump of arch_CM db.                </font></td>\n \t<td width='11'><font face=Tahoma size=-2 />        Dec  6 2004 11:50AM </font></td>\n \t<td width='11'><font face=Tahoma size=-2 /> Schedule 'arch_CM' for job 'arch_CM' did not report in !!! Call DBM.                                                                                                                                                                                            </font></td>\n 
+
+(6 rows affected)
+          
+ -------- 
+ </TABLE> 
+
+(1 row affected)

@@ -1,0 +1,35 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getSubscriptionRenewRetry;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getSubscriptionRenewRetry (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author: Yan Liu 
+**   Date:  July 30 2008
+**   Description:  retrieves all retriable subscriptions, which are then either
+**                 renewed or marked inactive.
+**
+**
+******************************************************************************/
+   at_status CHAR(1)
+)
+BEGIN
+
+   DECLARE at_dateNow DATETIME;
+
+   SET at_dateNow = UTC_TIMESTAMP();
+
+   SELECT ua.userId, ua.autoRenew, ua.cardId, ua.subscriptionOfferDetailId, ua.subscriptionStatus, ua.subscriptionEndDate
+   FROM UserSubscriptionAccount ua, RenewalRetryQueue rrq 
+   WHERE ua.userId = rrq.userId 
+     AND ua.subscriptionOfferDetailId = rrq.subscriptionOfferDetailId 
+     AND subscriptionStatus <> 'I' 
+     -- AND subscriptionEndDate < at_dateNow
+     AND status = at_status 
+     AND nextRetryDate < at_dateNow
+     ORDER BY rrq.dateCreated DESC LIMIT 10;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

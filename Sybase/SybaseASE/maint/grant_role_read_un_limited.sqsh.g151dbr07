@@ -1,0 +1,53 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]
+then
+   echo "Usage: "${0}" <serverName> "
+   exit 1  
+else
+   serverName=${1}
+fi
+
+##Password=`cat $HOME/.sybpwd | grep -w ${serverName} | awk '{print $2}'`
+Password=`cat $HOME/.sybpwd | grep -w c151rep44 | awk '{print $2}'`
+CurrentDate=`date '+%Y%m%d_%H%M%S'`
+LogFile=./output/${0}.${serverName}.${CurrentDate}
+
+date > ${LogFile}
+
+sqsh -Usa -S${serverName} -P${Password} << EOQ1 >> ${LogFile}
+
+
+USE master
+CREATE ROLE read_un_limited
+
+EXEC sp_role 'grant','read_un_limited','webmaint'
+EXEC sp_modifylogin webmaint, 'add default role', read_un_limited
+
+select * from master..syssrvroles where name = "read_un_limited"
+go
+
+select name from master..sysdatabases where name not in ("master", "model", "tempdb") and name not like "syb%"
+\do
+   \echo "use #1" 
+   use #1   
+   go
+   select db_name()
+   go
+
+   select name from sysobjects where type = "U" and name not like "rs%"
+   \do
+      \echo "grant select on #1 to read_un_limited"
+      grant select on #1 to read_un_limited 
+      go
+   \done
+
+\done
+
+
+go
+
+EOQ1
+
+
+exit 0

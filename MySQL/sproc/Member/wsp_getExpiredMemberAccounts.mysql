@@ -1,0 +1,35 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getExpiredMemberAccounts;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getExpiredMemberAccounts (
+/***********************************************************************
+**
+** CREATION:
+**   Author: Mike Stairs
+**   Date: Jan 4, 2005
+**   Description: retrieve list of userIds to be archived
+**
+*************************************************************************/
+at_inactiveExpireDaysAgo INT,
+at_freeExpireDaysAgo INT,
+at_pendingExpireDaysAgo INT,
+at_rowCount INT
+)
+BEGIN
+
+DECLARE at_now INT ;
+
+SET at_now = TIMESTAMPDIFF(second, "Dec 31 20:00 1969",now()) ;
+
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;
+
+SELECT user_id, 
+       gender
+  FROM user_info
+ WHERE status = 'J'
+    OR (status = 'I' AND  laston <  (at_now  - (at_inactiveExpireDaysAgo * 24 * 3600)))
+    OR (status in ('A','M','C') AND user_type = 'F' AND laston < (at_now - (at_freeExpireDaysAgo * 24 * 3600)))
+    OR (status in ('P','U') AND laston < (at_now - (at_pendingExpireDaysAgo * 24 * 3600)))
+ LIMIT at_rowCount ;
+
+END;;
+DELIMITER ;

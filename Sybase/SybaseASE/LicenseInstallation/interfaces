@@ -1,0 +1,475 @@
+##FMG_REPORT
+##        query tcp ether 10.1.20.52 1433
+
+#-------------------------------------------------------#
+# new lavalife.com db server 
+#-------------------------------------------------------#
+w151dbp10
+        query  tcp ether w151dbp10 8100
+        query  tcp ether 10.50.4.10 8100
+
+w151dbp20
+        query  tcp ether w151dbp20 8100
+        query  tcp ether 10.50.4.20 8100
+
+w151dbp30
+        query  tcp ether w151dbp30 8100
+        query  tcp ether 10.50.4.30 8100
+
+w151dbp40
+        query  tcp ether w151dbp40 8100
+        query  tcp ether 10.50.4.40 8100
+
+#-------------------------------------------------------#
+# credit card db server
+#-------------------------------------------------------#
+c151dbp01
+        query tcp ether c151dbp01 4100
+
+w151dbp011
+        query  tcp ether w151dbp01 4110
+
+#-------------------------------------------------------#
+
+#--------------------------------------#
+# IVR DB
+#--------------------------------------#
+v151dbp01ivr
+	query tcp ether v151dbp01 4100
+
+v151dbp03ivr
+        query tcp ether v151dbp03 4100
+
+v151dbp05ivr
+        query tcp ether v151dbp05 4100
+
+v151dbp03msa
+        query tcp ether v151dbp03 5100
+
+v151db20
+        query tcp ether v151db20 4100
+        query tcp ether 10.10.96.220 4100
+        
+v151db20m
+        query tcp ether v151db20 4101
+        query tcp ether 10.10.96.220 4101
+
+ausdb
+        query tcp ether aus-db 4100
+
+aus-db
+        query tcp ether aus-db 4100
+
+ausrssd02
+        query tcp ether ausdb02 5100
+        query tcp ether 192.168.131.35  5100
+
+ausdb02
+        query tcp ether ausdb02 4100
+        query tcp ether 192.168.131.35 4100
+
+ausrep02
+        query tcp ether ausdb02 6100
+        query tcp ether 192.168.131.35 6100
+
+#--------------------------------------
+# IVR Rep server at 104
+#-------------------------------------#
+v104dbrssd
+        query tcp ether v104dbrep 4100
+
+v104dbrep
+        query tcp ether v104dbrep 6100
+
+#--------------------------------------
+
+#-------------------------------------#
+# Mobile
+#-------------------------------------#
+v151dbp01mob
+        query tcp ether v151dbp01 6100
+
+v151dbp02mob
+        query tcp ether v151dbp02 6100
+        query tcp ether 10.10.36.51 6100
+
+v151dbp01sms
+        query tcp ether v151dbp01 5100
+
+v151dbp02sms
+        query tcp ether v151dbp02 5100
+        query tcp ether 10.10.36.51 5100
+
+v151dbp05mob
+        query tcp ether v151dbp05 6100
+
+v151dbp05sms
+        query tcp ether v151dbp05 5100
+
+#--------------------------------------------#
+# Mobile Rep server 
+#--------------------------------------------#
+m151rep01
+        query tcp ether v151rep01 6110
+
+m151rssd01
+        query tcp ether v151rep01 4110
+
+
+#--------------------------------------
+# CCD Rep server at 151
+#-------------------------------------#
+c151rssd01
+        query tcp ether v151rep01 4120
+
+c151rep01
+        query  tcp ether v151rep01 6120
+
+#-------------------------------
+# web test and dev
+#-------------------------------
+# webdb1g 4100  --test server
+
+webdb1g
+        query tli tcp /dev/tcp \x000210040a0a0b1f0000000000000000
+        master tli tcp /dev/tcp \x000210040a0a0b1f0000000000000000
+
+webdb1gm
+        query tcp ether webdb1g 4101
+
+## webdb1d     -- dev db server
+##   webdb1g     query   tcp (7100)
+
+#webdb1d
+#        query tli tcp /dev/tcp \x00021bbc0a0a0b1f0000000000000000
+#        master tli tcp /dev/tcp \x00021bbc0a0a0b1f0000000000000000
+
+#webdb1dm
+#        query tli tcp /dev/tcp \x00021bbc0a0a0b1f0000000000000000
+#        master tli tcp /dev/tcp \x00021bbc0a0a0b1f0000000000000000
+webdb1d 
+        query tcp ether webdb1g 7100
+         
+webdb1dm
+        query tcp ether webdb1g 7101
+         
+############################################
+#  Web ASE servers at 151 front st.
+############################################
+
+w151dbp01
+        query tcp ether w151dbp01 4100
+
+w151dbp011
+        query tcp ether w151dbp01 4110
+
+w151dbp01m
+        query tcp ether w151dbp01 4101
+
+w151dbp02
+        query tcp ether w151dbp02 4100
+
+w151dbp02m
+        query tcp ether w151dbp02 4101
+
+w151dbp07
+        query tcp ether w151dbp02 5100
+
+w151dbp04
+        query tcp ether w151dbp04 4100
+
+w151dbp04m
+        query tcp ether w151dbp04 4101
+
+w151dbp06
+        query tcp ether w151dbp06 4100
+
+w151dbp06m
+        query tcp ether w151dbp06 4101
+
+w151dbr01
+        query tcp ether w151dbr01 4100
+
+w151dbr01m
+        query tcp ether w151dbr01 4101
+
+w151dbr02
+        query tcp ether w151dbr02 4100
+
+w151dbr02m
+        query tcp ether w151dbr02 4101
+
+#----- the end of Web ASE servers at 151 front st. ---------#
+
+#----------------------------------------#
+# Web Rep servers at 151
+#----------------------------------------#
+
+w151rssd01
+        query tcp ether w151rep01 4100
+
+w151rep01
+        query tcp ether w151rep01 8100
+
+
+#----- the end of Web Rep servers at 151 front st. ---------#
+
+#--------------------#
+# rep server for CCD
+#--------------------#
+
+w151dbr06
+        query tcp ether w151dbr06 4100
+
+c151dbp06
+        query tcp ether c151dbp06 4100
+
+c151dbp06pgs
+        query tcp ether c151dbp06 5100
+
+c151dbp07
+        query tcp ether c151dbp07 4100
+
+c151dbp07pgs
+        query tcp ether c151dbp07 5100
+
+#----------------------------------------------#
+# Reporting servers 
+#----------------------------------------------#
+
+## webdb0r
+##      Services:
+##              query   tcp (4100)
+##              master  tcp (4100)
+
+webdb0r
+        query tli tcp /dev/tcp \x000210040a0a19070000000000000000
+
+ivrdb1r
+        query tcp ether ivrdb1r 4100
+
+## webdbiq
+##      Services:
+##              query   tcp (4100)
+
+IQDB1
+        query tli tcp /dev/tcp \x000210040a0a0b3c0000000000000000
+        master tli tcp /dev/tcp \x000210040a0a0b3c0000000000000000
+
+
+#-----------------------------------------#
+# DBM operational ASE server
+#-----------------------------------------#
+
+opsdb1p
+    query tcp ether opsdb1p 4100
+
+opsdb2p
+    query tcp ether opsdb2p 4100
+
+#------------------------------------------#
+# Others  
+#------------------------------------------#
+
+w151rssd02
+        query tcp ether webtheta 4120
+
+w151rep02
+        query tcp ether webtheta 8120
+
+w151rssd03
+        query tcp ether webtheta 4130
+
+w151rep03
+        query tcp ether webtheta 8130
+
+g151rssd07
+        master tcp ether g151dbr07 6100
+        query tcp ether g151dbr07 6100
+
+g151rep07
+        master tcp ether g151dbr07 7100
+        query tcp ether g151dbr07 7100
+
+g151dbr07sms
+        query tcp ether g151dbr07 5100
+
+g151dbr07
+        query tcp ether g151dbr07 4100
+
+w151dbp05
+        query tcp ether w151dbp06 5100
+
+#-------- the end ------------------------#
+
+#####  all new dev/test server for mobile, IVR/CCD and web on g151dbp01 
+###################################################################
+#---------------------#
+# mob
+#---------------------#
+m151devdb01
+	query tcp ether g151db01 4100
+
+m151devdb01_BS
+        query tcp ether g151db01 4200
+
+
+m151tstdb01
+	master tcp ether g151db01 4110
+	query tcp ether g151db01 4110
+
+m151devdb01sms
+	master tcp ether g151db01 4130
+	query tcp ether g151db01 4130
+
+m151tstdb01sms
+	master tcp ether g151db01 4140
+	query tcp ether g151db01 4140
+
+#-------------------------------#
+#  voice 
+#-------------------------------#
+
+v151devdb01
+	master tcp ether g151db01 5100
+	query tcp ether g151db01 5100
+
+
+v151tstdb01
+	master tcp ether g151db01 5110
+	query tcp ether g151db01 5110
+
+v151devdb01_BS
+        master tcp ether g151db01 5200
+        query tcp ether g151db01 5200
+
+#-------------------------------#
+#  web 
+#-------------------------------#
+
+w151devdb01
+	master tcp ether g151db01 6100
+	query tcp ether g151db01 6100
+
+
+w151tstdb01
+	master tcp ether g151db01 6110
+	query tcp ether g151db01 6110
+
+w151devdb01_BS
+        master tcp ether g151db01 6200
+        query tcp ether g151db01 6200
+
+
+#-------------------------------#
+#  CCD
+#-------------------------------#
+
+c151devdb01
+	master tcp ether g151db01 7100
+	query tcp ether g151db01 7100
+
+
+c151tstdb01
+	master tcp ether g151db01 7110
+	query tcp ether g151db01 7110
+
+
+c151devdb01_BS
+        master tcp ether g151db01 7200
+        query tcp ether g151db01 7200
+
+#-------------------------------------
+#ops db servers
+#------------------------------------
+g151opsdb01
+        master tcp ether g151db01 8100
+        query tcp ether g151db01 8100
+
+
+g151opsdb02
+        master tcp ether g151db01 8110
+        query tcp ether g151db01 8110
+
+
+#---------------------------------------#
+# test rep server and rssd db server 
+#---------------------------------------#
+
+g151tstrssd01
+        master tcp ether g151db01 9100
+        query tcp ether g151db01 9100
+
+g151tstrep01
+        master tcp ether g151db01 9300
+        query tcp ether g151db01 9300
+#---------------------------------------#
+
+#------------------------
+g104iqdb01
+ 	query tcp ether 10.10.26.40 8150
+
+g104opsdb02
+        query tcp ether g104db01 8110
+
+w151dbp10
+	query tcp ether 10.1.20.100 4100
+
+#---------------------------------------
+# consolidated rep server on  v151dbp04
+#---------------------------------------
+v151dbp04ivr
+        master tcp ether v151dbp04 4100
+        query tcp ether v151dbp04 4100
+
+c151rssd44
+        master tcp ether v151dbp04 4144
+        query tcp ether v151dbp04 4144
+
+m151rssd45
+        master tcp ether v151dbp04 4145
+        query tcp ether v151dbp04 4145
+
+w151rssd41
+        master tcp ether v151dbp04 4141
+        query tcp ether v151dbp04 4141
+
+w151rssd42
+        master tcp ether v151dbp04 4142
+        query tcp ether v151dbp04 4142
+
+w151rssd43
+        master tcp ether v151dbp04 4143
+        query tcp ether v151dbp04 4143
+
+#--------------------------#
+# mobile rep server
+#--------------------------#
+m151rep45
+        master tcp ether v151dbp04 6145
+        query  tcp ether v151dbp04 6145
+
+#--------------------------#
+# ccd rep server
+#--------------------------#
+c151rep44
+        master tcp ether v151dbp04 6144
+        query  tcp ether v151dbp04 6144
+        query  tcp ether 10.10.96.221 6144
+
+#--------------------------#
+# web rep server
+#--------------------------#
+w151rep41
+        master tcp ether v151dbp04 6141
+        query  tcp ether v151dbp04 6141
+
+w151rep42
+        master tcp ether v151dbp04 6142
+        query  tcp ether v151dbp04 6142
+
+w151rep43
+        master tcp ether v151dbp04 6143
+        query  tcp ether v151dbp04 6143
+
+

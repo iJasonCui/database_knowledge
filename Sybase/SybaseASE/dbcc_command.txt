@@ -1,0 +1,42 @@
+dbcc addtempdb( dbid |database_name )
+dbcc checkalloc [(database_name [, fix | nofix])]
+dbcc checkcatalog [(database_name[, fix])
+dbcc checkdb [(database_name [, skip_ncindex])]
+dbcc checkindex({table_name | table_id}, index_id
+[, bottom_up [, partition_name | partition_id]])
+dbcc checkstorage [(database_name)]
+dbcc checktable(table_name | table_id
+[, skip_ncindex | fix_spacebits | "check spacebits" |
+bottom_up | NULL [, partition_name | partition_id)
+dbcc checkverify(dbname[,tblname [,ignore_exclusions]])
+dbcc complete_xact (xid, {["commit", ¡°1pc¡±] | "rollback"})
+dbcc forget_xact (xid)
+dbcc dbrepair (database_name, dropdb)
+dbcc engine( {offline , [enginenum] | "online" })
+dbcc fix_text ({table_name | table_id})
+dbcc indexalloc(table_name | table_id, index_id
+[,optimized | fast | NULL [, fix | nofix | NULL
+[, partition_name | partition_id]]])
+dbcc monitor (increment, <group name>)
+dbcc monitor (decrement, <group name>)
+dbcc monitor (reset, <group name>)
+dbcc pravailabletempdbs
+dbcc rebuild_text(table_name | table_id | "all" [, column [, text_page
+[, data_partition_name | data_partition_id]]])
+dbcc reindex ({table_name | table_id})
+dbcc serverlimits
+dbcc stackused
+Commands
+32 Adaptive Server Enterprise
+dbcc tablealloc(table_name | table_id [, full | optimized | fast | NULL
+[, fix | nofix | NULL [, data_partition_name | data_partition_id ]]])
+dbcc { traceon | traceoff } (flag [, flag ... ])
+dbcc tune ( { ascinserts, {0 | 1 } , table_name |
+cleanup, {0 | 1 } |
+cpuaffinity, start_cpu {, on| off } |
+des_greedyalloc, dbid, object_name,
+" { on | off }" |
+deviochar vdevno, "batch_size" |
+doneinproc { 0 | 1 }})
+dbcc upgrade_object( [dbid | dbname
+[, object_name | object_type [, force | check])))

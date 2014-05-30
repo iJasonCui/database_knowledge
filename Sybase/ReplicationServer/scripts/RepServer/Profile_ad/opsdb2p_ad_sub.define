@@ -1,0 +1,40 @@
+define subscription "sub_a_backgreeting_dating"
+    for "ad_a_backgreeting_dating"
+    with replicate at opsdb2p.Profile_ad_rep
+go
+define subscription "sub_a_dating"
+    for "ad_a_dating"
+    with replicate at opsdb2p.Profile_ad_rep
+go
+define subscription "sub_a_mompictures_dating"
+    for "ad_a_mompictures_dating"
+    with replicate at opsdb2p.Profile_ad_rep
+go
+define subscription "sub_a_profile_dating"
+    for "ad_a_profile_dating"
+    with replicate at opsdb2p.Profile_ad_rep
+go
+define subscription "sub_Blocklist"
+    for "ad_Blocklist"
+    with replicate at opsdb2p.Profile_ad_rep
+go
+define subscription "sub_Hotlist"
+    for "ad_Hotlist"
+    with replicate at opsdb2p.Profile_ad_rep
+go
+define subscription "sub_Pass"
+    for "ad_Pass"
+    with replicate at opsdb2p.Profile_ad_rep
+go
+define subscription "sub_RepTest"
+    for "ad_RepTest"
+    with replicate at opsdb2p.Profile_ad_rep
+go
+define subscription "sub_SavedSearch"
+    for "ad_SavedSearch"
+    with replicate at opsdb2p.Profile_ad_rep
+go
+define subscription "sub_Smile"
+    for "ad_Smile"
+    with replicate at opsdb2p.Profile_ad_rep
+go

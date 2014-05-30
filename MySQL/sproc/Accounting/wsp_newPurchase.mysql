@@ -1,0 +1,108 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newPurchase;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newPurchase (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu 
+**   Date:  January 13 2009 
+**   Description:  save purchase 
+**
+** REVISION(S):
+**   Author:  Andy Tran
+**   Date:  April 2010
+**   Description:  added taxCountryId and taxJurisdictionId
+**
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+   at_userId                    DECIMAL(12,0),
+   at_xactionId                 INT,
+   at_xactionTypeId             INT,
+   at_purchaseTypeId            INT,
+   at_cost                      DECIMAL(10,2),
+   at_tax                       DECIMAL(10,2),
+   at_costUSD                   DECIMAL(5,2),
+   at_taxUSD                    DECIMAL(5,2),
+   at_purchaseOfferDetailId     SMALLINT,
+   at_subscriptionOfferDetailId SMALLINT,
+   at_billingLocationId         SMALLINT,
+   at_currencyId                INT,
+   at_creditCardId              INT,
+   at_paymentNumber             VARCHAR(40),
+   at_cardProcessor             CHAR(1),
+   at_discountFlag              CHAR(1),
+   at_taxCountryId              SMALLINT,
+   at_taxJurisdictionId         INT
+)
+BEGIN
+
+DECLARE at_dateNowGMT DATETIME;
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+   ROLLBACK;
+   SELECT 96;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+   ROLLBACK;
+   SELECT 96;
+END;
+
+SET at_dateNowGMT = UTC_TIMESTAMP();
+
+START TRANSACTION;
+
+INSERT INTO Purchase(xactionId,
+                        purchaseTypeId,
+                        billingLocationId,
+                        purchaseOfferDetailId,
+                        subscriptionOfferDetailId,
+                        currencyId,
+                        cost,
+                        costUSD,
+                        tax,
+                        taxUSD,
+                        userId,
+                        dateCreated,
+                        creditCardId,
+                        cardProcessor,
+                        paymentNumber,
+                        xactionTypeId,
+                        discountFlag,
+                        taxCountryId,
+                        taxJurisdictionId)
+   VALUES(at_xactionId,
+          at_purchaseTypeId,
+          at_billingLocationId,
+          at_purchaseOfferDetailId,
+          at_subscriptionOfferDetailId,
+          at_currencyId,
+          at_cost,
+          at_costUSD,
+          at_tax,
+          at_taxUSD,
+          at_userId,
+          at_dateNowGMT,
+          at_creditCardId,
+          at_cardProcessor,
+          at_paymentNumber,
+          at_xactionTypeId,
+          at_discountFlag,
+          at_taxCountryId,
+          at_taxJurisdictionId);
+
+IF (at_creditCardId > 0) 
+THEN 
+   UPDATE CreditCard SET dateLastUsed = at_dateNowGMT WHERE creditCardId = at_creditCardId;
+END IF;
+
+COMMIT;
+SELECT 0;
+
+END;;
+DELIMITER ;

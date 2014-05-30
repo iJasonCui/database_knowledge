@@ -1,0 +1,29 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updPurchaseUserIP;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updPurchaseUserIP (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         Aug 2006
+**   Description:  Update userIP in Purchase table
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_xactionId   DECIMAL(12,0)
+,at_userIP      DECIMAL(12,0)
+)
+BEGIN 
+    UPDATE Purchase
+    SET userIP = at_userIP
+    WHERE xactionId = at_xactionId;
+            
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

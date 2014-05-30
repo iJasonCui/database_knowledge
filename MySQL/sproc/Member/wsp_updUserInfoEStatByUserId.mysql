@@ -1,0 +1,31 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updUserInfoEStatByUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updUserInfoEStatByUserId (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu/Jack Veiga
+**   Date:  May 2003
+**   Description:  Update user info email info by user_id
+**
+**   Author: Mike Stairs
+**   Date: Oct 2005
+**   Description: added dateModified to user_info
+**
+******************************************************************************/
+ at_userId        DECIMAL(12,0)
+,at_emailStatus   CHAR(1)
+)
+BEGIN
+
+DECLARE at_dateNow DATETIME ;
+
+CALL wsp_GetDateGMT(at_dateNow);
+	
+UPDATE user_info 
+   SET emailStatus = at_emailStatus
+      ,dateModified=at_dateNow
+ WHERE user_id = at_userId ;
+
+END;;
+DELIMITER ;

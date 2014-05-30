@@ -1,0 +1,33 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_voidCCTran;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_voidCCTran (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Jason C.
+**   Date:    May 16 2005
+**   Description:  void a credit card transaction which has been authorized (can only void a new/pending tran)
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+  at_xactionId DECIMAL(12,0)
+)
+BEGIN
+
+  DECLARE at_dateGMT	DATETIME;
+
+  SET at_dateGMT = UTC_TIMESTAMP();
+  
+  UPDATE CreditCardTransaction
+  SET CCTranStatusId = 2,
+      dateVoided = at_dateGMT
+  WHERE xactionId = at_xactionId
+  AND CCTranStatusId = 1;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

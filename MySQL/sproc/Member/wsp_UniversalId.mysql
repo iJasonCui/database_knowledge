@@ -1,0 +1,28 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_UniversalId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_UniversalId (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga
+**   Date:  July 9 2002
+**   Description:  Generation of universalId
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+OUT at_universalId INT 
+)
+BEGIN
+
+    UPDATE UniversalId
+    SET universalId = universalId + 1 ;
+
+    SELECT universalId INTO at_universalId 
+      FROM UniversalId ;
+
+END;;
+DELIMITER ;

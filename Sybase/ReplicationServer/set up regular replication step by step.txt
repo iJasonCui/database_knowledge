@@ -1,0 +1,311 @@
+========================================================
+Implementation warm standby 
+========================================================
+
+[new installation]
+
+--step 1:
+
+create logical connection to LogicalSRV.Msg_mr
+admin logical_status
+
+--step 2:  add primary db 
+
+/opt/etc/repserver126/REP-12_6/install/rs_init -r /opt/etc/repserver126/REP-12_6/init/logs/resource.Msg_mr.p
+
+admin who_is_down (no one should be down)
+
+EXEC sp_addalias 'w151rep01_maint_user','dbo'
+
+--step 3:  set rep table and col (go to webccs)
+
+--step 4:  add ws db
+
+/opt/etc/repserver126/REP-12_6/install/rs_init -r /opt/etc/repserver126/REP-12_6/init/logs/resource.Msg_mr.ws
+
+
+
+--step 5:  dump primary db
+
+--step 6: load it into ws db
+
+--step 7: dbo alias on both primary and ws
+
+USE Msg_mi
+go
+IF USER_ID('rep3p_maint_user') IS NOT NULL
+BEGIN
+    EXEC sp_dropuser 'rep3p_maint_user'
+    IF USER_ID('rep3p_maint_user') IS NOT NULL
+        PRINT '<<< FAILED DROPPING USER rep3p_maint_user >>>'
+    ELSE 
+        PRINT '<<< DROPPED USER rep3p_maint_user >>>'
+END
+go
+
+USE Msg_mi
+go
+EXEC sp_addalias 'rep3p_maint_user','dbo'
+go
+
+--dbo use only and trunc log on STANDBY
+
+USE master
+go
+EXEC sp_dboption 'Msg_mi','dbo use only',true
+go
+USE master
+go
+EXEC sp_dboption 'Msg_mi','trunc log on chkpt',true
+go
+USE Msg_mi
+go
+CHECKPOINT
+go
+
+--step 8: resume connection to ws db
+
+resume connection to webdb31p.Msg_mi
+
+--step 9: test rep 
+
+SELECT T.repTestId, T.dateTime FROM Msg_md..RepTest T
+INSERT INTO Msg_md..RepTest ( repTestId, dateTime ) VALUES ( 108, getdate() )
+
+--step 10 : check the stable queue
+admin disk_space (on rep server)
+
+rs_helppartition (on rssd db)
+
+-- step 11: trouble shooting
+
+
+
+[re-initializing the standby ]
+
+--step 1:
+Does not need to run "create logical connection to LogicalSRV.Profile_ad"
+admin logical_status
+
+--step 2:  add primary db 
+Does not need to add primary db
+admin who_is_down (no one should be down)
+
+--step 3:  set rep table and col (go to webccs)
+Does not need to run it
+
+--step 4: drop rep2p_maint_user as alias on prim db and add it back as regular db user 
+USE Profile_ar
+go
+IF EXISTS (SELECT * FROM sysalternates WHERE suid=SUSER_ID('rep2p_maint_user'))
+BEGIN
+    EXEC sp_dropalias 'rep2p_maint_user'
+    IF EXISTS (SELECT * FROM sysalternates WHERE suid=SUSER_ID('rep2p_maint_user'))
+        PRINT '<<< FAILED DROPPING ALIAS rep2p_maint_user >>>'
+    ELSE
+        PRINT '<<< DROPPED ALIAS rep2p_maint_user >>>'
+END
+go
+
+USE Profile_ar
+go
+EXEC sp_adduser 'rep2p_maint_user','rep2p_maint_user','public'
+go
+
+
+--step 5: if the new warm stanby is loaded from prim db, need to disable the rep agent: 
+
+use Profile_ad
+dbcc gettrunc
+
+dbcc settrunc('ltm', ignore)
+sp_config_rep_agent Profile_ad, disable
+
+
+--step 6: ***** add ws db ***** with dump marker
+
+drop connection to webdb4p.Profile_ad (drop warm standby connection first) and then add a new ws db:
+
+/opt/etc/repserver126/REP-12_6/install/rs_init -r /opt/etc/repserver126/REP-12_6/init/logs/resource.Profile_ad.ws
+
+
+--step 7: dump primary db
+
+--step 8: load it into ws db and online database
+
+--step 9: dbo alias both on ws and prim
+
+USE Profile_ad
+go
+IF USER_ID('rep2p_maint_user') IS NOT NULL
+BEGIN
+    EXEC sp_dropuser 'rep2p_maint_user'
+    IF USER_ID('rep2p_maint_user') IS NOT NULL
+        PRINT '<<< FAILED DROPPING USER rep2p_maint_user >>>'
+    ELSE 
+        PRINT '<<< DROPPED USER rep2p_maint_user >>>'
+END
+go
+
+USE Profile_ad
+go
+EXEC sp_addalias 'rep2p_maint_user','dbo'
+go
+
+--dbo use only and trunc log on STANDBY
+
+USE master
+go
+EXEC sp_dboption 'Profile_ad','dbo use only',true
+go
+USE master
+go
+EXEC sp_dboption 'Profile_ad','trunc log on chkpt',true
+go
+USE Profile_ad
+go
+CHECKPOINT
+go
+
+--step 8: resume connection to ws db
+
+resume connection to webdb31p.Msg_mi
+
+--step 9: test rep 
+
+SELECT T.repTestId, T.dateTime FROM Msg_md..RepTest T
+INSERT INTO Msg_md..RepTest ( repTestId, dateTime ) VALUES ( 108, getdate() )
+
+--step 10 : check the stable queue
+admin disk_space (on rep server)
+
+rs_helppartition (on rssd db)
+
+-- step 11: trouble shooting
+
+
+
+[issue 1:]
+
+
+[solution 1:]
+
+[webalpha]:/rep3p_RSSD/{1}# rs_configure "num_thread", '300'
+[webalpha]:/rep3p_RSSD/{2}# go
+ 
+Configuration parameter changed.
+ 
+ Config Name                Config Value           Run Value                 
+ -------------------------- ---------------------- --------------------------
+ num_threads                300                    200                       
+ 
+You must reboot the replication server for this change to take effect.
+
+shutdown repserver rep3p and then start it up
+
+[issue 2]
+When run rs_init...........
+
+Running task: configure the Replication Agent.
+SQL Server message: msg 18382, level 16, state 1
+WARNING: "Database 'Session' is already configured to use Replication Agent. Request to enable Replication Agent has been ignored." 
+Unable to execute query 'exec sp_config_rep_agent "Session", enable,"rep3p", "rep3p_ra_user", "stickt0it"' against server 'webdb27p'.
+Task failed: configure the Replication Agent. Terminating configuration.
+Configuration failed.
+Exiting.
+The log file for this session is '/opt/etc/repserver126/REP-12_6/init/logs/log0516.001'.
+
+[solution 2]
+
+--1. On both Active and standby database server, execute "sp_config_rep_agent <db_bame>, disable "
+--2. drop alias rep3p_maint_user
+--3. run rs_init again
+
+
+
+===============================================================
+Switch over Active and Standby
+===============================================================
+
+Step 1: disconnect all client application
+
+Step 2: Stop the active Rep Agent
+
+Step 3: switch active 
+        [syntax] switch active for logical_server.logical_database to dataserver.database [with suspension]
+
+Step 4: Start rep agent on the new active
+
+Step 5: reconnect the client application to the new active
+
+Step 6: reconnect the new standby database
+        [syntax] resume connection to new standby
+
+
+
+===============================================================
+MSA (Multi-Site Availability)
+===============================================================
+
+[NAMING CONVENTION]
+
+1: [table rep def] prad_a_profile_dating which is {DB short name}_{full table name}. "prad" means "Profile_ad".
+2: [db rep def]    Profile_ad  which is {full_db_name}
+3: [db sub]        w151dbp03_Profile_ad which is {full_server_name}_{full_db_name}
+
+
+step 1:
+
+[rep2p]://{1}# create database replication definition Profile_ad with primary at webdb29p.Profile_ad 
+[####### wrong one, if you have logical connection, you have to use Logical server name ##########]
+[rep2p]://{2}# go
+Msg 15248, Level 12, State 0
+Server 'rep2d'
+Cannot use active or standby connection names when creating or altering replication definitions or function replication definitions.
+Must use logical connection name.
+[rep_server]://{1}# create database replication definition Profile_ad with primary at LogicalSRV.Profile_ad
+[rep2p]://{1}# create database replication definition Profile_ad with primary at webdb4p.Profile_ad 
+[rep2p]://{2}# go
+Database replication definition 'Profile_ad' for webdb4p.Profile_ad is created.
+
+step 2:
+
+rs_init
+
+
+step 3:
+
+[rep2d]://{1}# define subscription sub_SessionTest for database replication definition rep_SessionTest with primary at LogicalSRV.SessionTest with replicate at msadb0d.SessionTest_V use dump marker
+[rep2d]://{2}# go
+Subscription 'sub_SessionTest' is in the process of being defined.
+
+step 4:
+
+dump db
+
+
+
+=======================================================
+manually add rep agent instead of using rs_init
+=======================================================
+step 1:
+[webgamma: rep2p_RSSD] exec sp_config_rep_agent rep2p_RSSD, 'enable', 'rep2p', 'rep2p_ra', 'have2go'
+
+step 2:
+[rep2p] alter connection to webgamma.rep2p_RSSD set log transfer on
+
+==========================================================
+drop rep def
+==========================================================
+[webgamma: rep2p_RSSD] select "drop replication definition " +  objname from rs_objects where objname not like "rs%"
+
+=========================================================
+drop subscription
+=========================================================
+[webgamma: rep2p_RSSD] 
+SELECT 'drop subscription "' + s.subname + '" for "' + o.objname + '" with replicate at "' + d.dsname + '"."' + d.dbname + '" without purge' 
+FROM   rep3d_RSSD..rs_subscriptions s, rep3d_RSSD..rs_databases d, rep3d_RSSD..rs_objects o
+WHERE  s.objid = o.objid and s.dbid = d.dbid
+
+==========================================================
+

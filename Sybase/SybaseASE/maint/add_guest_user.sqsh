@@ -1,0 +1,34 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]
+then
+   echo "Usage: "${0}" <serverName> "
+   exit 1  
+else
+   serverName=${1}
+fi
+
+Password=`cat $HOME/.sybpwd | grep -w ${serverName} | awk '{print $2}'`
+CurrentDate=`date '+%Y%m%d_%H%M%S'`
+LogFile=./output/${0}.${serverName}.${CurrentDate}
+
+date > ${LogFile}
+
+sqsh -Usa -S${serverName} -P${Password} << EOQ1 >> ${LogFile}
+
+select name from master..sysdatabases where name not in ("master", "model", "tempdb") and name not like "syb%"
+\do
+   \echo "use #1" 
+   use #1   
+   go
+   EXEC sp_adduser 'guest'
+   go
+
+\done
+
+go
+
+EOQ1
+
+
+exit 0

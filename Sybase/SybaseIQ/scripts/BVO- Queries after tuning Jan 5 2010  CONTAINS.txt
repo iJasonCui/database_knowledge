@@ -1,0 +1,57 @@
+select  TT.DT,
+        TT.carrierId,
+        CA.networkOperator,
+        TT.Status,
+        TT.ErrorCode,
+        case 
+        when (TT.carrierId = 388 and TT.ErrorCode = '004') then 'Yes'
+        when (TT.carrierId = 389 and TT.ErrorCode = '004') then 'Yes'
+        when (TT.carrierId = 406 and TT.ErrorCode = '004') then 'Yes'
+        when (TT.carrierId = 410 and TT.ErrorCode = '004') then 'Yes'
+        when (TT.carrierId = 408 and TT.ErrorCode = '004') then 'Yes'
+        when (TT.carrierId = 400 and TT.ErrorCode = '006') then 'Yes'
+        when (TT.carrierId = 385 and TT.ErrorCode = '006') then 'Yes'
+        when (TT.carrierId = 393 and TT.ErrorCode = '006') then 'Yes'
+        when (TT.carrierId = 383 and TT.ErrorCode = '006') then 'Yes'
+        when (TT.carrierId = 379 and TT.ErrorCode = '006') then 'Yes'
+        when (TT.carrierId not in (388,389,406,410,408,385,393,383,379) and TT.ErrorCode = '006') then 'Yes'
+        else 'No' end as Success_Flag,
+        count(distinct(TT.carriercommunicationId)) as Num_Msg,
+        sum(P.cost) as TotalCost
+from
+(
+select  C.carriercommunicationId,
+        C.carrierId,
+        substring(substring(C.carrierMsgStatusDetail,2,999),1,charindex('''', substring(C.carrierMsgStatusDetail,2,999))-1) as Status,
+        right(C.carrierMsgStatusDetail,(length(C.carrierMsgStatusDetail)-1-charindex(':', C.carrierMsgStatusDetail))) as ErrorCode,
+        C.purchaseId,
+        date(C.dateCreated) as DT 
+from    arch_Mobile.Carriercommunication C 
+where   (C.dateCreated >= 'Oct 1, 2008' and C.dateCreated < 'Jan 30, 2010')
+        and C.direction = 1
+        and (C.applicationId = 2 and C.productId = 0)
+        and (C.carrierMsgData CONTAINS ( 'Hot Search at txt2CLICK! Reply: S Over 300+ sexy singles join txt2CLICK every day!')
+        or C.carrierMsgData CONTAINS ( 'Hot Search at txt2CLICK! Reply:S Over 300+ sexy singles join txt2CLICK everyday! Search')
+        or C.carrierMsgData CONTAINS ( 'Chat to local sexy singles! Reply: S Over 300+ singles daily at txt2CLICK sign-up today!')
+        or C.carrierMsgData CONTAINS ( 'Chat with Real Sexy Singles with txt2click! Reply: S Search for new people everyday! Joi')
+        or C.carrierMsgData CONTAINS ( 'Browse hundreds of exciting, sexy profiles! Reply: S  Join txt2CLICK and talk to as many')
+        or C.carrierMsgData CONTAINS ( 'Flirt with SEXY SINGLES! Reply: S Who are interested in YOU! Join txt2CLICK NOW! Reply' )
+        or C.carrierMsgData CONTAINS ( 'Chat, Flirt, Talk! Reply: S The choice is yours, real sexy singles waiting to talk to yo')
+        or C.carrierMsgData CONTAINS ( 'Flirt with NEW people daily! Reply: S Or talk to someone you met before! Join txt2CLICK!')
+        or C.carrierMsgData CONTAINS ( 'DO IT! Reply: S Anywhere, anytime you like! Join txt2CLICK and meet hot, exciting, singl')
+        or C.carrierMsgData CONTAINS ( 'Text Chat Flirting! Reply: S The NEW WAY to meet hot singles in your area! They want wha')
+        or C.carrierMsgData CONTAINS ( 'Search Profiles of sexy singles! Reply: S Join txt2click and talk to 1000s of flirty sin')
+        or C.carrierMsgData CONTAINS ( 'Text message exciting singles! Reply: S Anytime you want, whenever you want! Join txt2CL')
+        or C.carrierMsgData CONTAINS ( 'Sexy, text flirting! Reply: S Its fun, its safe and there are 1000s of singles to choose')
+        or C.carrierMsgData CONTAINS ( 'Connect with people like YOU! Reply: S Join txt2CLICK and talk to 1000s of singles. 300+')
+        or C.carrierMsgData CONTAINS ( 'Interests: Writing, drawing, photography. Indoor gardening! Reply: S Come find me on txt')
+        or C.carrierMsgData CONTAINS ( 'Interests: Guitar, automobiles, horticulture, sculpture, photography, art, architecture,'))
+)TT        
+    inner join arch_Mobile.Purchase P on (TT.purchaseId = P.purchaseId)
+    inner join arch_Mobile.Carrier CA on TT.carrierId = CA.carrierId
+group by TT.DT,
+        TT.carrierId,
+        CA.networkOperator,
+        TT.Status,
+        TT.ErrorCode
+;

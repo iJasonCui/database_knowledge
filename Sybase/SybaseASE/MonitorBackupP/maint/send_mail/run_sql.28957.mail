@@ -1,0 +1,12 @@
+Host name: webdb0r, host process: 28957, date: Wed Sep 22 22:30:00 EDT 2004
+./run_sql.sh error: script /opt/etc/sybase12_5/maint/reorg_compact.sql has failed at webdb0r.arch_SessionMemberHistory, suspicious words found in the isql output file '/opt/etc/sybase12_5/maint/arch_SessionMemberHistory/reorg_compact.out'.
+Running REORG COMPACT for DOL user tables in arch_SessionMemberHistory database on webdb0r server ...
+Started at Sep 22 2004 10:30PM local time.
+Msg 3906, Level 16, State 1:
+Server 'webdb0r', Line 1:
+Attempt to BEGIN TRANSACTION in database 'arch_SessionMemberHistory' failed because database is READ ONLY.
+REORG COMPACT has been successfully completed for 0 DOL user tables.
+REORG COMPACT has been skipped for 1 non-DOL user tables.
+REORG COMPACT has failed for 1 DOL user tables.
+REORG COMPACT has been skipped for 2 DOL user tables after failure.
+Finished at Sep 22 2004 10:30PM local time.

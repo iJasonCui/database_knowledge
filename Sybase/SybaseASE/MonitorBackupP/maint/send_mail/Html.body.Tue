@@ -1,0 +1,32 @@
+From:Backup.Monitor@lavalife.com
+To:erick.sanchez@lavalife.com,jason.cui@lavalife.com,harry.helal@lavalife.com,tracy.wu@lavalife.com
+MIME-Version: 1.0
+Content-Type: multipart/mixed;
+ boundary="PAA08673.1018277622/server.domain.com"
+Subject: Daily Backup Alert Report From opsdb1p.MonitorBackupP For Group E4ALL
+
+This is a MIME-encapsulated message
+
+--PAA08673.1018277622/server.domain.com
+Content-Type: text/html
+
+<HTML>
+<BODY bgcolor=darkred>
+<legend><strong><font face=arial size=5 color=#CCCCCC/> This report ran at Tue Dec 7 13:52:45 EST 2004 Daily Backup Alert Report</font> </strong></legend>
+<TABLE border = 3 bgcolor=#FFFFCC><TR>
+<th bgcolor='#CCCCCC'width='52'><font face=arial size=-3/>Alert Id</font></th>
+<th bgcolor='#CCCCCC'width='52'><font face=arial size=-3/>Execution Id</font></th>
+<th bgcolor='#CCCCCC'width='100'><font face=arial size=-3/>Host Name</font></th>
+<th bgcolor='#CCCCCC'width='52'><font face=arial size=-3/>Job Id</font></th>
+<th bgcolor='#CCCCCC'width='150'><font face=arial size=-3/>Job Desc</font></th>
+<th bgcolor='#CCCCCC'width='52'><font face=arial size=-3/>Group Name</font></th>
+<th bgcolor='#CCCCCC'width='100'><font face=arial size=-3/>Schedule ID</font></th>
+<th bgcolor='#CCCCCC'width='152'><font face=arial size=-3/>Schedule Desc</font></th>
+<th bgcolor='#CCCCCC'width='100'><font face=arial size=-3/>Date Create</font></th>
+<th bgcolor='#CCCCCC'width='200'><font face=arial size=-3/>Note</font></th>
+</TR>
+ <td width='11'><font face=Tahoma size=-2  />        5037 </font></td> <td width='11'><font face=Tahoma size=-2  />        NULL </font></td> <td width='110'><font face=Tahoma size=-2  /> THUMPER              </font></td> <td width='11'><font face=Tahoma size=-2 />           4 </font></td> <td width='150'><font face=Tahoma size=-2 /> Daily dump of arch_CM                    </font></td> <td width='11'><font face=Tahoma size=-2  /> DBM                            </font></td> <td width='11'><font face=Tahoma size=-2  />           4 </font></td> <td width='152'><font face=Tahoma size=-2 /> daily dump of arch_CM db.                </font></td> <td width='100'><font face=Tahoma size=-2 /> Dec  6 2004 11:50AM </font></td> <td width='200'><font face=Tahoma size=-2 /> Schedule 'arch_CM' for job 'arch_CM' did not report in !!! Call DBM.                                                                                                                                                                                            </font></td>
+</TABLE>
+</body>
+</html>
+--PAA08673.1018277622/server.domain.com

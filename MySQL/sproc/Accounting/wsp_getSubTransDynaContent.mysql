@@ -1,0 +1,30 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getSubTransDynaContent;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getSubTransDynaContent (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu 
+**   Date:  Janunary 29 2009 
+**   Description:  get SubTransactionDynaContent 
+**
+** REVISION(S):
+**   Author: 
+**   Date: 
+**   Description:
+**
+******************************************************************************/
+   at_xactionId INT
+)
+
+BEGIN
+   SELECT sequenceId, 
+          content 
+     FROM SubTransactionDynaContent
+    WHERE xactionId = at_xactionId
+   ORDER BY sequenceId ASC;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

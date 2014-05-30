@@ -1,0 +1,25 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getSlideshowLocales;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getSlideshowLocales ()
+/***********************************************************************
+**
+** CREATION:
+**   Author:  MIke Stairs
+**   Date:  Aug 2004
+**   Description:  Retrieves all the slideshow locale
+**
+** REVISION(S):
+**   Author: 
+**   Date: 
+**   Description: 
+**
+*************************************************************************/
+BEGIN
+	SELECT localeId, 
+               languageId, 
+               countryId
+  	 FROM  SlideshowLocale 
+        ORDER BY localeId ;
+
+END;;
+DELIMITER ;

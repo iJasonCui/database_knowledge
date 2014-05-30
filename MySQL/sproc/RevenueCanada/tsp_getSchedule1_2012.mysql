@@ -1,0 +1,164 @@
+IF OBJECT_ID('tsp_getSchedule1_2012') IS NOT NULL
+BEGIN
+    DROP PROCEDURE tsp_getSchedule1_2012
+    IF OBJECT_ID('tsp_getSchedule1_2012') IS NOT NULL
+        PRINT '<<< FAILED DROPPING PROCEDURE tsp_getSchedule1_2012 >>>'
+    ELSE
+        PRINT '<<< DROPPED PROCEDURE tsp_getSchedule1_2012 >>>'
+END
+go
+CREATE PROCEDURE tsp_getSchedule1_2012
+     at_col260  DECIMAL(12,2), 
+     at_spouseNetIncome DECIMAL(12,2), 
+     at_combineFlag  int,
+     at_CPP  DECIMAL(12,2),
+     at_EI  DECIMAL(12,2),
+     at_Donation DECIMAL(12,2),
+     at_childrenAmount  DECIMAL(12,2), ##children amount; Line 5, col367; 2 * $2191
+     at_col420 DECIMAL(12,2);  output ,
+     at_col345  DECIMAL(12,2); output,
+     at_col347  DECIMAL(12,2); output
+AS
+BEGIN
+
+     DECLARE at_col300  DECIMAL(12,2); ##basic personal amount; Line 1
+     DECLARE at_col303  DECIMAL(12,2); ##spouse amount; Line 3
+     DECLARE at_col367  DECIMAL(12,2); ##children amount; Line 5
+     DECLARE at_col308  DECIMAL(12,2); ##CPP; Line 6
+     DECLARE at_col312  DECIMAL(12,2);  ##EI; Line 7
+     DECLARE at_col315  DECIMAL(12,2);  ##Care Giver; Line 17
+     DECLARE at_col363  DECIMAL(12,2);  ## canada employment amount; Line 11
+     DECLARE at_col364  DECIMAL(12,2); ## public transit amount; Line 9
+     DECLARE at_col365  DECIMAL(12,2); ## children's fitness amount; Line 13 
+     DECLARE at_col370  DECIMAL(12,2); ## children's arts amount; Line 15 
+     ##DECLARE at_col368  DECIMAL(12,2); ## home renovation expense only for 2009
+     DECLARE at_col335  DECIMAL(12,2); ## add  line 1 to line 17 ; Line 18
+     DECLARE at_col338  DECIMAL(12,2); ## Line 19
+     DECLARE at_col340  DECIMAL(12,2); 
+     ##DECLARE at_col345  DECIMAL(12,2); 
+     DECLARE at_col346  DECIMAL(12,2); 
+     ##DECLARE at_col347  DECIMAL(12,2); 
+     DECLARE at_col348  DECIMAL(12,2); 
+     DECLARE at_col349  DECIMAL(12,2);  ## donation Line 22
+     DECLARE at_col350  DECIMAL(12,2); ##total federal non-refundable tax credit; Line 23 
+
+             
+     SET at_col300= 10822
+     SET at_col308= at_CPP ##MAX 2217.60
+     SET at_col312= at_EI  ##MAX  786.76
+     ##SET at_col367= 2 * 2191
+     SET at_col367= at_childrenAmount 
+     SET at_col363= 1095 ##canada employment 
+     SET at_col364= 1285 ##10 months
+     SET at_col365= 2 * 500  ## fitness amount
+     SET at_col370= 2 * 500  ##art amount
+     ##SET at_col368= 10000 ## home renovation expense schedule 12 only for 2009
+     SET at_col315= 2 * 4402 ## caregiver amount schedule 5 changjiu only for now; kairong tax year 2011
+     
+     IF at_combineFlag  = 1 ## CONBINED 
+     BEGIN
+          SET at_col303 = at_col300 - at_spouseNetIncome
+          IF at_col303 < 0 SET at_col303 = 0
+     END
+     ELSE BEGIN
+          SET at_col303 = 0
+     END
+     
+     PRINT "Line 303: %1! " , at_col303
+     PRINT "Line 367: %1! " , at_col367
+     PRINT "Line 308: %1! " , at_col308
+     PRINT "Line 312: %1! " , at_col312
+     PRINT "Line 363: %1! " , at_col363     
+     PRINT "Line 364: %1! " , at_col364
+     PRINT "Line 365: %1! " , at_col365
+     PRINT "Line 370: %1! " , at_col370
+     PRINT "Line 315: %1! " , at_col315
+     
+     ##calculate the Line18
+     SET at_col335 = at_col300 + at_col303 + at_col367 + at_col308  + at_col312 + at_col363 + at_col364 + at_col365  + at_col315 + at_col370
+     PRINT "Line 335: %1! " , at_col335
+     
+     SET at_col338 = convert(DECIMAL(12,2),  at_col335  * 0.15)
+     PRINT "Line 338: %1! " , at_col338  ##LINE 29
+     
+     ##donation 
+     SET at_col340 = at_Donation 
+     
+     IF at_col340 >= 200 
+     BEGIN
+          SET at_col345 = 200
+     END     
+     ELSE BEGIN
+          SET at_col345 = at_col340
+     END
+
+     SET at_col346 = convert(DECIMAL(12,2), at_col345 *0.15)
+     SET at_col347 = at_col340 - at_col345
+     SET at_col348 = convert(DECIMAL(12,2), at_col347 *0.29)
+     SET at_col349 = at_col346 + at_col348
+
+     PRINT "Line 340: %1! " , at_col340
+     PRINT "Line 345: %1! " , at_col345
+     PRINT "Line 346: %1! " , at_col346
+     PRINT "Line 347: %1! " , at_col347
+     PRINT "Line 348: %1! " , at_col348
+     PRINT "Line 349: %1! " , at_col349          
+     
+     ##Line 350 
+     SET at_col350 =  at_col338 + at_col349
+     PRINT "Line 350: %1! " , at_col350
+     
+     DECLARE at_LINE39 DECIMAL(12,2)
+     ##DECLARE at_LINE36 DECIMAL(12,2);  
+     
+     IF at_col260 <= 42707                       SET at_LINE39 = convert(DECIMAL(12,2), at_col260 * 0.15)
+     IF at_col260 >  42707 AND at_col260 <= 85414  SET at_LINE39 = convert(DECIMAL(12,2), 6406 + (at_col260 - 42707) * 0.22)
+     IF at_col260 >  85414 AND at_col260 <= 132406 
+     BEGIN
+          DECLARE at_LINE32 DECIMAL(12,2)
+          SET at_LINE32 = at_col260
+          
+          PRINT "Line 32 : %1! " , at_LINE32
+          PRINT "Line 33 : %1! " , at_LINE32          
+          
+          DECLARE at_LINE35 DECIMAL(12,2)
+          SET at_LINE35 = at_col260 - 85414
+          PRINT "Line 35 : %1! " , at_LINE35
+
+          DECLARE at_LINE37 DECIMAL(12,2)
+          SET at_LINE37 = convert(DECIMAL(12,2),  (at_col260 - 85414) * 0.26) 
+          PRINT "Line 37 : %1! " , at_LINE37
+        
+
+          SET at_LINE39 = 15802 + at_LINE37
+
+          
+     END
+               
+     IF at_col260 > 127021    SET at_LINE39 = convert(DECIMAL(12,2), 28020 + (at_col260 - 132406) * 0.29)
+
+     PRINT "Line 39 : %1! " , at_LINE39
+     PRINT "Line 40 : %1! " , at_LINE39
+     PRINT "Line 42 : %1! " , at_LINE39
+     
+     DECLARE at_line43  DECIMAL(12,2);    
+     PRINT "Line 43: %1! " , at_col350
+                   
+     ## calculate the Line 38                    
+     SET at_col420  = at_LINE39 - at_col350 
+     IF at_col420 < 0 SET at_col420 = 0
+     
+     PRINT "Line 420: %1! " , at_col420
+          
+END
+/* ### DEFNCOPY: END OF DEFINITION */
+go
+GRANT EXECUTE ON tsp_getSchedule1_2012 TO web
+go
+IF OBJECT_ID('tsp_getSchedule1_2012') IS NOT NULL
+   PRINT '<<< CREATED PROCEDURE tsp_getSchedule1_2012 >>>'
+ELSE
+   PRINT '<<< FAILED CREATING PROCEDURE tsp_getSchedule1_2012 >>>'
+go
+CALL sp_procxmode 'tsp_getSchedule1_2012','unchained'
+go

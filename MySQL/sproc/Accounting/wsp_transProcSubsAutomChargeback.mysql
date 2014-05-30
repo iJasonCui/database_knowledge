@@ -1,0 +1,72 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_transProcSubsAutomChargeback;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_transProcSubsAutomChargeback (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  May 29, 2006
+**   Description:  attempt to chargeback purchase if it exists. First check if
+**                 refXactionId exists, else check by cardNumber/date
+**
+**   Author: Andy Tran
+**   Date: May 5, 2010
+**   Description: add location tax IDs
+**
+******************************************************************************/
+at_userId		DECIMAL(12,0),
+at_xactionId    	DECIMAL(12,0),
+at_xactionTypeId 	TINYINT,
+at_contentId    	SMALLINT,
+at_subscriptionOfferDetailId     SMALLINT,
+at_subscriptionTypeId            SMALLINT,
+at_duration                      SMALLINT,
+at_durationUnits                 CHAR(1),
+at_dateNow              DATETIME,
+at_purchaseTypeId 	TINYINT,
+at_billingLocationId 	SMALLINT,
+at_creditCardId 	INT,
+at_currencyId		TINYINT,
+at_cost		        DECIMAL (10,2),
+at_costUSD              DECIMAL (5,2),
+at_tax                  DECIMAL (10,2),
+at_taxUSD               DECIMAL (5,2),
+at_refXactionId         DECIMAL(12,0),
+at_taxCountryId         SMALLINT,
+at_taxJurisdictionId    INT,
+at_partialCardNumber    CHAR(8),
+at_cardStatus           CHAR(1),
+at_cvvResponseCode      CHAR(1),
+at_avsResponseCode      CHAR(1)
+)
+BEGIN
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+   ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+   ROLLBACK;
+END;
+
+START TRANSACTION;
+
+INSERT INTO SubscriptionTransaction (xactionId, cardId, userId, subscriptionTypeId, duration, xactionTypeId, contentId, description, dateCreated, durationUnits)
+        VALUES (at_xactionId, at_creditCardId, at_userId, at_subscriptionTypeId, at_duration, at_xactionTypeId, at_contentId, "AUTOMATED CHARGEBACK", at_dateNow, at_durationUnits);
+
+INSERT INTO Purchase (xactionId, purchaseTypeId, billingLocationId, subscriptionOfferDetailId, currencyId, cost, costUSD, tax, taxUSD, userId, dateCreated, creditCardId,
+                cardProcessor, xactionTypeId, refXactionId, taxCountryId, taxJurisdictionId)
+        VALUES (at_xactionId, at_purchaseTypeId, at_billingLocationId, at_subscriptionOfferDetailId, at_currencyId, -at_cost, -at_costUSD, -at_tax, -at_taxUSD, at_userId,
+                at_dateNow, at_creditCardId, null, at_xactionTypeId, at_refXactionId, at_taxCountryId, at_taxJurisdictionId);
+
+INSERT INTO AdminAccountTransaction (xactionId, adminUserId, userId, dateCreated) VALUES (at_xactionId, 9999, at_userId, at_dateNow);
+
+COMMIT;
+
+SELECT at_userId, at_creditCardId, at_cardStatus, at_partialCardNumber, at_xactionId, at_cvvResponseCode, at_avsResponseCode, at_refXactionId;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

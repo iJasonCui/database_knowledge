@@ -1,0 +1,61 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_saveCreditBalance;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_saveCreditBalance (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu 
+**   Date:  January 15 2009 
+**   Description:  save credit balance. 
+**
+** REVISION(S):
+**   Author: 
+**   Date: 
+**   Description:
+**
+******************************************************************************/
+   at_userId       DECIMAL(12, 0),
+   at_credits      SMALLINT,
+   at_creditTypeId TINYINT,
+   at_dateExpiry   DATETIME
+)
+
+BEGIN
+   DECLARE at_dateNow DATETIME;
+
+   SET at_dateNow = UTC_TIMESTAMP();
+
+   IF (at_dateExpiry IS NULL) THEN 
+      SET at_dateExpiry = '2052-12-31 00:00:00';
+   END IF;
+
+   IF (SELECT 1 FROM CreditBalance 
+              WHERE userId = at_userId 
+                AND creditTypeId = at_creditTypeId) IS NOT NULL THEN 
+         UPDATE CreditBalance
+            SET credits = credits + at_credits,
+                dateModified = at_dateNow,
+                dateExpiry = at_dateExpiry
+          WHERE userId = at_userId 
+            AND creditTypeId = at_creditTypeId;
+
+   ELSE 
+         INSERT INTO CreditBalance(userId,
+                                   creditTypeId,
+                                   credits,
+                                   dateExpiry,
+                                   dateModified,
+                                   dateCreated)
+         VALUES(at_userId,
+                at_creditTypeId,
+                at_credits,
+                at_dateExpiry,
+                at_dateNow,
+                at_dateNow);
+
+   END IF;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

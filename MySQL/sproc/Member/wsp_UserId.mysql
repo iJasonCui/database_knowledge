@@ -1,0 +1,28 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_UserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_UserId (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga
+**   Date:  July 9 2002
+**   Description:  Generation of userId
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+OUT at_userId INT 
+)
+BEGIN 
+
+    UPDATE UserId
+    SET userId = userId + 1 ;
+
+    SELECT userId INTO at_userId
+      FROM UserId ;
+
+END;;
+DELIMITER ;

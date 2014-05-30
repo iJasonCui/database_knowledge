@@ -1,0 +1,17 @@
+###### Backup Monitor Dev cron
+* * * * * (cd /dumps/scripts/maint/NagiosAlerts; ./cron-AddAlerts.sh > cron-AddAlerts.out 2>&1 )
+###### DB Job Monitor Dev cron
+5,10,15,20,25,30,35,40,45,50,55 * * * * (cd /dumps/scripts/maint/NagiosAlerts; ./cron-SendAlertToNagios.sh > cron-SendAlertToNagios.out 2>&1 )
+###### Databse dumps
+30 04 * * * (cd /dumps/scripts/maint; ./cron-dumpdb.sh MonitorBackupP 1 33 31 > cron-dumpdb-MonitorBackupP.out 2>&1 )
+00 04 * * * (cd /dumps/scripts/maint; ./cron-dumpdb.sh master 1 283 286 > cron-dumpdb-master.out 2>&1 )
+05 04 * * * (cd /dumps/scripts/maint; ./cron-dumpdb.sh sybsystemprocs 1 284 287 > cron-dumpdb-sybsystemprocs.out 2>&1 )
+###### Daily Backup Alert Reports
+00 10 * * * (cd /dumps/scripts/maint; ./failuresEmail.sh > failuresEmail_ALL.out 2>&1 )
+01 10 * * * (cd /dumps/scripts/maint; ./failuresEmail_by_group.sh DBM > failuresEmail_DBM.out 2>&1 )
+02 10 * * * (cd /dumps/scripts/maint; ./failuresEmail_by_group.sh NTS > failuresEmail_NTS.out 2>&1 )
+03 10 * * * (cd /dumps/scripts/maint; ./failuresEmail_by_group.sh BSI > failuresEmail_BSI.out 2>&1 )
+###### Operator Weekly Reports
+00 10 * * * (cd /dumps/scripts/maint/operatorEMAIL; ./operatorEMAIL_pos.sh POS > operatorEMAIL_pos.out 2>&1 )
+00 10 * * * (cd /dumps/scripts/maint/operatorEMAIL; ./operatorEMAIL_web.sh WEB > operatorEMAIL_web.out 2>&1 )
+

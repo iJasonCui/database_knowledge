@@ -1,0 +1,185 @@
+ 
+
+1> rs_helpexception       
+
+2> go
+
+ 
+
+         Summary of Logged Transactions on 't151rep04x'
+
+ 
+
+ 
+
+              Total # of Logged Transactions = 1       
+
+ 
+
+ 
+
+ Xact ID     Org Site        Org User Org Date    Dest Site       # Recs/Xact 
+
+ ----------- --------------- -------- ----------- --------------- ----------- 
+
+         101 crmdb0d.crmtest x2kcco   Feb 29 2008 crmdb0d.crmtest           3 
+
+ 
+
+ 
+
+        For detailed information on a logged xact., type 'rs_helpexception {Xact ID}'
+
+ 
+
+(return status = 0)
+
+1> rs_helpexception 101, 'v'
+
+2> go
+
+ 
+
+        Detailed Summary of Logged Transaction # 101      on 't151rep04x'
+
+ 
+
+ 
+
+ Origin Site                    Origin User     Org. Commit Date  #Cmds in Xact 
+
+ ------------------------------ --------------- ----------------- ------------- 
+
+ crmdb0d.crmtest                x2kcco          Feb 29 2008  4:20             3 
+
+ Dest. Site                     Dest. User      Date Logged       
+
+ ------------------------------ --------------- ----------------- 
+
+ crmdb0d.crmtest_ws             rep_user        Feb 29 2008  4:25 
+
+ 
+
+This transaction was skipped due to a 'resume connection' command with the 'skip
+
+transaction' option.
+
+ 
+
+ 
+
+                Rejected Records
+
+ 
+
+ textval                                                                                                                                                                                                                                                         
+
+ --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 
+
+ A0126 05iso_1distribute 1 ~";Feb 29 2008  4:20:55:873PM,2 ~"!,3 1 begin transac
+
+         tion ~"=TRAN_csp_DispositionReasonsI for ~"'x2kcco-~#"#0x010678933226d9
+
+         737337404054e61d2aaa672ce32432cc0159592b2f27e8b8d0 osid 432                                               
+
+ begin transaction                                                                                                                                                                                                                                               
+
+ A0126 05iso_1distribute 2 ~"!,3 1 applied owner=~"$dbo ~!3DispositionReasons.~!
+
+         *rs_insert  yielding after ~$.dispositionId=17257, ~$2dispositionTypeId
+
+         =11, ~$,dateCreated=~"620080229 16:20:56:723, ~$*createdBy=9336, ~$-dat
+
+         eModified=~"620080229 16:20:56:723 
+
+ , ~$+modifiedBy=9336, ~$%rank=1, ~$'siteId=0, ~$'nodeId=0                                                                                                                                                                                                       
+
+ insert into dbo.DispositionReasons (dispositionId, dispositionTypeId, dateCreat
+
+         ed, createdBy, dateModified, modifiedBy, rank, siteId, nodeId) values (
+
+         17257, 11, '20080229 16:20:56:723', 9336, '20080229 16:20:56:723', 9336
+
+         , 1, 0, 0)                         
+
+ A0126 05iso_1distribute 1 ~";Feb 29 2008  4:20:55:873PM,2 ~"!,3 1 commit transa
+
+         ction                                                                                                                                                                            
+
+ execute rs_update_lastcommit @origin = 135, @origin_qid = 0x0000000102825ebe000
+
+         827fd000d000827fd000600009a51010d6bba0000000000000001, @secondary_qid =
+
+          0x00000000000000000000000000000000000000000000000000000000000000000000
+
+         0000, @origin_time = '20080229 16: 
+
+ 20:55:873'                                                                                                                                                                                                                                                      
+
+  commit transaction                                                                                                                                                                                                                                             
+
+(return status = 0)
+
+1>
+
+ 
+
+ 
+
+Phase 1 , get information from RSSD
+
+Test.sql : 
+
+use rep2p_RSSD
+
+go
+
+ 
+
+select hdr.sys_trans_id, cmd_type, textval
+
+     from rs_exceptshdr hdr,
+
+         rs_exceptscmd cmd,
+
+         rs_systext
+
+     where error_site = 'webdb29p'  and error_db = 'Profile_ar'    and hdr.sys_trans_id = cmd.sys_trans_id
+
+         and cmd_id = parentid
+
+     order by log_time, src_cmd_line,
+
+         output_cmd_index, sequence
+
+go
+
+ 
+
+isql -Usa  -Swebgamma -Drep2p_RSSD -itest.sql -otest.log
+
+ 
+
+Phase 2 , get userid list
+
+grep values test.log > test.log1
+
+cat test.log1 | cut -c33-41 > test.log2
+
+ 
+
+Phase 3, bcp the userId list into a temp table on webdb28p
+
+ 
+
+Phase 4, insert lost record into temp table
+
+Select a.* into tempdb..lost_user from Profile_ar..a_profile_romance a, tempdb..user_id 
+
+ 
+
+Phase 5, generate insert sql via DBArtisan and insert into webdb29p.
+
+
+
+ 

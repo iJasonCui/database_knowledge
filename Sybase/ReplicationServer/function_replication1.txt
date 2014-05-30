@@ -1,0 +1,33 @@
+1, create proc to be replicated and wrap proc.
+
+ Profile_ad/tsp_clean_ViewedMe (replicated proc) 
+ Profile_ad/tsp_wrap_delViewedMe(wrap proc)
+
+ Once a proc is marked as replicated, ASE treats is as ONE TRANSACTION!! Even you explicitly commit row by row.
+ So if we do massive delete/update/insert, we need to create a replicated proc(against all related servers)which transaction size is small(like 1,000, 10,000) and a wrap proc (only on primary). 
+
+2, enable replication for stored procedure at primary db server, use function instead of table 
+
+   sp_setrepproc tsp_clean_ViewedMe, 'function'
+
+3, create function repdef on primary repserver.
+
+1> create function replication definition tsp_clean_ViewedMe with primary at LogicalSRV_web.Profile_ad (@batchSize smallint,@begindate  datetime,@cutoffdate datetime) 
+2> go
+Function replication definition 'tsp_clean_ViewedMe' is created.
+
+4, create function subscription for replicated server(s) on replicate repserver
+
+1> define subscription tsp_clean_ViewedMe for tsp_clean_ViewedMe with replicate at w151tstdb02.Profile_ad
+2> go
+Subscription 'tsp_clean_ViewedMe' is in the process of being defined.
+1> activate subscription tsp_clean_ViewedMe for tsp_clean_ViewedMe with replicate at w151tstdb02.Profile_ad
+2> go
+Subscription 'tsp_clean_ViewedMe' is in the process of being activated.
+1> validate subscription tsp_clean_ViewedMe for tsp_clean_ViewedMe with replicate at w151tstdb02.Profile_ad
+2> go
+Subscription 'tsp_clean_ViewedMe' is in the process of being validated.
+1> check subscription tsp_clean_ViewedMe for tsp_clean_ViewedMe with replicate at w151tstdb02.Profile_ad
+2> go
+Subscription tsp_clean_ViewedMe is VALID at the replicate.
+Subscription tsp_clean_ViewedMe is VALID at the primary.

@@ -1,0 +1,26 @@
+
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 IVROnWeb
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 LavaForum
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 Msg_ad
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 Msg_ai
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 Msg_ar
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 Msg_md
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 Msg_mi
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 Msg_mr
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 Msg_wd
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 Msg_wi
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 Msg_wr
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 PartyMember
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 Plus45
+###./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 Profile_md
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 Profile_mi
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 Profile_mr
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 Profile_wd
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 Profile_wi
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 Profile_wr
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 SpeedDating
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 SuccessStory
+./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 Tracking
+###./settrunc_rep_agent_disable_OnStandbySRV.sh w151dbp05 USI
+
+

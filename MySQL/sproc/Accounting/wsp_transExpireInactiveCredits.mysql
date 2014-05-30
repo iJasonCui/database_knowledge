@@ -1,0 +1,53 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_transExpireInactiveCredits;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_transExpireInactiveCredits (
+at_userId                DECIMAL(12,0), 
+at_dateNow               DATETIME,
+at_creditTypeId          SMALLINT,
+at_credits               SMALLINT,
+at_xactionId             INT,
+at_balance               SMALLINT
+)
+BEGIN
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+	ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+	ROLLBACK;
+END;
+
+START TRANSACTION;
+
+INSERT INTO AccountTransaction
+        (xactionId
+        ,userId
+        ,xactionTypeId
+        ,creditTypeId
+        ,contentId
+        ,credits
+        ,balance
+        ,dateCreated
+    	)
+        VALUES
+        (at_xactionId
+   	,at_userId
+	,11
+    	,at_creditTypeId
+    	,68
+    	,at_credits * -1
+    	,at_balance
+    	,at_dateNow
+    	);
+
+DELETE FROM CreditBalance WHERE userId = at_userId AND creditTypeId = at_creditTypeId;
+
+COMMIT;
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

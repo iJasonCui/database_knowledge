@@ -1,0 +1,21 @@
+select name from master..sysdatabases where name not in ('master', 'model', 'tempdb', 'sybsystemdb', 'sybsystemprocs', 'sybsyntax')
+\do
+
+\echo "========================="    
+\echo #1
+USE master
+go
+EXEC sp_dboption #1,'dbo use only',false
+go
+USE master
+go
+EXEC sp_dboption #1,'trunc log on chkpt',false
+go
+USE #1
+go
+CHECKPOINT
+go
+
+\done
+
+

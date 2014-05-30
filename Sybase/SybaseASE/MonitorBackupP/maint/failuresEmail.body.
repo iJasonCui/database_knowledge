@@ -1,0 +1,8 @@
+ Daily Backup Alert Report                                             
+ --------------------------------------------------------------------- 
+ This report ran at Oct 25 2004  9:13AM                                
+
+(1 row affected)
+Msg 156, Level 15, State 2:
+Server 'opsdb1p', Line 14:
+Incorrect syntax near the keyword 'and'.

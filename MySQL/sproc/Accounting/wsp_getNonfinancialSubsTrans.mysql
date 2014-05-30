@@ -1,0 +1,27 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getNonfinancialSubsTrans;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getNonfinancialSubsTrans (
+
+ at_userId DECIMAL(12,0)
+,at_dateCreated DATETIME
+)
+BEGIN
+
+SELECT
+   snft.userId,
+   snft.contentId,
+   snft.subscriptionTypeId,
+   snft.duration,
+   snft.description,
+   snft.dateCreated,
+   snft.cardId,
+   CASE WHEN snft.cardId < 0 THEN 'Non CC Trans' ELSE cc.cardNickname END
+FROM SubscriptionNonfinancialTrans snft LEFT JOIN CreditCard cc ON snft.cardId = cc.creditCardId
+WHERE snft.userId = at_userId
+AND snft.dateCreated > at_dateCreated
+ORDER BY snft.dateCreated asc;
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

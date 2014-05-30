@@ -1,0 +1,32 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getCreditBalanceForward;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getCreditBalanceForward (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mark Jaeckle
+**   Date:  Sept 14, 2003
+**   Description:  retrieves the balance forward for the given user, prior to the given date
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+at_userId DECIMAL(12,0),
+at_cutoffDate DATETIME 
+)
+BEGIN
+
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+SELECT balance
+           FROM AccountTransaction
+           WHERE userId = at_userId
+           AND dateCreated < at_cutoffDate
+           ORDER BY dateCreated desc LIMIT 1;
+  
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

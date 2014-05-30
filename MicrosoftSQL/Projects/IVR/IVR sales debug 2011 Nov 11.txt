@@ -1,0 +1,18 @@
+Errors in the OLAP storage engine: The attribute key cannot be found: Table: fact_tIvrSales, Column: customerByProductKey, Value: 2159422. 
+Errors in the OLAP storage engine: The record was skipped because the attribute key was not found. 
+Attribute: POS CustomerId of Dimension: Customer By Product from Database: IVR, Cube: IVR Main, Measure Group: Sales, Partition: Sales_2011, Record: 87074.
+
+Errors in the OLAP storage engine: The process operation ended because the number of errors encountered during processing reached the defined limit of 
+allowable errors for the operation. Errors in the OLAP storage engine: An error occurred while processing the 'Sales_2011' 
+partition of the 'Sales' measure group for the 'IVR Main' cube from the IVR database.
+
+
+--
+
+Errors in the OLAP storage engine: The attribute key cannot be found: Table: dim_tIvrCustomerByProduct, Column: customerByProductKey, Value: 2159421. Errors in the OLAP storage engine: The record was skipped because the attribute key was not found. Attribute: POS CustomerId of Dimension: Customer By Product from Database: IVR, Cube: IVR Main, Measure Group: Customer By Product, Partition: t Ivr Customer By Product, Record: 2106830. Errors in the OLAP storage engine: The process operation ended because the number of errors encountered during processing reached the defined limit of allowable errors for the operation. Errors in the OLAP storage engine: An error occurred while processing the 't Ivr Customer By Product' partition of the 'Customer By Product' measure group for the 'IVR Main' cube from the IVR database.
+
+
+--
+
+
+

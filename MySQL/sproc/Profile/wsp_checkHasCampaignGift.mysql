@@ -1,0 +1,15 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_checkHasCampaignGift;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_checkHasCampaignGift (
+    at_campaignId                      int,
+    at_userId                          DECIMAL(12,0),
+    at_targetUserId                    DECIMAL(12,0)
+)
+BEGIN
+  SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;
+  select count(*) from CampaignUserGift	
+  where 	campaignId=at_campaignId and 
+                senderUserId=at_userId and 
+                targetUserId=at_targetUserId; 
+END;;
+DELIMITER ;

@@ -1,0 +1,34 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_saveCampaignUserGift;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_saveCampaignUserGift (
+/*
+* File Name: wsp_saveCampaignUserGift
+* Description: save Campaign User Gift
+* Created: Apr. 2010 
+*/
+    at_campaignId                      int,
+    at_userId                          DECIMAL(12,0),
+    at_targetUserId                    DECIMAL(12,0),
+    at_giftId                          int
+)
+BEGIN
+DECLARE at_dateModified DATETIME;
+
+CALL wsp_GetDateGMT(at_dateModified);
+
+INSERT INTO CampaignUserGift	(
+		campaignId,
+        senderUserId,
+        targetUserId,
+		giftId,
+		dateModified)
+	VALUES	
+	(
+		at_campaignId,
+        at_userId,
+        at_targetUserId,  
+		at_giftId,
+		at_dateModified
+	);
+END;;
+DELIMITER ;

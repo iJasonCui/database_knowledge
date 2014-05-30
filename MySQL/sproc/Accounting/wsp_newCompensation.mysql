@@ -1,0 +1,62 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newCompensation;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newCompensation (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga, Mark Jaeckle
+**   Date:  September 22 2003
+**   Description:  Inserts row to Compensation
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+
+ at_compensationId  int
+,at_usageTypeId  int
+,at_adminUserId         int
+,at_dateCompensated     datetime
+,at_dateUnavailableFrom datetime
+,at_dateUnavailableTo   datetime
+,at_userCount           int
+,at_creditCount         int
+,at_compensationDesc    varchar(255)
+)
+BEGIN
+
+DECLARE at_dateCreated DATETIME;
+
+SET at_dateCreated = UTC_TIMESTAMP();
+
+INSERT INTO Compensation (
+ compensationId
+,usageTypeId
+,adminUserId
+,dateCompensated
+,dateUnavailableFrom
+,dateUnavailableTo
+,userCount
+,creditCount
+,compensationDesc
+,dateCreated
+)
+VALUES
+(
+ at_compensationId
+,at_usageTypeId
+,at_adminUserId
+,at_dateCompensated
+,at_dateUnavailableFrom
+,at_dateUnavailableTo
+,at_userCount
+,at_creditCount
+,at_compensationDesc
+,at_dateCreated
+);
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

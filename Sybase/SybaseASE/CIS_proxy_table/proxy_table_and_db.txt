@@ -1,0 +1,241 @@
+==========proxy table=============
+1,turn on the parameter
+sp_configure 'allow remote access',1
+
+2,add entry to interface file
+
+3,add remote server at local server(webdb0r)
+sp_addserver ivrdb1r, ASEnterprise, ivrdb1r
+
+4,map local user to remote user
+(only when username or password is different from remote user)
+sp_addexternlogin webdb1g,aradu,webmaint,password
+
+sp_addexternlogin remote_server, loginame_on_local, externname 
+	[, externpasswd] [rolename]
+
+
+5,create proxy table
+
+create existing table BatchLog
+(
+    batchId             int      NOT NULL,
+    mainCityId          smallint NULL,
+    fileId              smallint NULL,
+    FtpFinishedDateTime datetime NULL,
+    BcpFinishedDateTime datetime NULL,
+    rowCountBcp         int      NULL,
+    rowCountAuditing    int      DEFAULT 0 NULL,
+    SpFinishedDateTime  datetime NULL,
+    rowCountArchived    int      NULL,
+    rowCountReport      int      NULL,
+    createdDateTimeFrom datetime NULL,
+    createdDateTimeTo   datetime NULL,
+    AsStartedDateTime   datetime NULL,
+    AsFinishedDateTime  datetime NULL,
+    fileDate            int      NULL,
+    productId           int      NULL,
+    rowCountUpdated     int      NULL,
+    byteSize            int      NULL
+)
+at "ivrdb1r.DB_LOG..BatchLog"
+
+6,create proxy table with condition
+  create a view on remote table then create proxy table on that view.
+
+
+==========proxy database================
+
+1,turn on the parameter
+sp_configure 'allow remote access',1
+
+2,add entry to interface file on both servers
+
+3,add remote server at local server(webdb0r) 
+sp_addserver webdb1g, ASEnterprise, webdb1g
+
+4,map local user to remote user
+(only when username or password is different from remote user)
+sp_addexternlogin webdb1g,aradu,webmaint
+
+5,grant connect permission to user
+grant connect to public
+confirm with following: connect to webdb1g
+
+6,create database Accounting1g4100 on [db_device_name] = [size]
+  with default_location='webdb1g.Accounting.dbo.'
+  for proxy_update
+
+7,if the db is created by cron_sa, need to grant permission
+  to aradu or webmaint
+
+8, try to browse data through proxy db
+   use Accounting1g4100
+   go
+   select * from ......
+
+===========Modify/Alter Proxy table==============================
+
+1, When table alter on the source the proxt table is out of sync
+   run comman - drop table dbo.<table_name>
+   
+2, Recreate proxy table
+   eg create proxy_table dbo.Payment external table at  'w151dbr06.crm.dbo.Payment'
+   
+3, Grant select to GRANT SELECT ON dbo.Payment TO read_un_limited
+   go
+
+===========refresh metadata from remote server=====
+alter database DoNotDrop
+for proxy_update
+
+**this command will refresh all the metadata from reomote server.
+  don't need to drop proxy db and recreate!
+
+========How to know which db are proxy ===========
+
+select name,def_remote_loc 
+from sysdatabases
+where def_remote_type = 1
+
+================================================
+
+sp_dropexternlogin
+Description
+Component Integration Services only Drops the definition of a remote login previously defined by sp_addexternlogin.
+
+Syntax
+sp_dropexternlogin  server  [,  loginame  [,  rolename ] ]
+
+Parameters
+server 
+is the name of the remote server from which the local server is dropping account access. The remote server is known to the local server by an entry in the master.dbo.sysservers table.
+
+loginame 
+is a login account known to the local server. If loginame is not specified, the current account is used. loginame must exist in the master.dbo.syslogins table.
+
+rolename 
+is the Adaptive Server user¡¯s assigned role.
+
+Examples
+Example 1
+Drops the definition of an external login to the remote server CIS1012 from ¡°bobj¡±. Only the ¡°bobj¡± account and the ¡°sa¡± account can add or modify a remote login for ¡°bobj¡±:
+
+sp_dropexternlogin CIS1012, bobj
+
+Example 2
+Drops the definition of an external login to the remote server SSB from users with the sa_role:
+
+sp_dropexternlogin SSB, NULL, sa_role
+
+Usage
+sp_dropexternlogin drops the definition of a remote login previously defined to the local server by sp_addexternlogin.
+
+You cannot execute sp_dropexternlogin from within a transaction.
+
+The remote server must be defined to the local server by sp_addserver.
+
+To add and drop local server users, use the system procedures sp_addalias and sp_droplogin.
+
+sp_helpexternlogin
+===============================
+
+The Case of proxy table between webLL on IQ and MI database on ivrdb1r
+
+When: Aug 18 2009
+By Jason Cui
+
+sp_addobjectdef PageCountGuestLL, 'g104iqdb01..webLL.PageCountGuest', 'table'
+
+CREATE EXISTING TABLE dbo.PageCountGuestLL
+(
+    cookieId       numeric(12,0) NULL,
+    pageId         smallint      NULL,
+    pageEventId    smallint      NULL,
+    sessionContext char(3)       NULL,
+    adCode         varchar(30)   NULL,
+    localePref     smallint      NULL,
+    dateCreated    datetime      nULL,
+    sessionGuest   char(64)      NULL
+)
+at "g104iqdb01..webLL.PageCountGuest"
+
+
+drop table SessionGuestLL
+
+sp_dropobjectdef SessionGuestLL
+
+sp_addobjectdef SessionGuestLL, 'g104iqdb01..webLL."SessionGuest"', 'table'
+
+
+CREATE EXISTING TABLE dbo.SessionGuestLL
+(
+    sessionGuest     char(64)      NOT NULL,
+    gender           char(1)       NULL,
+    context          char(3)       NULL,
+    cookieId         numeric(12,0) NOT NULL,
+    adCode           varchar(30)   NULL,
+    dateCreated      datetime      NOT NULL,
+    dateLastActivity datetime      NOT NULL,
+    pageHitCount     int           NULL,
+    localePref       smallint      NULL,
+    ipAddress        numeric(12,0) NULL
+)
+at "g104iqdb01..webLL.SessionGuest"
+
+select * from SessionGuestLL where dateCreated > = "aug 18 2009 15:00"
+
+
+drop table RefPageLL
+
+sp_dropobjectdef RefPageLL
+
+sp_addobjectdef RefPageLL, 'g104iqdb01..webLL."RefPage"', 'table'
+go
+CREATE EXISTING TABLE dbo.RefPageLL
+(
+    pageId       smallint     NOT NULL,
+    pageEventId  smallint     NOT NULL,
+    description  varchar(255) NOT NULL,
+    dateCreated  datetime     NOT NULL,
+    dateModified datetime     NOT NULL
+)
+at "g104iqdb01..webLL.RefPage"
+
+
+
+
+drop table RefGenderLL
+
+sp_dropobjectdef RefGenderLL
+
+sp_addobjectdef RefGenderLL, 'g104iqdb01..webLL."RefGender"', 'table'
+go
+CREATE EXISTING TABLE dbo.RefGenderLL
+(
+    gender       char(1)      NOT NULL,
+    description  varchar(255) NOT NULL,
+    dateCreated  datetime     NOT NULL,
+    dateModified datetime     NOT NULL
+
+)
+at "g104iqdb01..webLL.RefGender"
+
+
+drop table RefContextLL
+
+sp_dropobjectdef RefContextLL
+
+sp_addobjectdef RefContextLL, 'g104iqdb01..webLL."RefContext"', 'table'
+go
+CREATE EXISTING TABLE dbo.RefContextLL
+(
+    context      char(3)      NOT NULL,
+    description  varchar(255) NOT NULL,
+    dateCreated  datetime     NOT NULL,
+    dateModified datetime     NOT NULL
+
+)
+at "g104iqdb01..webLL.RefContext"
+
+-===================================================

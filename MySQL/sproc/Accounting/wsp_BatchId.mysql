@@ -1,0 +1,46 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_BatchId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_BatchId (
+  /******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  May 30 2005
+**   Description:  Generation of BatchId
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+OUT at_BatchId INT
+)
+BEGIN
+
+DECLARE at_dateGMT         DATETIME;
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+	ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+	ROLLBACK;
+END;
+
+SET at_dateGMT = UTC_TIMESTAMP();
+
+START TRANSACTION;
+UPDATE BatchId SET BatchId = BatchId + 1;
+
+SELECT BatchId INTO at_BatchId FROM BatchId;
+
+INSERT INTO BatchIdLog VALUES (at_BatchId, at_dateGMT);
+
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

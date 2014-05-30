@@ -1,0 +1,73 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getCardByCardId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getCardByCardId (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Mike Stairs
+**   Date:         Feb 23, 2004
+**   Description:  retrieves card for the specified cardId
+**
+** REVISION(S):
+**   Author:       Andy Tran
+**   Date:         June 30, 2004
+**   Description:  added debit card Solo/Maestro
+**
+**   Author:       Mike Stairs
+**   Date:         Aug 2, 2005
+**   Description:  added cvvPassedFlag
+**
+**   Author:       Andy Tran
+**   Date:         February, 2008
+**   Description:  added encodedCardId
+**
+**   Author:       Andy Tran
+**   Date:         February, 2011
+**   Description:  added avsPassedFlag
+**
+******************************************************************************/
+at_creditCardId int
+)
+BEGIN
+
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+SELECT 
+          CreditCard.userId
+          ,cardTypeId
+          ,cardNum
+          ,encodedCardNum
+          ,partialCardNum
+          ,cardExpiry
+          ,cardNickname
+          ,nameOnCard
+          ,address
+          ,city
+          ,country
+          ,countryArea
+          ,zipCode
+          ,bankCode
+          ,bankCity
+          ,bankAddress
+          ,bankName
+          ,bankAccount
+          ,status
+          ,cvv
+          ,CreditCard.dateModified
+          ,CreditCard.dateCreated
+          ,issueNumber
+          ,cardStartDate
+          ,IFNULL(cvvPassedFlag,'Y') as cvvPassedFlag
+          ,encodedCardId
+          ,dateLastUsed
+          ,realCardTypeId
+          ,IFNULL(avsPassedFlag,'Y') as avsPassedFlag
+      FROM CreditCard LEFT JOIN DebitCard ON CreditCard.creditCardId = DebitCard.cardId 
+      	   	      LEFT JOIN BankCard ON CreditCard.creditCardId = BankCard.cardId 
+     WHERE CreditCard.creditCardId = at_creditCardId;
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

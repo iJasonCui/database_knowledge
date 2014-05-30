@@ -1,0 +1,33 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_cntFirstIdentityApproved;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_cntFirstIdentityApproved (
+/***************************************************************************
+***
+**
+** CREATION:
+**   Author:  Yan Liu
+**   Date:  April 5 2005
+**   Description:  
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+    at_signupAdcode   VARCHAR(30),
+    at_startTimestamp INT,
+    at_endTimestamp   INT 
+)
+BEGIN
+    SELECT gender, 
+           COUNT(*)
+      FROM user_info 
+     WHERE status = 'A'
+       AND signup_context like 'a%'
+       AND signup_adcode = at_signupAdcode
+       AND firstidentitytime >= at_startTimestamp
+       AND firstidentitytime <  at_endTimestamp
+     GROUP BY gender ;
+END;;
+DELIMITER ;

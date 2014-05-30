@@ -1,0 +1,9 @@
+#@ Attempt to bulk-copy a NULL value into Server column which does not accept NULL values. Row 6428, Column 2
+536553037|~||~|anr|~||~|0|~||~|2013-07-23 13:17:10|~|2013-07-23 13:17:10|~|2731716372|~|r|~|534523|@|
+
+#@ Attempt to bulk-copy a NULL value into Server column which does not accept NULL values. Row 6430, Column 2
+536553039|~||~|anr|~||~|0|~||~|2013-07-23 13:17:12|~|2013-07-23 13:17:12|~|2731716372|~|rr|~|534523|@|
+
+#@ Attempt to bulk-copy a NULL value into Server column which does not accept NULL values. Row 6431, Column 2
+536553040|~||~|anr|~||~|0|~||~|2013-07-23 13:17:13|~|2013-07-23 13:17:13|~|2731716372|~|r|~|534523|@|
+

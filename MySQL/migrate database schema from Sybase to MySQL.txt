@@ -1,0 +1,98 @@
+1. USE Sybase Power Designer 15 reverse engineering the database objects from Sybase 15.
+
+2. at PowerDesigner, do the "change current DBMS" from Sybase 15 into MySQL 5.0
+
+3. run "generate the database" from PowerDesigner
+
+4. save the database scripts as "crebas.sql"
+
+5. issues
+
+5.1 datetime default getdate() does not work on MySQL. you could use "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    replace "getdate()" with "CURRENT_TIMESTAMP". But you have to change datetype from "datetime" into "timestamp"
+    it's important to note that datetime has a range of 1000-9999, but the range for timestamp is only 1970-2038.
+    this can be a problem if your system has to store birthdates, or you have to handle something like the payment
+    plan for a 30-year mortgage
+5.2 char and varchar over 255 does not supported by MySQL and use Text instead of varchar(255+)
+5.3 replace "dbo." with "" (empty string)
+5.4 replace "numeric" with "decimal"
+5.5 bigint not null auto_increment; decimal(12,0) does not match "auto_increment"
+5.6 replace 
+
+%s/float/decimal/g 
+%s/numeric/decimal/g 
+%s/decimal(10,0) not null auto_increment/int not null auto_increment/g
+%s/decimal(12,0) not null auto_increment/int not null auto_increment/g
+%s/getdate()/19000101/g
+%s/Jan 1 1970/1970-01-01/g
+%s/ show / `show` /g
+%s/ Call / `Call` /g
+%s/dbo.//g
+
+sed -i 's/Profile_ad/Profile_md/g' create_table_Profile_md.mysql
+sed -i 's/a_/m_/g' create_table_Profile_md.mysql
+
+
+# note 1.
+
+## For Member database,  user_info table
+## userCellId           smallint default rand()*10+1,
+
+6. execute the sql against MySQL server
+
+mysql -h 127.0.0.1 -P 4100 -D Plus45 < crebas_Plus45_NoDrop.sql 
+
+
+#------------
+# shutdown
+#------------
+mysqladmin -h127.0.0.1 -P4010 -uroot -p shutdown
+
+#---------------
+# start up
+#---------------
+mysqld_safe --defaults-file=/etc/g151db01_4020.cnf &
+
+#-----------------
+# migrate data
+#-----------------
+./dataMigrationSybMysql.sh  g151dbr07 Plus45 10.20.1.50 4010 Jump
+
+#---------------------------
+--dump table
+#---------------------------
+mysqldump -d -h127.0.0.1 -P4010 -uroot -p --database Plus45 --add-drop-table >g151db01_4010_Plus45.dump
+mysqldump -d -h127.0.0.1 -P4010 -uroot -p --database Plus45  >g151db01_4010_Plus45.dump
+mysqldump -d -h127.0.0.1 -P4010 -uroot -p --database Profile_ad --add-drop-table >g151db01_4010_Profile_ad.dump
+
+scp -p g151db01_4010_Profile_a*.dump jcui@gxcvs1:/home/jcui/web/javalife/mydb/scripts/initial/
+
+#---------------------
+scp -p -r /var/lib/w151dbp10_4100/ /data/w151dbp10_vol_1/db/
+rm -r -f /var/lib/w151dbp10_4100/
+ln -s /data/w151dbp10_vol_1/db/w151dbp10_4100 /var/lib/w151dbp10_4100
+
+chown -R mysql:mysql /data/w151dbp20_vol_1
+
+
+#-------------------
+# reverse engineer
+#--------------------
+[sybase@ivrdb1r:/data/dumps/software]$ scp create_table_Chargeback.mysql jcui@gxcvs1:/home/jcui/web/javalife/mydb/scripts/initial
+
+
+
+
+#----------------------
+# select count(*) 
+# truncate all tables
+#----------------------
+mysql -Nse 'show tables' Plus45 -h10.50.4.10 -P4100 -uroot -p63vette | while read table; do mysql -e "truncate table $table" Plus45 -h10.50.4.10 -P4100 -uroot -p63vette ; done
+
+mysql -Nse 'show tables' Plus45 -h10.50.4.10 -P4100 -uroot -p63vette | while read table; do mysql -e "select count(*) from $table" Plus45 -h10.50.4.10 -P4100 -uroot -p63vette ; done
+mysql -Nse 'show tables' Plus45 -h10.50.4.20 -P4100 -uroot -p63vette | while read table; do mysql -e "select count(*) from $table" Plus45 -h10.50.4.20 -P4100 -uroot -p63vette ; done
+mysql -Nse 'show tables' Plus45 -h10.10.96.221 -P7100 -uroot -p63vette | while read table; do mysql -e "select count(*) from $table" Plus45 -h10.10.96.221 -P7100 -uroot -p63vette ; done
+mysql -Nse 'show tables' Plus45 -h10.10.26.40 -P7100 -uroot -p63vette | while read table; do mysql -e "select count(*) from $table" Plus45 -h10.10.26.40 -P7100 -uroot -p63vette ; done
+mysql -Nse 'show tables' Plus45 -h10.50.4.30 -P7100 -uroot -p63vette | while read table; do mysql -e "select count(*) from $table" Plus45 -h10.50.4.30 -P7100 -uroot -p63vette ; done
+
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;

@@ -1,0 +1,49 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_saveGuestEmailStatus;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_saveGuestEmailStatus (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan L 
+**   Date:  November 9 2006
+**   Description:  save GuestEmailStatus data
+**
+** REVISION(S):
+**   Author: 
+**   Date:
+**   Description: 
+**
+******************************************************************************/
+    at_email          VARCHAR(129),
+    at_spamFlag       CHAR(1),
+    at_bounceBackFlag CHAR(1)
+)
+BEGIN
+
+DECLARE at_dateNow DATETIME ;
+DECLARE at_return  INT ;
+
+CALL wsp_GetDateGMT(at_dateNow);
+
+IF (SELECT 1 FROM GuestEmailStatus WHERE email = at_email)  IS NOT NULL
+THEN    
+    UPDATE GuestEmailStatus 
+       SET spamFlag       = at_spamFlag,
+           bounceBackFlag = at_bounceBackFlag, 
+           dateModified   = at_dateNow
+     WHERE email = at_email ;
+ELSE
+    INSERT GuestEmailStatus(email,
+                            spamFlag,
+                            bounceBackFlag,
+                            dateCreated,
+                            dateModified)
+    VALUES(at_email,
+           at_spamFlag,
+           at_bounceBackFlag,
+           at_dateNow,
+           at_dateNow) ;
+END IF;
+
+END;;
+DELIMITER ;

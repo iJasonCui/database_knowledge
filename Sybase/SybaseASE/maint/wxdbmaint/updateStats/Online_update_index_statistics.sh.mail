@@ -1,0 +1,8 @@
+wxdbmaint
+./Online_update_index_statistics.sh started at Fri Feb 22 07:00:01 EST 2013
+SERVER: v151dbp01ivr ; DATABASE: Mailbox
+
+Step 1 - Create SQL command file ...
+Step 2 - Run SQL: update statistics ...
+
+./Online_update_index_statistics.sh succeeded at Fri Feb 22 07:12:47 EST 2013.

@@ -1,0 +1,52 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newSDAccount;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newSDAccount (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         June 1, 2009
+**   Description:  Record new SD account
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_userId             DECIMAL(12,0)
+,at_billingLocationId  SMALLINT
+)
+label_this:BEGIN
+
+DECLARE at_passOfferId  SMALLINT;
+DECLARE at_dateNow      DATETIME;
+DECLARE at_dateExpiry   DATETIME;
+
+-- get at_dateNow
+SET at_dateNow = UTC_TIMESTAMP();
+
+SELECT defaultPassOfferId INTO at_passOfferId FROM SDDefaultAccount WHERE billingLocationId = at_billingLocationId;
+IF at_passOfferId <= 0 THEN 
+   LEAVE label_this;
+END IF;
+
+SET at_dateExpiry = '2052-12-31 00:00:00';
+
+INSERT INTO SDAccount (
+         userId
+        ,passOfferId
+        ,dateCreated
+        ,dateModified
+        ,dateExpiry
+    ) VALUES (
+         at_userId
+        ,at_passOfferId
+        ,at_dateNow
+        ,at_dateNow
+        ,at_dateExpiry
+    );
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

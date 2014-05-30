@@ -1,0 +1,40 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_wcsCreditCardByCardNumber;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_wcsCreditCardByCardNumber (
+ at_rowcount   INT
+,at_encodedCardNum VARCHAR(64)
+)
+BEGIN 
+    IF at_encodedCardNum IS NULL OR TRIM(at_encodedCardNum) = '' THEN
+        SELECT userId
+              ,REPEAT('*',16) as cardNumber
+              ,nameOnCard
+              ,'N/A' as gender
+              ,productId
+        FROM CreditCard WHERE 1=2; 
+    ELSEIF (at_encodedCardNum REGEXP '[^0-9]') = 0  THEN
+        SELECT userId
+              ,CONCAT(REPEAT('*',12), RIGHT(RTRIM(partialCardNum),4)) as cardNumber
+              ,nameOnCard
+              ,'N/A' as gender
+              ,productId
+        FROM CreditCard
+        WHERE encodedCardId = CAST(at_encodedCardNum AS UNSIGNED)
+        ORDER BY userId DESC 
+	LIMIT at_rowcount;
+    ELSE
+        SELECT userId
+              ,CONCAT(REPEAT('*',12), RIGHT(RTRIM(partialCardNum),4))  as cardNumber
+              ,nameOnCard
+              ,'N/A' as gender
+              ,productId
+        FROM CreditCard
+        WHERE encodedCardNum = at_encodedCardNum
+        ORDER BY userId DESC
+	LIMIT at_rowcount;
+    END IF;
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

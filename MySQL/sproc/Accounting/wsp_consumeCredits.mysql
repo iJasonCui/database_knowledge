@@ -1,0 +1,44 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_consumeCredits;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_consumeCredits (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs/Jack Veiga
+**   Date:  September 2003
+**   Description:  
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_userId 			DECIMAL(12,0)
+,at_xactionTypeId		INT
+,at_contentId			SMALLINT
+,at_product			CHAR(1)
+,at_community			CHAR(1)
+,at_userType			CHAR(1)
+,at_noOfCreditsToConsume	SMALLINT 
+)
+proc_label:BEGIN
+
+DECLARE at_balance		SMALLINT;
+DECLARE at_dateNow 		DATETIME;
+
+CALL wsp_getTotalCredits (at_userId, at_balance);
+
+IF at_noOfCreditsToConsume > at_balance
+THEN
+   SELECT 99;
+   LEAVE proc_label;
+END IF;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+CALL wsp_cursorConsumeCredits 
+     (at_userId,at_xactionTypeId,at_contentId,at_product,at_community,at_userType,at_noOfCreditsToConsume,at_balance,at_dateNow);
+
+END;;
+DELIMITER ;

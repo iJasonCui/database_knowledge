@@ -1,0 +1,18 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getCitiesOfJurisdiction;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getCitiesOfJurisdiction (
+at_jurisdictionId smallint
+)
+begin
+     select cityId, cityName
+       from City, Jurisdiction, Country
+      where City.jurisdictionId = Jurisdiction.jurisdictionId
+        and City.jurisdictionId = at_jurisdictionId
+        and Jurisdiction.jurisdictionId = at_jurisdictionId
+        and Jurisdiction.parentId = at_jurisdictionId
+        and City.secondJurisdictionId = -1
+        and City.countryId = Country.countryId
+        and City.population >= Country.minPopulation
+      order by cityName ;
+END;;
+DELIMITER ;

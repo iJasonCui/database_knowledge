@@ -1,0 +1,17 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getSecondaryJurisdictions;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getSecondaryJurisdictions (
+at_parentId smallint
+)
+BEGIN
+
+   SELECT a.jurisdictionId, a.parentId, a.countryId, a.jurisdictionName, a.jurisdictionTypeId, b.jurisdictionTypeLabel, -1
+     FROM Jurisdiction a, JurisdictionType b
+    WHERE a.jurisdictionTypeId = b.jurisdictionTypeId
+      and a.parentId = at_parentId
+      and a.jurisdictionId != at_parentId
+      and a.displayInLists = 1
+    order by a.jurisdictionName ;
+
+END;;
+DELIMITER ;

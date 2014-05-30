@@ -1,0 +1,120 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newUserEvent;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newUserEvent (
+/***********************************************************************
+**
+** CREATION:
+**   Author:        Andy Tran
+**   Date:          April, 2006
+**   Description:   Creates new user event
+**
+** REVISION(S):
+**   Author:        Andy Tran
+**   Date:          November, 2007
+**   Description:   Change monitor to combine all products/communities
+**                  Change return value after a sucessful monitor
+**                  Add read uncommitted for select count(*)
+**
+**   Author:        Andy Tran
+**   Date:          May 2008
+**   Description:   Change monitor to separate by products/communities
+**                  Application will decide if monitor is based on
+**                  products/communities by passing in the parameters
+**                  (null means combine)
+**
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+ at_userId             DECIMAL(12,0)
+,at_targetUserId       DECIMAL(12,0)
+,at_eventTypeId        SMALLINT
+,at_reasonTypeId       SMALLINT
+,at_productCode        CHAR(1)
+,at_communityCode      CHAR(1)
+,at_eventMonitorLimit  INT
+,at_eventMonitorCutoff DATETIME
+)
+BEGIN
+
+DECLARE at_userEventId        INT ;
+DECLARE at_dateGMT            DATETIME ;
+DECLARE at_eventMonitorCount  INT ;
+
+CALL wsp_GetDateGMT( at_dateGMT);
+
+IF at_targetUserId < 0
+THEN
+    SET at_targetUserId = NULL ;
+END IF;
+
+IF at_reasonTypeId < 0
+THEN
+    SET at_reasonTypeId = NULL ;
+END IF;
+
+IF (SELECT 1
+                 FROM UserEvent e, UserEventMonitor m
+                WHERE e.userId = at_userId
+                  AND e.eventTypeId = at_eventTypeId
+                  AND e.productCode = at_productCode
+                  AND e.communityCode = at_communityCode
+                  AND e.userEventId = m.userEventId
+                  AND m.dateCreated >= at_eventMonitorCutoff) IS NULL
+THEN
+
+        CALL wsp_UserEventId(at_userEventId);
+
+        INSERT INTO UserEvent
+        (
+             userEventId
+            ,userId
+            ,targetUserId
+            ,eventTypeId
+            ,reasonTypeId
+            ,productCode
+            ,communityCode
+            ,dateCreated
+        )
+        VALUES
+        (
+             at_userEventId
+            ,at_userId
+            ,at_targetUserId
+            ,at_eventTypeId
+            ,at_reasonTypeId
+            ,at_productCode
+            ,at_communityCode
+            ,at_dateGMT
+        ) ;
+
+        SELECT count(*) INTO at_eventMonitorCount
+          FROM UserEvent
+         WHERE userId = at_userId
+           AND eventTypeId = at_eventTypeId
+           AND productCode = at_productCode
+           AND communityCode = at_communityCode
+           AND dateCreated > at_eventMonitorCutoff ;
+
+        IF at_eventMonitorCount >= at_eventMonitorLimit
+        THEN
+                 INSERT INTO UserEventMonitor
+                        (
+                             userEventId
+                            ,dateCreated
+                            ,dateModified
+                        )
+                 VALUES
+                        (
+                             at_userEventId
+                            ,at_dateGMT
+                            ,at_dateGMT
+                        ) ;
+
+        END IF;
+
+END IF;
+
+END;;
+DELIMITER ;

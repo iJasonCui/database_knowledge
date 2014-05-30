@@ -1,0 +1,34 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_chkCouponDateExpiry;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_chkCouponDateExpiry (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Andy Tran
+**   Date:  June 2008
+**   Description:  check if a purchase was made with the credit card before
+**
+** REVISION(S):
+**   Author:
+**   Date: 
+**   Description: 
+**
+******************************************************************************/
+ at_couponNumber DECIMAL(10,0)
+)
+BEGIN
+
+DECLARE at_dateNow DATETIME;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+SELECT 1 AS isExpired
+          FROM Coupon
+         WHERE couponNumber = at_couponNumber
+           AND dateExpiry IS NOT NULL
+           AND dateExpiry < at_dateNow;
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

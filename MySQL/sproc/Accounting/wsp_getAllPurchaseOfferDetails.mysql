@@ -1,0 +1,44 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAllPurchaseOfferDetails;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAllPurchaseOfferDetails (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Mike Stairs
+**   Date:         May 21, 2003
+**   Description:  retrieves all package descriptions
+**
+** REVISION:
+**   Author:       Andy Tran
+**   Date:         Nov 15, 2004
+**   Description:  remove purchaseOfferId from order by
+**
+**   Author:       Mike Stairs
+**   Date:         Apr 29, 2005
+**   Description:  add dateExpiry check
+**
+**   Author:       Andy Tran
+**   Date:         Dec 1, 2005
+**   Description:  returns all offer details, including expired
+**                 filter out expired details when set detail list for offer
+**
+******************************************************************************/
+)
+  BEGIN  
+	SELECT 
+          purchaseOfferDetailId,
+          purchaseOfferId,
+          contentId,
+          ordinal,
+          cost,
+          credits,
+          bonusCredits,
+          duration,
+          restrictedPurchaseTypeId,
+          dateExpiry
+        FROM PurchaseOfferDetail
+        ORDER BY purchaseOfferDetailId;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

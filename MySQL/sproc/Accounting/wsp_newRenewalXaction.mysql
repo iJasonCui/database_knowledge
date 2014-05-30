@@ -1,0 +1,38 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newRenewalXaction;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newRenewalXaction (
+ /******************************************************************
+**
+** CREATION:
+**   Author:  Andy Tran
+**   Date:  June 2008 
+**   Description:  Inserts row into RenewalTransaction
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_userId                     DECIMAL(12,0)
+,at_subscriptionOfferDetailId  SMALLINT
+)
+BEGIN
+DECLARE at_dateNow  DATETIME;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+INSERT RenewalTransaction (
+         userId
+        ,subscriptionOfferDetailId
+        ,dateCreated
+    )
+    VALUES (
+         at_userId
+        ,at_subscriptionOfferDetailId
+        ,at_dateNow
+    );
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

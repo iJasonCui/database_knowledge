@@ -1,0 +1,53 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updUserInfoTypeByUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updUserInfoTypeByUserId (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga
+**   Date:  June 6 2002
+**   Description:  Update user type by user id
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_userType CHAR(1)
+,at_userId   DECIMAL(12,0)
+,at_xactionId int 
+)
+BEGIN
+
+DECLARE at_firstPayTime INT ;
+DECLARE at_dateNow DATETIME ;
+DECLARE at_getdate DATETIME ;
+
+CALL wsp_GetDateGMT(at_dateNow);
+SET at_getdate = now();
+CALL wsp_convertTimestamp(at_getdate, at_firstPayTime, NULL);
+	
+SELECT firstpaytime INTO at_firstPayTime
+  FROM user_info
+ WHERE user_id = at_userId ;
+
+IF at_userType = 'P' AND at_firstPayTime = NULL
+THEN
+    UPDATE user_info 
+       SET
+           user_type = at_userType
+	  ,firstpaytime = at_firstPayTime
+	  ,first_xactionId = at_xactionId
+          ,dateModified    = at_dateNow
+     WHERE user_id = at_userId ;
+ELSE
+    UPDATE user_info 
+       SET
+   	   user_type = at_userType,
+           dateModified = at_dateNow
+     WHERE user_id = at_userId ;
+END IF;
+ 
+END;;
+DELIMITER ;

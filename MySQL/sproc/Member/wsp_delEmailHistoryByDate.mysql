@@ -1,0 +1,36 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_delEmailHistoryByDate;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_delEmailHistoryByDate (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga/Yan Liu
+**   Date:  June 2003
+**   Description:  Deletes email history rows by date
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_numberOfDays INT
+,at_rowcount     INT
+)
+BEGIN
+
+DECLARE at_dateExpiry  DATETIME ;
+DECLARE at_dateCreated DATETIME ;
+DECLARE at_userId      DECIMAL(12,0) ;
+DECLARE at_email       VARCHAR(129) ;
+DECLARE at_deleteCount INT ;
+
+SET at_dateExpiry = DATEADD(DAY,-1*at_numberOfDays,now()) ;
+SET at_deleteCount = 0;
+
+DELETE FROM EmailHistory
+ WHERE dateCreated < at_dateExpiry
+ LIMIT at_rowcount ;
+
+END;;
+DELIMITER ;

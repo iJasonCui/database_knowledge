@@ -1,0 +1,6 @@
+RESTORE DATABASE '/data/db/c151iqdb1/c151iqdb1.db'
+FROM '/c151iqdb1_dump/dumps/IQDB3/IQDB3_Full.dmp'
+RENAME IQ_SYSTEM_MAIN TO '/data/db/rawpartion1'
+RENAME IQ_MAIN2 TO '/data/db/rawpartion2'
+RENAME IQ_SYSTEM_TEMP TO '/data/db/c151iqdb1/c151iqdb1.iqtmp'
+RENAME IQ_SYSTEM_MSG TO '/data/db/c151iqdb1/c151iqdb1.iqmsg'

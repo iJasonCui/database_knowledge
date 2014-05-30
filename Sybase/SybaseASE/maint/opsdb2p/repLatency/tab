@@ -1,0 +1,134 @@
+#-------------------------------------------------#
+# measure rep latency by sending test transaction   
+# Jason C. on Mar 20 2006
+#-------------------------------------------------#
+##0 * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./UserDefinedRepLatency.sh > /dev/null 2>&1)
+0,10,20,30,40,50 * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./MeasureRepLatency_InsertPrimary.sh > /dev/null 2>&1)
+5,15,25,35,45,55 * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./MeasureRepLatency_SelectReplicate.sh > /dev/null 2>&1)
+#---------------------------------#
+# Rep Server Latency 
+#---------------------------------#
+#0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh webdb20p cron_sa > /dev/null 2>&1)
+0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh webdb21p cron_sa > /dev/null 2>&1)
+#0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh webdb23p cron_sa > /dev/null 2>&1)
+#0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh webdb24p cron_sa > /dev/null 2>&1)
+#0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh webdb25p cron_sa > /dev/null 2>&1)
+2,4,6,8,12,14,16,18,22,24,26,28  7-9 * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh webdb27p cron_sa > /dev/null 2>&1)
+2,4,6,8,12,14,16,18,22,24,26,28  7-9 * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh webdb30p cron_sa > /dev/null 2>&1)
+0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh webdb28p cron_sa > /dev/null 2>&1)
+0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh webdb29p cron_sa > /dev/null 2>&1)
+0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh webdb27p cron_sa > /dev/null 2>&1)
+0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh webdb30p cron_sa > /dev/null 2>&1)
+0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh webdb22p cron_sa > /dev/null 2>&1)
+0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh webdb31p cron_sa > /dev/null 2>&1)
+#0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh w151dbp01 cron_sa > /dev/null 2>&1)
+#0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh w151dbp02 cron_sa > /dev/null 2>&1)
+#0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh w151dbp03 cron_sa > /dev/null 2>&1)
+#0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh w151dbr01 cron_sa > /dev/null 2>&1)
+#0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh w151dbr02 cron_sa > /dev/null 2>&1)
+#0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh w151dbr03 cron_sa > /dev/null 2>&1)
+#0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh w151dbr04 cron_sa > /dev/null 2>&1)
+#0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh w151dbr05 cron_sa > /dev/null 2>&1)
+#
+#--------------------------------------------#
+# check stable Q 
+#--------------------------------------------#
+0,10,20,30,40,50  * * * * (cd /opt/etc/sybase12_52/maint/repStats;   ./check_stableQ.sh > /dev/null 2>&1)
+#
+##0,2,4,6,8,12,14,16,18,22,24,26,28,30,35,40,45,50,52,55,57 * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh.Test opsdb2p sa > /dev/null 2>&1)
+##0,2,4,6,8,12,14,16,18,22,24,26,28,30,35,40,45,50,52,55,57 * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh.Test asedb0d sa > /dev/null 2>&1)
+##0,2,4,6,8,12,14,16,18,22,24,26,28,30,35,40,45,50,52,55,57 * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./figure-out-latency.sh.Test msadb0d  sa > /dev/null 2>&1)
+#
+#---------------------------------#
+# Run Statistics
+#---------------------------------#
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statisticsM.sh cmlogdb1p > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statisticsM.sh crmdb1p > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh indiansdb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics11.sh daldb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh dnrdb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh nycdb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh stldb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh sfodb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh bosdb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh caldb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh chidb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh coldb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh detdb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh edmdb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh mtldb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh ottdb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh phidb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh phndb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh pitdb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh quedb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh wasdb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh tordb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh vandb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh windb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh pardb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh mindb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh atldb > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh laxdb > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statisticsM.sh auditdb0p > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh sipdb01 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh sipdb02 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh sipdb03 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh pgsdb1p > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh posdb1p > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh sipdb04 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh sipdb05 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh sipdb06 > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh sipdb07 > /dev/null 2>&1)
+#0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh sipdb08 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh skypedb > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh sipdb10 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh ausdb > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh sipdb11 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh sipdb12 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh sipdb13 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/ivrstats; ./statistics.sh tstdb01 > /dev/null 2>&1)
+#-------------------------------#
+#  temp: deleteSessionGuestHistory 
+#-------------------------------#
+#5,35 * * * * (cd /opt/etc/sybase12_52/maint/repLatency; ./DeleteSessionGuestHistory.sh asedb0d sa > /dev/null 2>&1)
+#
+#0,30 * * * * (cd /opt/etc/sybase12_52/maint/SysProcess; ./SysProcess2.sh cron_sa sipdb06  > /dev/null 2>&1)
+#0,30 * * * * (cd /opt/etc/sybase12_52/maint/SysProcess; ./SysProcess2.sh cron_sa sipdb05  > /dev/null 2>&1)
+#0,30 * * * * (cd /opt/etc/sybase12_52/maint/SysProcess; ./SysProcess2.sh cron_sa sipdb04  > /dev/null 2>&1)
+#0,30 * * * * (cd /opt/etc/sybase12_52/maint/SysProcess; ./SysProcess2.sh cron_sa sipdb03  > /dev/null 2>&1)
+#0,30 * * * * (cd /opt/etc/sybase12_52/maint/SysProcess; ./SysProcess2.sh cron_sa sipdb02  > /dev/null 2>&1)
+#
+# cron tab entry for ivrCrons
+00,15,30,45 8,9,10,11,12,13,14,15,16,17 * * * (cd /opt/etc/sybase12_52/maint/ivrCron; ./executeSQL.sh > ./executeSQL.sh.out )
+#00 13,14,15,16,17,18 * * * (cd /opt/etc/sybase12_52/maint/ivrCron; ./executeSQL.sh > ./executeSQL.sh.out )
+#------------------------------------------------------#
+# WEB STATS
+#------------------------------------------------------#
+0,5,10,15,20,25,30,35,40,45,50,55  9-17 * * 1-5 (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh webdb0g  > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  9-17 * * 1-5 (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh webdb0t  > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  9-17 * * 1-5 (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh webdb1d  > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh webdb20p > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh webdb21p > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh webdb22p > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh webdb23p > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh webdb24p > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh webdb25p > /dev/null 2>&1)
+##0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh webdb26p > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh webdb27p > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh webdb28p > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh webdb29p > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh webdb30p > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh webdb31p > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh w151dbp01 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh w151dbp02 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh w151dbp03 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh w151dbr01 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh w151dbr02 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh w151dbr03 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh w151dbr04 > /dev/null 2>&1)
+0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh w151dbr05 > /dev/null 2>&1)
+###0,5,10,15,20,25,30,35,40,45,50,55  * * * * (cd /opt/etc/sybase12_52/maint/webStats; ./statistics.sh webdb0r  > /dev/null 2>&1)
+0 8 * * 1 (cd /opt/etc/sybase12_52/maint/webStats; ./getCPU.sh > getCPU.sh.log 2>&1)
+#
+#

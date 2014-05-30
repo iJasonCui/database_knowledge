@@ -1,0 +1,669 @@
+case $fileId in
+
+1001)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+userId,
+reasonContentId,
+reviewed,
+adminUserId,
+dateCreated,
+dateModified,
+FROM AccountFlag
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1002)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+xactionId,
+userId,
+xactionTypeId,
+creditTypeId,
+contentId,
+product,
+community,
+credits,
+balance,
+userType,
+description,
+dateCreated,
+FROM AccountTransaction
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1004)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+userId,
+eventType,
+xactionId,
+cardNum,
+encodedCardNum,
+dateCreated,
+FROM AccountingEvent
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1005)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+xactionId,
+adminUserId,
+FROM AdminAccountTransaction
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1006)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+creditCardId,
+reasonContentId,
+reason,
+status,
+dateCreated,
+dateModified,
+FROM BadCreditCard
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1007)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+billingLocationId,
+billingLocationCode,
+billingLocationDesc,
+currencyId,
+merchantId,
+displayTax,
+FROM BillingLocation
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1008)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+cardTypeId,
+nicknameContentId,
+contentId,
+displayOrdinal,
+FROM CardType
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1009)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+compensationId,
+usageTypeId,
+adminUserId,
+userCount,
+creditCount,
+compensationDesc,
+dateCompensated,
+dateUnavailableFrom,
+dateUnavailableTo,
+dateCreated,
+FROM Compensation
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1010)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+compensationId,
+FROM CompensationId
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1011)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+contentId,
+contentDesc,
+FROM Content
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1012)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+userId,
+creditTypeId,
+credits,
+dateExpiry,
+dateCreated,
+dateModified,
+FROM CreditBalance
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1013)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+creditCardId,
+userId,
+cardTypeId,
+cardNum,
+encodedCardNum,
+partialCardNum,
+status,
+nameOnCard,
+cardNickname,
+country,
+countryArea,
+city,
+address,
+zipCode,
+cardExpiry,
+cvv,
+dateCreated,
+dateModified,
+FROM CreditCard
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1014)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+creditCardId,
+FROM CreditCardId
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1015)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+creditTypeId,
+contentId,
+ordinal,
+duration,
+FROM CreditType
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1016)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+currencyId,
+currencyCode,
+currencyDesc,
+convertUSD,
+precisionDigits,
+dateCreated,
+dateModified,
+FROM Currency
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1017)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+currencyId,
+convertUSD,
+adminUserId,
+dateCreated,
+FROM CurrencyHistory
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1018)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+billingLocationId,
+defaultPurchaseOfferId,
+defaultAccountType,
+defaultUsageCellId,
+FROM DefaultUserAccount
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1019)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+localeId,
+isoDesc,
+FROM Locale
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1020)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+localeId,
+contentId,
+contentText,
+FROM LocaleContent
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1021)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+merchantId,
+merchantCode,
+description,
+FROM Merchant
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1022)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+xactionId,
+userId,
+purchaseTypeId,
+purchaseOfferDetailId,
+billingLocationId,
+currencyId,
+xactionTypeId,
+creditCardId,
+refXactionId,
+cost,
+costUSD,
+tax,
+taxUSD,
+cardProcessor,
+paymentNumber,
+dateCreated,
+FROM Purchase
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1023)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+xactionId,
+paymentNumber,
+FROM PurchaseDecline
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1024)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+purchaseOfferId,
+currencyId,
+accountType,
+description,
+dateCreated,
+dateExpiry,
+FROM PurchaseOffer
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1025)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+purchaseOfferDetailId,
+purchaseOfferId,
+contentId,
+restrictedPurchaseTypeId,
+ordinal,
+cost,
+credits,
+duration,
+bonusCredits,
+dateCreated,
+FROM PurchaseOfferDetail
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1026)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+purchaseTypeId,
+description,
+FROM PurchaseType
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1027)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+billingLocationId,
+rate,
+dateCreated,
+dateExpired,
+FROM TaxRate
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1028)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+usageCellId,
+description,
+dateCreated,
+FROM UsageCell
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1029)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+usageCellId,
+usageTypeId,
+credits,
+duration,
+FROM UsageCellDetail
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1030)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+usageTypeId,
+contentId,
+xactionTypeId,
+hasDuration,
+description,
+appletDesc,
+FROM UsageType
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1031)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+userId,
+billingLocationId,
+purchaseOfferId,
+usageCellId,
+accountType,
+dateCreated,
+dateModified,
+FROM UserAccount
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1032)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+xactionId,
+FROM XactionId
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1033)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+xactionTypeId,
+description,
+FROM XactionType
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;
+
+1003)
+isql -Usa -P${Password27p} -S${serverSource} -D${dbSource} >> ${LogFile} <<EOF50
+SELECT 
+userId,
+FROM AccountTransactionBalance
+WHERE 
+	(dateCreated >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateCreated < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+	or (dateModifed >= convert(datetime, convert(char(8),$fileDate)) 
+		and dateModifed < dateadd(dd, 1, convert(datetime, convert(char(8),$fileDate)))) 
+\bcp ${dbLoad}..${tableNameBcpIn} -Usa -P${Password0r} -S${serverDest} -b 1000  
+go
+select '[rowCountBcp]  ' + convert(varchar(10),@@rowcount) 
+go
+EOF50
+;;

@@ -1,0 +1,66 @@
+create subscription IQDB1prad_RepTest
+for prad_RepTest
+with replicate at IQDB1.IQDB1
+without materialization
+Please, provide script allowing to receive below data from SYBASE 12/15
+
+Has Cold load failed
+Has Warm backup failed
+Has SRDF failed
+Has Disk mirroring on cluster failed
+Is Database available
+
+Measure tempDB size
+Measure remaining database space 
+
+% of space used up on data device
+% of space used up on log device
+
+Database SLA Compliance (
+Andrei says:
+(general method)
+
+# of Deadlocks per second
+# of blocked users or processes
+
+Average end-user response time
+Average db response time
+Log of users accessing DB
+# of locks per second
+# of full table or index scans per second
+
+Determine the largest worktable created in tempDB within each hour
+Data Cache Hit ratio
+Procedure Cache Hit ratio
+Logical I/O
+Top 10 Users 
+Top 10 tables by locking activity
+To
+Andrei says:
+Top 10 tables by locking activity
+Top 10 most used queries
+Top 10 queries by duration
+Top 10 most used stored procs
+Top 10 stored procs by duration
+Top 10 connections by duration
+Total connections
+Active connections
+Network In
+Network Out
+Network I/O delay count
+
+Has Sybase license expired
+
+Top 10 Fragmented tables 
+Top 10 fragmented index's 
+Total Number of queries per day
+Committed Transactions
+
+Andrei says:
+Committed Transactions
+Transaction Profile
+List of all sql's fired every 24 hours. This should be in a replayable form.
+Engine utilization per engine
+Device utilization
+Storage utilization
+Worker process mem failure

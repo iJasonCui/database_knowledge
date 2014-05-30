@@ -1,0 +1,192 @@
+## vocomo user from 10.209.10.82 and 10.209.10.80 onto  172.17.17.23 port 6010
+GRANT EXECUTE ON *.* TO 'vocomo'@'10.209.10.%' IDENTIFIED BY 'free2stay';
+GRANT SELECT ON *.* TO 'vocomo'@'10.209.10.%' IDENTIFIED BY 'free2stay';
+
+
+## TK weekly sales report
+##http://172.25.6.210/reports/weekly/weeklySalesSummary.html
+## user: report;  2viewNow
+GRANT SELECT ON *.* TO 'webmaint'@'172.25.6.210' IDENTIFIED BY 'free2stay'; 
+GRANT SELECT ON *.* TO 'webmaint'@'172.25.8.%' IDENTIFIED BY 'free2stay'; 
+
+# shew
+GRANT SELECT ON *.* TO 'sleong'@'172.25.8.101' IDENTIFIED BY 'free2stay'; 
+GRANT SELECT ON *.* TO 'sleong'@'172.25.8.65' IDENTIFIED BY 'free2stay'; 
+
+## Andy Rohan
+## 172.17.17.23 port 5010
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'172.25.8.84' IDENTIFIED BY 'andy123';
+
+
+## Brendon
+## 172.17.17.23 port 5010
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'172.25.8.94' IDENTIFIED BY 'brendon123';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'172.25.8.113' IDENTIFIED BY 'brendon123';
+
+#
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'10.30.18.153' IDENTIFIED BY '63vette';
+
+#lilian
+GRANT SELECT ON *.* TO 'webmaint'@'192.168.25.195' IDENTIFIED BY 'free2stay'; 
+
+## web user
+GRANT EXECUTE ON *.* TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+
+## webmaint user
+GRANT SELECT ON *.* TO 'webmaint'@'%' IDENTIFIED BY 'free2stay';
+GRANT REPLICATION CLIENT ON *.* TO 'webmaint'@'%'; --for kevin's monitor
+
+
+GRANT EXECUTE ON *.* TO 'webmaint'@'%' IDENTIFIED BY 'free2stay';
+GRANT EXECUTE ON *.* TO 'webmaint'@'192.168.25.86' IDENTIFIED BY 'free2stay';
+
+##on server g151db01 10.20.1.50 port 4010 and 4020
+## dev
+#liliana
+GRANT ALL PRIVILEGES  ON *.* TO 'root'@'127.0.0.1' IDENTIFIED BY 'just4you';
+GRANT ALL PRIVILEGES  ON *.* TO 'root'@'127.0.0.1' IDENTIFIED BY 'Cliff2012';
+UPDATE mysql.user SET Password=PASSWORD('just4you') WHERE User='root';
+FLUSH PRIVILEGES;
+
+GRANT ALL PRIVILEGES  ON *.* TO 'root'@'192.168.25.86' IDENTIFIED BY 'free2stay';
+GRANT ALL PRIVILEGES  ON *.* TO 'webmaint'@'192.168.25.86' IDENTIFIED BY 'free2stay';
+
+GRANT ALL PRIVILEGES  ON *.* TO 'root'@'192.168.25.118' IDENTIFIED BY 'free2stay';
+
+GRANT ALL PRIVILEGES  ON *.* TO 'root'@'192.168.25.65' IDENTIFIED BY 'just4you';
+
+##jeff on dev 
+GRANT ALL PRIVILEGES  ON *.* TO 'root'@'192.168.25.161' IDENTIFIED BY 'free2stay';
+GRANT ALL PRIVILEGES  ON *.* TO 'root'@'10.10.26.92' IDENTIFIED BY 'free2stay';
+
+##andy on dev 
+GRANT ALL PRIVILEGES  ON *.* TO 'webmaint'@'172.25.8.78' IDENTIFIED BY 'free2stay';
+
+
+
+##on server g151db01 10.20.1.50 port 5010 and 5020
+## test
+GRANT ALL PRIVILEGES  ON *.* TO 'root'@'127.0.0.1' IDENTIFIED BY 'just4you';
+UPDATE mysql.user SET Password=PASSWORD('just4you') WHERE User='root';
+UPDATE mysql.user SET Password=PASSWORD('just4you') WHERE User= 'root@127.0.0.1';
+FLUSH PRIVILEGES;
+
+
+GRANT SELECT ON *.* TO 'webmaint'@'%' IDENTIFIED BY 'free2stay';
+
+##production
+
+##jason pc
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'192.168.25.65' IDENTIFIED BY '63vette';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'192.168.27.62' IDENTIFIED BY '63vette';
+##wxdbmaint
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'10.10.86.73' IDENTIFIED BY '63vette';
+##gxcvs1
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'10.10.26.21' IDENTIFIED BY '63vette' with grant option;
+#localhost
+GRANT ALL PRIVILEGES  ON *.* TO 'root'@'127.0.0.1' IDENTIFIED BY 'Cliff2012';
+
+##vocomo
+GRANT ALL PRIVILEGES  ON *.* TO 'cron_sa'@'127.0.0.1' IDENTIFIED BY '63vette';
+GRANT ALL PRIVILEGES  ON *.* TO 'cron_sa'@'192.168.27.62' IDENTIFIED BY '63vette';
+GRANT ALL PRIVILEGES  ON *.* TO 'cron_sa'@'10.209.10.98' IDENTIFIED BY '63vette';
+GRANT ALL PRIVILEGES  ON *.* TO 'cron_sa'@'10.209.10.101' IDENTIFIED BY '63vette';
+
+#arch_vocomo 5100 on vocomo_master2
+# liliana
+GRANT ALL PRIVILEGES  ON *.* TO 'root'@'192.168.27.56' IDENTIFIED BY 'free2stay';
+
+
+## web user
+GRANT EXECUTE ON *.* TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+GRANT SELECT ON *.* TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+GRANT ALL ON Plus45.MailBody TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+
+GRANT ALL ON SurveyPoll.* TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+GRANT ALL ON SuccessStory.* TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+GRANT ALL ON Content.* TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+GRANT ALL ON ContentJava.* TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+GRANT ALL ON Jump.jumpout_user TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+GRANT ALL ON Jump.jump_user TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+GRANT ALL ON Jump.PublishTransUser TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+
+GRANT ALL ON Profile_ad.SavedSearch TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+GRANT ALL ON Profile_ar.SavedSearch TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+GRANT ALL ON Profile_ai.SavedSearch TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+GRANT ALL ON Profile_md.SavedSearch TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+GRANT ALL ON Profile_mr.SavedSearch TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+GRANT ALL ON Profile_mi.SavedSearch TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+GRANT ALL ON Profile_wd.SavedSearch TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+GRANT ALL ON Profile_wr.SavedSearch TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+GRANT ALL ON Profile_wi.SavedSearch TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+
+GRANT ALL ON Admin.* TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+
+GRANT ALL ON *.MailBody TO 'web'@'%' IDENTIFIED BY 'L0nd0n2o12';
+
+## webmaint user
+GRANT SELECT ON *.* TO 'webmaint'@'%' IDENTIFIED BY 'free2stay';
+GRANT REPLICATION CLIENT ON *.* TO 'webmaint'@'%'; 
+--for kevin's monitor
+
+## wordpress 
+GRANT ALL PRIVILEGES ON my_quote.* to 'httpd'@'%' IDENTIFIED BY 'free2stay';
+
+## c151dbp07 and my mac
+/usr/bin/mysqladmin -u root password 'Cliff2012'
+## changed in to 'just4you'
+CREATE DATABASE wordpress;
+CREATE USER wordpressuser@localhost;
+SET PASSWORD FOR wordpressuser@localhost= PASSWORD("free2stay");
+GRANT ALL PRIVILEGES ON wordpress.* TO wordpressuser@localhost IDENTIFIED BY "free2stay" ;
+FLUSH PRIVILEGES;
+
+#sep 19 2013
+REVOKE ALL PRIVILEGES ON *.* FROM 'webmaint';
+flush privileges;
+
+# 172.25.6.18 monitor server
+GRANT  REPLICATION CLIENT ON *.* TO 'webmaint'@'172.25.6.18' IDENTIFIED BY "free2stay";
+flush privileges;
+
+#-----------------------------------------------------------------#
+# change web password for online index maintenmance
+#-----------------------------------------------------------------#
+UPDATE mysql.user SET Password=PASSWORD('just4you') WHERE User='web';
+FLUSH PRIVILEGES;
+
+UPDATE mysql.user SET Password=PASSWORD('L0nd0n2o12') WHERE User='web';
+FLUSH PRIVILEGES;
+
+
+#---------------------------------------------------#
+# MySQL lavalife production
+#---------------------------------------------------#
+
+#-----------------------------------------------#
+# 1. standby server 10.50.4.20 port 4100 
+# 2. standby server 10.50.4.40 port 4100 
+#-----------------------------------------------#
+UPDATE mysql.user SET Password=PASSWORD('just4you') WHERE User='web';
+FLUSH PRIVILEGES;
+
+
+#------------------------------------------------#
+# MySQL Profile slave only servers
+# revoke execute privilege from stored procedure of modification
+#
+# 1. slave server 10.50.4.10 port 5100 
+# 2. slave server 10.50.4.20 port 5100 
+# 3. slave server 10.50.4.30 port 5100 
+# 4. slave server 10.50.4.40 port 5100 
+#
+SELECT ROUTINE_NAME FROM INFORMATION_SCHEMA.ROUTINES 
+WHERE ROUTINE_TYPE="PROCEDURE"  AND ROUTINE_SCHEMA="Profile_ar" 
+and ( ROUTINE_NAME like 'wsp_upd%' or ROUTINE_NAME like 'wsp_new%' or ROUTINE_NAME like 'wsp_save%' or ROUTINE_NAME like 'wsp_del%' or ROUTINE_NAME like 'wsp_add%' );
+
+
+revoke EXECUTE ON *.* from  'web'@'%' ;
+
+# profile_proxy database: Profile
+[jcui@gxcvs1 Profile_proxy]$ ./grantPermissionMySQL.sh 10.50.4.40 5100 Profile grant
+

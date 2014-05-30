@@ -1,0 +1,39 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_cntNewUser;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_cntNewUser (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mark Jaeckle
+**   Date:  September 5 2002  
+**   Description:  Counts number of new users since at_daysAgo days before now.
+**          
+** REVISION(S):
+**   Author: 
+**   Date: 
+**   Description:
+**
+******************************************************************************/
+at_daysAgo INT,
+at_gender CHAR
+)
+BEGIN
+
+DECLARE at_now DATETIME ;
+DECLARE at_now_seconds INT ;
+
+SET at_now = now();
+
+CALL wsp_convertTimestamp( at_now, at_now_seconds , 0 );
+
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;
+
+SELECT count(*)
+  FROM user_info
+ WHERE user_type IN('F', 'P') AND
+       signuptime >= (at_now_seconds - 86400 * at_daysAgo) AND
+       signuptime <= at_now_seconds AND
+       gender = at_gender ;
+        
+END;;
+DELIMITER ;

@@ -1,0 +1,28 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getBillToMobileRespStatus;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getBillToMobileRespStatus (
+
+/*******************************************************************
+**
+** CREATION:
+**   Author:      Andy Tran
+**   Date:        April 2011
+**   Description: Selects row from BillToMobileResponse for the given
+**                at_xactionId.
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*******************************************************************/
+ at_xactionId  DECIMAL(12,0)
+)
+BEGIN
+    SELECT IFNULL(status, -1) as status
+      FROM BillToMobileResponse
+     WHERE xactionId = at_xactionId;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

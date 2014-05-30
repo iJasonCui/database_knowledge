@@ -1,0 +1,150 @@
+--========== Add Mini-Me database (view database) and Rename a database connection ==============
+
+-------------------------------------
+Step 1: create mini-me DB
+-------------------------------------
+
+select "CREATE DATABASE " + name + "_view ON wdata3=80 LOG ON wlog5=40 "
+from sysdatabases where name not in ('master', 'tempdb', 'model', 'sybsystemprocs', 'sybsystemdb') and name not like "%view"
+
+select "EXEC sp_dboption '" + name + "','dbo use only',true" from sysdatabases where name like "%view"
+select "EXEC sp_dboption '" + name + "','trunc log on chkpt',true" from sysdatabases where name like "%view"
+
+
+CREATE DATABASE IVROnWeb_view ON wdata3=80 LOG ON wlog5=40 
+CREATE DATABASE Msg_ad_view ON wdata3=80 LOG ON wlog5=40 
+CREATE DATABASE Msg_ai_view ON wdata3=80 LOG ON wlog5=40 
+CREATE DATABASE Msg_ar_view ON wdata3=80 LOG ON wlog5=40 
+CREATE DATABASE Msg_md_view ON wdata3=80 LOG ON wlog5=40 
+CREATE DATABASE Msg_mi_view ON wdata3=80 LOG ON wlog5=40 
+CREATE DATABASE Msg_mr_view ON wdata3=80 LOG ON wlog5=40 
+CREATE DATABASE Msg_wd_view ON wdata3=80 LOG ON wlog5=40 
+CREATE DATABASE Msg_wi_view ON wdata3=80 LOG ON wlog5=40 
+CREATE DATABASE Msg_wr_view ON wdata3=80 LOG ON wlog5=40 
+CREATE DATABASE Profile_md_view ON wdata3=80 LOG ON wlog5=40 
+CREATE DATABASE Profile_mi_view ON wdata3=80 LOG ON wlog5=40 
+CREATE DATABASE Profile_mr_view ON wdata3=80 LOG ON wlog5=40 
+CREATE DATABASE Profile_wd_view ON wdata3=80 LOG ON wlog5=40 
+CREATE DATABASE Profile_wi_view ON wdata3=80 LOG ON wlog5=40 
+CREATE DATABASE Profile_wr_view ON wdata3=80 LOG ON wlog5=40 
+CREATE DATABASE SuccessStory_view ON wdata3=80 LOG ON wlog5=40 
+CREATE DATABASE USI_view ON wdata3=80 LOG ON wlog5=40 
+
+
+USE master
+go
+CREATE DATABASE PartyMember_view
+    ON wdev20=128
+    LOG ON wlog6=128
+go
+USE master
+go
+EXEC sp_dboption 'PartyMember_view','dbo use only',true
+go
+EXEC sp_dboption 'PartyMember_view','trunc log on chkpt',true
+go
+USE PartyMember_view
+go
+CHECKPOINT
+go
+IF DB_ID('PartyMember_view') IS NOT NULL
+    PRINT '<<< CREATED DATABASE PartyMember_view >>>'
+ELSE
+    PRINT '<<< FAILED CREATING DATABASE PartyMember_view >>>'
+go
+USE PartyMember_view
+go
+EXEC sp_changedbowner 'sa'
+go
+
+
+---------------------------------------------------
+Step 2: add rep-maint-user to  mini-me DB as alias
+---------------------------------------------------
+
+USE PartyMember_view
+go
+EXEC sp_addalias 'rep5p_maint_user','dbo'
+go
+
+---------------------------------------------------
+Step 3: create view against tables on mini-me DB 
+---------------------------------------------------
+
+select "CREATE VIEW " + name + " AS SELECT * FROM PartyMember.." + name 
+from sysobjects where type = "U" and name not like "rs%" 
+order by name 
+
+For instance:
+
+CREATE VIEW PartyBrowse AS SELECT * FROM PartyMember..PartyBrowse
+CREATE VIEW PartyFlirts AS SELECT * FROM PartyMember..PartyFlirts
+
+---------------------------------------------------
+Step 3.1: modify the interfaces file
+---------------------------------------------------
+[repserver@webtheta:~]$ pwd
+/opt/etc/repserver126
+
+vi interfaces
+
+
+w151dbp01L
+        query tcp ether w151dbp01 4100
+
+w151dbp02L
+        query tcp ether w151dbp02 4100
+
+w151dbp03L
+        query tcp ether w151dbp03 4100
+
+
+----------------------------------------------------------------------------------------------
+Step 4: shutdown all rep servers in the replcation domain
+----------------------------------------------------------------------------------------------
+
+shutdown rep2p / rep3p /rep4p / rep5p 
+
+----------------------------------------------------------------------------------------------
+Step 5: In the RSSD of all rep servers, run updates as bellow:
+----------------------------------------------------------------------------------------------
+
+[rep5p_RSSD of webtheta] 
+
+SELECT dsname+ "L", * FROM rs_databases WHERE dsname='w151dbp02'  and ltype='P' and dbname like "%view"
+--UPDATE rs_databases SET dsname=dsname+ "L"  WHERE dsname='w151dbp02' and ltype='P' and dbname like "%view"
+
+SELECT dbname + "_view", dsname+ "L", * FROM rs_databases WHERE dsname='w151dbp02'  and ltype='P' and dbname not like "%view"
+--UPDATE rs_databases SET dbname = dbname + "_view", dsname=dsname+ "L"  WHERE dsname='w151dbp02' and ltype='P' and dbname not like "%view"
+
+
+SELECT * FROM rs_databases WHERE dsname='w151dbp03' AND dbname='PartyMember' and ltype='P'
+--UPDATE rs_databases SET dbname = "PartyMember_view" WHERE dsname='w151dbp03' AND dbname='PartyMember' and ltype='P'
+
+SELECT * FROM rs_repdbs    WHERE dsname='w151dbp03' AND dbname='PartyMember' 
+--UPDATE rs_repdbs    SET dbname = "Partymember_view" WHERE dsname='w151dbp03' AND dbname='PartyMember' 
+
+SELECT * FROM rs_databases WHERE dsname='w151dbp03' AND dbname='PartyMember_view' and ltype='P'
+--UPDATE rs_databases SET dsname='w151dbp03L' WHERE dsname='w151dbp03' AND dbname='PartyMember_view' and ltype='P'
+
+----------------------------------------------------------------------------------------------
+Step 6: In the RSSD of the ID Repserver, run update as follows:
+----------------------------------------------------------------------------------------------
+
+[rep2p_RSSD of webgamma]
+
+SELECT * FROM rs_idnames WHERE name1='w151dbp03' and name2='PartyMember' and type=9 and ltype='P'
+--UPDATE rs_idnames SET name1='w151dbp03', name2='PartyMember_view' WHERE name1='w151dbp03' and name2='PartyMember' and type=9 and ltype='P'
+
+SELECT * FROM rs_idnames WHERE name1='w151dbp03' and name2='PartyMember_view' and type=9 and ltype='P'
+--UPDATE rs_idnames SET name1='w151dbp03L' WHERE name1='w151dbp03' and name2='PartyMember_view' and type=9 and ltype='P'
+
+------------------------------------------------------------------------------------------------
+step 7: migrate rs tables and procs into mini db using DBArtision
+------------------------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------------------------
+step 8: re-start all rep servers
+------------------------------------------------------------------------------------------------
+

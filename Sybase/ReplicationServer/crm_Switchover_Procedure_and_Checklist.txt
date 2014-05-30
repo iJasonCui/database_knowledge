@@ -1,0 +1,117 @@
+crm Database Switchover Procedure
+
+Assume the following:
+- crm: Primary = c151dbp02; Warm Standby = c151dbp03 --> Primary = c151dbp03; Warm Standby = c151dbp02
+
+1. Make sure you have login credentials for the following servers in your $HOME/.sybpwd:
+- c151dbp02
+- c151dbp03
+- v151rep01
+
+2. Run switchover script in web/javalife/db/scripts/RepServer/SwitchWarmStandby_crm.sh
+   Usage: ${0} <activeSRV> <standbySRV> <repSRV> <logicalSRV> <DBName> <activeSRVForRep> <standbySRVForRep> 
+
+- For crm database:./SwitchWarmStandby_crm.sh c151dbp02 c151dbp03 v151rep01 LogicalSRV crm c151dbp02 c151dbp03
+
+***************************************************************************************************************
+********************************IMPORTANT!!********************************************************************
+ChargebackLoad database should be on the same server as crm at all times!!!
+If you ever move crm or ChargebackLoad, they will have to be on the same server!!!
+- For ChargebackLoad database:./SwitchWarmStandby_ChargebackLoad.sh c151dbp02 c151dbp03 v151rep01 LogicalSRV ChargebackLoad c151dbp02 c151dbp03
+***************************************************************************************************************
+
+3. Double-check if the new primary's db option "dbo use only" is false
+
+4. Change the crons on the following servers:
+
+ivrdb1r (NOTE: You have to change the actual script since the database server is specified within the script!!!)
+================================================================================================================
+05 09 * * 3 (cd /opt/etc/sybase12_52/maint/subCallBack; ./processSCBRecFile.sh > ./processSCBRecFile.sh.out 2>&1)
+05 07 * * 3 (cd /opt/etc/sybase12_52/maint/900load; ./processRecFile.sh > ./processRecFile.sh.out 2>&1)
+================================================================================================================
+
+
+c151dbp02
+================================================================================================================
+# Sync lookup tables for ContentMonitor
+0,15,30,45 * * * * (cd /export/home/sybase/maint/c151dbp02pgs/ContentMonitor; ./sync_lookup_tables.sh c151dbp02 crm c151dbp03pgs ContentMonitor > ./sync_lookup_tables.log 2>&1
+================================================================================================================
+
+
+wxdbmaint
+================================================================================================================
+
+##################################################################
+#  CCD Crons
+##################################################################
+#-----------------------------------------------------------------#
+##Report extracts
+# arch_CRM.sh is currently running verisign extracts. Ultimatly will replace processcrm.sh
+00 3 * * * (cd /opt/scripts/maint/ccd/arch_CRM; ./arch_CRM.sh c151dbp02  1> ./arch_CRM.log 2>&1)
+30 3 * * * (cd /opt/scripts/maint/ccd/arch_CRM; ./arch_CRM_BD.sh c151dbp02 1> ./arch_CRM_BD.log 2>&1)
+45 3 * * * (cd /opt/scripts/maint/ccd; ./processcrm.sh c151dbp02 > processcrm.sh.out 2>&1)
+##Pending Archive
+00 6 * * * (cd /opt/scripts/maint/ccd; ./cron_pending_arch.sh c151dbp02  > ./cron_pending_arch.sh.out 2>&1 )
+# Paymentech Download Batch
+#------------------------------------------------------------------------------------------------------------------------
+5 2 * * *  (cd /opt/scripts/maint/ccd/arch_CRM; ./arch_CRM_Paymentech.sh  c151dbp02 1> ./arch_CRM_Paymentech.log 2>&1)
+#------------------------------------------------------------------------------------------------------------------------
+##Activity sales summary -  daily job
+45 4 * * * (cd /opt/scripts/maint/ccd/agentSum; ./agentSum.sh  c151dbp02 1> ./agentSum.log 2>&1)
+#
+## Chargeback
+45 4 * * * (cd /opt/scripts/maint/ccd; ./cron-load-chargebacksreason.sh w151dbp01 Chargeback c151dbp02 ChargebackLoad> cron-load-Chargebacks.sh.out)
+05 5 * * * (cd /opt/scripts/maint/ccd/Chargeback; ./process_ChargeBacks.sh w151dbp01 Chargeback c151dbp02 ChargebackLoad> process_ChargeBacks.sh.out 2>&1)
+45 10 * * * (cd /opt/scripts/maint/ccd; ./cron-load-chargebacksreason.sh w151dbp01 Chargeback c151dbp02 ChargebackLoad> cron-load-Chargebacks.sh.out)
+#
+05 11 * * * (cd /opt/scripts/maint/ccd/Chargeback; ./process_ChargeBacks.sh w151dbp01 Chargeback c151dbp02 ChargebackLoad> process_ChargeBacks.sh.out 2>&1)
+#
+45 14 * * * (cd /opt/scripts/maint/ccd; ./cron-load-chargebacksreason.sh w151dbp01 Chargeback c151dbp02 ChargebackLoad> cron-load-Chargebacks.sh.out)
+05 15 * * * (cd /opt/scripts/maint/ccd/Chargeback; ./process_ChargeBacks.sh w151dbp01 Chargeback c151dbp02 ChargebackLoad> process_ChargeBacks.sh.out 2>&1)
+## sync_operator_table.sh - Disabled on 2010-03-01 requsted by Tk Chan
+#23 * * * * (cd /opt/scripts/maint/ccd/Chargeback; ./sync_operator_table.sh c151dbp02 crm w151dbp01 Chargeback > sync_operator_table.sh.out)
+#
+#------------------------------------------------------------------------------------------------------------------------
+# Purge all Expired data (older then 13 month)
+#  1.CreditCardActivity 2.SettementResponse 3.PaymentechResponce 4.PaymentechRequest 5.VerisingResponse 6.VerisingRequest
+#------------------------------------------------------------------------------------------------------------------------
+30 12 * * * (cd /opt/scripts/maint/ccd; ./crm_purge_13_month.sh c151dbp02 > crm_purge_13_month.sh.out 2>&1)
+#------------------------------------------------------------------------------------------------------------------------
+# Customer Purge Job deleting customer older than 8 years
+#------------------------------------------------------------------------------------------------------------------------
+30 5 * * * (cd /opt/scripts/maint/ccd/custPurg; ./custPurg.sh  c151dbp02 1> ./custPurg.log 2>&1)
+#------------------------------------------------------------------------------------------------------------------------
+#
+# Purge Credit Card transactions older than 13 months
+05 5 * * * (cd /opt/scripts/maint/ccd/custPurg; ./removeOldPayments.sh c151dbp02 1> ./removeOldPayments.sh.log 2>&1 )
+#
+# Purge data from some CRN Log Tables
+05 7 * * * (cd /opt/scripts/maint/ccd/custPurg; ./deleteCRMLogtables.sh c151dbp02 1> ./deleteCRMLogtables.sh.log 2>&1 )
+#
+# Delete Cheques from CashPaymentExcp older than six months
+#------------------------------------------------------------------------------------------------------------------------
+30 11 1 * * (cd /opt/scripts/maint/ccd;  ./update_stale_cheques.sh c151dbp02 > update_stale_cheques.sh.out 2>&1 )
+================================================================================================================
+
+
+
+
+Application Side Changes Required
+
+Call Center Apps: changes to database-config.xml
+
+Restart:
+collector-1
+collector-2
+ccapps2
+olccp-01
+
+Ivr Apps: changes to database-config.xml
+
+Restart:
+Mond (for ivr)
+SMS Billing App
+900 (US, Cdn, Aus)
+CS
+
+changes to CCVision config

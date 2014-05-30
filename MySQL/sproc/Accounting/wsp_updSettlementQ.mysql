@@ -1,0 +1,61 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updSettlementQ;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updSettlementQ (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Jeff Yang 
+**   Date:    Jnue 7 2008
+**   Description:  approve or reject settlement q and insert a row into CreditCardTransaction table. 
+**
+******************************************************************************/
+at_xactionId  DECIMAL(12,0),
+at_status int, 
+at_adminUserId int 
+)
+BEGIN
+DECLARE at_dateGMT	DATETIME;
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+   ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+   ROLLBACK;
+END;
+
+SET at_dateGMT = UTC_TIMESTAMP();
+
+START TRANSACTION;
+ 
+IF at_status = 1 OR at_status = 2 
+THEN 
+       UPDATE SettlementQueue 
+       SET status=at_status, adminUserId=at_adminUserId, dateReviewed=at_dateGMT 
+       WHERE xactionId=at_xactionId;
+              -- In SettlemtnQueue 
+              -- 0 MEANS pending approve 
+              -- 1 MEANS approved, in other words: it is for Pending settlement 
+              -- 2 MEANS rejected 
+     
+
+       UPDATE CreditCardTransaction 
+       SET CCTranStatusId = at_status 
+       WHERE xactionId = at_xactionId 
+            AND CCTranStatusId = 6;
+        
+                 -- In CreditCardTransaction: 
+                 -- 1 MEANS Pending for settlement 
+                 -- 2 MEANS void 
+END IF;
+
+COMMIT;
+
+SELECT 0 AS RESULT,ROW_COUNT() AS ROWCNT,at_xactionId AS PRIMKEY;
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

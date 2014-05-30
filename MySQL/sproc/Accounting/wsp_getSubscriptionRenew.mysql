@@ -1,0 +1,29 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getSubscriptionRenew;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getSubscriptionRenew (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author: Yan Liu 
+**   Date:  April 2008
+**   Description:  retrieves all expired subscriptions, which are then either
+**                 renewed or marked inactive.
+**
+**
+******************************************************************************/
+)
+BEGIN
+   DECLARE at_dateNow DATETIME;
+
+   SET at_dateNow = UTC_TIMESTAMP();
+
+   SELECT userId , autoRenew, cardId, subscriptionOfferDetailId, subscriptionStatus, subscriptionEndDate
+    FROM UserSubscriptionAccount
+    WHERE subscriptionStatus <> 'I'
+      AND subscriptionEndDate < at_dateNow
+   ORDER BY userId;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

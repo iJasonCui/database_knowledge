@@ -1,0 +1,92 @@
+exec rs_configure 'cm_max_connections', '160'
+exec rs_configure 'memory_limit', '512'
+exec rs_configure 'num_client_connections',     '45'  
+exec rs_configure 'num_msgqueues',              '600'
+exec rs_configure 'num_stable_queues',          '128' 
+exec rs_configure 'num_threads',                '400'
+exec rs_configure 'sqt_max_cache_size',         '20971520' 
+exec rs_configure 'sts_cachesize',              '200' 
+exec rs_configure 'smp_enable',                 'on'
+
+
+
+5,18c5,6
+<  cm_max_connections         128                    128                       
+<  current_rssd_version       1260                   1260                      
+<  dsi_commit_check_locks_int 1000                   1000                      
+<  dsi_commit_check_locks_log 200                    200                       
+<  dsi_commit_check_locks_max 400                    400                       
+<  dsi_commit_control         on                     on                        
+<  dsi_exec_request_sproc     on                     on                        
+<  dsi_ignore_underscore_name on                     on                        
+<  dsi_max_xacts_in_group     20                     20                        
+<  dsi_partitioning_rule      none                   none                      
+<  dsi_rs_ticket_report       off                    off                       
+<  dsi_text_convert_multiplie 1.0                    1.0                       
+<  exec_cmds_per_timeslice    5                      5                         
+<  exec_sqm_write_request_lim 16384                  16384                     
+---
+>  cm_max_connections         64                     64                        
+>  current_rssd_version       1500                   1500                      
+27c15
+<  id_server                  rep2p                  rep2p                     
+---
+>  id_server                  w151rep01              w151rep01                 
+32,33c20
+<  md_sqm_write_request_limit 100000                 100000                    
+<  memory_limit               512                    512                       
+---
+>  memory_limit               40                     40                        
+35c22
+<  minimum_rssd_version       1260                   1260                      
+---
+>  minimum_rssd_version       1500                   1500                      
+42c29
+<  num_client_connections     45                     45                        
+---
+>  num_client_connections     30                     30                        
+44c31
+<  num_msgqueues              600                    600                       
+---
+>  num_msgqueues              178                    178                       
+47,50c34,37
+<  num_stable_queues          128                    128                       
+<  num_threads                400                    400                       
+<  oserver                    rep3p                  rep3p                     
+<  password_encryption        1                      1                         
+---
+>  num_stable_queues          32                     32                        
+>  num_threads                50                     50                        
+>  oserver                    w151rep03              w151rep03                 
+>  password_encryption        0                      0                         
+53,54c40
+<  rep_as_standby             off                    off                       
+<  rsm_proc_compat_version    1260                   1260                      
+---
+>  rsm_proc_compat_version    1500                   1500                      
+58,59c44
+<  send_truncate_table        on                     on                        
+<  smp_enable                 false                  false                     
+---
+>  smp_enable                 off                    off                       
+66c51
+<  sqt_max_cache_size         20971520               20971520                  
+---
+>  sqt_max_cache_size         1048576                1048576                   
+70a56
+>  stats_engineering_counters off                    off                       
+73,74c59,61
+<  stats_sampling             on                     on                        
+<  sts_cachesize              200                    200                       
+---
+>  stats_sampling             off                    off                       
+>  stats_show_zero_counters   off                    off                       
+>  sts_cachesize              100                    100                       
+91d77
+<  sts_full_cache_rs_locater  off                    off                       
+117d102
+<  sub_sqm_write_request_limi 32768                  32768                     
+121c106
+<  varchar_truncation         off                    off   
+---
+>  varchar_truncation         off                    off 

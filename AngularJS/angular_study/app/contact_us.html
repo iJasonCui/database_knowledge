@@ -1,0 +1,114 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Contact Us</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link type="image/x-icon" href="http://www.tutorialrepublic.com/favicon.ico" rel="shortcut icon" />
+    <link href="http://www.tutorialrepublic.com/lib/styles/default.css" media="all" type="text/css" rel="stylesheet" />
+    <script type="text/javascript" src="http://www.tutorialrepublic.com/lib/js/jquery.min.js"></script>
+    <script type="text/javascript" src="http://www.tutorialrepublic.com/lib/js/default.js"></script>        
+    
+    <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40117907-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+</head>
+
+<body>
+
+    <div class="centercolumn">
+        <div class="tutorialbox">
+            
+            <!--Text Content-->
+            <div class="content">
+                <!-- InstanceBeginEditable name="main_content" -->
+                <a href="index.html" class="previous-page" title="Go to Previous Page"></a>
+                <a href="javascript:void(0);" class="next-page disabled" title="Go to Next Page : Disabled"></a>
+                <h1>Contact <span>Us</span></h1>
+                <p class="subhead">We would love to hear from you so please feel free to drop us a line. If you are expecting a response, you will need to provide us your email<em>*</em> address, of course.</p>
+            
+                <div class="contact-form">
+                <form method="post" action="lib/assets/post-contact.php">
+                    <p><label>Your Name (optional) <input type="text" name="user-name" class="name" /></label></p>
+                    <p><label>Your E-mail (optional) <input type="text" name="user-email" class="email" /></label></p>
+                    <p><label>Subject <input type="text" name="subject" class="subject" /></label></p>
+                    <p><label>Your Message <textarea name="comments"></textarea></label></p>                        
+                    <p><input type="submit" value="Submit" class="blue-btn" /></p>
+                </form>                                       
+                </div>
+            
+                <div class="contact-hint">
+                    <p>You may use this contact form to:</p>
+                    <ul>
+                        <li>report any inaccuracies in the information presented on this website,</li>
+                        <li>advertise with us to promote your product or the services you provide, or</li>
+                        <li>provide suggestions to improve this website.</li>
+                    </ul>
+                    <p class="break">Unfortunately we are not able to provide individual help, or support for a specific problem due to the volume of mail we receive every day. But rest assured that we read every single comment :)</p>
+                    <p><em>(*) We respect your privacy, so the information that you provide remains confidential. We will never share your email address or other personal information with anyone.</em></p>
+                </div>
+            
+                <!--Bottom Navigation-->
+                <div class="bottom-link">
+                    <a href="index.html" class="previous-page-bottom">Previous Page</a>
+                    <a href="javascript:void(0);" class="next-page-bottom disabled" title="Disabled">Next Page</a>
+            
+                    <div class="clear">&nbsp;</div>
+                </div>
+                <!--End:Bottom Navigation--> 
+                <!-- InstanceEndEditable -->
+            </div>
+            <!--End:Text Content-->
+        </div>
+
+        <!--Feedback Form-->
+        <div class="report-error">
+            <div class="contact-form">
+                <span class="close">Close</span>
+                <form id="feedback-form" action="#">
+                <h3>Your Feedback:</h3>
+                <div>
+                    <p class="fl"><label>Your Name (optional) <input type="text" name="user-name" id="user-name" class="name" /></label></p>
+                    <p class="fr"><label>Your E-mail (optional) <input type="text" name="user-email" id="user-email" class="email" /></label></p>
+                    <div class="clear">&nbsp;</div>
+                </div>
+                <p><label>Page address <input type="text" name="page-url" id="page-url" disabled="disabled" /></label></p>
+                <p><label>Description <textarea name="description" id="description"></textarea></label></p>
+                <p id="feedback-error">We will be happy if you say something.</p>
+                <p><input type="button" value="Send" class="blue-btn" onclick="sendFeedback()" /></p>
+                </form>
+                <div id="response"></div>
+                <div class="clear">&nbsp;</div>
+            </div>           
+        </div>           
+        <!--End:Feedback Form-->
+
+               <!--Bottom Ads-->
+        <div class="bottom-ad">
+                    
+            <!--Advertise Here Placeholder-->
+            <a href="http://www.olympiads.ca/">
+            <img src="./img/Olympiads.png" alt="Olympiads School" />
+            </a>
+            <a href="http://www.ivyglobal.ca/">
+            <img src="./img/IvyGlobal.png" alt="Ivy Global" />
+            </a>
+
+            <!--Advertisement From Vendor-->         
+            <div class="clear">&nbsp;</div>
+        </div>
+        <!--End:Bottom Ads-->
+ 
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,40 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_wcsUserInfoByZipCode;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_wcsUserInfoByZipCode (
+ at_count  INT
+,at_zipcode   VARCHAR(10)
+)
+BEGIN
+
+DECLARE at_getDateGMT DATETIME;
+DECLARE at_getHourGMT INT;
+
+SET at_zipcode = UPPER(at_zipcode) ;
+
+CALL wsp_GetDateGMT(at_getDateGMT);
+SET at_getHourGMT = HOUR(at_getDateGMT) ;
+
+IF at_getHourGMT > 21 OR at_getHourGMT < 13
+THEN
+   SELECT 0 AS user_id, 'Pls run 8am-4pm' AS zipcode, "Unknown" AS gender ;
+ELSE
+
+  SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;
+
+  SELECT user_id
+  ,username
+  ,zipcode
+  ,CASE WHEN gender = "M" THEN "Male"
+        WHEN gender = "F" THEN "Female"
+        WHEN gender = "C" THEN "Couples"
+        ELSE "Unknown"
+   END as gender
+  FROM user_info
+  WHERE zipcode LIKE at_zipcode
+  ORDER BY user_id DESC
+  LIMIT at_count;
+
+END IF;
+
+END;;
+DELIMITER ;

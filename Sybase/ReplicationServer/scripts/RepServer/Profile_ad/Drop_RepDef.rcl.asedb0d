@@ -1,0 +1,11 @@
+drop replication definition ad_Blocklist                  
+drop replication definition ad_Hotlist                    
+drop replication definition ad_Pass                       
+drop replication definition ad_RepTest                    
+drop replication definition ad_SavedSearch                
+drop replication definition ad_Smile                      
+drop replication definition ad_a_backgreeting_dating      
+drop replication definition ad_a_dating                   
+drop replication definition ad_a_mompictures_dating       
+drop replication definition ad_a_profile_dating
+go

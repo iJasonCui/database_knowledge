@@ -1,0 +1,41 @@
+
+--select '2004Sep' as Month,
+
+select '2004Oct' as Month,
+SUM(creditConsumed2004Sep) as creditConsumed,
+SUM(case when creditConsumed2004Sep < 0 then 1 else 0 end) as userCount,
+
+SUM(case when creditConsumed2004Sep < 0 and creditConsumed2004Aug = 0 and creditConsumed2004Jul = 0 and creditConsumed2004Jun = 0
+and creditConsumed2004May < 0 then creditConsumed2004Sep else 0 end ) as creditConsumedM3,
+SUM(case when creditConsumed2004Sep < 0 and creditConsumed2004Aug = 0 and creditConsumed2004Jul = 0 and creditConsumed2004Jun = 0
+and creditConsumed2004May < 0 then 1 else 0 end ) as countM3 ,
+
+SUM(case when creditConsumed2004Sep < 0 and creditConsumed2004Aug = 0 and creditConsumed2004Jul = 0 and creditConsumed2004Jun = 0
+and creditConsumed2004May = 0 and creditConsumed2004Apr < 0 then creditConsumed2004Sep else 0 end ) as creditConsumedM4,
+SUM(case when creditConsumed2004Sep < 0 and creditConsumed2004Aug = 0 and creditConsumed2004Jul = 0 and creditConsumed2004Jun = 0
+and creditConsumed2004May = 0 and creditConsumed2004Apr < 0 then 1 else 0 end ) as countM4 ,
+
+SUM(case when creditConsumed2004Sep < 0 and creditConsumed2004Aug = 0 and creditConsumed2004Jul = 0 and creditConsumed2004Jun = 0
+and creditConsumed2004May = 0 and creditConsumed2004Apr = 0 and creditConsumed2004Mar < 0 
+then creditConsumed2004Sep else 0 end ) as creditConsumedM5,
+SUM(case when creditConsumed2004Sep < 0 and creditConsumed2004Aug = 0 and creditConsumed2004Jul = 0 and creditConsumed2004Jun = 0
+and creditConsumed2004May = 0 and creditConsumed2004Apr = 0 and creditConsumed2004Mar < 0 then 1 else 0 end ) as countM5,
+
+SUM(case when creditConsumed2004Sep < 0 and creditConsumed2004Aug = 0 and creditConsumed2004Jul = 0 and creditConsumed2004Jun = 0
+and creditConsumed2004May = 0 and creditConsumed2004Apr = 0 and creditConsumed2004Mar = 0  and creditConsumed2004Feb < 0
+then creditConsumed2004Sep else 0 end ) as creditConsumedM6,
+SUM(case when creditConsumed2004Sep < 0 and creditConsumed2004Aug = 0 and creditConsumed2004Jul = 0 and creditConsumed2004Jun = 0
+and creditConsumed2004May = 0 and creditConsumed2004Apr = 0 and creditConsumed2004Mar = 0 and creditConsumed2004Feb < 0
+then 1 else 0 end ) as countM6,
+
+SUM(case when creditConsumed2004Sep < 0 and creditConsumed2004Aug = 0 and creditConsumed2004Jul = 0 and creditConsumed2004Jun = 0
+and creditConsumed2004May = 0 and creditConsumed2004Apr = 0 and creditConsumed2004Mar = 0 and creditConsumed2004Feb = 0  
+and dateFirstPurchased < 'Jan 1 2004' then creditConsumed2004Sep else 0 end ) as creditConsumedM7,
+SUM(case when creditConsumed2004Sep < 0 and creditConsumed2004Aug = 0 and creditConsumed2004Jul = 0 and creditConsumed2004Jun = 0
+and creditConsumed2004May = 0 and creditConsumed2004Apr = 0 and creditConsumed2004Mar = 0 and creditConsumed2004Feb = 0 
+and dateFirstPurchased < 'Jan 1 2004' then 1 else 0 end ) as countM7
+
+from DeferredRev.NegativeChartJul2005
+go
+
+

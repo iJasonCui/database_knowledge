@@ -1,0 +1,27 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_delHotlistByUsrIdTrgtId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_delHotlistByUsrIdTrgtId (
+/***********************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga
+**   Date:  October 17 2002
+**   Description:  Deletes a row from Hotlist for a given user and target
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+ at_productCode CHAR(1)
+,at_communityCode CHAR(1)
+,at_userId DECIMAL(12,0)
+,at_targetUserId DECIMAL(12,0)
+)
+BEGIN 
+	DELETE FROM Hotlist 
+	WHERE userId = at_userId
+	AND targetUserId = at_targetUserId;
+END;;
+DELIMITER ;

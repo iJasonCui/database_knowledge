@@ -1,0 +1,85 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newPayPalNotify;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newPayPalNotify (
+
+/*******************************************************************
+**
+** CREATION:
+**   Author:      Andy Tran
+**   Date:        July 2009 
+**   Description: Inserts row into PayPalNotify
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*******************************************************************/
+
+ at_paymentNumber      VARCHAR(17)
+,at_paymentType        VARCHAR(63)
+,at_paymentStatus      VARCHAR(9)
+,at_paymentDate        VARCHAR(30)
+,at_paymentAmount      VARCHAR(7)
+,at_feeAmount          VARCHAR(7)
+,at_currencyCode       VARCHAR(3)
+,at_invoiceNumber      VARCHAR(19)
+,at_receiverId         VARCHAR(17)
+,at_receiverEmail      VARCHAR(127)
+,at_payerId            VARCHAR(17)
+,at_payerEmail         VARCHAR(127)
+,at_recurringProfileId VARCHAR(14)
+,at_profileStatus      VARCHAR(14)
+,at_nextPaymentDate    VARCHAR(30)
+)
+label_this:BEGIN
+
+DECLARE at_dateNow DATETIME;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+IF (SELECT 1 FROM PayPalNotify WHERE paymentNumber = at_paymentNumber) IS NOT NULL THEN 
+   LEAVE label_this;
+END IF; 
+
+INSERT INTO PayPalNotify (
+         paymentNumber
+        ,paymentType
+        ,paymentStatus
+        ,paymentDate
+        ,paymentAmount
+        ,feeAmount
+        ,currencyCode
+        ,invoiceNumber
+        ,receiverId
+        ,receiverEmail
+        ,payerId
+        ,payerEmail
+        ,recurringProfileId
+        ,profileStatus
+        ,nextPaymentDate
+        ,dateCreated
+    )
+    VALUES (
+         at_paymentNumber
+        ,at_paymentType
+        ,at_paymentStatus
+        ,at_paymentDate
+        ,at_paymentAmount
+        ,at_feeAmount
+        ,at_currencyCode
+        ,at_invoiceNumber
+        ,at_receiverId
+        ,at_receiverEmail
+        ,at_payerId
+        ,at_payerEmail
+        ,at_recurringProfileId
+        ,at_profileStatus
+        ,at_nextPaymentDate
+        ,at_dateNow
+    );
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

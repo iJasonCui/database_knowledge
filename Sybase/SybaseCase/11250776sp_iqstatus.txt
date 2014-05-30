@@ -1,0 +1,81 @@
+'Adaptive Server IQ (TM)','Copyright (c) 1992-2005 by Sybase, Inc. All rights reserved.'
+
+' Version:','12.6.0/050217/P/ESD 1/Sun_svr4/OS 5.8/64bit/2005-02-17 00:19:58'
+
+' Time Now:','2006-04-21 16:08:17.422'
+
+' Build Time:','2005-02-17 00:19:58'
+
+' File Format:','23 on 03/18/1999 '
+
+' Server mode:','IQ Server'
+
+' Catalog Format:','2'
+
+' Stored Procedure Revision:','1'
+
+' Page Size:','131072/8192blksz/16bpp'
+
+' Number of Main DB Spaces:','1'
+
+' Number of Temp DB Spaces:','4'
+
+' Number of Local DB Spaces:','0'
+
+' DB Blocks: 1-35709598','IQ_SYSTEM_MAIN'
+
+' Temp Blocks: 1-128000','IQ_SYSTEM_TEMP'
+
+' Temp Blocks: 1045440-1173439','IQ_TEMP2'
+
+' Temp Blocks: 2090880-2218879','IQ_TEMP3'
+
+' Temp Blocks: 3136320-3648319','IQ_TEMP4'
+
+' Create Time:','2004-09-14 13:29:43.056'
+
+' Update Time:','2006-04-21 04:00:34.920'
+
+' Main IQ Buffers:','12252, 1536Mb'
+
+' Temporary IQ Buffers:','4897, 614Mb'
+
+' Main IQ Blocks Used:','19081725 of 35709598, 53%=145Gb, Max Block#: 35646975'
+
+' Temporary IQ Blocks Used:','164 of 896000, 0%=1Mb, Max Block#: 0'
+
+' Main Reserved Blocks Available:','25600 of 25600, 100%=200Mb'
+
+' Temporary Reserved Blocks Available:','25600 of 25600, 100%=200Mb'
+
+' IQ Dynamic Memory:','Current: 2188mb, Max: 2189mb'
+
+' Main IQ Buffers:','Used: 72, Locked: 0'
+
+' Temporary IQ Buffers:','Used: 10, Locked: 0'
+
+' Main IQ I/O:','I: L367/P36 O: C36/D36/P0 D:0 C:100.0'
+
+' Temporary IQ I/O:','I: L307/P0 O: C40/D40/P0 D:30 C: 0.0'
+
+' Other Versions:','0 = 0Mb'
+
+' Active Txn Versions:','0 = C:0Mb/D:0Mb'
+
+' Last Full Backup ID:','1042829'
+
+' Last Full Backup Time:','0001-01-01 00:00:00'
+
+' Last Backup ID:','1042829'
+
+' Last Backup Type:','FULL'
+
+' Last Backup Time:','0001-01-01 00:00:00'
+
+' DB Updated:','0'
+
+' Blocks in next ISF Backup:','0 Blocks: =0Mb'
+
+' Blocks in next ISI Backup:','0 Blocks: =0Mb'
+
+'DB File Encryption Status:','OFF'

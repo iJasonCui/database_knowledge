@@ -1,0 +1,56 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_saveProfileExtra;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_saveProfileExtra (
+IN  at_userId INT 
+,at_userPick1 INT 
+,at_userPick2 INT 
+,at_userPick3 INT
+,at_relationshipStatus INT 
+,at_childrenStatus INT
+,at_describeSelf INT
+,at_sliderHorror INT
+,at_sliderTravel INT
+,at_sliderSailboat INT
+,at_sliderEasyGoing INT
+,at_sliderButterfly INT
+)
+BEGIN
+
+DECLARE at_dateCreated DATETIME;
+
+CALL wsp_GetDateGMT(at_dateCreated);
+
+INSERT INTO ProfileExtra 
+(userId
+,userPick1
+,userPick2
+,userPick3
+,relationshipStatus
+,childrenStatus
+,describeSelf
+,sliderHorror
+,sliderTravel
+,sliderSailboat
+,sliderEasyGoing
+,sliderButterfly
+,dateCreated
+) 
+VALUES (
+ at_userId
+,at_userPick1
+,at_userPick2
+,at_userPick3
+,at_relationshipStatus
+,at_childrenStatus
+,at_describeSelf
+,at_sliderHorror
+,at_sliderTravel
+,at_sliderSailboat
+,at_sliderEasyGoing
+,at_sliderButterfly
+,at_dateCreated
+);
+
+END;;
+
+DELIMITER ;

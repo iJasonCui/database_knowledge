@@ -1,0 +1,31 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getTotalCredits;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getTotalCredits (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  Sept 2, 2003
+**   Description:  retrieves credit balance total for user
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+at_userId DECIMAL(12,0),
+OUT at_total INT
+)
+BEGIN
+   SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+   SELECT IFNULL(sum(credits),0) 
+     INTO at_total 
+     FROM CreditBalance 
+    WHERE userId = at_userId 
+      AND dateExpiry > UTC_TIMESTAMP();
+
+END;;
+DELIMITER ;

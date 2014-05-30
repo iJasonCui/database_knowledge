@@ -1,0 +1,223 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS tsp_getON428_2012 ;
+CREATE DEFINER='root'@'127.0.0.1' PROCEDURE tsp_getON428_2012 ( 
+     at_col260  DECIMAL(12,2), 
+     at_spouseNetIncome DECIMAL(12,2), 
+     at_combineFlag  int ,
+     at_CPP  DECIMAL(12,2),
+     at_EI  DECIMAL(12,2),
+     at_col345  DECIMAL(12,2),
+     at_col347  DECIMAL(12,2),
+OUT  at_line70  DECIMAL(12,2)  
+)
+BEGIN
+
+     DECLARE at_col5804   DECIMAL(12,2); ##basic personal amount; Line 1
+     DECLARE at_col5804_1 DECIMAL(12,2); ##base spouse amount; For Line 3
+     DECLARE at_col5812   DECIMAL(12,2); ##spouse amount; Line 3
+     DECLARE at_col308    DECIMAL(12,2); ##CPP; Line 5
+     DECLARE at_col312    DECIMAL(12,2);  ##EI; Line 6
+     DECLARE at_col5884   DECIMAL(12,2); ##total federal non-refundable tax credit; Line 23 
+     DECLARE at_col5840   DECIMAL(12,2); ##Care giver; Line 12 
+
+     ##DECLARE at_col260  DECIMAL(12,2); ##Taxable income; Line 24
+     DECLARE at_line31  DECIMAL(12,2);  
+     DECLARE at_line33  DECIMAL(12,2); 
+     DECLARE at_line35  DECIMAL(12,2);    
+     DECLARE at_line36  DECIMAL(12,2); 
+     DECLARE at_line37  DECIMAL(12,2);    
+     DECLARE at_line38  DECIMAL(12,2); 
+     DECLARE at_line39  DECIMAL(12,2); 
+     DECLARE at_line40  DECIMAL(12,2);
+     DECLARE at_line41  DECIMAL(12,2);
+     DECLARE at_line42  DECIMAL(12,2);
+     DECLARE at_line43  DECIMAL(12,2);
+     DECLARE at_line44  DECIMAL(12,2);
+     DECLARE at_line45  DECIMAL(12,2); 
+     DECLARE at_line46  DECIMAL(12,2);
+     DECLARE at_line47  DECIMAL(12,2);
+     DECLARE at_line50  DECIMAL(12,2);
+     
+     
+     ##for donation calculation from federal schedule 1
+     DECLARE at_col340  DECIMAL(12,2); 
+     ##DECLARE at_col345  DECIMAL(12,2); 
+     DECLARE at_col346  DECIMAL(12,2); 
+     ##DECLARE at_col347  DECIMAL(12,2); 
+               
+     SET at_col5804  = 9405 ;
+     SET at_col5804_1= 8784 ;
+     SET at_col5840  = 2 * 4433 ;
+     SET at_col308   = at_CPP ; ##MAX 
+     SET at_col312   = at_EI ; ## MAX 
+     ##SET at_line40 = 205 ;
+     
+     
+     IF at_combineFlag  = 1 ## CONBINED 
+     THEN
+          SET at_col5812 = at_col5804_1 - at_spouseNetIncome ;
+          IF at_col5812 < 0  
+          THEN
+              SET at_col5812 = 0 ;
+          END IF;
+
+          IF at_col5812 >= 7986 
+          THEN
+              SET at_col5812 = 7986;
+          END IF;
+     ELSE 
+          SET at_col5812 = 0 ;
+     END IF;
+     
+     PRINT "Line 5804: %1! " , at_col5804
+     PRINT "Line 5812: %1! " , at_col5812
+     PRINT "Line 308: %1! " , at_col308
+     PRINT "Line 312: %1! " , at_col312
+     PRINT "Line 5840: %1! " , at_col5840
+     
+     
+     DECLARE at_LINE24 DECIMAL(12,2) ;
+     SET  at_LINE24 =  at_col5804 + at_col5812 + at_col308  + at_col312 + at_col5840 ;
+     PRINT "Line 24: %1! " , at_LINE24
+     
+     ##calculate the Line18     
+     SET at_col5884 = convert(DECIMAL(12,2),  at_LINE24  * 0.0505)
+     PRINT "Line 5884: %1! " , at_col5884  
+     
+     ##donation 
+     
+     PRINT "Line 345: %1! " , at_col345
+     DECLARE at_LINE27 DECIMAL(12,2);
+     SET at_LINE27 =   convert(DECIMAL(12,2),  at_col345  * 0.0505)
+     PRINT "Line 27: %1! " , at_LINE27
+     
+     PRINT "Line 347: %1! " , at_col347
+     DECLARE at_LINE28  DECIMAL(12,2);
+     SET at_LINE28 =   convert(DECIMAL(12,2),  at_col347  * 0.1116)     
+     PRINT "Line 28: %1! " , at_LINE28
+     
+     DECLARE at_LINE29 DECIMAL(12,2);
+     SET at_LINE29 =   at_LINE28 + at_LINE27
+     PRINT "Line 29  : %1! " , at_LINE29
+     
+     DECLARE at_LINE30      DECIMAL(12,2);
+     SET at_LINE30 =   at_LINE29 +  at_col5884 
+     PRINT "Line 30  : %1! " , at_LINE30
+     
+     DECLARE at_LINE31 DECIMAL(12,2)
+     SET at_LINE31 = at_col260 
+     PRINT "Line 31 : %1! " , at_LINE31
+     
+     DECLARE at_LINE36 DECIMAL(12,2)
+     
+     IF at_col260 <= 39020                       SET at_LINE36 = convert(DECIMAL(12,2), at_col260 * 0.0505)
+     IF at_col260 >  39020 AND at_col260 <= 78043  SET at_LINE36 = convert(DECIMAL(12,2), 1971 + (at_col260 - 39020) * 0.0915)
+     IF at_col260 >  78043                       
+     BEGIN
+          DECLARE at_LINE32 DECIMAL(12,2)
+          SET at_LINE32 = at_col260
+          
+          DECLARE at_LINE34 DECIMAL(12,2)
+          SET at_LINE34 = at_col260 - 78043
+          PRINT "Line 34 : %1! " , at_LINE34
+
+          SET at_LINE36 = convert(DECIMAL(12,2),  at_LINE34 * 0.1116) 
+          PRINT "Line 36 : %1! " , at_LINE36
+
+          DECLARE at_LINE38 DECIMAL(12,2)
+          SET at_LINE38 = 5541 + at_LINE36
+          PRINT "Line 38 : %1! " , at_LINE38
+
+          ##SET at_line38 =  at_LINE37
+     END
+
+     
+     PRINT "Line 39: %1! " , at_LINE38
+
+     DECLARE at_LINE42 DECIMAL(12,2);
+     SET at_LINE42 =   at_LINE30
+     PRINT "Line 42  : %1! " , at_LINE42
+                        
+     ## calculate the Line 33  
+     DECLARE at_LINE47 DECIMAL(12,2);                  
+     SET at_LINE47  = at_LINE38 - at_LINE42
+     IF at_LINE47 < 0 SET at_LINE47 = 0
+     PRINT "Line 47: %1! " , at_LINE47
+     
+     DECLARE at_line49 DECIMAL(12,2);
+     SET at_line49  = at_LINE47
+     PRINT "Line 49: %1! " , at_line49
+     
+         
+     ##ontario surtax
+     SET at_line50  = convert(DECIMAL(12,2), (at_line49 - 4213) *0.2 )
+     IF  at_line50  < 0  SET at_line50  =  0
+     PRINT "Line 50 %1! " , at_line50
+      
+     DECLARE at_line51 DECIMAL(12,2);
+     SET at_line51  = convert(DECIMAL(12,2), (at_line49 - 5392) *0.36 )
+     IF  at_line51 < 0  SET at_line51 =  0 
+     PRINT "Line 51: %1! " , at_line51
+     
+     DECLARE at_line52 DECIMAL(12,2);
+     SET at_line52  = at_line51 + at_line50
+     PRINT "Line 52: %1! " , at_line52
+     
+     DECLARE at_line53 DECIMAL(12,2);
+     SET at_line53 = at_line49 + at_line52
+     PRINT "Line 53: %1! " , at_line53
+     
+     DECLARE at_line54  DECIMAL(12,2);
+     DECLARE at_line55  DECIMAL(12,2);
+     DECLARE at_line56  DECIMAL(12,2);
+     DECLARE at_line57  DECIMAL(12,2);     
+     
+     SET at_line54 = 217
+     SET at_line55 = 2 * 401
+     SET at_line56 = 0
+     SET at_line57 = at_line56 + at_line54 + at_line55
+     
+
+     PRINT "Line 55: %1! " , at_line55
+     PRINT "Line 56: %1! " , at_line56
+     PRINT "Line 57: %1! " , at_line57
+     
+     DECLARE at_line58  DECIMAL(12,2);
+     DECLARE at_line59  DECIMAL(12,2);
+     DECLARE at_line60  DECIMAL(12,2);
+     DECLARE at_line61  DECIMAL(12,2);
+      
+     SET at_line58 = at_line57 * 2 
+     SET at_line59 = at_line53
+     
+     PRINT "Line 58: %1! " , at_line58
+     PRINT "Line 59: %1! " , at_line59
+          
+     SET at_line60 = at_line58 - at_line59
+     IF at_line60 < 0  SET at_line60  =  0 
+     PRINT "Line 60: %1! " , at_line60
+     
+     SET at_line61 = at_line53 - at_line60
+     IF at_line61  < 0  SET at_line61  =  0
+     PRINT "Line 61: %1! " , at_line61
+     PRINT "Line 62: %1! " , at_line61
+          
+     ##ontario health premium chart
+     DECLARE at_line69  DECIMAL(12,2);
+     
+     IF at_col260 <= 20000                       SET at_line69  =  0
+     IF at_col260 >  20000 AND at_col260 <= 25000  SET at_line69  =  (at_col260- 20000) * 0.06    
+     IF at_col260 >  25000 AND at_col260 <= 36000  SET at_line69  =  300   
+     IF at_col260 >  38500 AND at_col260 <= 48000  SET at_line69  =  450
+     IF at_col260 >  48600 AND at_col260 <= 72000  SET at_line69  =  600
+     IF at_col260 >  72000 AND at_col260 <= 72600  SET at_line69  =  600 + (at_col260 - 72000) * 0.25
+     IF at_col260 >  72600 AND at_col260 <= 200000 SET at_line69  =  750
+
+     PRINT "Line 69: %1! " , at_line69
+     
+     SET at_line70 = at_line61 + at_line69
+     PRINT "Line 70: %1! " , at_line70
+     
+      
+END;;
+DELIMITER ;

@@ -1,0 +1,51 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_adminAdjustSubscrPurchase;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_adminAdjustSubscrPurchase (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  Feb 16, 2006
+**   Description:  adjust  subscription purchase for user
+**
+**
+******************************************************************************/
+   at_userId        DECIMAL(12, 0),
+   at_xactionId     DECIMAL(12, 0),
+   at_refXactionId  DECIMAL(12, 0),
+   at_contentId     SMALLINT,
+   at_xactionTypeId TINYINT,
+   at_cardProcessor CHAR(1),
+   at_adminUserId   INT,
+   at_adminNote     VARCHAR(255)
+)
+BEGIN
+
+DECLARE at_dateNow                   DATETIME;
+DECLARE at_currencyId                TINYINT;
+DECLARE at_subscriptionOfferDetailId SMALLINT;
+DECLARE at_purchaseTypeId            TINYINT;
+DECLARE at_billingLocationId         SMALLINT;
+DECLARE at_creditCardId              INT;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+SELECT creditCardId, currencyId, subscriptionOfferDetailId, billingLocationId, purchaseTypeId 
+       INTO at_creditCardId, at_currencyId, at_subscriptionOfferDetailId, at_billingLocationId, at_purchaseTypeId 
+       FROM Purchase WHERE xactionId = at_refXactionId;
+
+IF (FOUND_ROWS() > 0)
+THEN 
+   IF (at_subscriptionOfferDetailId IS NULL) 
+   THEN
+      CALL wsp_cursorAdminAdjustSubscrPurchase(at_userId,at_xactionId,at_refXactionId,at_contentId,at_xactionTypeId,at_cardProcessor,
+		at_adminUserId,at_adminNote,at_dateNow,at_currencyId,at_purchaseTypeId,at_billingLocationId,at_creditCardId);
+   ELSE
+      CALL wsp_trans2AdminAdjustSubscrPurchase(at_userId,at_xactionId,at_refXactionId,at_contentId,at_xactionTypeId,at_cardProcessor,
+                at_adminUserId,at_adminNote,at_dateNow,at_currencyId,at_purchaseTypeId,at_billingLocationId,at_creditCardId,at_subscriptionOfferDetailId);
+   END IF;
+END IF;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

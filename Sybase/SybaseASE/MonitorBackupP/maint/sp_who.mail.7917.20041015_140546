@@ -1,0 +1,9 @@
+Host name: opsdb1p, host process: 7917,\ndate: Fri Oct 15 14:05:45 EDT 2004.
+
+Step 1 - invoke isql to run /dumps/scripts/maint/sp_who.sql at opsdb1p server in master database ...
+succeeded at Fri Oct 15 14:05:45 EDT 2004.
+
+Step 2 - archive isql output file ...
+succeeded at Fri Oct 15 14:05:46 EDT 2004.
+
+run_sql.sh succeeded at Fri Oct 15 14:05:46 EDT 2004.

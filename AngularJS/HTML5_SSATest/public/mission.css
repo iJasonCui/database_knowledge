@@ -1,0 +1,88 @@
+body {
+	font-family: sans-serif;
+}
+h1 {
+   color: purple;
+   border-bottom: 1px solid black; 
+}
+h2 {color: gray;}
+
+p {
+	color: black; 
+}
+
+! p.greenTea {color: green; }
+
+.guarantee {
+
+
+   border-color: black;
+   border-width: 1px; 
+   border-style: groove; 
+   background-color: #a7cece;
+   padding: 30px;
+   padding-left: 200px;
+   margin-right: 400px;
+   background-image: url(logo.gif);
+   background-repeat: no-repeat;
+   background-position: top left;
+}
+
+#drinks {
+   border-width: thin;
+   border-style: solid;
+   border-color: black;
+   !width: 250px;
+   padding-left: 30px;
+   padding-right: 30px;
+   padding-bottom: 30px;
+   margin-left: 20px;
+   margin-right: 400px
+   text-align: center;
+   position: absolute;
+   top: 200px;
+   right: 50px; 
+   width: 280px;
+￼
+
+}
+
+#drinks h2 {
+   color: maroon;
+}
+
+a:link {color: purple;}
+a:visited {color: red;}
+a:hover {
+   background: yellow;
+   color: black;}
+
+#footer {
+   width: 400px;
+   border-color: black;
+   border-width: 1px; 
+   border-style: groove; 
+   background-color: #a7cece;
+   padding: 30px;
+   padding-left: 30px;
+   margin:  30px;
+   margin-right: 250px;
+}   
+
+table {
+ margin-left: 20px; 
+ margin-right: 20px; 
+ border: thin solid black; 
+ caption-side: bottom;
+}
+td, th {
+border: thin dotted gray;
+}
+th {background-color: #cc6600;}
+
+padding: 5px;
+caption {
+font-style: italic;
+}
+
+.cell {background-color: #fcba7a;}

@@ -1,0 +1,78 @@
+#!/bin/bash
+
+#!/bin/bash
+
+. $HOME/.bash_profile
+#. /ccs/sybase15/SYBASE.sh
+
+set -u
+set -x
+
+#-----------------------------------------#
+#  Usage 
+#-----------------------------------------#
+
+if [ $# -ne "1" ]
+then
+   echo "#-------------------------------------------------#"
+   echo "# Usage: $0 <SQL_SERVER_NAME> "
+   echo "#-------------------------------------------------#"
+   exit 1
+else
+   SERVER_NAME=${1}
+fi
+
+#---------------------------------------------#
+#  Initialization 
+#---------------------------------------------#
+SQL_USER=cron_sa
+OPS_SERVER_NAME=g151opsdb02
+OPS_DB=DbaTasks
+PASSWORD=`cat $HOME/.sybpwd | grep -w ${OPS_SERVER_NAME} | awk '{print $2}' `
+
+YEAR_MON_DAY=`date '+%a %b %e %Y' `
+YEAR_MON_DAY_HMS=` date '+%Y%m%d_%H:%M:%S ' `
+LOG_FILE=${SYBMAINT}/Refresh/output/${0}.log.${SERVER_NAME}.${YEAR_MON_DAY_HMS}
+
+MAIL_LIST="${SYBMAINT}/send_mail/mail_list.txt"
+MAIL_SCRIPT="${SYBMAINT}/send_mail/send_mail.sh"
+
+date > ${LOG_FILE}
+
+#cd /opt/etc/sybase12_52/maint/Refresh
+cd /opt/scripts/maint/web/Refresh
+
+##./001-dump-seed-DB.sh ${SERVER_NAME}
+
+./010-startDBServerMaint.sh ${SERVER_NAME}
+
+sleep 150
+
+./020-load-all-db.sh ${SERVER_NAME}m 
+
+case ${SERVER_NAME} in
+
+"webdb1g")
+./030-postLoad.sh ${SERVER_NAME}m t
+;;
+
+"webdb1d")
+./030-postLoad.sh ${SERVER_NAME}m d
+;;
+
+"webdb0g")
+./030-postLoad.sh ${SERVER_NAME}m t
+;;
+
+"webdb0t")
+./030-postLoad.sh ${SERVER_NAME}m t
+;;
+
+esac
+
+###./030-postLoad.sh ${SERVER_NAME}m t
+
+./040-shutdownDBServerMaint.sh ${SERVER_NAME} 
+
+exit 0
+

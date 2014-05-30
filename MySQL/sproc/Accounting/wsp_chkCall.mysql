@@ -1,0 +1,31 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_chkCall;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_chkCall (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga/Yan Liu
+**   Date:  July 2003
+**   Description: Check if callId exists in Call
+**
+** REVISION(S):
+**   Author:  
+**   Date:  
+**   Description:  
+**
+**
+******************************************************************************/
+at_callId INT
+)
+BEGIN
+
+IF (SELECT 1 FROM Accounting.Call WHERE callId = at_callId) IS NOT NULL 
+THEN 
+   SELECT 1;
+ELSE
+   SELECT 0;
+END IF;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

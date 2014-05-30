@@ -1,0 +1,31 @@
+CREATE TABLE "COMMONTABLE"."NPA_NXX_Lookup" (
+	"npa" CHAR(3) NOT NULL,
+	"nxx" CHAR(3) NOT NULL,
+	"city" varchar(128) NOT NULL,
+	"region" char(3) NULL,
+	PRIMARY KEY ( "npa", "nxx" )
+);
+
+
+CREATE HG INDEX "city_HG_idx" ON "COMMONTABLE"."NPA_NXX_Lookup" ( "city" ) IN "IQ_SYSTEM_MAIN";
+CREATE HG INDEX "NPA_HG_idx" ON "COMMONTABLE"."NPA_NXX_Lookup" ( "npa" ) IN "IQ_SYSTEM_MAIN";
+CREATE HG INDEX "region_HG_idx" ON "COMMONTABLE"."NPA_NXX_Lookup" ( "region" ) IN "IQ_SYSTEM_MAIN";
+
+
+SET TEMPORARY OPTION Output_Format='TEXT'; 
+LOAD TABLE COMMONTABLE.NPA_NXX_Lookup
+(   
+        npa      '|'  NULL('NULL') 
+        ,nxx      '|'  NULL('NULL') 
+        ,city      '|'  NULL('NULL') 
+        ,region      '\n' 
+)        
+FROM '/data/dump/g104iqdb01/bcp-data/COMMONTABLE/NPA_NXX_Lookup.txt'
+FORMAT ascii 
+STRIP OFF 
+QUOTES OFF 
+ESCAPES OFF 
+PREVIEW ON 
+NOTIFY 10000
+; 
+COMMIT; 

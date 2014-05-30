@@ -1,0 +1,119 @@
+[re-initializing the standby ]
+
+--step 1: [v104dbrep] 
+sqsh -Usa -Sv104dbrep
+
+drop connection to v104db12.ottLL
+
+admin logical_status
+
+admin who_is_down (no one should be down)
+
+--step 2: [on primary database, for instance, sipdb-12]
+
+
+
+--step 3:  set rep table and col (go to webccs)
+Does not need to run it
+
+
+--step 4: drop rep2p_maint_user as alias on prim db and add it back as regular db user (on primary)
+USE Profile_ar
+go
+IF EXISTS (SELECT * FROM sysalternates WHERE suid=SUSER_ID('rep2p_maint_user'))
+BEGIN
+    EXEC sp_dropalias 'rep2p_maint_user'
+    IF EXISTS (SELECT * FROM sysalternates WHERE suid=SUSER_ID('rep2p_maint_user'))
+        PRINT '<<< FAILED DROPPING ALIAS rep2p_maint_user >>>'
+    ELSE
+        PRINT '<<< DROPPED ALIAS rep2p_maint_user >>>'
+END
+go
+
+USE Profile_ar
+go
+EXEC sp_adduser 'rep2p_maint_user','rep2p_maint_user','public'
+go
+
+
+--step 5: if the new warm stanby is loaded from prim db, need to disable the rep agent: (on both)
+
+use Profile_ad
+dbcc gettrunc
+
+exec sp_stop_rep_agent Profile_ad
+dbcc settrunc('ltm', ignore)
+sp_config_rep_agent Profile_ad, disable
+
+
+--step 6: ***** add ws db ***** with dump marker
+
+--step 6.1 drop connection to warm standby 
+
+--step 6.2 drop connection to primary 
+
+--step 6.3 add primary db connection 
+
+  /opt/etc/repserver126/REP-12_6/install/rs_init -r /opt/etc/repserver126/REP-12_6/init/logs/resource.Profile_ad.p
+
+  admin who_is_down (no one should be down)
+
+--step 6.4 add ws db connection 
+
+  /opt/etc/repserver126/REP-12_6/install/rs_init -r /opt/etc/repserver126/REP-12_6/init/logs/resource.Profile_ad.ws
+
+
+--step 7: dump primary db
+
+--step 8: load it into ws db and online database
+
+--step 9: dbo alias both on ws and prim
+
+USE Profile_ad
+go
+IF USER_ID('rep2p_maint_user') IS NOT NULL
+BEGIN
+    EXEC sp_dropuser 'rep2p_maint_user'
+    IF USER_ID('rep2p_maint_user') IS NOT NULL
+        PRINT '<<< FAILED DROPPING USER rep2p_maint_user >>>'
+    ELSE 
+        PRINT '<<< DROPPED USER rep2p_maint_user >>>'
+END
+go
+
+USE Profile_ad
+go
+EXEC sp_addalias 'rep2p_maint_user','dbo'
+go
+
+--dbo use only and trunc log on STANDBY
+
+USE master
+go
+EXEC sp_dboption 'Profile_ad','dbo use only',true
+go
+USE master
+go
+EXEC sp_dboption 'Profile_ad','trunc log on chkpt',true
+go
+USE Profile_ad
+go
+CHECKPOINT
+go
+
+--step 8: resume connection to ws db
+
+resume connection to webdb31p.Msg_mi
+
+--step 9: test rep 
+
+SELECT T.repTestId, T.dateTime FROM Msg_md..RepTest T
+INSERT INTO Msg_md..RepTest ( repTestId, dateTime ) VALUES ( 108, getdate() )
+
+--step 10 : check the stable queue
+admin disk_space (on rep server)
+
+rs_helppartition (on rssd db)
+
+-- step 11: trouble shooting
+

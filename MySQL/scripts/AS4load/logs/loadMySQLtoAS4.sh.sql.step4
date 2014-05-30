@@ -1,0 +1,12 @@
+DECLARE @NowDate datetime 
+DECLARE @MaxDate datetime 
+SELECT @NowDate = GETDATE() 
+SELECT @MaxDate = DATEADD(day, 1, '2013-12-10 4:00:00') 
+EXEC succor.audit.pULoadArchive 
+  552589, 
+  23, 
+  23, 
+  @NowDate, 
+  '2013-12-10 4:00:00', 
+  @MaxDate 
+go 

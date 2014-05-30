@@ -1,0 +1,29 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getSubsOfferDetails;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getSubsOfferDetails (
+/******************************************************************************
+**
+******************************************************************************/
+)
+   BEGIN  
+      SELECT subscriptionOfferDetailId,
+             subscriptionOfferId,
+             contentId,
+             subscriptionTypeId,
+             ordinal,
+             cost,
+             duration,
+             durationUnits,
+             freeTrialDuration,
+             dateExpiry,
+             freeTrialDurationUnits,
+             promoFlag,
+             autoRenewOfferDetailId, 
+             premiumId,
+             masterOfferDetailId 
+        FROM SubscriptionOfferDetail
+      ORDER BY ordinal;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

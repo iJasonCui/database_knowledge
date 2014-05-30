@@ -1,0 +1,6 @@
+select name from sysdatabases where name not like "syb%" and name not in ("master", "model", "tempdb")
+\do
+\echo #1
+CREATE TABLE #1..RepTest (repTestId int NOT NULL,    dateTime  datetime NOT NULL)              
+go
+\done

@@ -1,0 +1,14 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updSmileStatus;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updSmileStatus (
+    at_userId       DECIMAL(12, 0),
+    at_targetUserId DECIMAL(12, 0),
+    at_seen         CHAR(1)
+)
+
+BEGIN
+
+    UPDATE Smile SET seen = at_seen WHERE userId = at_userId AND targetUserId = at_targetUserId;
+
+END;;
+DELIMITER ;

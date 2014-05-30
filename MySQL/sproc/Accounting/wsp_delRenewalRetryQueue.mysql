@@ -1,0 +1,29 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_delRenewalRetryQueue;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_delRenewalRetryQueue (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu 
+**   Date:  July 25 2008 
+**   Description:  delete RenewalRetryQueue 
+**
+** REVISION(S):
+**   Author: 
+**   Date: 
+**   Description:
+**
+******************************************************************************/
+at_userId DECIMAL(12,0)
+)
+BEGIN
+   
+IF (SELECT 1 FROM RenewalRetryQueue WHERE userId = at_userId) IS NOT NULL 
+THEN
+	DELETE FROM RenewalRetryQueue WHERE userId = at_userId;
+END IF;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

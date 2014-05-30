@@ -1,0 +1,40 @@
+Benchmark on the BCP and CIS of Sybase ASE Server
+
+Test No.	Table Name	Space (MB)	Row count	Time for BCP 	Time for CIS bulk copy	Comment
+
+1	CDR_Track_Data_199909	
+Data:     358.09MB
+Index:    324.44MB	
+
+3,239,383 rows	
+
+BCP out: 15 minutes
+BCP in:   18 minutes
+Total:      33 minutes	
+
+CIS: 10 minutes	
+
+CIS is faster than BCP out/in three times.
+
+2	CDR_Account_Adjustment_Base	
+Data:     902.83MB
+Index:    414.35MB	
+6,199,000 rows	
+
+BCP out: 33 minutes
+BCP in:   43 minutes
+Total:      76 minutes	
+
+CIS: 22 minutes	
+
+CIS is faster than BCP out/in three times.
+
+Notes:
+➢	In terms of BCP, we are doing fast BCP because those tables have no index, constraint and trigger. 
+➢	BCP out command that has been used during tests is as follows: bcp table_name out datafile –c –t ‘|’ –Uuser_id –Ppassword
+➢	BCP in command that has been used during tests is as follows: bcp table_name in datafile –c –t ‘|’ -b 1000 –U  –P  –S server
+➢	CIS bulk copy command that has been used during tests is as follows: select * into new_table from cis_ proxy_table
+Tips:
+➢	In terms of BCP in, we are supposed to use the option “–b batchsize”, which is the number of rows per batch of data copied. And the default is to copy all rows in one batch, in this case, it maybe fill up the log of that database. During these tests, the batchsize has been set to 1000.
+➢	In terms of CIS bulk copy, we also are supposed to configure “cis bulk copy batch size” with sp_configure. During these tests, this system parameter has been set to 1000. 
+

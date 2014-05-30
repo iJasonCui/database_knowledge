@@ -1,0 +1,110 @@
+===============================================================
+2nd level MSA (Multi-Site Availability) without using dump marker
+===============================================================
+
+step 1:
+
+[NAMING CONVENTION]
+
+1: [table rep def] prad_a_profile_dating which is {DB short name}_{full table name}. "prad" means "Profile_ad".
+2: [db rep def]    Profile_ad  which is {full_db_name}
+3: [db sub]        w151dbp03_Profile_ad which is {full_server_name}_{full_db_name}
+4: [table sub]     03prad_a_profile_dating  {short_server_name}{DB short name}_{full table name}
+
+step 1: add logical connection
+[w151rep01]: create logical connection to LogicalSRV.Profile_ai
+
+step 2: add primary db connection 
+[repserver@w151rep01:~/REP-12_6/install]$ /opt/etc/repserver126/REP-12_6/install/rs_init -r /opt/etc/repserver126/REP-12_6/init/logs/resource.Profile_ai.BRP.p
+
+step 3: create db rep def
+[w151rep01]://{1}# create database replication definition Profile_ai with primary at w151dbp03.Profile_ai (wrong one)
+
+[####### wrong one, if you have logical connection, you have to use Logical server name ##########]
+[rep2p]://{2}# go
+Msg 15248, Level 12, State 0
+Server 'rep2d'
+Cannot use active or standby connection names when creating or altering replication definitions or function replication definitions.
+Must use logical connection name.
+[rep_server]://{1}# create database replication definition Profile_ad with primary at LogicalSRV.Profile_ad
+
+[w151rep01]://{1}# create database replication definition Profile_ai with primary at LogicalSRV.Profile_ai (good one)
+
+Database replication definition 'Profile_ad' for webdb4p.Profile_ad is created.
+
+step 4: add msa db connection
+             
+rs_init to add db connection (regular)
+
+[repserver@w151rep01:~/REP-12_6/install]$ /opt/etc/repserver126/REP-12_6/install/rs_init -r /opt/etc/repserver126/REP-12_6/init/logs/resource.Profile_ai.BRP.rep.dbr01
+
+USE Profile_ai
+go
+IF USER_ID('rep5p_maint_user') IS NOT NULL
+BEGIN
+    EXEC sp_dropuser 'rep5p_maint_user'
+    IF USER_ID('rep5p_maint_user') IS NOT NULL
+        PRINT '<<< FAILED DROPPING USER rep5p_maint_user >>>'
+    ELSE
+        PRINT '<<< DROPPED USER rep5p_maint_user >>>'
+END
+go
+
+EXEC sp_addalias 'rep5p_maint_user','dbo'
+
+step 6:
+
+/* using dump marker */
+[w151rep01]://{1}# define subscription w151dbp03_Profile_ad for database replication definition Profile_ad with primary at webdb4p.Profile_ad with replicate at w151dbp03.Profile_ad_view use dump marker
+##### drop subscription w151dbp03_Profile_ad for database replication definition Profile_ad with primary at webdb4p.Profile_ad with replicate at w151dbp03.Profile_ad_view without purge
+##### same sa password for primary db server, primary rep server and replicate rep server
+/* the end           */
+
+/* without using dump marker */
+[w151rep01]:
+define subscription w151dbr01_Profile_ai for database replication definition Profile_ai with primary at LogicalSRV.Profile_ai with replicate at w151dbr01.Profile_ai
+check  subscription w151dbr01_Profile_ai for database replication definition Profile_ai with primary at LogicalSRV.Profile_ai with replicate at w151dbr01.Profile_ai
+activate subscription w151dbr01_Profile_ai for database replication definition Profile_ai with primary at LogicalSRV.Profile_ai with replicate at w151dbr01.Profile_ai
+check  subscription w151dbr01_Profile_ai for database replication definition Profile_ai with primary at LogicalSRV.Profile_ai with replicate at w151dbr01.Profile_ai
+validate subscription w151dbr01_Profile_ai for database replication definition Profile_ai with primary at LogicalSRV.Profile_ai with replicate at w151dbr01.Profile_ai
+check  subscription w151dbr01_Profile_ai for database replication definition Profile_ai with primary at LogicalSRV.Profile_ai with replicate at w151dbr01.Profile_ai
+--drop subscription w151dbr01_Profile_ai for database replication definition Profile_ai with primary at LogicalSRV.Profile_ai with replicate at w151dbr01.Profile_ai without purge
+
+######## dsi has been suspended on  w151dbp03.Profile_ad_view (VIP)
+
+step 7:
+
+dump db on webdb21p (comment out the tab)
+
+step 8:
+
+scp into BRP and load db w151dbr01.Profile_ai  without online
+
+step 9: insert one row into reptest
+
+step 10: suspend log transfer from webdb29p.Profile_ai
+
+step 11: suspend connection to webdb21p.Profile_ai and dbo use only on webdb21p.Profile_ai
+
+step 12: suspend route to rep5p
+
+setp 13: resume log transfer from webdb29p.Profile_ai 
+
+step 14: dump copy load the last tran from ws and then online database on msa db and then fix the main_user
+
+[vip] check crontab on webdb21p (replicate db server)
+
+step 15: resume connection to webdb21p.Profile_ai and turn of "dbo use only"
+
+step 16: [w151rep01] sysadmin hibernate_on 
+
+step 17: admin who to figure out the queue Id
+
+step 18: [w151rep01] --sysadmin sqm_purge_queue, ***, 0
+
+step 19: [w151rep01] admin disk_space to check the queue shrinked and then sysadmin hibernate_off
+
+step 20: resume connection to w151dbr01.Profile_ai (it has been brought up)
+
+step 21: resume route to rep5p AND TEST IT 
+

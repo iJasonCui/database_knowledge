@@ -1,0 +1,105 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updPayPalUserSubscription;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updPayPalUserSubscription (
+
+/*******************************************************************
+**
+** CREATION:
+**   Author:      Andy Tran
+**   Date:        July 2009 
+**   Description: Inserts row into PayPalUserSubscription
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*******************************************************************/
+ at_userId                    DECIMAL(12,0)
+,at_recurringProfileId        VARCHAR(14)
+,at_subscriptionOfferDetailId SMALLINT
+,at_subscriptionStatus        CHAR(1)
+,at_subscriptionEndDate       DATETIME
+,at_cancelCodeId              TINYINT
+,at_cancelCodeMask            INT
+,at_userCancelReason          VARCHAR(255)
+)
+BEGIN
+DECLARE at_dateNow DATETIME;
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+   ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+   ROLLBACK;
+END;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+START TRANSACTION;
+IF (SELECT 1 FROM PayPalUserSubscription WHERE recurringProfileId = at_recurringProfileId) IS NOT NULL 
+THEN 
+	    UPDATE PayPalUserSubscription
+	           SET subscriptionOfferDetailId = at_subscriptionOfferDetailId
+	              ,subscriptionStatus = at_subscriptionStatus
+	              ,subscriptionEndDate = at_subscriptionEndDate
+	              ,dateModified = at_dateNow
+	         WHERE recurringProfileId = at_recurringProfileId;
+
+            INSERT INTO PayPalUserSubscriptionHistory
+            SELECT  userId
+                   ,recurringProfileId
+                   ,subscriptionOfferDetailId
+                   ,subscriptionStatus
+                   ,subscriptionEndDate
+                   ,dateCreated
+                   ,dateModified
+                   ,at_cancelCodeId
+                   ,at_cancelCodeMask
+                   ,at_userCancelReason
+              FROM PayPalUserSubscription
+             WHERE recurringProfileId = at_recurringProfileId;
+ELSE
+            INSERT INTO PayPalUserSubscription (
+                 userId
+                ,recurringProfileId
+                ,subscriptionOfferDetailId
+                ,subscriptionStatus
+                ,subscriptionEndDate
+                ,dateCreated
+                ,dateModified
+            )
+            VALUES (
+                 at_userId
+                ,at_recurringProfileId
+                ,at_subscriptionOfferDetailId
+                ,at_subscriptionStatus
+                ,at_subscriptionEndDate
+                ,at_dateNow
+                ,at_dateNow
+            );
+
+            INSERT INTO PayPalUserSubscriptionHistory
+            SELECT  userId
+                   ,recurringProfileId
+                   ,subscriptionOfferDetailId
+                   ,subscriptionStatus
+                   ,subscriptionEndDate
+                   ,dateCreated
+                   ,dateModified
+                   ,at_cancelCodeId
+                   ,at_cancelCodeMask
+                   ,at_userCancelReason
+              FROM PayPalUserSubscription
+             WHERE recurringProfileId = at_recurringProfileId;
+              
+END IF;
+
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,365 @@
+how to install sybase ase 157
+
+1. go to sybase web site https://sybase.subscribenet.com/control/sybs/download?element=4270541
+2. enter user name and password
+3. find the product cd and copy the link
+4. on the linux server g151db01, wget "[the link]"
+cd /ccs; wget  "https://esdhttp.flexnetoperations.com/cgi-bin/download?rid=2687818211&rp=DTM20131209211548OTg1MzEwNTgy"
+
+5. tar -xvf ase1570_linx8664_64_02.tgz
+6. /usr/sbin/useradd sybase157
+7. passwd sybase157
+8. At the command line, enter:
+./setup.bin -i console
+
+9. 
+
+
+
+pre-install
+solaris
+
+vi /etc/system 
+set shmsys:shminfo_shmmax=536870912
+
+linux
+
+echo '1024*1024*1024' | bc >  /proc/sys/kernel/shmmax
+
+
+vi sysctl.conf
+kernel.shmmax = ...
+sysctl -p
+
+hp-ux
+sam
+
+SHMMAX 1G (HP)
+SHMMIN 1
+SHMMNI 100
+SHMSEG 10
+SHMMNI 70
+SHMMNS 200
+MAXDSIZ MAXDSIZ_64BIT >=128
+maxfile  10000
+maxfilelimit  4096
+nfile     10000 (函数)
+
+
+
+asyncdisk - In
+rebuild kernel
+
+/etc/mknod /dev/async c 101
+chmod 0660 /dev/async
+chown sybase /dev/async
+
+
+To optimize asynchronos I/O and to prevent the paging of shared memory,
+you must grant MLOCK permissions before you install Adaptive Server.
+To grant MLOCK permissions to a group, enter:
+/etc/privgrp add mlock <group name>
+sample:
+vi /etc/privgrp add mlock sybase
+sybase MLOCK
+/sbin/rc3.d/S991async
+/etc/setprivgrp sybase MLOCK
+or:
+CHAPTER 2 Installing Adaptive Server
+/etc/setprivgrp <group name> MLOCK
+sample:
+/etc/setprivgrp sybase MLOCK
+
+
+
+
+PATH=$PATH:/usr/local/bin:/usr/ccs/bin:/usr/bin:/usr/ucb:/etc:.
+export PATH
+
+set erase '^H'
+LM_LICENSE_FILE=/opt/sybase/SYSAM-1_0/licenses/license.dat:$LM_LICENSE_FILE
+export LM_LICENSE_FILE
+PATH=/opt/sybase/ASE-12_5/bin:/opt/sybase/OCS-12_5/bin:/opt/sybase/CFG-1_0/bin:$PATH
+export PATH
+SYBASE_SYSAM=SYSAM-1_0
+export SYBASE_SYSAM
+SYBASE_OCS=OCS-12_5
+export SYBASE_OCS
+SYBASE=/opt/sybase
+export SYBASE
+SYBASE_JRE=/opt/sybase/shared-1_0/jre1.2.2
+export SYBASE_JRE
+SYBASE_EJB=EJB-12_5
+export SYBASE_EJB
+LD_LIBRARY_PATH=/opt/sybase/ASE-12_5/lib:/opt/sybase/OCS-12_5/lib:/usr/lib:/opt/sybase/SQLRemote/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH
+SYBASE_ASE=ASE-12_5
+export SYBASE_ASE
+DSQUERY=CNPM_SERVER
+export DSQUERY
+
+
+LANG=C   #NO need in linux!!!
+export LANG
+set -o vi
+
+
+
+CNPM_SERVER
+
+
+
+ismp
+
+MSP
+
+
+sp_configure "max memory",524288 -- 字节数/2048来计算
+go
+sp_configure "procedure cache size", 104857     -- %20*max memory
+go
+sp_configure "allocate max shared memory",0 -- dynamic allocate memory
+go
+sp_configure 'global async prefetch limit',20
+go
+sp_configure "heap memory per user", 6144
+go
+sp_configure "memory per worker process", 2048
+go
+sp_configure "number of locks", 1000000
+go
+sp_configure "lock scheme",0,datarows
+go
+sp_configure "row lock promotion HWM", 3000
+go
+sp_configure "page lock promotion HWM", 3000
+go
+sp_configure "number of aux scan descriptors",400
+go
+sp_configure "size of global fixed heap",600
+go
+sp_configure "max network packet size",4096
+go
+sp_configure 'default network packet size',4096
+go
+sp_configure 'additional network memory',1024000
+go
+sp_configure 'housekeeper free write percent',3
+go
+sp_configure 'number of devices', 20
+go
+sp_configure 'number of open objects',2500
+go
+sp_configure 'number of open indexes',2500
+go
+sp_configure 'number of user connections',200
+go
+
+
+
+Multi Processor 
+sp_configure "max online engines",n-1
+go
+sp_configure "number of engines at startup",n/2
+go
+
+sp_configure 'number of worker processes',40
+go
+sp_configure 'max parallel degree',20
+go
+sp_configure "max scan parallel degree",3
+go
+sp_configure "number of aux scan descriptors",1000
+go
+sp_configure "number of sort buffers",500
+go
+
+
+
+sp_configure 'number of open objects',2500
+go
+sp_configure 'number of open indexes',1000
+go
+
+> * crank up "number of user connections"
+> * crank up "number of worker processes"
+
+
+1.set masster device to undefault 
+
+sp_diskdefault master,defaultoff
+
+msp mspmsp
+
+sp_addlogin crbt,"crbt",'ctdb'
+go
+--sp_role "grant",sa_role,crbt
+--go
+use crbt
+go
+sp_addalias dbo,crbt
+--sp_adduser ljuser
+go
+
+sp_password null,'cnpm123'
+
+
+
+sp_cacheconfig 'default data cache','400M'
+go
+
+sp_poolconfig 'default data cache','200M','16K'
+go
+
+use userdb
+go
+
+sp_logiosize '16K'
+go
+
+
+????????????????????????????????????????????????
+sp_cacheconfig 'tempdb_cache','95M'
+go
+sp_cacheconfig 'cnpm_log','128M',logonly
+go
+????????????????????????????????????????????????
+
+restart
+???????????????????????????????????????????????
+sp_poolconfig 'cnpm_log','128M','8K'
+sp_dboption 'cnpm','single user',true
+use cnpm
+go
+ sp_bindcache 'cnpm_log','cnpm','dbo.syslogs'
+ go
+ sp_logiosize "8K"
+ go
+ 
+sp_dboption 'cnpm','single user',false
+???????????????????????????????????????????????
+
+
+DISK INIT
+    NAME='temp_dat',
+    PHYSNAME='/opt/sybdata/temp_dat.dat',
+    VDEVNO=3,
+    SIZE=1024000,
+    VSTART=0,
+    CNTRLTYPE=0
+    
+go
+
+sp_diskdefault 'temp_dat',defaultoff
+go
+
+sp_deviceattr "temp_dat","dsync",false
+
+go
+
+DISK INIT
+    NAME='temp_log',
+    PHYSNAME='/opt/sybdata/temp_log.dat',
+    VDEVNO=4,
+    SIZE=512000,
+    VSTART=0,
+    CNTRLTYPE=0
+    
+go
+
+sp_diskdefault 'temp_log',defaultoff
+
+go
+
+sp_deviceattr "temp_log","dsync",false
+
+go
+
+ALTER DATABASE tempdb 
+    ON temp_dat=2000
+go
+ALTER DATABASE tempdb 
+    LOG ON temp_log=1000
+go
+
+(in single mode)
+sp_dropsegment 'default',tempdb,master
+go
+sp_dropsegment system,tempdb,master
+go
+sp_dropsegment logsegment,tempdb,master
+go
+
+sp_cacheconfig 'tempdb_cache','95M'
+go
+sp_bindcache "tempdb_cache",tempdb
+go
+
+
+EXEC sp_dboption 'dsf','select into/bulkcopy/pllsort',true
+go
+EXEC sp_dboption 'dsf','trunc log on chkpt',true
+go
+EXEC sp_dboption 'dsf','abort tran on log full',true
+go
+use CNPM_DATDB
+go
+checkpoint
+go
+
+sp_cacheconfig 'vasDataCache','500M'
+go
+sp_bindcache "pub_cache",CNPM,table,index
+go
+
+
+
+I will add 3 more items,
+10 times of the number of sort buffer,
+2-4 times of the default stack size
+crank up max network packet sizes if using giga bits networks
+
+
+On Sun, 13 Feb 2005 16:53:25 -0800,
+Andrew Thomson wrote:
+
+> Hi,
+> 
+> I just noticed another post about performance suggestions with some
+> helpful comments from Michael and Rob.
+> 
+> I was wondering if anyone has a resource with some other helpful
+> suggestions. As we know, the default configuration of ASE is more suitable
+> to running on a laptop than on a high end server.
+> 
+> What other sort of changes to people make immediately post install.
+> 
+> Although I'm not clear on their precise purpose, I've started making the
+> following changes to my default installs.
+> 
+> * crank up "max memory"
+> * crank up "number of open objects"
+> * crank up "user log cache size"
+> * increase "max online engines"
+> * increase "number of engines at startup" (I currently run with 4 on a 2x
+> Xeon box these days)
+> * crank up "procedure cache size"
+> * crank up "number of user connections"
+> * crank up "number of worker processes"
+> * crank up "max parallet degree"
+> * crank up "max scan parallel degree"
+> * crank up "default data cache"
+> * put tempdb on a tmpfs partition
+> 
+> Some of these settings I grabbed from:
+> http://www.rocket99.com/sybase/sybase1.html
+> 
+> Are more worker processes the answer?
+> 
+> Of course a lot of these configurations options I imagine are site
+> dependent and hardware dependent, but any other obvious recommendations of
+> configuration options to tweak?
+> 
+> Regards,
+> 
+> ajt.

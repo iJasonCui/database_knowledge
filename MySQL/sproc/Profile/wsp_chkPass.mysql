@@ -1,0 +1,18 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_chkPass;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_chkPass (
+ at_userId DECIMAL(12,0)
+,at_targetUserId DECIMAL(12,0)
+,OUT at_chk INT
+)
+BEGIN
+  SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;
+  IF (SELECT 1 FROM Pass WHERE userId = at_userId AND targetUserId = at_targetUserId AND seen != 'T' AND IFNULL(messageOnHoldStatus,'A') != 'H') IS NOT NULL 
+  THEN  
+		SET at_chk = 1;
+  ELSE
+		SET at_chk = 0;
+  END IF;
+
+END;;
+DELIMITER ;

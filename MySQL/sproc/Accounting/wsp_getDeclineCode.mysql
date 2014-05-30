@@ -1,0 +1,28 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getDeclineCode;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getDeclineCode (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu 
+**   Date:  July 28 2008 
+**   Description:  get decline code. 
+**
+** REVISION(S):
+**   Author: 
+**   Date: 
+**   Description:
+**
+******************************************************************************/
+)
+
+BEGIN
+   SELECT declineCode, 
+          retrialFlag 
+     FROM DeclineCode ;
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

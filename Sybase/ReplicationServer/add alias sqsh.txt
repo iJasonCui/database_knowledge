@@ -1,0 +1,49 @@
+jasonc@webccs:~/src/javalife/db/scripts/maint$ vi addalias.sqsh 
+"addalias.sqsh" 52 lines, 995 characters 
+#!/bin/bash
+
+if [ $# -ne 2 ]
+then
+   echo "Usage: "${0}" <serverName> <repServer> "
+   exit 1
+else
+   serverName=${1}
+   repServer=${2}
+fi
+
+Password=`cat $HOME/.sybpwd | grep -w ${serverName} | awk '{print $2}'`
+CurrentDate=`date '+%Y%m%d_%H%M%S'`
+LogFile=./output/${0}.${serverName}.${CurrentDate}
+
+date > ${LogFile}
+
+sqsh -Ucron_sa -S${serverName} -P${Password} << EOQ1 >> ${LogFile}
+
+select name from master..sysdatabases where name not in ('master', 'tempdb', 'model', 'sybsystemprocs', 'sybsystemdb') and name not
+like "%view"
+
+\do
+   \echo "use #1"
+   use #1
+   go
+   select db_name()
+   go
+   checkpoint
+   go
+
+   select name from sysobjects where type = "U" and name not like "rs%"
+   \do
+      \echo "grant select on #1 to read_un_limited"
+      grant select on #1 to read_un_limited
+      go
+   \done
+
+\done
+
+
+go
+
+EOQ1
+
+
+exit 0

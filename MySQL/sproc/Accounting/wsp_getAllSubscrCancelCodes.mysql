@@ -1,0 +1,30 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAllSubscrCancelCodes;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAllSubscrCancelCodes (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  November 2004
+**   Description:  retrieves all subscription cancel codes
+**
+** REVISION(S):
+**   Author:  Mike Stairs
+**   Date:    Mar 1, 2006
+**   Description: also return cancelCodeMaskId
+**
+******************************************************************************/
+)
+  BEGIN  
+	SELECT 
+          cancelCodeId,
+          contentId,
+          customerChoice,
+          description,
+          cancelCodeMaskId
+        FROM SubscriptionCancelCode
+        ORDER BY ordinal ;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

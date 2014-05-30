@@ -1,0 +1,161 @@
+OK, here it is, the result of a LOT of broken servers to figure this stuff out….  Its actually REALLY simple to set up the master-master mysql configs once you know what to look for… ?
+
+This is just a reference for you for the config files I use in production at f151.  To start replication there are other commands you run from the shell once everything is up and running.
+
+Kevin
+
+
+MASTER1 SETUP (my.cnf):
+
+
+[root@f151-mysql-master-1 ~]# cat /etc/my.cnf
+[mysqld]
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+user=mysql
+# Default to using old password format for compatibility with mysql 3.x
+# clients (those using the mysqlclient10 compatibility package).
+old_passwords=1
+
+
+
+### kmj added config ################
+port=3306
+# make sure to bind to ALL ip
+bind-address=0.0.0.0
+query-cache-type=1
+query-cache-size=24M
+skip-name-resolve
+max-connections=512
+table_cache=1024
+log_slow_queries=/var/log/mysql-logs/mysqld.slow.log
+long_query_time=2
+key_buffer_size=256M
+thread_cache=128
+### end of kmj config ##############
+
+### kmj start of master config
+log-bin=/var/log/mysql-logs/mysql-bin.log
+binlog-do-db=IvrDb
+server-id=1
+auto_increment_offset=1
+auto_increment_increment=2
+expire_logs_days=14
+max_binlog_size=100M
+log-slave-updates
+master-connect-retry=10
+### end of kmj master config
+
+##innodb config - kmj
+default-table-type=innodb
+innodb_file_per_table
+
+# Set buffer pool size between 50-80% of computer memory,
+# but make sure on Linux 32 bit total memory usage is < 2GB
+innodb_buffer_pool_size=11G
+innodb_additional_mem_pool_size=20M
+
+# Set the log file size to about 25% of the buffer pool size
+innodb_log_file_size=300M
+innodb_log_buffer_size=8M
+
+#not acid safe, but far better performance... can withstand
+#mysql crash but is OS crashes may lose up to 1 second of writes
+innodb_flush_log_at_trx_commit=2
+
+#allow innodb to have as many threads as it needs
+innodb_thread_concurrency=0
+
+#eliminate double buffering
+innodb_flush_method=O_DIRECT
+
+##end of innodb config - kmj
+
+
+
+# Disabling symbolic-links is recommended to prevent assorted security risks;
+# to do so, uncomment this line:
+# symbolic-links=0
+
+[mysqld_safe]
+log-error=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
+
+
+
+MASTER 2 SETUP (my.cnf):
+
+[root@f151-mysql-master-2 ~]# cat /etc/my.cnf
+[mysqld]
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+user=mysql
+# Default to using old password format for compatibility with mysql 3.x
+# clients (those using the mysqlclient10 compatibility package).
+old_passwords=1
+
+
+### kmj added config ################
+port=3306
+# make sure to bind to ALL ip
+bind-address=0.0.0.0
+query-cache-type=1
+query-cache-size=24M
+skip-name-resolve
+max-connections=512
+table_cache=1024
+log_slow_queries=/var/log/mysql-logs/mysqld.slow.log
+long_query_time=2
+key_buffer_size=256M
+thread_cache=128
+### end of kmj config ##############
+
+### kmj start of master config
+log-bin=/var/log/mysql-logs/mysql-bin.log
+binlog-do-db=IvrDb
+server-id=2
+auto_increment_offset=2
+auto_increment_increment=2
+expire_logs_days=14
+max_binlog_size=100M
+log-slave-updates
+master-connect-retry=10
+### end of kmj master config
+
+##innodb config - kmj
+default-table-type=innodb
+innodb_file_per_table
+
+# Set buffer pool size between 50-80% of computer memory,
+# but make sure on Linux 32 bit total memory usage is < 2GB
+innodb_buffer_pool_size=11G
+innodb_additional_mem_pool_size=20M
+
+# Set the log file size to about 25% of the buffer pool size
+innodb_log_file_size=300M
+innodb_log_buffer_size=8M
+
+#not acid safe, but far better performance... can withstand
+#mysql crash but is OS crashes may lose up to 1 second of writes
+innodb_flush_log_at_trx_commit=2
+
+#allow innodb to have as many threads as it needs
+innodb_thread_concurrency=0
+
+#eliminate double buffering
+innodb_flush_method=O_DIRECT
+
+##end of innodb config - kmj
+
+# Disabling symbolic-links is recommended to prevent assorted security risks;
+# to do so, uncomment this line:
+# symbolic-links=0
+
+[mysqld_safe]
+log-error=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
+[root@f151-mysql-master-2 ~]#
+
+
+
+

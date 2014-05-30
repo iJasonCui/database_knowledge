@@ -1,0 +1,157 @@
+DBA Login Report as of Mon Aug  3 10:00:00 EDT 2009
+
+
+ ServerName LoginName       LoginFullName                  CreateDate  PasswordDateTime     SARoleInd SSORoleInd 
+ ---------- --------------- ------------------------------ ----------- -------------------- --------- ---------- 
+ webdb30p   aalb            Adrian Alb                     Jun 10 2005 Jun 10 2005 12:26PM  Y         N          
+ webdb30p   cmessa          Courtney Messam - DBA          Dec  5 2005 Dec  5 2005  1:11PM  Y         N          
+ webdb30p   cron_sa         Login running CRON jobs        Feb  4 2005 Feb  4 2005 10:55AM  Y         N          
+ webdb30p   jcui            Jason Cui                      Feb  4 2005 Feb  4 2005 11:12AM  Y         N          
+ webdb30p   mda_user        Login collecting MDA data      Nov 12 2008 Nov 12 2008  3:21PM  Y         N          
+ webdb30p   sa              Sybase System Administrator    Oct  6 2004 Feb 20 2009 11:23AM  Y         Y          
+
+ ServerName LoginName       LoginFullName                  CreateDate  PasswordDateTime     SARoleInd SSORoleInd 
+ ---------- --------------- ------------------------------ ----------- -------------------- --------- ---------- 
+ w151dbp01  aalb            Adrian Alb                     Jun 10 2005 Jun 10 2005 12:26PM  Y         N          
+ w151dbp01  cmessa          Courtney Messam - DBA          Dec  5 2005 Dec 20 2005 10:28AM  Y         N          
+ w151dbp01  cron_sa         Login running CRON jobs        Feb  4 2005 Feb  4 2005 10:55AM  Y         N          
+ w151dbp01  hqian           Hunter Qian - DBA              Apr  9 2007 Apr 19 2007  5:20PM  Y         N          
+ w151dbp01  jcui            Jason Cui                      Feb  4 2005 Feb  4 2005 11:12AM  Y         N          
+ w151dbp01  mda_user        Login collecting MDA data      Nov 13 2008 Nov 13 2008  3:25PM  Y         N          
+ w151dbp01  sa              Sybase System Administrator    Oct  6 2004 Jun  9 2009  4:03PM  Y         Y          
+
+ ServerName LoginName       LoginFullName                  CreateDate  PasswordDateTime     SARoleInd SSORoleInd 
+ ---------- --------------- ------------------------------ ----------- -------------------- --------- ---------- 
+ w151dbp02  aalb            Adrian Alb                     Jun 10 2005 Jun 10 2005 12:26PM  Y         N          
+ w151dbp02  cmessa          Courtney Messam - DBA          Dec  5 2005 Dec  5 2005 10:36AM  Y         N          
+ w151dbp02  cron_sa         Login running CRON jobs        Jun 10 2005 Jun 10 2005 12:26PM  Y         Y          
+ w151dbp02  hqian           Hunter Qian - DBA              Apr  9 2007 Apr 19 2007  5:18PM  Y         N          
+ w151dbp02  jcui            Jason Cui                      Jun 10 2005 Jun 10 2005 12:26PM  Y         N          
+ w151dbp02  mda_user        Login collecting MDA data      Oct 23 2008 Oct 23 2008  2:06PM  Y         N          
+ w151dbp02  sa              Sybase System Administrator    Oct  6 2004 Jun 10 2009  3:36PM  Y         Y          
+
+ ServerName LoginName       LoginFullName                  CreateDate  PasswordDateTime     SARoleInd SSORoleInd 
+ ---------- --------------- ------------------------------ ----------- -------------------- --------- ---------- 
+ w151dbp03  aalb            Adrian Alb                     Jun 10 2005 Jun 10 2005 12:26PM  Y         N          
+ w151dbp03  cmessa          Courtney Messam - DBA          Dec  5 2005 Dec  5 2005 10:37AM  Y         N          
+ w151dbp03  cron_sa         Login running CRON jobs        Jun 10 2005 Jun 10 2005 12:26PM  Y         N          
+ w151dbp03  jcui            Jason Cui                      Jun 10 2005 Jun 10 2005 12:26PM  Y         N          
+ w151dbp03  mda_user        Login collecting MDA data      Nov 26 2008 Nov 26 2008 10:52AM  Y         N          
+ w151dbp03  sa              Sybase System Administrator    Oct  6 2004 Apr 15 2009  3:52PM  Y         Y          
+
+ ServerName LoginName       LoginFullName                  CreateDate  PasswordDateTime     SARoleInd SSORoleInd 
+ ---------- --------------- ------------------------------ ----------- -------------------- --------- ---------- 
+ w151dbp04  aalb            Adrian Alb                     Jun 10 2005 Jun 10 2005 12:26PM  Y         N          
+ w151dbp04  cmessa          Courtney Messam - DBA          Dec  5 2005 Dec 20 2005 10:28AM  Y         N          
+ w151dbp04  cron_sa         Login running CRON jobs        Feb  4 2005 Feb  4 2005 10:55AM  Y         N          
+ w151dbp04  hqian           Hunter Qian - DBA              Apr  9 2007 Apr 19 2007  5:20PM  Y         N          
+ w151dbp04  jcui            Jason Cui                      Feb  4 2005 Feb  4 2005 11:12AM  Y         N          
+ w151dbp04  sa              Sybase System Administrator    Jun 12 2008 Jun  9 2009  4:03PM  Y         Y          
+
+ ServerName LoginName       LoginFullName                  CreateDate  PasswordDateTime     SARoleInd SSORoleInd 
+ ---------- --------------- ------------------------------ ----------- -------------------- --------- ---------- 
+ w151dbp05  aalb            Adrian Alb                     Jun 10 2005 Jun 10 2005 12:26PM  Y         N          
+ w151dbp05  cmessa          Courtney Messam - DBA          Dec  5 2005 Dec  5 2005 10:36AM  Y         N          
+ w151dbp05  cron_sa         Login running CRON jobs        Jun 10 2005 Jun 10 2005 12:26PM  Y         Y          
+ w151dbp05  hhelal          Harry Helal                    Jun 10 2005 Jun 10 2005  3:00PM  Y         Y          
+ w151dbp05  hqian           Hunter Qian - DBA              Apr  9 2007 Apr 19 2007  5:18PM  Y         N          
+ w151dbp05  jcui            Jason Cui                      Jun 10 2005 Jun 10 2005 12:26PM  Y         N          
+ w151dbp05  sa              Sybase System Administrator    Jun 14 2008 Jun 10 2009  3:36PM  Y         Y          
+
+ ServerName LoginName       LoginFullName                  CreateDate  PasswordDateTime     SARoleInd SSORoleInd 
+ ---------- --------------- ------------------------------ ----------- -------------------- --------- ---------- 
+ w151dbp06  aalb            Adrian Alb                     Jun 10 2005 Jun 10 2005 12:26PM  Y         N          
+ w151dbp06  cmessa          Courtney Messam - DBA          Dec  5 2005 Dec  5 2005 10:37AM  Y         N          
+ w151dbp06  cron_sa         Login running CRON jobs        Jun 10 2005 Jun 10 2005 12:26PM  Y         N          
+ w151dbp06  hqian           Hunter Qian - DBA              Apr  9 2007 Apr 19 2007  5:22PM  Y         N          
+ w151dbp06  jcui            Jason Cui                      Jun 10 2005 Jun 10 2005 12:26PM  Y         N          
+ w151dbp06  sa              Sybase System Administrator    Jun 14 2008 Apr 15 2009  3:51PM  Y         Y          
+
+ ServerName LoginName       LoginFullName                  CreateDate  PasswordDateTime     SARoleInd SSORoleInd 
+ ---------- --------------- ------------------------------ ----------- -------------------- --------- ---------- 
+ w151dbr01  aalb            Adrian Alb                     Jun 10 2005 Jun 10 2005 12:25PM  Y         N          
+ w151dbr01  cmessa          Courtney Messam - DBA          Dec  5 2005 Dec 20 2005  9:48AM  Y         N          
+ w151dbr01  cron_sa         Login running CRON jobs        Jun 10 2005 Jun 10 2005 12:25PM  Y         N          
+ w151dbr01  hqian           Hunter Qian - DBA              Apr  9 2007 Apr 19 2007  5:08PM  Y         N          
+ w151dbr01  jcui            Jason Cui                      Jun 10 2005 Jun 10 2005 12:25PM  Y         N          
+ w151dbr01  mda_user        Login collecting MDA data      Nov 26 2008 Nov 26 2008 11:52AM  Y         N          
+ w151dbr01  sa              Sybase System Administrator    Oct  6 2004 Nov 26 2008  2:25PM  Y         Y          
+
+ ServerName LoginName       LoginFullName                  CreateDate  PasswordDateTime     SARoleInd SSORoleInd 
+ ---------- --------------- ------------------------------ ----------- -------------------- --------- ---------- 
+ w151dbr02  aalb            Adrian Alb                     Jun 10 2005 Jun 10 2005 12:25PM  Y         N          
+ w151dbr02  cmessa          Courtney Messam - DBA          Dec  5 2005 Dec 20 2005  9:54AM  Y         N          
+ w151dbr02  cron_sa         Login running CRON jobs        Jun 10 2005 Jun 10 2005 12:25PM  Y         N          
+ w151dbr02  hqian           Hunter Qian - DBA              Apr  9 2007 Apr 19 2007  5:08PM  Y         N          
+ w151dbr02  jcui            Jason Cui                      Jun 10 2005 Jun 10 2005 12:25PM  Y         N          
+ w151dbr02  mda_user        Login collecting MDA data      Nov 26 2008 Nov 26 2008 12:28PM  Y         N          
+ w151dbr02  sa              Sybase System Administrator    Oct  6 2004 Nov 26 2008  2:26PM  Y         Y          
+
+ ServerName LoginName       LoginFullName                  CreateDate  PasswordDateTime     SARoleInd SSORoleInd 
+ ---------- --------------- ------------------------------ ----------- -------------------- --------- ---------- 
+ w151dbr03  aalb            Adrian Alb                     Jun 10 2005 Jun 10 2005 12:25PM  Y         N          
+ w151dbr03  cmessa          Courtney Messam - DBA          Dec  5 2005 Dec 20 2005  9:52AM  Y         N          
+ w151dbr03  cron_sa         Login running CRON jobs        Jun 10 2005 Jun 10 2005 12:25PM  Y         N          
+ w151dbr03  hqian           Hunter Qian - DBA              Apr  9 2007 Apr 19 2007  5:10PM  Y         N          
+ w151dbr03  jcui            Jason Cui                      Jun 10 2005 Jun 10 2005 12:25PM  Y         N          
+ w151dbr03  mda_user        Login collecting MDA data      Nov 26 2008 Nov 26 2008 12:44PM  Y         N          
+ w151dbr03  sa              Sybase System Administrator    Oct  6 2004 Nov 26 2008  2:30PM  Y         Y          
+
+ ServerName LoginName       LoginFullName                  CreateDate  PasswordDateTime     SARoleInd SSORoleInd 
+ ---------- --------------- ------------------------------ ----------- -------------------- --------- ---------- 
+ w151dbr06  aalb            Adrian Alb                     Jun 10 2005 Jun 10 2005 12:26PM  Y         N          
+ w151dbr06  cmessa          Courtney Messam - DBA          Dec  5 2005 Dec 21 2005 10:20AM  Y         N          
+ w151dbr06  cron_sa         Login running CRON jobs        Jun 10 2005 Jun 10 2005 12:26PM  Y         Y          
+ w151dbr06  jcui            Jason Cui                      Jun 10 2005 Jun 10 2005 12:26PM  Y         N          
+ w151dbr06  mda_user        Login collecting MDA data      Nov 26 2008 Nov 26 2008 12:55PM  Y         N          
+ w151dbr06  sa              Sybase System Administrator    Jul  4 2008 Dec 10 2008  3:25PM  Y         Y          
+
+ ServerName LoginName       LoginFullName                  CreateDate  PasswordDateTime     SARoleInd SSORoleInd 
+ ---------- --------------- ------------------------------ ----------- -------------------- --------- ---------- 
+ c151dbp02  aalb            Adrian Alb - DBA               Jun 10 2005 Aug 21 2008  3:19PM  Y         N          
+ c151dbp02  cmessa          Courtney Messam - DBA          Dec  5 2005 Dec  5 2005 12:41PM  Y         N          
+ c151dbp02  cron_sa         Login running CRON jobs        Feb  3 2005 Feb  3 2005  4:16PM  Y         N          
+ c151dbp02  hqian           Hunter Qian - DBA              Apr  9 2007 Apr 19 2007  4:28PM  Y         N          
+ c151dbp02  ibang           In Kap Bang                    Mar 24 2008 Apr 10 2008  1:26PM  Y         N          
+ c151dbp02  jcui            Jason Cui                      Feb  3 2005 Sep 17 2007  4:30PM  Y         N          
+ c151dbp02  mda_user        Login collecting MDA data      Nov 19 2008 Nov 19 2008 10:21AM  Y         N          
+ c151dbp02  sa              Sybase System Administrator    Nov 24 2008 Apr 17 2009 11:03AM  Y         Y          
+
+ ServerName   LoginName       LoginFullName                  CreateDate  PasswordDateTime     SARoleInd SSORoleInd 
+ ------------ --------------- ------------------------------ ----------- -------------------- --------- ---------- 
+ c151dbp02pgs aalb            Adrian Alb - DBA               Jun 10 2005 Jun 10 2005 11:38AM  Y         N          
+ c151dbp02pgs cmessa          Courtney Messam - DBA          Dec  5 2005 Mar 10 2006  5:06PM  Y         N          
+ c151dbp02pgs cron_sa         Login running CRON jobs        Jun 10 2005 Jun 10 2005  3:24PM  Y         N          
+ c151dbp02pgs hqian           Hunter Qian - DBA              Apr  9 2007 Apr 19 2007  4:32PM  Y         N          
+ c151dbp02pgs jcui            Jason Cui - DBA                Jun 10 2005 Jun 10 2005 11:38AM  Y         N          
+ c151dbp02pgs mda_user        Login collecting MDA data      Jul 21 2009 Jul 21 2009  1:59PM  Y         N          
+ c151dbp02pgs sa              Sybase System Administrator    Dec  9 2008 Jul  6 2009 10:28AM  Y         Y          
+
+ ServerName LoginName       LoginFullName                  CreateDate  PasswordDateTime     SARoleInd SSORoleInd 
+ ---------- --------------- ------------------------------ ----------- -------------------- --------- ---------- 
+ v151db20   aalb            Adrian                         Jun 21 2005 Nov 18 2005  2:30PM  Y         N          
+ v151db20   cmessa          Courtney Messam                Mar 15 2006 Apr  9 2007  7:53PM  Y         N          
+ v151db20   cron_sa         Login running CRON jobs        Jun 22 2005 Jul  3 2008  7:19PM  Y         N          
+ v151db20   hqian           Hunter Qian - DBA              Apr  9 2007 Jul  3 2007  2:50PM  Y         N          
+ v151db20   jcui            Jason Cui                      Jun 22 2005 Jun 14 2006  4:01PM  Y         N          
+ v151db20   mda_user        Login collecting MDA data      Nov  5 2008 Nov  5 2008  7:21PM  Y         N          
+ v151db20   sa              Sybase System Administrator    Oct  6 2004 Apr 15 2009  7:33PM  Y         Y          
+ v151db20   tomcat          Tomcat                         Aug  3 2005 Aug  3 2005  3:32PM  Y         N          
+
+ ServerName LoginName       LoginFullName                  CreateDate  PasswordDateTime     SARoleInd SSORoleInd 
+ ---------- --------------- ------------------------------ ----------- -------------------- --------- ---------- 
+ aus-db     aalb            Adrian                         Jan 13 2006 Jan 19 2006  4:45PM  Y         N          
+ aus-db     cmessa          Courtney Messam                Jan 13 2006 Apr  9 2007  7:54PM  Y         N          
+ aus-db     cron_sa         Login running CRON jobs        Jan 13 2006 Jan 13 2006  1:09AM  Y         N          
+ aus-db     jcui            Jason Cui                      Jan 13 2006 Feb 22 2006  2:06PM  Y         N          
+ aus-db     sa              Sybase System Administrator    Jul 15 2004 Sep 24 2007  4:16PM  Y         Y          
+
+ ServerName   LoginName       LoginFullName                  CreateDate  PasswordDateTime     SARoleInd SSORoleInd 
+ ------------ --------------- ------------------------------ ----------- -------------------- --------- ---------- 
+ v151dbp01ivr aalb            Adrian                         Jun 21 2005 Nov 18 2005  2:30PM  Y         N          
+ v151dbp01ivr cmessa          Courtney Messam                Mar 15 2006 Apr  9 2007  7:53PM  Y         N          
+ v151dbp01ivr cron_sa         Login running CRON jobs        Jun 22 2005 Sep 16 2008  3:43PM  Y         N          
+ v151dbp01ivr hqian           Hunter Qian - DBA              Apr  9 2007 Jul  3 2007  2:50PM  Y         N          
+ v151dbp01ivr jcui            Jason Cui                      Jun 22 2005 Jun 14 2006  4:01PM  Y         N          
+ v151dbp01ivr mda_user        Login collecting MDA data      Oct 27 2008 Oct 28 2008  5:39PM  Y         N          
+ v151dbp01ivr sa              Sybase System Administrator    Mar 20 2008 Jul 14 2009  3:13PM  Y         Y          

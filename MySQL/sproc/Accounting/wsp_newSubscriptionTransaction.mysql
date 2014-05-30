@@ -1,0 +1,91 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newSubscriptionTransaction;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newSubscriptionTransaction (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  November 25, 20043
+**   Description:  add subscription transaction  for user
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date: Jan 12, 2006
+**   Description: added durationUnits
+**
+** REVISION(S):
+**   Author: Yan Liu 
+**   Date: April 26, 2008
+**   Description: added subscriptionOfferDetailId 
+**
+******************************************************************************/
+   at_userId             DECIMAL(12,0),
+   at_xactionTypeId      TINYINT,
+   at_subscriptionTypeId TINYINT,
+   at_contentId          SMALLINT,
+   at_dateNow            DATETIME,
+   at_adminUserId        INT,
+   at_description        VARCHAR(255),
+   at_cardId             INT,
+   at_duration           INT,
+   at_userTrans          BIT,
+   at_durationUnits      CHAR(1),
+   at_offerDetailId      SMALLINT
+)
+proc_label:BEGIN
+
+DECLARE at_xactionId  INT;
+DECLARE at_dateNowGMT DATETIME;
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+   ROLLBACK;
+END;
+
+DECLARE	EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+   ROLLBACK;
+END;
+
+SET at_dateNowGMT = UTC_TIMESTAMP();
+CALL wsp_XactionId(at_xactionId);
+IF !(at_xactionId > 0) THEN
+   LEAVE proc_label;
+END IF;
+
+START TRANSACTION;
+
+IF (at_adminUserId > 0) THEN
+   INSERT INTO AdminAccountTransaction(xactionId, adminUserId, userId, dateCreated) VALUES (at_xactionId, at_adminUserId, at_userId, at_dateNowGMT);
+END IF;
+
+INSERT INTO SubscriptionTransaction(xactionId,
+                                       userId,
+                                       cardId,
+                                       xactionTypeId,
+                                       contentId,
+                                       subscriptionTypeId,
+                                       dateCreated,
+                                       description,
+                                       duration,
+                                       userTrans,
+                                       durationUnits,
+                                       subscriptionOfferDetailId)
+   VALUES(at_xactionId,
+          at_userId,
+          at_cardId,
+          at_xactionTypeId,
+          at_contentId,
+          at_subscriptionTypeId,
+          at_dateNowGMT,
+          at_description,
+          at_duration,
+          at_userTrans,
+          at_durationUnits,
+          at_offerDetailId);
+
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

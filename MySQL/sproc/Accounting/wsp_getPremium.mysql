@@ -1,0 +1,32 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getPremium;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getPremium (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu 
+**   Date:  April 18, 2008
+**   Description:  retrieves all premium package info 
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+)
+
+BEGIN  
+   SELECT premiumId,
+          premiumDesc, 
+          contentId, 
+          dateCreated,
+          dateExpiry,
+          features 
+     FROM Premium ;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

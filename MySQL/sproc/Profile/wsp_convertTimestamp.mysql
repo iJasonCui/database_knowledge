@@ -1,0 +1,21 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_convertTimestamp;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_convertTimestamp (OUT at_date_datetime datetime, OUT at_date_int int, OUT at_gmt_offset int)
+BEGIN
+
+if at_date_datetime IS NOT NULL
+THEN
+
+  SET at_date_int = UNIX_TIMESTAMP(at_date_datetime);
+  SET at_gmt_offset = TIMESTAMPDIFF(HOUR,  NOW(), UTC_TIMESTAMP());
+
+ELSEIF at_date_int IS NOT NULL
+THEN
+  
+  SET at_date_datetime = FROM_UNIXTIME(at_date_int);
+  SET at_gmt_offset = TIMESTAMPDIFF(HOUR,  NOW(), UTC_TIMESTAMP());
+
+END IF;
+
+END;;
+DELIMITER ;

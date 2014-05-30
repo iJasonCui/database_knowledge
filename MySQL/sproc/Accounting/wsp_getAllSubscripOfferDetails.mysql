@@ -1,0 +1,51 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAllSubscripOfferDetails;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAllSubscripOfferDetails (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  Nov 2004
+**   Description:  retrieves all subscription detail descriptions
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date: Jan 6, 2006
+**   Description: retrieve extra columns
+**
+** REVISION(S):
+**   Author: Yan Liu 
+**   Date: Feb 26, 2008
+**   Description: retrieve extra columns
+**
+** REVISION(S):
+**   Author: Yan Liu 
+**   Date: April 1, 2008
+**   Description: retrieve extra columns - premiumId, masterOfferDetailId.
+**
+******************************************************************************/
+)
+BEGIN  
+      SELECT subscriptionOfferDetailId,
+             subscriptionOfferId,
+             contentId,
+             subscriptionTypeId,
+             ordinal,
+             cost,
+             duration,
+             durationUnits,
+             freeTrialDuration,
+             dateExpiry,
+             freeTrialDurationUnits,
+             promoFlag,
+             autoRenewOfferDetailId,
+             premiumId,
+             masterOfferDetailId, 
+             upgradeOfferDetailId 
+        FROM SubscriptionOfferDetail
+      ORDER BY subscriptionOfferDetailId;
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

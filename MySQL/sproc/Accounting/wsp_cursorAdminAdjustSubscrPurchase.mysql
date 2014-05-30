@@ -1,0 +1,54 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_cursorAdminAdjustSubscrPurchase;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_cursorAdminAdjustSubscrPurchase (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  Feb 16, 2006
+**   Description:  adjust  subscription purchase for user
+**
+**
+******************************************************************************/
+at_userId        DECIMAL(12, 0),
+at_xactionId     DECIMAL(12, 0),
+at_refXactionId  DECIMAL(12, 0),
+at_contentId     SMALLINT,
+at_xactionTypeId TINYINT,
+at_cardProcessor CHAR(1),
+at_adminUserId   INT,
+at_adminNote     VARCHAR(255),
+at_dateNow       DATETIME,
+at_currencyId    TINYINT,
+at_purchaseTypeId    TINYINT,
+at_billingLocationId SMALLINT,
+at_creditCardId      INT
+)
+BEGIN
+
+DECLARE at_subscriptionOfferDetailId SMALLINT;
+
+DECLARE done INT DEFAULT FALSE;
+DECLARE CUR_subDetail CURSOR FOR SELECT subscriptionOfferDetailId FROM PurchaseSubscriptionDetail WHERE xactionId = at_refXactionId;
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+OPEN CUR_subDetail;
+
+read_loop: LOOP
+
+   FETCH CUR_subDetail INTO at_subscriptionOfferDetailId;
+
+   IF done THEN
+      LEAVE read_loop;
+   END IF;
+
+   CALL wsp_transAdminAdjustSubscrPurchase(at_userId,at_xactionId,at_refXactionId,at_contentId,at_xactionTypeId,at_cardProcessor,at_adminUserId,at_adminNote,
+		at_dateNow,at_currencyId,at_purchaseTypeId,at_billingLocationId,at_creditCardId,at_subscriptionOfferDetailId);
+
+END LOOP;
+ 
+CLOSE CUR_subDetail;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

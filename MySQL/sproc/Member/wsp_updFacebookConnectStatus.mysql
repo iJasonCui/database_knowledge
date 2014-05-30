@@ -1,0 +1,35 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS wsp_updFacebookConnectStatus;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updFacebookConnectStatus (
+/***********************************************************************
+**
+** CREATION:
+**   Author:        Andy Tran
+**   Date:          January, 2011
+**   Description:   Updates the status of a FacebookConnect record.
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+at_fbUserId  VARCHAR(24),
+at_llUserId  DECIMAL(12,0),
+at_status    CHAR(1)
+)
+BEGIN
+
+DECLARE  at_dateModified   DATETIME;
+
+IF (SELECT 1 FROM FacebookConnect WHERE fbUserId = at_fbUserId AND llUserId = at_llUserId) IS NOT NULL THEN 
+
+   SET at_dateModified = UTC_TIMESTAMP();
+
+   UPDATE FacebookConnect SET status = at_status, dateModified = at_dateModified 
+	WHERE fbUserId = at_fbUserId AND llUserId = at_llUserId;
+
+END IF;
+
+END;;
+DELIMITER ;

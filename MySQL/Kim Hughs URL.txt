@@ -1,0 +1,18 @@
+Liferay for Click/LL.com: 
+http://click.lavalife.com:8080/group/click-magazine/1
+http://10.10.97.60:8080/group/click-magazine/1
+
+Login: kim.hughes@lavalife.com
+PW: 123456
+
+Liferay for corp site:
+http://10.10.25.158:7080/c/portal/login?p_l_id=10127&redirect=%2Fgroup%2Fcorp%2F1
+
+Login: kim.hughes@lavalife.com
+PW: ??
+
+Prime CMS:
+http://10.10.86.51:8080/cms/
+
+Login: kim
+PW: kim

@@ -1,0 +1,165 @@
+Setup for IVR Replication to searchDB
+=================================================
+
+
+1. Run rs_init to add v151db20.searchDB to Replication System
+	This is a one time procedure
+	
+2. Generate "Create RepDef"
+	Use script located at $HOME/src/javalife/db/scripts/RepServer/genrd_WEB.sh
+	Point script to searchDB as this will have the structure required for the RepDef
+	Make Sure to follow naming conventions for RepDefs
+	
+	RepDefName = <Server_Number><DB>_<TB>
+	
+	Save script in $HOME/src/javalife/db/scripts/RepServer/<TableName>/createRepDef_<Table_Name>_<DB>.sql
+	
+	eg cmessa@webccs:/export/home/cmessa/src/javalife/db/scripts/RepServer/Mailbox>$ cat createRepDef_Mailbox_harLL.sql
+        
+        create replication definition "20harLL_Mailbox"
+        with primary at LogicalSRV.harLL
+        with all tables named "Mailbox"
+        (
+                "region" int,
+                "boxnum" int,
+                "adnum" int,
+                "greetingnum" int,
+                "accountnum" int,
+                "status" int,
+                "rcac" int,
+                "passcode" int,
+                "gender" int,
+                "date_created" datetime,
+                "date_lastaccess" datetime,
+                "ani" char(25),
+                "cf_status" int,
+                "mp_status" int,
+                "phonenum" char(10),
+                "ad_status" int,
+                "ad_autoapprove" int,
+                "ad_segment" int,
+                "ad_category" int,
+                "date_ad" datetime,
+                "date_birth" datetime,
+                "age" int,
+                "burb" int,
+                "language" int,
+                "onlineStatus" int,
+                "cf_start" int,
+                "cf_end" int,
+                "cf_count" int,
+                "gr_status" int,
+                "gr_date_created" datetime,
+                "ethnicity" int,
+                "picture" int,
+                "filter" int,
+                "login_count" int,
+                "partnershipId" int,
+                "dnis" char(25),
+                "hltaCounter" int,
+                "daCaller" int,
+                "cellPhonenum" char(10),
+                "mt_start" int,
+                "mt_end" int,
+                "postcode" char(20),
+                "lat_rad" int,
+                "long_rad" int,
+                "rcac_member" int,
+                "accountregion" int,
+                "accountId" int,
+                "serialNumber" int
+        )
+        primary key ( "region", "boxnum")
+        replicate minimal columns
+        /* No searchable columns */
+        /* No minimal columns */
+        go
+
+	==============================================================================================
+	cmessa@webccs:/export/home/cmessa>$ sqsh -Usa -Sv104dbrssd                                                    
+	sqsh-2.1 Copyright (C) 1995-2001 Scott C. Gray                                                                
+	This is free software with ABSOLUTELY NO WARRANTY                                                             
+	For more information type '\warranty'                                                                         
+	Password:                                                                                                     
+	1> use v104dbrep_RSSD                                                                                                  
+	2> go                                                                                                         
+	
+	
+	Issue stored proc to check if replication definition was created
+	
+	1> rs_helprep
+	2> go
+	
+	Replication Definition Name	PRS		Primary DS.DB		Primary Table	Replicate Table	Type
+	20chrLL_Mailbox			v104dbrep	LogicalSRV.chrLL	Mailbox		Mailbox		Tbl
+	20harLL_Mailbox			v104dbrep	LogicalSRV.harLL	Mailbox		Mailbox		Tbl
+	20idpLL_Mailbox			v104dbrep	LogicalSRV.idpLL	Mailbox		Mailbox		Tbl
+	20milLL_Mailbox			v104dbrep	LogicalSRV.milLL	Mailbox		Mailbox		Tbl
+	20nsvLL_Mailbox			v104dbrep	LogicalSRV.nsvLL	Mailbox		Mailbox		Tbl
+	20potLL_Mailbox			v104dbrep	LogicalSRV.potLL	Mailbox		Mailbox		Tbl
+	20seaLL_Mailbox			v104dbrep	LogicalSRV.seaLL	Mailbox		Mailbox		Tbl
+	
+	==============================================================================================         
+
+3. Log into Replication server - v104dbrep
+	Execute script to create Replication Definition
+
+4. Define Subscription (Bulk NonAtomic Materialisation )
+	Define Subscription
+	Check Subscription
+	Activate Subscription
+	Check Subscription
+	Validate Subscription
+	Ckeck Subscription
+	
+	
+	Naming Convention : <SeverNo><DB>_searchDB_<TB>
+	
+	eg cmessa@webccs:/export/home/cmessa/src/javalife/db/scripts/RepServer/Mailbox>$ cat define_sub_v151db20_chrLL_Mailbox.sql
+	
+	define subscription "20chrLL_searchDB_Mailbox" for "20chrLL_Mailbox"  with replicate at v151db20.searchDB
+	go
+	check subscription "20chrLL_searchDB_Mailbox" for "20chrLL_Mailbox"  with replicate at v151db20.searchDB
+	go
+	activate subscription "20chrLL_searchDB_Mailbox" for "20chrLL_Mailbox"  with replicate at v151db20.searchDB
+	go
+	check subscription "20chrLL_searchDB_Mailbox" for "20chrLL_Mailbox"  with replicate at v151db20.searchDB
+	go
+	validate subscription "20chrLL_searchDB_Mailbox" for "20chrLL_Mailbox"  with replicate at v151db20.searchDB
+	go
+
+	==============================================================================================
+	Check the subscription to make sure everything is OK 
+	This is done from the RSSD
+	
+	1> rs_helpsub
+	2> go 					
+						
+	 ** This Site is 'v104dbrep' **					
+	                                                            Status at					
+						
+	Subscription Name	Rep. Def. Name	Replicate DS.DB		A/C	RRS	PRS
+	20chrLL_searchDB_Mai	20chrLL_Mailbox	v151db20.searchDB	0	Valid	Valid
+	20harLLsearchDB_Mail	20harLL_Mailbox	v151db20.searchDB	0	Valid	Valid
+	20idpLL_searchDB_Mai	20idpLL_Mailbox	v151db20.searchDB	0	Valid	Valid
+	20milLL_searchDB_Mai	20milLL_Mailbox	v151db20.searchDB	0	Valid	Valid
+	20nsvLL_searchDB_Mai	20nsvLL_Mailbox	v151db20.searchDB	0	Valid	Valid
+	20potLL_searchDB_Mai	20potLL_Mailbox	v151db20.searchDB	0	Valid	Valid
+	20seaLL_searchDB_Mai	20seaLL_Mailbox	v151db20.searchDB	0	Valid	Valid
+	(return status = 0)					
+
+	=============================================================================================
+	   
+5. Add test record and suspend log transfer
+	suspend log transfer from v151db20.harLL
+	   
+	Make sure test record makes it then wait another 2 mins 
+	   
+6. Delete any data from table for the region we are processing, it records exists
+           
+7. SQSH BCP data from Warm Stanby into v151db20.searchDB.<table_name>
+           
+8. Resume Log transfer
+	resume log transfer from v151db20.harLL
+	
+9. Use admin who_is_down to check if the server replication is up

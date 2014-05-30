@@ -1,0 +1,105 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newOptimalPaymentsRequest;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newOptimalPaymentsRequest (
+    at_customerId          DECIMAL(10,0)
+   ,at_activityId          INT
+   ,at_accountNumber       CHAR(10)
+   ,at_storeID             VARCHAR(80)
+   ,at_actionCode          VARCHAR(20)
+   ,at_merchantRefNum      varchar(255)  
+   ,at_cardType            char(2)       
+   ,at_cardNumber           varchar(64)   
+   ,at_cardExpiryMonth      char(2)       
+   ,at_cardExpiryYear       char(4)       
+   ,at_amount               DECIMAL(10,2) 
+   ,at_currencyCode         char(3)       
+   ,at_cardHolderName       varchar(30)   
+   ,at_userStreet           varchar(30)   
+   ,at_userCity             varchar(20)   
+   ,at_userState            char(2)       
+   ,at_userCountryCode      char(2)       
+   ,at_userPostalCode       varchar(10)   
+   ,at_cardSecurityValue    varchar(4)    
+   ,at_cardIssueNumber      char(2)       
+   ,at_cardStartMonth       char(2)       
+   ,at_cardStartYear        char(4)       
+   ,at_cardSecurityPresence char(1)       
+   ,at_encodedCardId        int           
+   ,at_customerIP           varchar(50)   
+   ,at_email                varchar(129)  
+)
+BEGIN
+DECLARE at_dateCreated       DATETIME;
+
+SET at_dateCreated = NOW();
+
+-- CALL at_return = wsp_GetDateGMT at_dateCreated OUTPUT
+-- IF at_return != 0
+--    BEGIN
+--        RETURN at_return
+--    END
+
+INSERT INTO OptimalPaymentsRequest (
+    customerId          
+    ,activityId          
+    ,merchantId          
+    ,storeID             
+    ,actionCode          
+    ,merchantRefNum      
+    ,cardType            
+    ,cardNumber          
+    ,cardExpiryMonth     
+    ,cardExpiryYear      
+    ,amount              
+    ,currencyCode        
+    ,cardHolderName      
+    ,userStreet          
+    ,userCity            
+    ,userState           
+    ,userCountryCode     
+    ,userPostalCode      
+    ,cardSecurityValue   
+    ,cardIssueNumber     
+    ,cardStartMonth      
+    ,cardStartYear       
+    ,dateCreated         
+    ,cardSecurityPresence
+    ,authAmount          
+    ,encodedCardId       
+    ,customerIP          
+    ,email               
+)
+VALUES (
+    at_customerId          
+   ,at_activityId          
+   ,at_accountNumber       
+   ,at_storeID             
+   ,at_actionCode          
+   ,at_merchantRefNum      
+   ,at_cardType            
+   ,at_cardNumber          
+   ,at_cardExpiryMonth     
+   ,at_cardExpiryYear      
+   ,at_amount              
+   ,at_currencyCode        
+   ,at_cardHolderName      
+   ,at_userStreet          
+   ,at_userCity            
+   ,at_userState           
+   ,at_userCountryCode     
+   ,at_userPostalCode      
+   ,at_cardSecurityValue   
+   ,at_cardIssueNumber     
+   ,at_cardStartMonth      
+   ,at_cardStartYear
+   ,at_dateCreated
+   ,at_cardSecurityPresence
+   ,at_amount 
+   ,at_encodedCardId       
+   ,at_customerIP          
+   ,at_email               
+);
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

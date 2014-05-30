@@ -1,0 +1,1722 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 12">
+<meta name=Originator content="Microsoft Word 12">
+<link rel=File-List
+href="RE%20http172.25.6.18%20%20mysql%20monitor%20server_files/filelist.xml">
+<link rel=Edit-Time-Data
+href="RE%20http172.25.6.18%20%20mysql%20monitor%20server_files/editdata.mso">
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:Author>jcui</o:Author>
+  <o:Template>NormalEmail</o:Template>
+  <o:Revision>1</o:Revision>
+  <o:TotalTime>0</o:TotalTime>
+  <o:Created>2013-06-13T20:26:00Z</o:Created>
+  <o:Pages>1</o:Pages>
+  <o:Words>2055</o:Words>
+  <o:Characters>11714</o:Characters>
+  <o:Lines>97</o:Lines>
+  <o:Paragraphs>27</o:Paragraphs>
+  <o:CharactersWithSpaces>13742</o:CharactersWithSpaces>
+  <o:Version>12.00</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]-->
+<link rel=themeData
+href="RE%20http172.25.6.18%20%20mysql%20monitor%20server_files/themedata.thmx">
+<link rel=colorSchemeMapping
+href="RE%20http172.25.6.18%20%20mysql%20monitor%20server_files/colorschememapping.xml">
+<!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:Zoom>0</w:Zoom>
+  <w:TrackMoves/>
+  <w:TrackFormatting/>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:DoNotPromoteQF/>
+  <w:LidThemeOther>EN-US</w:LidThemeOther>
+  <w:LidThemeAsian>ZH-CN</w:LidThemeAsian>
+  <w:LidThemeComplexScript>X-NONE</w:LidThemeComplexScript>
+  <w:Compatibility>
+   <w:DoNotExpandShiftReturn/>
+   <w:BreakWrappedTables/>
+   <w:SplitPgBreakAndParaMark/>
+   <w:DontVertAlignCellWithSp/>
+   <w:DontBreakConstrainedForcedTables/>
+   <w:DontVertAlignInTxbx/>
+   <w:Word11KerningPairs/>
+   <w:CachedColBalance/>
+  </w:Compatibility>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+  <m:mathPr>
+   <m:mathFont m:val="Cambria Math"/>
+   <m:brkBin m:val="before"/>
+   <m:brkBinSub m:val="&#45;-"/>
+   <m:smallFrac m:val="off"/>
+   <m:dispDef/>
+   <m:lMargin m:val="0"/>
+   <m:rMargin m:val="0"/>
+   <m:defJc m:val="centerGroup"/>
+   <m:wrapIndent m:val="1440"/>
+   <m:intLim m:val="subSup"/>
+   <m:naryLim m:val="undOvr"/>
+  </m:mathPr></w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" DefUnhideWhenUsed="true"
+  DefSemiHidden="true" DefQFormat="false" DefPriority="99"
+  LatentStyleCount="267">
+  <w:LsdException Locked="false" Priority="0" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Normal"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="heading 1"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 2"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 3"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 4"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 5"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 6"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 7"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 8"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 9"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 1"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 2"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 3"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 4"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 5"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 6"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 7"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 8"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 9"/>
+  <w:LsdException Locked="false" Priority="35" QFormat="true" Name="caption"/>
+  <w:LsdException Locked="false" Priority="10" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Title"/>
+  <w:LsdException Locked="false" Priority="1" Name="Default Paragraph Font"/>
+  <w:LsdException Locked="false" Priority="11" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Subtitle"/>
+  <w:LsdException Locked="false" Priority="22" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Strong"/>
+  <w:LsdException Locked="false" Priority="20" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Emphasis"/>
+  <w:LsdException Locked="false" Priority="59" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Table Grid"/>
+  <w:LsdException Locked="false" UnhideWhenUsed="false" Name="Placeholder Text"/>
+  <w:LsdException Locked="false" Priority="1" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="No Spacing"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 1"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 1"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 1"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 1"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 1"/>
+  <w:LsdException Locked="false" UnhideWhenUsed="false" Name="Revision"/>
+  <w:LsdException Locked="false" Priority="34" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="List Paragraph"/>
+  <w:LsdException Locked="false" Priority="29" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Quote"/>
+  <w:LsdException Locked="false" Priority="30" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Intense Quote"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 1"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 1"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 1"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 1"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 1"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 1"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 2"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 2"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 2"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 2"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 2"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 2"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 2"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 2"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 3"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 3"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 3"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 3"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 3"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 3"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 3"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 3"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 4"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 4"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 4"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 4"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 4"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 4"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 4"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 4"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 5"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 5"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 5"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 5"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 5"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 5"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 5"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 5"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 6"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 6"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 6"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 6"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 6"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 6"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 6"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 6"/>
+  <w:LsdException Locked="false" Priority="19" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Subtle Emphasis"/>
+  <w:LsdException Locked="false" Priority="21" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Intense Emphasis"/>
+  <w:LsdException Locked="false" Priority="31" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Subtle Reference"/>
+  <w:LsdException Locked="false" Priority="32" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Intense Reference"/>
+  <w:LsdException Locked="false" Priority="33" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Book Title"/>
+  <w:LsdException Locked="false" Priority="37" Name="Bibliography"/>
+  <w:LsdException Locked="false" Priority="39" QFormat="true" Name="TOC Heading"/>
+ </w:LatentStyles>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:SimSun;
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-alt:\5B8B\4F53;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 135135232 16 0 262145 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:roman;
+	mso-font-pitch:variable;
+	mso-font-signature:-1610611985 1107304683 0 0 159 0;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-1610611985 1073750139 0 0 159 0;}
+@font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:1627400839 -2147483648 8 0 66047 0;}
+@font-face
+	{font-family:"\@SimSun";
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 135135232 16 0 262145 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";
+	mso-fareast-font-family:SimSun;
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:"Times New Roman";}
+a:link, span.MsoHyperlink
+	{mso-style-priority:99;
+	color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	color:purple;
+	text-decoration:underline;
+	text-underline:single;}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-link:"Balloon Text Char";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:8.0pt;
+	font-family:"Tahoma","sans-serif";
+	mso-fareast-font-family:SimSun;
+	mso-fareast-theme-font:minor-fareast;}
+span.EmailStyle17
+	{mso-style-type:personal;
+	mso-style-noshow:yes;
+	mso-style-unhide:no;
+	font-family:"Calibri","sans-serif";
+	mso-ascii-font-family:Calibri;
+	mso-hansi-font-family:Calibri;
+	color:windowtext;}
+span.EmailStyle18
+	{mso-style-type:personal;
+	mso-style-noshow:yes;
+	mso-style-unhide:no;
+	font-family:"Calibri","sans-serif";
+	mso-ascii-font-family:Calibri;
+	mso-hansi-font-family:Calibri;
+	color:#1F497D;}
+span.BalloonTextChar
+	{mso-style-name:"Balloon Text Char";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Balloon Text";
+	mso-ansi-font-size:8.0pt;
+	mso-bidi-font-size:8.0pt;
+	font-family:"Tahoma","sans-serif";
+	mso-ascii-font-family:Tahoma;
+	mso-fareast-font-family:SimSun;
+	mso-fareast-theme-font:minor-fareast;
+	mso-hansi-font-family:Tahoma;
+	mso-bidi-font-family:Tahoma;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	mso-default-props:yes;
+	font-size:10.0pt;
+	mso-ansi-font-size:10.0pt;
+	mso-bidi-font-size:10.0pt;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.0in 1.0in 1.0in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;
+	mso-paper-source:0;}
+div.WordSection1
+	{page:WordSection1;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman","serif";}
+</style>
+<![endif]--><!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="1026"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout></xml><![endif]-->
+</head>
+
+<body lang=EN-US link=blue vlink=purple style='tab-interval:.5in'>
+
+<div class=WordSection1>
+
+<p class=MsoNormal style='margin-left:120.0pt;text-indent:-120.0pt;tab-stops:
+120.0pt;mso-layout-grid-align:none;text-autospace:none'><b><span
+style='mso-bidi-font-family:Calibri;color:black'>From:<span style='mso-tab-count:
+1'>                                         </span></span></b><span
+style='mso-bidi-font-family:Calibri;color:black'>Liliana Wagner<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:120.0pt;text-indent:-120.0pt;tab-stops:
+120.0pt;mso-layout-grid-align:none;text-autospace:none'><b><span
+style='mso-bidi-font-family:Calibri;color:black'>Sent:<span style='mso-tab-count:
+1'>                                           </span></span></b><span
+style='mso-bidi-font-family:Calibri;color:black'>Thursday, April 25, 2013 9:56
+AM<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:120.0pt;text-indent:-120.0pt;tab-stops:
+120.0pt;mso-layout-grid-align:none;text-autospace:none'><b><span
+style='mso-bidi-font-family:Calibri;color:black'>To:<span style='mso-tab-count:
+1'>                                               </span></span></b><span
+style='mso-bidi-font-family:Calibri;color:black'>Jason Cui; Jeff Yang<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:120.0pt;text-indent:-120.0pt;tab-stops:
+120.0pt;mso-layout-grid-align:none;text-autospace:none'><b><span
+style='mso-bidi-font-family:Calibri;color:black'>Subject:<span
+style='mso-tab-count:1'>                                     </span></span></b><span
+style='mso-bidi-font-family:Calibri;color:black'>RE: http://172.25.6.18/<span
+style='mso-spacerun:yes'>  </span>mysql monitor server<o:p></o:p></span></p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&lt;?php<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>/*<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>* Mysql Monitor system - kmj<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>*/<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>// check to see if running... only let run once at a
+time<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>if (linux_am_i_running()) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; logit(&quot;Already
+running&quot;);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; exit;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>} else {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; logit(&quot;STARTING NEW
+PROCESS&quot;);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>}<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>$hd=connect_to_config_db();<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>set_time_limit(250);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>$loop_time=30;&nbsp; // how often do we want the
+loop to run<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>while(1) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; $loop_start_time=time();<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; // load every time so we can
+add/change servers without restarting process<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; $qry=&quot;select * from
+t_servers order by f_order&quot;;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; $result=mysql_query($qry, $hd);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; if (!$result) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //echo 'error
+running!';<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; exit; // cron
+should restart me<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; }<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+while($server_row=mysql_fetch_assoc($result)) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //echo
+&quot;checking server: &quot;.$server_row['f_server_num'].' ';<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$datetime=date(&quot;Y-m-d H:i:s&quot;);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $connect_ok=0;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $insert_ok=-1;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $slave_secs=-1;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $errmsg='';<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$server_info='';<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $slave_ok=-1;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $master_ok=-1;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // get the last
+time we checked this server... should be indexed properly...<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$qry=&quot;select f_date_time from t_results where
+f_server_num=&quot;.$server_row['f_server_num'].&quot; order by
+f_server_num,f_date_time desc limit 1&quot;;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$x_result=mysql_query($qry, $hd);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if ($x_result)
+$row=mysql_fetch_assoc($x_result);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // only check
+this server if its in the time frame....<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$checktime=date(&quot;Y-m-d
+H:i:s&quot;,time()-$server_row['f_frequency_secs']+10);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //echo
+$row['f_date_time'].' &lt; ',$checktime,'&lt;br/&gt;';<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if
+(!isset($row['f_date_time']) || $row['f_date_time']&lt;$checktime) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; //echo 'Yes - checking&lt;br/&gt;';<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; if ($server_row['f_ip']!='') {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+// something there to check<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+// always do the connection test<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$check_hd=connect_to_remote_db($server_row['f_ip'], $server_row['f_user'],
+$server_row['f_pass']);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+if ($check_hd!==false) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; $connect_ok=1;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; // see if we want to do the insert test<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; if ($server_row['f_test_insert']) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$insert_ok=0;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+// first, select the db we are allowed to test on<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$rc=select_remote_db($server_row['f_test_db']);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+if ($rc) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; // connected to db ok<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; $insert_this=&quot;$datetime&quot;;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; $qry=&quot;insert into
+&quot;.$server_row['f_test_table'].&quot;
+(&quot;.$server_row['f_test_field'].&quot;) values ('$insert_this')&quot;;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; $x_result=mysql_query($qry, $check_hd);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; if ($x_result &amp;&amp; mysql_affected_rows($check_hd))
+$insert_ok=1;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; else $errmsg.=&quot;$datetime fail on insert qry=$qry&quot;;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; }<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; if ($server_row['f_is_master']) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+// get data specific to master<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$qry=&quot;show master status&quot;;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$x_result=mysql_query($qry, $check_hd);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+if ($x_result) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; $row=mysql_fetch_assoc($x_result);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; if (isset($row['File'])) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$master_ok=1;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; } else {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$errmsg.='Could not retrieve MASTER info qry='.$qry;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$master_ok=0;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; }<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; // save server info once in a while<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; if (mt_rand(0, 10)==1) $server_info.='MASTER_INFO:
+'.print_r($row,true);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+} else {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; $errmsg.='MASTER NOT OK! err on qry='.$qry;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; $master_ok=0;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; }<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; if ($server_row['f_is_slave']) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+// get data specific to slave<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$qry=&quot;show slave status&quot;;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$x_result=mysql_query($qry, $check_hd);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+if ($x_result) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; $row=mysql_fetch_assoc($x_result);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; if (isset($row['Seconds_Behind_Master'])) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$slave_secs=$row['Seconds_Behind_Master'];<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$slave_ok=1;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; } else {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$errmsg.=&quot;Could not retrieve SLAVE info qry=$qry&quot;;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$slave_secs=99999;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$slave_ok=0;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; }<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; <o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;// save the slave info once in a while<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; if (mt_rand(0, 10)==1) $server_info.='SLAVE_INFO:
+'.print_r($row,true);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+} else {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; $errmsg.='SLAVE NOT OK! err on qry='.$qry;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; $slave_ok=0;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; }<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; if ($server_row['f_get_globals'] || (mt_rand(0, 20)==1)) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+// get the standard system vars for the server if set in db or<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+// randomly every once in a while...<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$qry=&quot;show GLOBAL status&quot;;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$x_result=mysql_query($qry, $check_hd);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+if ($x_result) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; //$row=mysql_fetch_assoc($x_result);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; //$server_info.='GLOBAL_INFO: '.print_r($row,true);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; add_show_global_to_str($server_info, $x_result);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+} else {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; $errmsg.='GLOBAL INFO NOT OK! err on qry='.$qry;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; }<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; <o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;mysql_close($check_hd);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+} else {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; $errmsg.=&quot;ERROR! connect failed! &quot;.mysql_error();<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+// now that we have checked this server, decide whether or not we need to send
+an alert email<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+// we send when we first see a problem AND when we no longer see a problem<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+// emails to send to are stored in f_emails in the t_servers table and we set<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+// f_alert_emails_sent to 1 when we send error emails.&nbsp; this way when we
+see all ok we check<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+// that to see if we need to send the all ok email and reset that field to zero<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$update=false;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+if ($connect_ok==0 || $insert_ok==0 || $slave_ok==0 || ($slave_secs&gt;120
+&amp;&amp; $slave_secs!=3600) || $master_ok==0 || $errmsg!='') {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; // some err occurred, send emails if not yet in alert state<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; if (!$server_row['f_alert_emails_sent']) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$message=&quot;Mysql-Monitor automated alert!\r\n\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;(Values of -1 are ok, means not
+checked)\r\n\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;Server:&quot;.$server_row['f_name'].&quot;\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;IP: &quot;.$server_row['f_ip'].&quot;\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;Is Master:
+&quot;.($server_row['f_is_master']?'YES':'NO').&quot;\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;Is Slave:
+&quot;.($server_row['f_is_slave']?'YES':'NO').&quot;\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;Connect OK: : &quot;.$connect_ok.&quot;\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;Master RUNNING: &quot;.$master_ok.&quot;\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;Slave RUNNING: &quot;.$slave_ok.&quot;\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;Slave SECONDS behind:
+&quot;.$slave_secs.&quot;\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;Error Message: $errmsg\r\n\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;Monitor <a href="URL:\r\n">URL:\r\n</a>&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;<a href="http://172.25.6.18/mysql-monitor/">http://172.25.6.18/mysql-monitor/</a>&quot;;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+if ($server_row['f_emails']!='') {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; $emails=explode('|', $server_row['f_emails']);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; foreach ($emails as $k=&gt;$e) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+mail($e, 'Mysql Server Error! '.$server_row['f_name'], $message, 'From: <a
+href="mailto:MYSQL_ERRS@fmginc.com">MYSQL_ERRS@fmginc.com</a>');<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; }<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+} else {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; mail('kjohnson@fmginc.com', 'DEFAULT-server error, no emails
+defined!', $message, 'From: <a href="mailto:MYSQL_ERRS@fmginc.com">MYSQL_ERRS@fmginc.com</a>');<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+// update the server<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$update=true;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$sent=1;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; }<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+} else {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; // all ok, check to see if last time we were in error mode<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; if ($server_row['f_alert_emails_sent']) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$message=&quot;Mysql-Monitor automated update - ALL OK\r\n\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;(Values of -1 are ok: means not
+checked)\r\n\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;Server:&quot;.$server_row['f_name'].&quot;\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;IP: &quot;.$server_row['f_ip'].&quot;\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;Is Master:
+&quot;.($server_row['f_is_master']?'YES':'NO').&quot;\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;Is Slave:
+&quot;.($server_row['f_is_slave']?'YES':'NO').&quot;\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;Connect OK: : &quot;.$connect_ok.&quot;\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;Master RUNNING: &quot;.$master_ok.&quot;\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;Slave RUNNING: &quot;.$slave_ok.&quot;\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;Slave SECONDS behind: &quot;.$slave_secs.&quot;\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;Error Message: $errmsg\r\n\r\n&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;Monitor <a href="URL:\r\n">URL:\r\n</a>&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;<a href="http://172.25.6.18/mysql-monitor/">http://172.25.6.18/mysql-monitor/</a>&quot;;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+if ($server_row['f_emails']!='') {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; $emails=explode('|', $server_row['f_emails']);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; foreach ($emails as $k=&gt;$e) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+mail($e, 'Mysql Server ALL OK! '.$server_row['f_name'], $message, 'From: <a
+href="mailto:MYSQL_ERRS@fmginc.com">MYSQL_ERRS@fmginc.com</a>');<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; }<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+} else {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; mail('kjohnson@fmginc.com', 'DEFAULT-all OK, no emails
+defined!', $message, 'From: <a href="mailto:MYSQL_ERRS@fmginc.com">MYSQL_ERRS@fmginc.com</a>');<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+// update the server<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$update=true;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$sent=0;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; }<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+if ($update) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; // update the sent emails field in the servers table<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; $qry=&quot;update t_servers set f_alert_emails_sent='$sent'
+where f_server_num='&quot;.$server_row['f_server_num'].&quot;'&quot;;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; $sent_result=mysql_query($qry, $hd);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+// save the results for this server<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$qry=&quot;insert into t_results
+(f_server_num,f_connect_ok,f_insert_ok,f_slave_ok,f_master_ok,&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;
+.&quot;f_slave_secs_behind,f_date_time,f_server_info,f_err_msg) &quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; .&quot;values
+('&quot;.$server_row['f_server_num'].&quot;',&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.&quot;'$connect_ok',&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.&quot;'$insert_ok',&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.&quot;'$slave_ok',&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.&quot;'$master_ok',&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.&quot;'$slave_secs',&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.&quot;'$datetime',&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.&quot;'&quot;.str_replace('&lt;br&gt;', '\n', addslashes($server_info)).&quot;',&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.&quot;'&quot;.str_replace('&lt;br&gt;', '\n',
+addslashes($errmsg)).&quot;')&quot;; // replace the &lt;br&gt; i put with
+proper line breaks AFTER addslashed!<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$x_result=mysql_query($qry, $hd);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; } // endif - if we have an IP!<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; } // endif - if
+we are checking this server<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; } // endwhile - server loop<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; <o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;$sleep_time=$loop_time-(time()-$loop_start_time);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; //echo 'sleeping
+',$sleep_time,'&lt;br/&gt;';<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; sleep($sleep_time);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>}<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>/*<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>* funcs<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>*/<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>exit;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>/**<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>* connect to our database<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>* @param none<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>* @return mysql-db-handle<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>*/<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>function connect_to_config_db() {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; $DEF_DB_HOST =
+&quot;localhost&quot;;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; $DEF_DB_NAME =
+&quot;monitor&quot;;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; $DEF_DB_USER =
+&quot;monitor&quot;;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; $DEF_DB_PASS =
+&quot;monitor&quot;;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; // connect to db<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; $hd = mysql_connect($DEF_DB_HOST,
+$DEF_DB_USER, $DEF_DB_PASS)<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; or die ('DB Connect Err');<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; // Select database<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; mysql_select_db ($DEF_DB_NAME,
+$hd)<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; or die ('DB Select Err');<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; return $hd;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>}<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>/**<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>* connect to our database<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>* @param none<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>* @return mysql-db-handle or FALSE if fails<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>*/<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>function connect_to_remote_db($host,$user,$pass) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; // connect to db<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; $hd = mysql_connect($host, $user,
+$pass);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; return $hd;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>}<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>/**<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>* select a db to use for test<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>* @param string $db db name to select<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>* @return bool whether or not db select was OK<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>*/<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>function select_remote_db($db) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; return mysql_select_db($db);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>}<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>function add_show_global_to_str(&amp;$str,
+&amp;$result) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; while
+($row=mysql_fetch_assoc($result)) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$str.=$row['Variable_name'].'=&gt;'.$row['Value'].'&lt;br&gt;';<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; }<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>}<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>function linux_am_i_running() {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$file=basename(__FILE__);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$pids=array();<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // have to take
+out the grep line AND the cronjob line<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // this will
+work as long as you &gt; NULL in crontab<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+exec(&quot;ps axl | grep&nbsp; '$file' | grep -v grep | grep -v NULL&quot;,
+$pids);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // will
+always find itself, so count of one means just me running<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+//logit(print_r($pids,true).&quot; count=&quot;.count($pids));<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if
+(count($pids) &gt; 1) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+//echo &quot;running &quot;.count($pids).&quot; times - quitting!!&quot;;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+return true;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //else
+echo &quot;not running - so we are now running... &quot;;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // save
+to file current pid for reference<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$filename=$file.'.pid';<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $fp=fopen('/var/run/'.$filename,'w');<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+fwrite($fp, getmypid());<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+fclose($fp);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return
+false;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>}<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>function logit($txt) {<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; $str=date(&quot;Y-m-d
+H:i:s&quot;).' '.$txt.&quot;\r\n&quot;;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+$file=date(&quot;Y-m-d&quot;).'-log.txt';<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+$fp=fopen('/var/www/mysql-monitor/logs/'.$file,'a');<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; fwrite($fp, $str);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; fclose($fp);<o:p></o:p></span></p>
+
+<p class=MsoNormal style='text-autospace:none'><span style='font-size:9.0pt;
+font-family:"Courier New"'>}<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='color:#1F497D'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span style='color:#1F497D'><o:p>&nbsp;</o:p></span></p>
+
+<div>
+
+<div style='border:none;border-top:solid #B5C4DF 1.0pt;padding:3.0pt 0in 0in 0in'>
+
+<p class=MsoNormal><b><span style='font-size:10.0pt;font-family:"Tahoma","sans-serif"'>From:</span></b><span
+style='font-size:10.0pt;font-family:"Tahoma","sans-serif"'> Jason Cui <br>
+<b>Sent:</b> Thursday, April 25, 2013 9:53 AM<br>
+<b>To:</b> Jeff Yang; Liliana Wagner<br>
+<b>Subject:</b> http://172.25.6.18/ mysql monitor server<o:p></o:p></span></p>
+
+</div>
+
+</div>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+</div>
+
+</body>
+
+</html>

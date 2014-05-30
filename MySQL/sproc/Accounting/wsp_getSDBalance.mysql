@@ -1,0 +1,32 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getSDBalance;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getSDBalance (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         June 1, 2009
+**   Description:  Retrieves token balance for user, broken down by type
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_userId DECIMAL(12,0) 
+)
+BEGIN
+
+    SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+    SELECT passTypeId, balance
+      FROM SDBalance
+     WHERE userId = at_userId 
+       AND dateExpiry >= UTC_TIMESTAMP()
+    ORDER BY passTypeId DESC;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,42 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_cursorUserSubscriptionAccount;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_cursorUserSubscriptionAccount (
+   at_userId                    DECIMAL(12,0),
+   at_premiumId                 SMALLINT
+)
+BEGIN
+
+DECLARE done INT DEFAULT FALSE;
+DECLARE at_sOfferDetailId SMALLINT;
+
+DECLARE CUR_UserSubscriptionAccount CURSOR FOR
+       SELECT u.subscriptionOfferDetailId as subscriptionOfferDetailId
+        FROM SubscriptionOfferDetail s, UserSubscriptionAccount u
+       WHERE u.userId = at_userId
+         AND s.subscriptionOfferDetailId = u.subscriptionOfferDetailId
+         AND s.premiumId = at_premiumId;
+
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+OPEN CUR_UserSubscriptionAccount;
+
+read_loop: LOOP
+
+FETCH CUR_UserSubscriptionAccount INTO at_sOfferDetailId;
+
+IF done THEN
+   LEAVE read_loop;
+END IF;
+
+DELETE FROM UserSubscriptionAccount
+                WHERE userId = at_userId
+                  AND subscriptionOfferDetailId = at_sOfferDetailId;
+
+END LOOP read_loop;
+
+CLOSE CUR_UserSubscriptionAccount;
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,27 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_delPassByUsrIdTrgtId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_delPassByUsrIdTrgtId (
+/***********************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga
+**   Date:  October 30 2002
+**   Description:  Deletes rows from Pass
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+ at_productCode CHAR(1)
+,at_communityCode CHAR(1)
+,at_userId DECIMAL(12,0)
+,at_targetUserId DECIMAL(12,0)
+)
+BEGIN
+	DELETE FROM Pass 
+	WHERE userId = at_userId
+	AND targetUserId = at_targetUserId;
+END;;
+DELIMITER ;

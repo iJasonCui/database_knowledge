@@ -1,0 +1,152 @@
+1. Get the software
+
+First download IQ.
+For a licensed version you need to go http://sybase.subscribenet.com (account required) or to the Sybase eShop http://eshop.sybase.com/eshop/buy?id=48151
+Alternatively, you can download an EBF for Sybase IQ 15 at http://downloads.sybase.com (registration required). Then click on “Sybase IQ” and download an EBF/Patch, for instance EBF16926. With an EBF/Patch you can install a full version as well.
+
+2. Prepare the Operating System
+
+Make sure that the filesystem for the Sybase software is big enough. A full installation needs approx. 850 Mb so 2 Gb should give you enough room to handle upgrades too. In this case we install the software in /opt/sybase/iq150. Database files will be stored on raw devices and in /var/sybase.
+Become root and add a group "sybase" and a user "sybase" to the system. Also create the needed directories.
+mkdir -p /opt/sybase
+mkdir -p /var/sybase
+groupadd sybase
+useradd -g sybase -d /opt/sybase sybase
+chown sybase:sybase /opt/sybase
+chown sybase:sybase /var/sybase
+Check that your operating system has the required patches and configuration settings. Look in the installation documentation at http://infocenter.sybase.com/help/topic/com.sybase.help.infocenter.iq.15.0/title.htm for detailed instructions. When you run the IQ installation, it will also check for some required packages.
+
+3. Prepare the Installation
+
+Now, switch to the newly created user:
+su - sybase
+You should now be in the directory /opt/sybase. Make a work directory and put the downloaded Sybase software in it.
+mkdir work
+mkdir iq150
+cd work
+<put the software in this directory>
+tar -xf <software-distro>
+
+4. Installation
+
+Go into the directory with the installed software. Run the installer (for instance ./setupLinuxAMD64).
+./setupLinuxAMD64
+Answer the questions and install into /opt/sybase/iq150. You can select what license type you need, Licensed or Evaluation. For the licenced version you need an account at http://sybase.subscribenet.com. The evaluation license allows you to run IQ with all its features for 30 days.
+To use the installar on Unix you may need to set the DISPLAY variable.
+Once the installation is complete you can remove the work directory and its content.
+cd ..
+rm -Rf work
+
+5. Setup your environment
+
+In /opt/sybase/iq150/IQ-15_0 you will find a few files, like IQ-15_0.csh and IQ-15_0.sh. Depending on the type of shell you use, you need to source in one of these. For instance, when your default shell is bash you should do this:
+. /opt/sybase/iq150/IQ-15_0/IQ-15_0.sh
+Is is fairly common to activate such a script from your login script.
+
+6. Create raw devices
+
+For performance reasons you should use raw devices for the IQ Main and Temporary store. For testing purposes use 2Gb for the Main store and 1 Gb for the Temporary store. You can always add more when needed. Do not forget to chown the raw devices to the sybase user. Check if this setting is persistent after a reboot. Note: contrary to Sybase ASE behaviour, Sybase IQ will only accept raw devices and not "block special". Check the filetype with the "file" command. When needed, bind a block special device to a raw device with the "raw" command.
+Start the IQ server (utility database only)
+
+Before you can create a database the IQ server must be started with only the utility database active. Use the start_iq command, but specify the name of server as well using the -n flag. In this example the Sybase recommendation is followed to distinguish the name of the IQ server from the name of the database. For the IQ server IQ2_srv is used, and for the database IQ2_db.
+
+start_iq -n IQ2_srv OR
+start_iq -n utility_db OR
+start_iq @utility_db.cfg
+
+-------------------------------------
+utility_db.cfg IS AS FOLLOWS:
+
+-n utility_db
+-x  tcpip{port=8000}
+-iqmc 2048
+-iqtc 2048 
+-c  48m
+-gc 20
+-gd DBA
+-gl all
+-gm 20
+-gp 4096
+-ti 1440
+-tl 1200
+-------------------------------------
+
+7. Create a database
+
+dbisqlc -c "UID#DBA;PWD#sql;ENG#utility_db;DBN#utility_db;links#tcpip(host=10.10.26.40:8000)" -q create_db.sql 
+
+Create a directory where server and database specific files will be stored
+mkdir /var/sybase/IQ2_srv
+
+Create a connection to the IQ server with dbisql (Windows look and feel) or dbisqlc (very basic gui). 
+Specify DBA as the user ID, use “sql” (lower case) as the password and “utility_db” as the name of the database. 
+Once connected you can create a database. 
+
+The create database command has several option that can have a big impact on performance. 
+See notes below or study the Sybase documentation to get the best result. Example:
+
+create database '/var/sybase/IQ2_srv/IQ2_db.db'
+transaction log on '/var/sybase/IQ2_srv/IQ2_db.log'
+mirror '/var/sybase/IQ2_srv/IQ2_db_mirror.log'
+iq path '/var/sybase/IQ2_srv/IQ2_db_01.iq'
+iq size 2000
+message path '/var/sybase/IQ2_srv/IQ2_db.iqmsg'
+temporary path '/var/sybase/IQ2_srv/IQ2_db_01.iqtmp'
+temporary size 1000
+
+When the database has been successfully created, exit from dbisql or dbisqlc. Then shutdown the IQ server.
+
+
+stop_iq the utility_db
+
+8.  start up the new created db
+
+[sybaseiq15@g104db01 g530iqdb15]$ more g530iqdb15.cfg
+# default.cfg
+# ----------------------------------------------------------------------
+# This file contains the default ASIQ startup parameters.  All servers
+# started will default to these parameters, unless overriden by contents
+# of parameter list.
+# ----------------------------------------------------------------------
+# Must be in the format: One parameter per line
+# ----------------------------------------------------------------------
+-n  g530iqdb15 /g104db01/g530iqdb15/g530iqdb15.db  
+-x  tcpip{port=9000}
+-iqmc 2048
+-iqtc 2048 
+-c  48m
+-gc 20
+-gd DBA
+-gl all
+-gm 20
+-gp 4096
+-ti 1440
+-tl 1200
+
+start_iq @g530iqdb15.cfg
+
+---------------------------------------------------------
+
+9. odbc configuration
+
+
+[network] host=10.10.26.40;port=9000
+
+10. ADD MORE DB SPACES into IQ STORE  (based on number CPUs)
+
+dbisqlc -c "UID#DBA;PWD#sql;ENG#g530iqdb15;DBN#g530iqdb15;links#tcpip(host=10.10.26.40:9000)" -q create_dbspace2.sql 
+
+CREATE DBSPACE iqstore2
+USING FILE iqstore2
+'/g104db01/g530iqdb15/g530iqdb15.iqstore2' SIZE 200 MB IQ STORE;
+
+11. ADD MORE dbspace FILES into TEMP STORE  (based on number CPUs)
+
+ALTER DBSPACE "IQ_SYSTEM_TEMP" ADD
+FILE "IQ_SYSTEM_TEMP2" '/g104db01/g530iqdb15/g530iqdb15.iqtmp2' SIZE 50 MB;
+COMMIT;
+
+
+
+
+

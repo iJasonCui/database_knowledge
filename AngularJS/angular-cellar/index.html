@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html xmlns:ng="http://angularjs.org" ng:app="cellar">
+<head>
+	<meta charset="utf8"/>
+<title>Angular Cellar</title>
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+
+<div id="header" ng:controller="MenuCtrl">
+    <a href="#/wines">Angular Cellar</a>
+	<button ng:click="addWine()">New Wine</button>
+</div>
+
+<div id="sidebar">
+    <ng:include src="'partials/wine-list.html'"></ng:include>
+</div>
+
+<div id="content">
+	<ng:view></ng:view>
+</div>
+
+ <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.2/angular.min.js" ng:autobind></script>
+<script src="lib/angular-resource.min.js"></script>
+<script src="js/app.js"></script>
+<script src="js/services.js"></script>
+<script src="js/directives.js"></script>
+<script src="js/controllers.js"></script>
+
+</body>
+
+</html>

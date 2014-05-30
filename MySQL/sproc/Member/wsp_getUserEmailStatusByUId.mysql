@@ -1,0 +1,28 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getUserEmailStatusByUId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getUserEmailStatusByUId (
+/******************************************************************************
+ **
+ ** CREATION:
+ **   Author:  Yan L 
+ **   Date:  November 13 2006
+ **   Description:  Get UserEmailStatus data
+ **
+ ** REVISION(S):
+ **   Author: 
+ **   Date:
+ **   Description: 
+ **
+******************************************************************************/
+    at_userId DECIMAL(12, 0)
+)
+BEGIN
+    SELECT spamFlag,
+           bounceBackFlag,
+           dateCreated,
+           dateModified
+      FROM UserEmailStatus 
+     WHERE userId = at_userId ;
+
+END;;
+DELIMITER ;

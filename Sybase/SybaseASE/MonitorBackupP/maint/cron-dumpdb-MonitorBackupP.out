@@ -1,0 +1,71 @@
+Backup Server session id is:  9.  Use this value when executing the
+'sp_volchanged' system stored procedure after fulfilling any volume change
+request from the Backup Server.
+Backup Server: 6.28.1.1: Dumpfile name 'BackupP1401003F4A' section number 1
+mounted on disk file '/dumps/MonitorBackupP/MonitorBackupP-db1'
+Backup Server: 4.58.1.1: Database MonitorBackupP: 9830 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 24120 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 38642 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 53164 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 67686 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 82082 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 96476 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 110998 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 125520 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 140042 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 154564 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 168960 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 183354 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 197876 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 205924 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 221300 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 224788 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 232600 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 240546 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 248782 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 257436 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 281056 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 288504 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 297144 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 304838 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 313202 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 320948 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 331500 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 353134 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 374768 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 396402 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 418036 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 439670 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 461304 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 482938 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 504572 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 526206 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 547840 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 569474 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 591108 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 612742 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 634376 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 656010 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 677644 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 699278 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 720912 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 742546 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 764180 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 785814 kilobytes DUMPed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 805912 kilobytes DUMPed.
+Backup Server: 3.43.1.1: Dump phase number 1 completed.
+Backup Server: 3.43.1.1: Dump phase number 2 completed.
+Backup Server: 3.43.1.1: Dump phase number 3 completed.
+Backup Server: 4.58.1.1: Database MonitorBackupP: 805952 kilobytes DUMPed.
+Backup Server: 3.42.1.1: DUMP is complete (database MonitorBackupP).
+######################
+ EXECUTING FUNCTION   
+33,31,opsdb1p.MonitorBackupP daily dump FINISHED OK,1,1,/dumps/scripts/maint/cromdumpdb-MonitorBackupP.out
+######################
+(1 row affected)
+ RESULT      ROWCNT      PRIMKEY     
+ ----------- ----------- ----------- 
+           0           1     9382284 
+
+(1 row affected)
+(return status = 0)

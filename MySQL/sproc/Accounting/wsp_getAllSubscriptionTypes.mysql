@@ -1,0 +1,24 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAllSubscriptionTypes;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAllSubscriptionTypes (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  November 2004
+**   Description:  retrieves all subscription types
+**
+**
+******************************************************************************/
+)
+BEGIN  
+	SELECT 
+          subscriptionTypeId,
+          contentId,
+          description
+        FROM SubscriptionType
+        ORDER BY subscriptionTypeId ;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,1727 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<TITLE>Sybase FAQ: 17/19 - ASE Section 9 (2 of 3)</TITLE>
+<script language="JavaScript1.2">
+function edc(s,s2)
+{document.write("<font face=\"Arial\"><A href=\"",s,"\" target=\"_blank\" onclick=\"window.open('",s,"','Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=720,height=530,left=30,top=43');return false;\" )>Not finding the answers you need?&nbsp;",s2,"Submit your question for others to see.</A></font>");}
+//-->
+</script>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<DIV ALIGN=CENTER>
+<SMALL>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  Part17 -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A>
+</SMALL>
+<BR><HR SIZE=2 WIDTH=600 NOSHADE>
+<P><H1>Sybase FAQ: 17/19 - ASE Section 9 (2 of 3)</H1>
+<table border="0" cellpadding="4" cellspacing="4" width="35%">
+<tr><td width="100%" align="center" bgcolor="#D6D6C0">
+<p align=center><small>
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part17/index.html","<br>");
+// --></script>
+</small></p>
+</td></tr>
+</table>
+ <br>
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="40%">
+<tr><td width="100%" align="center" bgcolor="#CCCCFF"><font face="Arial">There are reader questions on this topic!<a href="#ct"><br>Help
+others by sharing your knowledge</a></font></td></tr>
+</table></center></div>
+<HR SIZE=2 WIDTH=600 NOSHADE>
+</DIV>
+<PRE>
+Message-ID: &lt;databases/sybase-faq/part17_1074677126@rtfm.mit.edu&gt;
+X-Last-Updated: 2003/03/02
+From: dowen@midsomer.org (David Owen)
+Newsgroups: <A HREF="http://groups.google.com/groups?group=comp.databases.sybase" target="new">comp.databases.sybase</A>
+Subject: Sybase FAQ: 17/19 - ASE Section 9 (2 of 3)
+Reply-To: <A HREF="mailto:dowen@midsomer.org">dowen@midsomer.org</A> (David Owen)
+Keywords: FAQ, DATABASES, SYBASE, ASA, ASE, REP
+Date: 21 Jan 2004 09:26:09 GMT
+
+Archive-name: databases/sybase-faq/part17
+URL: <A HREF="http://www.isug.com/Sybase_FAQ">http://www.isug.com/Sybase_FAQ</A>
+Version: 1.7
+Maintainer: David Owen
+Last-modified: 2003/03/02
+Posting-Frequency: posted every 3rd month
+   A how-to-find-the-FAQ article is posted on the intervening months.
+
+9.1.10: SQL to determine space used for an index
+
+-------------------------------------------------------------------------------
+
+This one is not strictly a stored proc, but it has its uses.
+
+Fundamentally, it is sp_spaceused reduced to bare essentials:
+
+  set nocount on
+  declare @objname varchar(30)
+  select  @objname = "your table"
+
+  select  index_name = i.name,
+          i.segment,
+          rowtotal   = rowcnt(i.doampg),
+          reserved   = reserved_pgs(i.id, i.doampg) +
+                       reserved_pgs(i.id, i.ioampg),
+          data       = data_pgs(i.id, i.doampg),
+          index_size = data_pgs(i.id, i.ioampg),
+          unused     = (reserved_pgs(i.id, i.doampg) +
+                        reserved_pgs(i.id, i.ioampg) -
+                          (data_pgs(i.id, i.doampg) +
+                           data_pgs(i.id, i.ioampg)))
+  into    #space
+  from    sysindexes i
+  where   i.id = object_id(@objname)
+
+You can analyse this in a number of ways:
+
+ 1. This query should tally with sp_spaceused @objname:
+      select 'reserved KB' = sum(reserved)   * 2,
+             'Data KB'     = sum(data)       * 2,
+             'Index KB'    = sum(index_size) * 2,
+             'Unused KB'   = sum(unused)     * 2
+        from #space
+ 2. This one reports space allocation by segment:
+      select 'segment name' = s.name,
+             'reserved KB'  = sum(reserved)   * 2,
+             'Data KB'      = sum(data)       * 2,
+             'Index KB'     = sum(index_size) * 2,
+             'Unused KB'    = sum(unused)     * 2
+        from #space t,
+             syssegments s
+       where t.segment = s.segment
+       group by s.name
+ 3. This one reports allocations by index:
+      select  t.index_name,
+                  s.name,
+                  'reserved KB' = reserved * 2,
+                  'Data KB' = data * 2,
+                  'Index KB' = index_size * 2,
+                  'Unused KB' = unused * 2
+          from    #space t,
+                  syssegments s
+          where   t.segment = s.segment
+
+If you leave out the where clause in the initial select into, you can analyse
+across the whole database.
+
+Hope this points you in the right direction.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.1.11: sp_helpoptions - Shows what options are set for a database.
+
+-------------------------------------------------------------------------------
+
+Thanks again go to Bret Halford for some more sterling work. The following proc
+will let you know some of options that are set within a database. The release
+included is here has been tested to work on Solaris (11.9.2 and 12.0), but it
+is likely that other platforms use and set @@options differently (endian issues
+etc). As such, it is more of a sort of template for platforms other than
+Solaris. Please feel free to expand it and send the modified proc back to me
+and Bret.
+
+Get it as part of the bundle (zip or tarball) or individually from here.
+
+The output is as follows:
+
+1&gt; sp_helpoptions
+2&gt; go
+showplan is off
+ansinull is off
+ansi_permissions is off
+arithabort is on
+arithignore is off
+arithignore arith_overflow off
+close on endtran is off
+nocount is on
+noexec is off
+parseonly is off.
+(return status = 0)
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.1.12: sp_days - returns days in a given month.
+
+-------------------------------------------------------------------------------
+
+Returns the number of days in a month. Modify to fit your needs, either
+returning a result set (of 1 row) or set a variable, or both as this version
+does.
+
+Get it as part of the bundle (zip or tarball) or individually from here.
+
+The output is as follows:
+
+1&gt; declare @days int
+2&gt; -- For November 1999
+3&gt; exec sp_days @days,11,99
+4&gt; go
+
+ ---
+  30
+
+(1 row affected)
+(return status = 0)
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.1.13: sp__optdiag - optdiag from within isql.
+
+-------------------------------------------------------------------------------
+
+Versions of ASE: minimum of 11.5. I cannot test it on 11.5, so I do not know if
+it works on that version. However, the procedure uses a 'case' statement, so
+will certainly not work before 11.5. If anyone still has 11.5 running and can
+let me know that it works, I would be grateful.
+
+It seems little point in showing you what optdiag looks like, since it takes a
+fair amount of space. This proc produces pretty much identical output.
+
+Get it as part of the bundle (zip or tarball) or individually from here.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.1.14: sp_desc - a simple list of a tables' columns
+
+-------------------------------------------------------------------------------
+
+Stored proc to return a much simpler picture of a table that sp_help.  sp_help
+produces all of the information, too much in fact, and it always takes me a
+couple of minutes to work out the various flags etc.  I think that this is a
+little easier to read and understand quickly.
+
+1&gt; sp_desc spt_values
+2&gt; go
+spt_values
+No.   Column Name                    Datatype
+----- ------------------------------ -------------------- --------
+(1)   name                           varchar(28)
+(2)   number                         int                  NOT NULL
+(3)   type                           char(2)              NOT NULL
+(4)   low                            int
+(5)   high                           int
+(6)   msgnum                         int
+
+(6 rows affected)
+(return status = 0)
+1&gt;
+
+Get it as part of the bundle (zip or tarball) or individually from here.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.1.15: sp_lockconfig - displays locking schemes for tables
+
+-------------------------------------------------------------------------------
+sp_lockconfig [sys_flag]
+will list the server default locking scheme and lock promotion data (HWM, LWM,
+and PCT) in priority order: 
+
+ 1. All table-specific lock configurations for the current database. 
+ 2. The database-wide lock configurations, if they exist. 
+ 3. The server-wide lock configurations. 
+
+A list of all tables will then be listed by locking scheme. For data-only
+tables a suffix of "*" indicates that the table was originally created with a
+clustered allpages configuration and was then altered to a data-only
+configuration. (The reverse cannot be detected.) If sys_flag is non-null then
+system tables will be included. Note that many system tables do not have a
+defined locking scheme. (The implicit usage is allpages.)
+
+1&gt; sp_lockconfig
+2&gt; go
+
+ TYPE     OBJECT                       LEVEL LOCK DATA
+ -------- ---------------------------- ----- ---------------------------------
+ Server   -                            page  PCT = 100, LWM = 200, HWM = 200
+ Server   -                            row   PCT = 100, LWM = 200, HWM = 200
+ Server   default lock scheme          -     allpages
+
+    THERE ARE 4 USER TABLES WITH ALLPAGES LOCKING.
+
+ TABLE                          OWNER
+ ------------------------------ ------------------------------
+ appkey8                        dbo
+ appkey8_hist                   dbo
+ text_table7                    TESTUSER2
+ with_types_table12             TESTUSER3
+
+    THERE ARE 2 USER TABLES WITH DATAPAGES LOCKING.
+
+ TABLE                          OWNER
+ ------------------------------ ------------------------------
+ dol_test1                      dbo
+ dol_test2                      dbo
+
+    THERE ARE 2 USER TABLES WITH DATAROWS LOCKING.
+
+ TABLE                          OWNER
+ ------------------------------ ------------------------------
+ dol_test10                     dbo
+ dol_test11                     dbo
+
+(return status = 0)
+1&gt;
+
+Get it as part of the bundle (zip or tarball) or individually from here.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.2.1: Generating dump/load database command.
+
+-------------------------------------------------------------------------------
+
+This shell script generates dump/load database commands from dump devices. I
+cannot show the output because it seems to be broken, it is certainly a little
+convoluted and is really pertinent to the pre-11 days, possibly even pre-10. It
+is available as part of the archive code package.
+
+What is really needed here is some automatic backup scripts. How is it going
+Barb?
+
+Get it as part of the bundle (zip or tarball) or individually from here.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.2.2: upd_stats.csh
+
+-------------------------------------------------------------------------------
+
+This is a script from Frank Lundy (<A HREF="mailto:flundy@verio.net">mailto:flundy@verio.net</A>) and does not
+generate output, but does the updates directly. As such there is no output to
+show you. It requires a program called sqlsa which you will need to modify to
+suit your own server.  You probably want to make the file unreadable by regular
+users who have no need for any passwords contained within.
+
+Get it as part of the bundle (zip or tarball) or individually from here.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.3.1: SybPerl FAQ
+
+Sybperl is a fantastic utility for DBAs and system administrators needing to
+put together scripts to monitor and manage their installations as well as the
+main way that web developers can gain access to data held in ASEs.
+
+Sybperl now comes in a number of flavours, including a DBD version that is part
+of the DBI/DBD suite. Michael has also written a package called Sybase::Simple
+that sits on top of Sybperl that makes building such scripts a breeze.
+
+Find out more and grab a copy from Michael Peppler's <A HREF="mailto:mpeppler@peppler.org">mpeppler@peppler.org</A> own
+FAQ:
+
+<A HREF="http://www.mbay.net/~mpeppler/Sybperl/sybperl-faq.html">http://www.mbay.net/~mpeppler/Sybperl/sybperl-faq.html</A>
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.3.2: dbschema.pl
+
+-------------------------------------------------------------------------------
+
+dbschema.pl is a script that will extract the schema (everything from the
+server definition down to table permissions etc) from ASE/SQL Server.  It was
+initially developed by Michael Peppler but currently maintained by me (David
+Owen dowen@midsomer.org)  The script is written using Sybperl and was
+originally distributed solely as part of that package.  The latest copy can be
+got from <A HREF="ftp://ftp.midsomer.org/pub/dbschema.tgz">ftp://ftp.midsomer.org/pub/dbschema.tgz</A>.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.3.3: ddl_insert.pl
+
+-------------------------------------------------------------------------------
+
+In order to use this script you must have Sybperl installed -- see Q9.3.1 for
+more information.
+
+This utility produces the insert statements to rebuild a table. Note that it
+depends on the environment variable DSQUERY for the server selection. Also be
+warned that the generated script truncates the destination table, which might
+not be what you want. Other than that, it looks like an excellent addition to
+the testing toolkit.
+
+Get it as part of the bundle (zip or tarball) or individually from here.
+
+[dowen@n-utsire code]$ ./ddl_insert.pl alrbprod sa myPassword h%
+-- This script is created by ./ddl_insert.pl.
+-- It would generate INSERT statements for tables whose names match the
+-- following pattern:
+/*      (  1 = 0
+     or name like 'h%'
+        )
+
+*/
+
+set nocount on
+go
+
+
+/*.............. hearing ...............*/
+-- Sat Feb 17 13:24:09 MST 2001
+
+declare @d datetime
+select @d = getdate()
+print        '       %1!    hearing', @d
+go
+
+truncate table hearing  -- Lookout !!!!!!
+go
+
+insert hearing values('Dec 11 1985 12:00:00:000AM', 1, '1030', 2, '0930', 'Calgary, Alberta', NULL, NULL, '3408 Board Room', 3, NULL, '35', NULL)
+...
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.3.4: int.pl
+
+-------------------------------------------------------------------------------
+
+Background
+
+Please find included a copy of int.pl, the interfaces file conversion tool. It
+should work with perl 4 and 5, but some perl distributions don't seem to
+support gethostbyname which you need for the solaris, ncr, and vms file format.
+
+You may need to adjust the first line to the path of perl on your system, and
+may need to set the PERLLIB environment variable so that it finds the
+getopts.pl module.
+
+While it may not be 100% complete (e.g. it ignores the timeout field) you're
+free to add any functionality you may need at your site.
+
+int.pl -h will print the usage, typical invocation is
+        int.pl -f sun4-interfaces -o sol &gt; interfaces.sol
+Usage:  int.pl  -f 
+                -o { sol|ncr|vms|nw386|os2|nt386|win3|dos|ntdoswin3 }
+                [-V] [-v] [-h]
+where
+        -f  input file to process
+        -o  specify output mode
+                  (e.g. sol, ncr, vms, nw386, os2, nt386, win3, dos, ntdoswin3)
+        -V        turn on verbose mode
+        -v        print version string
+        -h        print this message
+
+[The following are a couple of output examples, is any other utility ever
+needed? Ed]
+
+Get it as part of the bundle (zip or tarball) or individually from here.
+
+The following interface file:
+
+N_UTSIRE
+        master tcp ether n-utsire 4100
+        query tcp ether n-utsire 4100
+
+N_UTSIRE_XP
+        master tcp ether n-utsire 4400
+        query tcp ether n-utsire 4400
+
+N_UTSIRE_BS
+        master tcp ether n-utsire 4010
+        query tcp ether n-utsire 4010
+
+
+becomes
+
+[dowen@n-utsire code]$ ./int.pl -f $SYBASE/interfaces -o vms
+N_UTSIRE
+        master tcp ether 192.168.1.1 4100
+        query tcp ether 192.168.1.1 4100
+N_UTSIRE_XP
+        master tcp ether 192.168.1.1 4400
+        query tcp ether 192.168.1.1 4400
+N_UTSIRE_BS
+        master tcp ether 192.168.1.1 4010
+        query tcp ether 192.168.1.1 4010
+[dowen@n-utsire code]$
+[dowen@n-utsire code]$ ./int.pl -f $SYBASE/interfaces -o sol
+N_UTSIRE
+        master tli tcp /dev/tcp \x00021004c0a801010000000000000000
+        query tli tcp /dev/tcp \x00021004c0a801010000000000000000
+N_UTSIRE_XP
+        master tli tcp /dev/tcp \x00021130c0a801010000000000000000
+        query tli tcp /dev/tcp \x00021130c0a801010000000000000000
+N_UTSIRE_BS
+        master tli tcp /dev/tcp \x00020faac0a801010000000000000000
+        query tli tcp /dev/tcp \x00020faac0a801010000000000000000
+[dowen@n-utsire code]$
+[dowen@n-utsire code]$ ./int.pl -f $SYBASE/interfaces -o ncr
+N_UTSIRE
+        master tli tcp /dev/tcp \x00021004c0a80101
+        query tli tcp /dev/tcp \x00021004c0a80101
+N_UTSIRE_XP
+        master tli tcp /dev/tcp \x00021130c0a80101
+        query tli tcp /dev/tcp \x00021130c0a80101
+N_UTSIRE_BS
+        master tli tcp /dev/tcp \x00020faac0a80101
+        query tli tcp /dev/tcp \x00020faac0a80101
+[dowen@n-utsire code]$
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.3.5: Sybase::Xfer.pm
+
+-------------------------------------------------------------------------------
+
+The following is taken directly from the authors own documentation.
+
+QUICK DESCRIPTION
+ Sybase::Xfer transfers data between two Sybase  servers  with  multiple
+ options like specifying a where_clause, a smart auto_delete option  and
+ can pump data from a perl subroutine or take a  plain  flat  file.  Has
+ option, similiar to default behaviour in Sybase::BCP, to capture failed
+ rows in a batch.
+
+ Also comes with a command line wrapper, sybxfer.
+
+ Also comes with a sister module Sybase::ObjectInfo.pm
+
+
+DEPENDENCIES
+   Requires Perl Version 5.005 or beyond
+
+   Requires packages:
+      Sybase::DBlib
+      Getopt::Long
+      Tie::IxHash
+
+
+SYNOPSIS
+   #from perl
+      #!/usr/bin/perl5.005
+      use Sybase::Xfer;
+      $h = new Sybase::Xfer( %options );
+      $h-&gt;xfer();
+      $h-&gt;done();
+
+   #from shell
+      #!/usr/ksh
+      sybxfer &lt;options&gt;
+
+
+DESCRIPTION (a little bit from the pod)
+
+  If you're in an environment with multiple servers and you  don't  want
+  to use cross-server joins then this module may be worth a  gander.  It
+  transfers data from one server to another server row-by-row in memory
+  w/o using an intermediate file.
+
+  To juice things up it can take data from any set of  sql  commands  as
+  long as the output of the sql matches the  definition  of  the  target
+  table. And it can take data from a  perl  subroutine  if  you're  into
+  that.
+
+  It also has some smarts to delete rows in the target table before  the
+  data is  transferred  by  several  methods.  See  the  -truncate_flag,
+  -delete_flag and -auto_delete switches.
+
+  Everything is controlled by switch settings sent has  a  hash  to  the
+  module. In essence one describes the from source and the to source and
+  the module takes it from there.
+
+  Error handling:
+
+    An attempt was made to build in hooks for robust error reporting via
+    perl callbacks. By default, it will print to stderr  the  data,  the
+    column names, and their datatypes upon  error.  This  is  especially
+    useful when sybase reports attempt to load an oversized row  warning
+    message.
+
+
+  Auto delete:
+
+    More recently the code has been  tweaked  to  handle  the  condition
+    where data is bcp'ed into a table but the row already exists and the
+    desired result to replace  the  row.  Originally,  the  -delete_flag
+    option was meant for this condition. ie. clean out the table via the
+    -where_clause before the bcp in was to occur. If this is  action  is
+    too drastic, however, by using the -auto_delete option  one  can  be
+    more precise and force only those rows about to be  inserted  to  be
+    deleted before the bcp in begins. It will bcp the 'key'  information
+    to a temp table, run a delete (in a loop so as not to blow  any  log
+    space) via a join between the temp table and target table  and  then
+    begin the bcp in. It's weird but in the right situation  it  may  be
+    exactly what you want. Typically used to manually replicate a table.
+
+
+CONTACTS
+   my e-mail: <A HREF="mailto:stephen.sprague@msdw.com">stephen.sprague@msdw.com</A>
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.3.6: Sybmon.pl
+
+-------------------------------------------------------------------------------
+
+Sybmon is a utility for interactive, realtime, monitoring of processes and
+locks. It is a sort of "top" for Sybase. It requires both Sybperl and Perl/Tk
+to be installed, both are available for most platforms, including Linux, NT,
+Solaris.
+
+Grab the tarball from <A HREF="ftp://ftp.midsomer.org/pub/sybmon.tar.gz">ftp://ftp.midsomer.org/pub/sybmon.tar.gz</A> or a zip'd one
+from <A HREF="ftp://ftp.midsomer.org/pub/sybmon.zip">ftp://ftp.midsomer.org/pub/sybmon.zip</A>.
+
+There is also an NT binary for those people that are unable or just don't want
+to install Perl.  You can get that from <A HREF="ftp://ftp.midsomer.org/pub/">ftp://ftp.midsomer.org/pub/</A>
+sybmon-i386.zip.
+
+You can view a screenshot of the main process monitor from here (just to prove
+that it runs on NT fine!!!!). A not very exciting server, doing not a lot!
+
+A note of interest! To get the screenshot I used the latest copy of Activestate
+Perl for NT and their Perl Package Manager (just type PPM from a DOS prompt
+once Perl is installed) and had the 3 required packages (Tk, Sybperl, Sybase::
+Login) installed in under 2 minutes!!!!
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.3.7: showserver.pl
+
+-------------------------------------------------------------------------------
+
+This small Perl script shows a list of what servers are running on the current
+machine.  Does a similar job to the showserver that comes with ASE, but looks
+much nicer.
+
+Get it as part of the bundle (zip or tarball) or individually from here.
+
+bash-2.03$ ./showserver.pl
+
+monserver's
+-----------
+  CONCRETE Owner: sybase, Started: 14:25:51
+      Engine:  0 (PID: 520)
+  PORTLAND Owner: sybase, Started: 14:29:33
+      Engine:  0 (PID: 545)
+
+dataserver's
+------------
+  CONCRETE Owner: sybase, Started: 14:10:38
+      Engine:  1 (PID: 494)
+      Engine:  0 (PID: 493)
+  PORTLAND Owner: sybase, Started: 14:26:56
+      Engine:  0 (PID: 529)
+
+backupserver's
+--------------
+  CONCRETE_back Owner: sybase, Started: 14:25:25
+      Engine:  0 (PID: 515)
+  PORTLAND_back Owner: sybase, Started: 14:29:07
+      Engine:  0 (PID: 538)
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.3.8: Collection of Perl Scripts
+
+-------------------------------------------------------------------------------
+
+David Whitmarsh has put together a collection of scripts to help manage and
+monitor ASEs. They can be grabbed individually or en masse from http://
+sparkle-consultancy.co.uk/sybase/ .
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.4.1: Sybtcl FAQ
+
+This is Tom Poindexter <A HREF="http://www.nyx.net/~tpoindex/">http://www.nyx.net/~tpoindex/</A> FAQ.
+
+-------------------------------------------------------------------------------
+
+                               Index of Sections                               
+                                                                               
+  * Overview
+  * The enabling language platform
+  * Design and commands
+  * Applications
+  * Information Sources
+  * Download
+  * About the Author
+
+-------------------------------------------------------------------------------
+
+                                   Overview                                    
+                                                                               
+Sybtcl is an extension to Tcl (Tool Command Language) that allows Tcl programs
+to access Sybase databases. Sybtcl adds additional Tcl commands to login to a
+Sybase server, send SQL statements, retrieve result sets, execute stored
+procedures, etc. Sybtcl simplifies Sybase programming by creating a high level
+interface on top of DB-Library. Sybtcl can be used to program a wide variety of
+applications, from system administration procedures to end-user applications.
+
+Sybtcl runs on Unix, Windows NT and 95, and Macintosh platforms.
+
+-------------------------------------------------------------------------------
+
+                        The enabling language platform                         
+                                                                               
+Tool Command Language, often abbreviated "Tcl" and pronounced as "tickle", was
+created by Dr. John Ousterhout at the University of California-Berkeley. Tcl is
+an interpreted script language, similar to Unix shell, Awk, Perl, and others.
+Tcl was designed to be easily extended, where new commands are added to the
+base interpreter to provide additional functionality. Core Tcl commands contain
+all of the usual constructs provided by most programming languages: setting and
+accessing variables, file read/write, if-then-else, do-while, function calls.
+Tcl also contains many productivity enhancing commands: list manipulation,
+associative arrays, and regular expression processing.
+
+Tcl has several features that make it a highly productive language. First, the
+language is interpreted. Interpreters allow execution without a compile and
+link step. Code can be developed with immediate feedback. Second, Tcl has a
+single data type: string. While this might at first glance seem to a
+deficiency, it avoids problems of data conversion and memory management. (This
+feature doesn't preclude Tcl from performing arithmetic operations.) Last, Tcl
+has a consistent and simple syntax, much the same as the Unix shell. Every Tcl
+statement is a command name, followed by arguments.
+
+Dr. Ousterhout also developed a companion Tcl extension, called Tk. Tk provides
+simplified programming of X11 applications with a Motif look and feel. X11
+applications can be programmed with 60%-80% less code than equivalent Xt,
+Motif, or Xview programs using C or C++.
+
+Dr. Ousterhout now leads Tcl/Tk development at Sun Microsystems.
+
+-------------------------------------------------------------------------------
+
+                              Design and commands                              
+                                                                               
+Sybtcl was designed to fill the gap between pure applications development tools
+(e.g. Apt, Powerbuilder, et.al.) and database administration tools, often Unix
+shell scripts consisting of 'isql' and Awk pipelines. Sybtcl extends the Tcl
+language with specialized commands for Sybase access. Sybtcl consists of a set
+of C language functions that interface DB-Library calls to the Tcl language.
+
+Instead of a simple one-to-one interface to DB-Library, Sybtcl provides a
+high-level Sybase programming interface of its own. The following example is a
+complete Sybtcl program that illustrates the simplified interface. It relies on
+the Tcl interpreter, "tclsh", that has been extended with Sybtcl.
+
+  #!/usr/local/bin/tclsh
+  set hand [sybconnect "mysybid" "mysybpasswd"]
+  sybuse $hand pubs2
+  sybsql $hand "select au_lname, au_fname from authors order by au_lname"
+  sybnext $hand {
+    puts [format "%s, %s" @1 @2]
+  }
+  sybclose $hand
+  exit
+
+In this example, a Sybase server connection is established ("sybconnect"), and
+the "pubs" sample database is accessed ("sybuse"). An SQL statement is sent to
+the server ("sybsql"), and all rows returned are fetched and printed
+("sybnext"). Finally, the connection is closed ("sybclose").
+
+The same program can be made to display its output in an X11 window, with a few
+changes. The Tcl/Tk windowing shell, "wish", also extended with Sybtcl is used.
+
+  #!/usr/local/bin/wish
+  listbox .sql_output
+  button  .exit -text exit -command exit
+  pack .sql_output .exit
+  set hand [sybconnect "mysybid" "mysybpasswd"]
+  sybuse $hand pubs2
+  sybsql $hand "select au_lname, au_fname from authors order by au_lname"
+  sybnext $hand {
+    .sql_output insert end  [format "%s, %s" @1 @2]
+  }
+  sybclose $hand
+
+In addition to these commands, Sybtcl includes commands to access return column
+names and datatypes ("sybcols"), return values from stored procedures
+("sybretval"), reading and writing of "text" or "image" columns ("sybreadtext",
+"sybwritetext"), canceling pending results ("sybcancel"), and polling
+asynchronous SQL execution ("sybpoll").
+
+Full access to Sybase server messages is also provided. Sybtcl maintains a Tcl
+array variable which contains server messages, output from stored procedures
+("print"), DB-Library and OS error message.
+
+-------------------------------------------------------------------------------
+
+                                 Applications                                  
+                                                                               
+The Sybtcl distribution includes "Wisqlite", an X11 SQL command processor.
+Wisqlite provides a typical windowing style environment to enter and edit SQL
+statements, list results of the SQL execution in a scrollable listbox, save or
+print output. In addition, menu access to the Sybase data dictionary is
+provided, listing tables in a database, the column names and datatypes of a
+table, text of stored procedures and triggers.
+
+For a snapshot of Wisqlite in action, look here.
+
+Other applications included in the Sybtcl distribution include:
+
+  * a simple graphical performance monitor
+  * a version of "sp_who", with periodic refresh
+
+Sybtcl users have reported a wide variety of applications written in Sybtcl,
+ranging from end user applications to database administration utilities.
+
+-------------------------------------------------------------------------------
+
+                              Information Sources                              
+                                                                               
+Sybtcl is extensively documented in "Tcl/Tk Tools", edited by Mark Harrison,
+published by O'Reilly and Associates, 1997, ISBN: 1-56592-218-2.
+
+Tcl/Tk is described in detail in "Tcl and the Tk Toolkit" by Dr. John
+Ousterhout, Addison-Wesley Publishing 1994 ISBN: 0-201-63337-X . Another recent
+publication is "Practical Programming in Tcl and Tk" by Brent Welch, Prentice
+Hall 1995 ISBN 0-13-182007-9.
+
+A wealth of information on Tcl/Tk is available via Internet sources:
+
+    news:comp.lang.tcl
+    <A HREF="http://www.neosoft.com/tcl/">http://www.neosoft.com/tcl/</A>
+    http://www.sco.com/Technology/tcl/Tcl.html
+    ftp://ftp.neosoft.com/pub/tcl/
+   
+-------------------------------------------------------------------------------
+
+                                   Download                                    
+                                                                               
+Download Sybtcl in tar.gz format for Unix.
+Download Sybtcl in zip format for Windows NT and 95.
+
+Tcl/Tk and Sybtcl are both released in source code form under a "BSD" style
+license. Tcl/Tk and Sybtcl may be freely used for any purpose, as long as
+copyright credit is given to the respective owners. Tcl/Tk can be obtained from
+either anonymous FTP site listed above.
+
+Tcl/Tk and Sybtcl can be easily configured under most modern Unix systems
+including SunOS, Solaris, HP-UX, Irix, OSF/1, AIX, SCO, et.al. Sybtcl also runs
+under Windows NT and 95; pre-compiled DLL's are include in the distribution.
+Sybtcl requires Sybase's DB-Library, from Sybase's Open Client bundle.
+
+Current versions are:
+
+  * Sybtcl 2.5: released January 8, 1998
+  * Tcl 8.0: released August 13, 1997
+  * Tk 8.0: released August 13, 1997
+
+The Internet newsgroup <A HREF="http://groups.google.com/groups?group=comp.lang.tcl" target="new">comp.lang.tcl</A> is the focal point for support. The group
+is regularly read by developers and users alike. Authors may also be reached
+via email. Sun has committed to keeping Tcl/Tk as freely available software.
+
+-------------------------------------------------------------------------------
+
+                               About the Author                                
+                                                                               
+Tom Poindexter is a consultant with expertise in Unix, relational databases,
+systems and application programming. He holds a B.S. degree from the University
+of Missouri, and an M.B.A. degree from Illinois State University. He can be
+reached at <A HREF="mailto:tpoindex@nyx.net">tpoindex@nyx.net</A>.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.4.2: sybdump
+
+-------------------------------------------------------------------------------
+
+Sybdump is a Tcl script written by De Clarke (<A HREF="mailto:de@ucolick.org">de@ucolick.org</A>) for extracting a
+database schema.  Look in
+
+ftp://ftp.ucolick.org/pub/src/
+
+for sybdump.tar or sybdump.tar.gz.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.4.3: wisql
+
+-------------------------------------------------------------------------------
+
+Another Sybtcl package maintained by De Clarke (de@ucolick.org) this one is a
+graphical replacement for isql. Correct me if I am wrong, but I think that this
+started life as wisqlite and was included as part of the Sybtcl package and was
+then updated by De and became wisql.
+
+You can grab a copy of wisql from ftp://ftp.ucolick.org:/pub/UCODB/
+wisql5B.tar.gz
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.5.1: Sybase Module for Python
+
+-------------------------------------------------------------------------------
+
+Dave Cole has a module for Python that allows connectivity to Sybase in an
+analagous way to Sybperl or Sybtcl. You can find details from http://
+www.object-craft.com.au/projects/sybase/.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.6.1: SQSH, SQshelL
+
+SQSH is a direct replacement for isql with a million more bells and whistles.
+In fact, the title gives it away, since SQSH is a pretty seemless marriage of
+sh(1)
+and isql.
+
+There has been a webified copy of the SQSH FAQ based on the 1.4 release
+contained within these pages for a while, but it is considerably behind the
+times. As such, I have moved the 1.4 release to a separate file readable from 
+here.
+
+The current SQSH FAQ can be seen on Scott's own site, <A HREF="http://www.voicenet.com/">http://www.voicenet.com/</A>
+~gray/FAQ.html.
+
+-------------------------------------------------------------------------------
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.6.2: NTQuery.exe
+
+-------------------------------------------------------------------------------
+
+Brief
+
+ntquery.exe is a 32-bit application allowing a lightweight, but robust sybase
+access environment for win95/NT. It has a split window - the top for queries,
+the bottom for results and error/message handler responses, which are processed
+in-line. Think of it as isql for windows - a better (reliable) version of wisql
+(with sensible error handling). Because its simple it can be used against
+rep-server (I've also used it against Navigation Server(R.I.P.))
+
+Requirements: open client/dblib (Tested with 10.x up to 11.1.1)
+
+It picks up the server list from %SYBASE%\ini\sql.ini and you can add
+DSQUERY,SYBUSER and SYBPASS variables in your user variables to set default
+server,username and password values.
+
+Instructions
+
+To connect: SQL-&gt;CONNECT (only one connection at a time, but you can run
+multiple ntquery copies) Enter query in top window and hit F3 (or SQL-&gt;Execute
+Query if you must use the mouse) Results/Messages/Errors appear in bottom
+window
+
+A script can be loaded into the top window via File-&gt;Open Either sql or results
+can be saved with File-&gt;Save - it depends which window your focus is on.
+
+Theres a buffer limit of 2mb
+
+Get it here
+
+ntquery.zip [22K]
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.6.3: BCPTool - A utility for Transferring Data from one ASE to Another.
+
+-------------------------------------------------------------------------------
+
+BCPTool is a GUI utility written by Anthony Mandic that moves data from one ASE
+to another. It runs on Solaris and Linux and is very straightforward to use.
+
+Go to <A HREF="http://www.mbay.net/~mpeppler/bcptool">http://www.mbay.net/~mpeppler/bcptool</A> to grab a copy, read the
+documentation and see a couple of screen shots.
+
+Hot news! Michael Peppler is porting BCPtool to use the GTK+ libraries, which
+is basically the standard gnome toolkit for Linux. Go to Michael's site for
+more details (<A HREF="http://www.mbay.net/~mpeppler">http://www.mbay.net/~mpeppler</A>).
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.7.1: How to access a SQL Server using Linux
+
+-------------------------------------------------------------------------------
+
+I am planning to remove/reduce/rewrite this section when the ASE on Linux FAQ
+moves to section 2. Most of it is out of date, and I think that most of its
+links are broken.
+
+Some time back, Sybase released a binary distribution of ctlib for Linux. This
+is just the header and libraries files for ctlib only, not dblib, not isql, not
+bcp, not the dataserver and not the OpenServer. This was done as a skunk works
+internal project at Sybase, for the good of the Linux community, and not
+supported by Sybase in any official capacity. This version of ctlib identifies
+itself as 10.0.3.
+
+At the time, the binary format for Linux libraries was a format called a.out.
+Since then, the format has changed to the newer, ELF format. ELF libraries and
+.o files cannot be linked with a.out libraries and .o files. Fortunately, a.out
+libraries and .o files can easily be converted to ELF via the objdump(1)
+program.
+
+Getting a useable ctlib for Linux isn't that easy, though. Another
+compatibility problem has arisen since these old libraries were compiled. The
+byte-order for the ctype macros has changed. One can link to the
+(converted-to-ELF) ctlib, but running the resulting executable will result in
+an error message having to do with missing localization files. The problem is
+that the ctype macros in the compiled ctlib libraries are accessing a structure
+in the shared C library which has changed its byte order.
+
+I've converted the a.out library, as distributed by Sybase to ELF, and added
+the old tables directly to the library, so that it won't find the wrong ones in
+libc.
+
+Using this library, I can link and run programs on my Linux machines against
+Sybase databases (It also can run some programs against Microsoft SQL server,
+but that's another FAQ). However, you must be running Linux 2.0 or later, or
+else the link phase will core dump.
+
+This library is available for ftp at:
+
+  * ftp://mudshark.sunquest.com/pub/ctlib-linux-elf/
+  * ftp://mudshark.sunquest.com/pub/ctlib-linux-elf/
+
+is a compiled version of sybperl 2.0, which is built with the above library.
+Obviously, only the ctlib module is in this distribution.
+
+In order to use this code, you will need a Sybase dataserver, a Sybase
+interfaces file (in the non-TLI format -- see Q9.3.4), a user named sybase in
+your /etc/passwd file, whose home directory is the root of the distribution,
+and some application code to link to.
+
+As far as an isql replacement goes, use sqsh - Q9.5.1.
+
+One of the libraries in the usual Sybase distribution is a libtcl.a This
+conflicts with the library on Linux which implements the TCL scripting
+language, so this distribution names that library libsybtcl.a, which might
+cause some porting confusion.
+
+    The above conflict problem is addressed by SybPerl - Q9.3.1 and sqsh -
+    Q9.5.1
+   
+More information
+
+See Q11.4.6 for more information on setting up DBI/DBD:Sybase
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.7.2: Sybase on Linux FAQ
+
+-------------------------------------------------------------------------------
+
+I am planning to move this section out of here next release.
+
+Sybase have released two versions of Sybase on Linux, 11.0.3.3 and 11.9.2, and
+a third, 12.5, is in beta testing at this moment, slated for GA sometime in the
+first half of 2001.
+
+11.9.2
+
+This is officially supported and sanctioned.  The supported version can be
+purchased from Sybase at similar, if not exactly the same, conditions as 11.9.2
+on NT, with one small exception: you can download a developer's version for
+free!  There is a 11.9.2.2 EBF, although I am not 100% sure if the current
+developer's release is 11.9.2 or 11.9.2.2. Certainly for a while, you could
+only get the EBF if you had a paid for version.
+
+11.0.3.3
+
+    Please remember that Sybase Inc does not provide any official support for
+    SQL Server on Linux (ie the 11.0.3.3 release). The folks on the 'net
+    provide the support.
+   
+Index
+
+  * Minimum Requirements
+  * How to report a bug
+  * Bug list
+
+Minimum Requirements
+
+  * Linux release: 2.0.36 or 2.1.122 or greater.
+
+How to report a bug
+
+I hope you understand that the Sybase employee who did the port is a very busy
+person so it's best not to send him mail regarding trivial issues. If you have
+tried posting to comp.databases.sybase and <A HREF="mailto:ase-linux-list@isug.com">ase-linux-list@isug.com</A> and have
+checked the bugs list, send him an e-mail note with the following data - you
+will not get an acknowledgement to your e-mail and it will go directly into the
+bug tracking database; true bugs will be fixed in the next release; any message
+without the above Subject will be deleted, unseen, by a filter.
+
+    Administrator: I know that the above sounds harsh but Wim ten has been
+    launched to world-wide exposure. In order for him to continue to provide
+    Sybase ASE outside of his normal workload we all have to support him.
+    Thanks!
+   
+With the above out of the way, if you find a bug or an issue please report it
+as follows:
+
+    To: <A HREF="mailto:wtenhave@sybase.com">wtenhave@sybase.com</A>
+    Subject: SYBASE ASE LINUX PR
+    uname: the result of typing 'uname -a' in a shell
+    $SYBASE/scripts/hw_info.sh: As 'sybase' run this shell script and enclose
+    its output
+    short description: a one to two line description of the problem
+    repeatable: yes, you can repeat it, no you cannot
+    version of dataserver: the result of: as the 'sybase' user, 'cd $SYBASE/bin
+    ' and type './dataserver -v|head -1'
+    test case: test case to reproduce the problem
+   
+                                   Bug List                                    
++-----------------------------------------------------------------------------+
+|             |        |              |             |             |           |
+|-------------+--------+--------------+-------------+-------------+-----------|
+|    Short    | Fixed? |  Dataserver  |    Date     |  Fix Date   | Fix Notes |
+| Description |        |   Release    |  Reported   |             |           |
+|-------------+--------+--------------+-------------+-------------+-----------|
+|             |        | SQL Server/  |             |             | You must  |
+|             |        | 11.0.3.3/P/  |             |             | upgrade   |
+| Remote      |        | Linux Intel/ | Pre-release | Pre-release | your OS   |
+| connections | Yes    | Linux 2.0.36 | of SQL      | of SQL      | to either |
+| hang        |        | i586/1/OPT/  | Server      | Server      | 2.0.36 or |
+|             |        | Thu Sep 10   |             |             | 2.1.122   |
+|             |        | 13:42:44     |             |             | or        |
+|             |        | CEST 1998    |             |             | greater   |
++-----------------------------------------------------------------------------+
+
+as of Fri Nov 20 20:16 (08:16:47 PM) MST 1998
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.7.3: Linux Shared Memory for ASE (x86 Processors)
+
+-------------------------------------------------------------------------------
+
+2.2.x Series Kernels and Above
+
+To set the maximum shared memory to 128M use the following:
+
+# echo 134217728 &gt; /proc/sys/kernel/shmmax
+
+This comes from the following calculation: 128Mb = 128 x 1024 x 1024 bytes =
+134217728 bytes
+
+2.0.x and 2.1.x Kernels
+
+To increase the total memory for ASE (SQL Server) beyond 32mb, several kernel
+parameters must be changed.
+
+ 1. Determine Memory/System Requirements
+      + a: Total Memory &lt; 128mb specific instructions
+      + b: Total Memory &gt; 128MB - specific instructions
+ 2. Modify the linux/include/asm/shmparam.h to setup shared memory
+ 3. Increase the size of the swap
+ 4. Recompile your kernel &amp; start using the new kernel
+ 5. Verify the changes have taken effect
+ 6. Increase the total memory to the desired size
+
+Comments
+
+-------------------------------------------------------------------------------
+
+1a - Total Memory &lt; 128mb specific instructions
+
+-------------------------------------------------------------------------------
+
+Requirements:
+
+Linux 2.0.36 or higher
+
+Total memory is currently limited to 128mb. A request to the Linux kernel
+developers has been made to enable large swap support which will allow the same
+size as 2.2.x kernels.
+
+-------------------------------------------------------------------------------
+
+1b - Total Memory &gt; 128mb - specific instructions
+
+-------------------------------------------------------------------------------
+
+Requirements:
+
+  * Linux Kernel 2.2.x or higher *
+  * util-linux package 2.9 or higher *
+  * Swap space atleast as large as the SQL Server
+
+
+* - both are available from <A HREF="ftp://ftp.us.kernel.org">ftp://ftp.us.kernel.org</A>
+
+You need to make the following changes in linux/include/asm-i386/page.h:
+
+- #define __PAGE_OFFSET (0xC0000000)
++ #define __PAGE_OFFSET (0x80000000)
+
+This allows accessing up to 2gb of memory. Default is 960mb.
+
+-------------------------------------------------------------------------------
+
+Step 2: Modify the linux/include/asm/shmparam.h to setup shared memory
+
+-------------------------------------------------------------------------------
+
+   
+    [max seg size]
+    - #define SHMMAX 0x2000000 /* defaults to 32 MByte */
+    + #define SHMMAX 0x7FFFE000 /* 2048mb - 8k */
+   
+    [max number of segments]
+    - #define _SHM_ID_BITS 7 /* maximum of 128 segments */
+    + #define _SHM_ID_BITS 5 /* maximum of 32 segments */
+   
+    [number of bits to count how many pages in the shm segment]
+    - #define _SHM_IDX_BITS 15 /* maximum 32768 pages/segment */
+    + #define _SHM_IDX_BITS 19 /* maximum 524288 pages/segment */
+   
+    Alter _SHM_IDX_BITS only if you like to go beyond the default 128MByte
+    where you also need the swap space available.
+   
+    _SHM_ID_BITS + _SHM_IDX_BITS must be equal to or less then 24.
+   
+    Linux kernel PAGE size for Intel x86 machines = 4k
+   
+-------------------------------------------------------------------------------
+
+Step 3: To increase the size of swap
+
+-------------------------------------------------------------------------------
+
+       
+        $ mkswap -c &lt;device&gt; [size] &lt;- use for pre 2.2 kernels
+        - limited to 128mb - 8k
+       
+        $ mkswap -c -v1 &lt;device&gt; [size] &lt;- limited to 2gb 8k
+       
+        $ swapon &lt;device&gt;
+       
+  * Add the following to your /etc/fstab to enable this swap on boot
+       
+        &lt;device&gt; swap swap defaults 0 0
+       
+-------------------------------------------------------------------------------
+
+Step 4: Recompile your kernel &amp; restart using the new kernel
+
+-------------------------------------------------------------------------------
+
+   
+    Follow the instructions provided with the Linux Kernel
+   
+-------------------------------------------------------------------------------
+
+Step 5: Verify the changes have taken effect
+
+-------------------------------------------------------------------------------
+
+   
+    $ ipcs -lm
+   
+    ------ Shared Memory Limits --------
+    max number of segments = 32
+    max seg size (kbytes) = 2097144
+    max total shared memory (kbytes) = 67108864
+    min seg size (bytes) = 1
+   
+    [jfroebe@jfroebe-desktop asm]$
+   
+    The changes took.
+   
+-------------------------------------------------------------------------------
+
+Step 6: Increase the total memory to the desired size
+
+-------------------------------------------------------------------------------
+
+   
+    Because of current limitations in the GNU C Library (glibc), ASE is limited
+    to 893mb. A workaround to increase this to 1400mb has been submitted.
+   
+    Increase the total memory to desired size. Remember the above limitation as
+    well as the 128mb limitation on Linux kernel 2.0.36.
+   
+    For example, to increase the total memory to 500mb:
+       
+        1&gt; sp_configure "total memory", 256000
+        2&gt; go
+        1&gt; shutdown
+        2&gt; go
+       
+-------------------------------------------------------------------------------
+
+Comments
+
+* Note that it is possible to increase the total memory far above the physical
+RAM
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.7.4: Sybase now available on Free BSD
+
+-------------------------------------------------------------------------------
+
+Amazing, the Sybase folks have got ASE running on FreeBSD!  The following post
+is from Reinoud van Leeuwen (<A HREF="mailto:reinoud.v@n.leeuwen.net">reinoud.v@n.leeuwen.net</A>). His web site is http://
+www.xs4all.nl/~reinoud and contains lots of other useful stuff.
+
+Sybase has made an update of their free 11.0.3.3 SQL server available.  This
+updated version includes some bug fixes and *FreeBSD support*.
+
+The 11.0.3.3 version is unsupported, but Free for development *and production*!
+
+The server still runs under the Linux emulation, but there is a native SDK
+(libraries).
+
+download on
+
+<A HREF="http://www.sybase.com/linux/ase/">http://www.sybase.com/linux/ase/</A>
+
+some extra info on:
+
+<A HREF="http://my.sybase.com/detail?id=1009270">http://my.sybase.com/detail?id=1009270</A>
+
+Here are the notes I made to get everything working (still working on things
+like sybperl, dbd::sybase and PHP :-)
+
+notes on getting Sybase to work on FreeBSD 4.0 RELEASE
+======================================================
+
+(log in as root)
+
+1: create a user sybase. give it /usr/local/sybase as home  directory. I gave
+him bash as shell and put him in the group sybase 
+
+2: put the following files in /usr/local (they contain the path sybase): 
+
+  * sybase-ase-11.0.3.3-FreeBSD-6.i386.tgz 
+  * sybase-doc-11.0.3.3-FreeBSD-6.i386.tgz 
+  * sybase-ocsd-10.0.4-FreeBSD-6.i386.tgz 
+
+3: untar them: 
+
+ tar xvzf sybase-ase-11.0.3.3-FreeBSD-6.i386.tgz
+ tar xvzf sybase-doc-11.0.3.3-FreeBSD-6.i386.tgz
+ tar xvzf sybase-ocsd-10.0.4-FreeBSD-6.i386.tgz
+ rm sybase*.tgz
+
+4: change the ownership of the tree to sybase:
+
+ chown -R sybase:sybase /usr/local/sybase
+
+5: install the FreeBSD linux emulation:
+
+  * add the following line to /etc/rc.conf
+    linux_enable="YES"
+  * build the following ports:
+    /usr/ports/emulators/linux_base
+
+(TIP: move the nluug site up in the makefile, this speeds up things
+considerably from the Netherlands!)
+
+6: build a kernel that supports System V shared memory blocks make sure that
+the following lines are in the kernel config file (/sys/i386/conf/YOUR_KERNEL)
+
+# the next 3 are now standard in the kernel
+ options SYSVSHM
+ options SYSVMSG
+ options SYSVSEM
+
+ options SHMMAXPGS="8192"
+ options SHMMAX="(SHMMAXPGS*PAGE_SIZE+1)"
+
+(this might be a good time to also enable your kernel for Multi processor) It
+is also possible to set the last two entries during runtime:
+
+sysctl -w kern.ipc.shmmax=32000000
+sysctl -w kern.ipc.shmall=8192
+
+(log in as sybase or su to it; make sure that the SYBASE environment variable
+is set to /usr/local/sybase ; the .cshrc file should set it.)
+
+7: brand some executables to make sure FreeBSD knows that they are Linux ones 
+
+ brandelf -t Linux /usr/local/sybase/install/sybinit
+ brandelf -t Linux /usr/local/sybase/install/startserver
+ brandelf -t Linux /usr/local/sybase/bin/*
+
+8: run ./install/sybinit
+
+With this program you should be able to install a sybase server and a backup
+server. (see the included docs or the online manuals on http://
+sybooks.sybase.com)
+
+9: To make Sybase start during system boot copy the following script to /usr/
+local/etc/rc.d and make it executable by root
+
+ #!/bin/sh
+ # start all sybase servers on this system
+ # assume that sybase is installed in the home dir of user
+ # sybase
+ export SYBASE=`grep -e "^sybase" /etc/passwd | cut -d: -f 6`
+ export PATH="${SYBASE}/bin:${SYBASE}/install:${PATH}"
+
+ unset LANG
+ unset LC_ALL
+
+ cd ${SYBASE}/install
+
+ for RUN_SERVER in RUN_*
+ do
+      su sybase -c "startserver -f ${RUN_SERVER}" &gt; /dev/null 2&gt;&amp;1
+      echo -n "${RUN_SERVER} "
+ done
+ echo
+
+# end of script
+
+Getting 2 CPU's working
+=======================
+
+Two get Sybase running on 2 CPU's involves two steps:
+
+  * getting Unix working on 2 CPU's and
+  * configuring Sybase to use them.
+
+1: Getting FreeBSD to work on 2 CPU's.
+
+Build a new kernel that supports 2 CPU's. Run the command mptable (as root).
+note the last few lines of output, they will tell you what you should include
+in your kernel file.
+
+Edit the Kernel file and build it. Note the messages during the next reboot. It
+should say somewhere that it uses the second CPU now.
+
+2: insert the following line in the sybase.sh startup script in /usr/local/etc/
+rc.d
+
+ export SRV_CPUCOUNT=2 
+
+Also insert this line in the files where environment variables are set for the
+user sybase. Edit the config file for the sybase server(s) on your system (/usr
+/local/sybase/&lt;SERVERNAME&gt;.cfg). Change the values in the line "max online
+engines" from "Default" to "2". (Another option is to give the SQL command
+sp_configure "max online engines",2) During the next Sybase reboot, the last
+line in the errorlog should say something like:
+
+engine 1, os pid xxx online
+
+there should be two processes with the name dataserver now.
+
+
+Back to top
+-------------------------------------------------------------------------------
+
+9.8.1: Other Extended Stored Procedures
+
+-------------------------------------------------------------------------------
+
+The following stored procedures were written by Ed Barlow <A HREF="mailto:sqltech@tiac.net">sqltech@tiac.net</A> and
+can be fetched from the following site:
+
+    <A HREF="http://www.edbarlow.com">http://www.edbarlow.com</A>
+   
+Here's a pseudo-man page of what you get:
+
+                  Modified Sybase Procedures                   
+        +-------------------------------------------------------------+        
+        |               |                                             |        
+        |---------------+---------------------------------------------|        
+        |    Command    |                 Description                 |        
+        |---------------+---------------------------------------------|        
+        |---------------+---------------------------------------------|        
+        |sp__help       |Better sp_help                               |        
+        |---------------+---------------------------------------------|        
+        |sp__helpdb     |Database Information                         |        
+        |---------------+---------------------------------------------|        
+        |sp__helpdevice |Break down database devices into a nice      |        
+        |               |report                                       |        
+        |---------------+---------------------------------------------|        
+        |sp__helpgroup  |List groups in database by access level      |        
+        |---------------+---------------------------------------------|        
+        |sp__helpindex  |Shows indexes by table                       |        
+        |---------------+---------------------------------------------|        
+        |sp__helpsegment|Segment Information                          |        
+        |---------------+---------------------------------------------|        
+        |sp__helpuser   |Lists users in current database by group     |        
+        |               |(include aliases)                            |        
+        |---------------+---------------------------------------------|        
+        |sp__lock       |Lock information                             |        
+        |---------------+---------------------------------------------|        
+        |sp__who        |sp_who that fits on a page                   |        
+        +-------------------------------------------------------------+        
+                       Audit Procedures                        
+        +-------------------------------------------------------------+        
+        |                 |                                           |        
+        |-----------------+-------------------------------------------|        
+        |     Command     |                Description                |        
+        |-----------------+-------------------------------------------|        
+        |sp__auditsecurity|Security Audit On Server                   |        
+        |-----------------+-------------------------------------------|        
+        |sp__auditdb      |Audit Current Database For Potential       |        
+        |                 |Problems                                   |        
+        +-------------------------------------------------------------+        
+                System Administrator Procedures                
+        +-------------------------------------------------------------+        
+        |              |                                              |        
+        |--------------+----------------------------------------------|        
+        |   Command    |                 Description                  |        
+        |--------------+----------------------------------------------|        
+        |--------------+----------------------------------------------|        
+        |sp__block     |Blocking processes.                           |        
+        |--------------+----------------------------------------------|        
+        |sp__dbspace   |Summary of current database space information.|        
+        |--------------+----------------------------------------------|        
+        |sp__dumpdevice|Listing of Dump devices                       |        
+        |--------------+----------------------------------------------|        
+        |sp__helpdbdev |Show how Databases use Devices                |        
+        |--------------+----------------------------------------------|        
+        |sp__helplogin |Show logins and remote logins to server       |        
+        |--------------+----------------------------------------------|        
+        |sp__helpmirror|Shows mirror information, discover broken     |        
+        |              |mirrors                                       |        
+        |--------------+----------------------------------------------|        
+        |sp__segment   |Segment Information                           |        
+        |--------------+----------------------------------------------|        
+        |sp__server    |Server summary report (very useful)           |        
+        |--------------+----------------------------------------------|        
+        |sp__vdevno    |Who's who in the device world                 |        
+        +-------------------------------------------------------------+        
+                        DBA Procedures                         
+        +-------------------------------------------------------------+        
+        |               |                                             |        
+        |---------------+---------------------------------------------|        
+        |    Command    |                 Description                 |        
+        |---------------+---------------------------------------------|        
+        |---------------+---------------------------------------------|        
+        |sp__badindex   |give information about bad indexes (nulls,   |        
+        |               |bad statistics...)                           |        
+        |---------------+---------------------------------------------|        
+        |sp__collist    |list all columns in database                 |        
+        |---------------+---------------------------------------------|        
+        |sp__indexspace |Space used by indexes in database            |        
+        |---------------+---------------------------------------------|        
+        |sp__noindex    |list of tables without indexes.              |        
+        |---------------+---------------------------------------------|        
+        |sp__helpcolumns|show columns for given table                 |        
+        |---------------+---------------------------------------------|        
+        |sp__helpdefault|list defaults (part of objectlist)           |        
+        |---------------+---------------------------------------------|        
+        |sp__helpobject |list objects                                 |        
+        |---------------+---------------------------------------------|        
+        |sp__helpproc   |list procs (part of objectlist)              |        
+        |---------------+---------------------------------------------|        
+        |sp__helprule   |list rules (part of objectlist)              |        
+        |---------------+---------------------------------------------|        
+        |sp__helptable  |list tables (part of objectlist)             |        
+        |---------------+---------------------------------------------|        
+        |sp__helptrigger|list triggers (part of objectlist)           |        
+        |---------------+---------------------------------------------|        
+        |sp__helpview   |list views (part of objectlist)              |        
+        |---------------+---------------------------------------------|        
+        |sp__trigger    |Useful synopsis report of current database   |        
+        |               |trigger schema                               |        
+        +-------------------------------------------------------------+        
+                      Reverse Engineering                      
+        +-------------------------------------------------------------+        
+        |                 |                                           |        
+        |-----------------+-------------------------------------------|        
+        |     Command     |                Description                |        
+        |-----------------+-------------------------------------------|        
+        |-----------------+-------------------------------------------|        
+        |sp__revalias     |get alias script for current db            |        
+        |-----------------+-------------------------------------------|        
+        |sp__revdb        |get db creation script for server          |        
+        |-----------------+-------------------------------------------|        
+        |sp__revdevice    |get device creation script                 |        
+        |-----------------+-------------------------------------------|        
+        |sp__revgroup     |get group script for current db            |        
+        |-----------------+-------------------------------------------|        
+        |sp__revindex     |get indexes script for current db          |        
+        |-----------------+-------------------------------------------|        
+        |sp__revlogin     |get logins script for server               |        
+        |-----------------+-------------------------------------------|        
+        |sp__revmirror    |get mirroring script for server            |        
+        |-----------------+-------------------------------------------|        
+        |sp__revuser      |get user script for current db             |        
+        +-------------------------------------------------------------+        
+                       Other Procedures                        
+        +-------------------------------------------------------------+        
+        |               |                                             |        
+        |---------------+---------------------------------------------|        
+        |    Command    |                 Description                 |        
+        |---------------+---------------------------------------------|        
+        |---------------+---------------------------------------------|        
+        |sp__bcp        |Create unix script to bcp in/out database    |        
+        |---------------+---------------------------------------------|        
+        |sp__date       |Who can remember all the date styles?        |        
+        |---------------+---------------------------------------------|        
+        |sp__quickstats |Quick dump of server summary information     |        
+        +-------------------------------------------------------------+        
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+9.8.3: xsybmon
+
+-------------------------------------------------------------------------------
+
+The original site, NSCU, no longer carries these bits. If you feel that it's
+useful to have xsybmon and you know where the new bits are, please drop me an
+e-mail: dowen@midsomer.org
+
+There is an alternative that is include as part of De Clarke's wisql package.
+It is called syperf. I do not have any screen shots, but I will work on it. You
+can grab a copy of wisql from ftp://ftp.ucolick.org:/pub/UCODB/
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+Sybase Tech Docs Open Client ASE FAQ
+
+</PRE>
+<DIV ALIGN=CENTER>
+<SMALL>
+<P><HR WIDTH=1900 NOSHADE><BR>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  Part17 -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A></SMALL>
+<P>
+<div align="center">
+
+<center>
+<form method="post" action="rateit.php">
+<table border="1" cellpadding="0" cellspacing="0" width="150" bgcolor="#ffcccc" style="WIDTH: 150px">
+<tr><td width="100%">
+<div align="center">
+<table border="0" cellpadding="2" width="100%" bgcolor="#ffcccc">
+<tr><td width="100%" height="14">
+<p align="center"><font face="Arial">Rate this FAQ</font></p>
+</td></tr>
+<tr><td width="100%" height="14">
+<p align="center">
+<INPUT TYPE=HIDDEN NAME="pid" VALUE="databases/sybase-faq/part17/index.html">
+<select size="1" name="D1" style="COLOR: darkmagenta; BACKGROUND-COLOR: cornsilk">
+<option selected value="0">N/A</option>
+<option value="1">Worst</option>
+<option value="2">Weak</option>
+<option value="3">OK</option>
+<option value="4">Good</option>
+<option value="5">Great</option>
+</select>
+</p>
+</td></tr>
+<tr><td width="100%" height="27">
+<p align="center">
+<IMG onclick="mystr='/frate.php?pid='+pid.value+'&vote='+D1.value;
+Popup=window.open(mystr,'Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=380,height=270,left=230,top=43'); 
+ return false;" height=28 src="/images/vote.gif" alt="Vote" width=83 border=0 ></p>
+</td></tr>
+</table>
+</div>
+</td></tr>
+</table>
+<font size="-1" face="Arial"><br><a href="/topRated.html">Current Top-Rated FAQs</a><br></font>
+</form>
+</center>
+
+</div>
+
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="100%">
+<tr><td width="100%" bgcolor="#D6D6C0">
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part17/index.html"," ");
+// --></script>
+<p><font face="Arial"><a name="ct">Are you an expert in this area?</a> Share your knowledge and earn expert points by giving answers or rating people's questions and answers! This section of FAQS.ORG is not sanctioned in any way by FAQ authors or maintainers.</font></p>
+<p><font face="Arial">Questions strongly related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-6730.html">How can I display the table sizes of ALL tables in a database?   </a> by Caspar (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9594.html">how to use nested cursors in a stored procedure in ASE ? is there any template to use !...</a> by nino (12/18/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3265.html">to connect sybase and c++,how to connect and access the data </a> by kumaran (9/2/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6741.html">how do u tell the last time update statistics has been run on a table (11.0.3) </a> by yujo (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11075.html">I need to Execute an SP & set its output to the insert statement. This will be occured for...</a> by rose (1/14/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9435.html">I wanted to know EXACT technical details about what ACTUALLY happens when u fire a simple...</a> by anu (12/15/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-8395.html">Is there anyway to start dataserver in ASE 11.9.2 with only the master and tempdb online...</a> by steve_2000g (11/28/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-854.html">i get an error on the "convert" when i try to run this line of code, why is this?   print...</a> by shugarhi (7/14/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11834.html">Hi  &nbsp; We're using Sybase ASE 12.0 running on SUN 4500 Cluster server. We cannot...</a> by KK (1/26/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6297.html">I am creating a stored proc to create a report of dependencies. &nbsp;We are creating...</a> by RR (10/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7388.html">How is this hazardous if we do not close a cursor? </a> by amar (11/11/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9827.html">How can i reduce my tempdb size once i have increased it by creating a device also? </a> by rajs (12/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12835.html">how can i transfer a table from cybase to db2? &nbsp;please sendme step by step method if...</a> by maulik (2/9/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3213.html">My database is in bypass recovery mode. How do I put it in normal mode? </a> by Lach (9/1/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-1435.html">Hi ,  &nbsp;We are using Sybase ASE 11.9.2 with SCO Unix 7.1.1 &nbsp;as the operating ...</a> by gowri (7/27/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-2412.html">were is a database that will bring up  a person address without there last name </a> by travis (8/15/2003)</font></li>
+</ul>
+<p><font face="Arial">Questions somewhat related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-2221.html">Guys!   See the Sybase query below: select convert(float,substring(&lt;field1&gt;,3,...</a> by pathfinder (8/12/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7790.html">What are the side-effects of turning-on the built-in auditing capabilities of sybase? </a> by Choy (11/17/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12136.html">When ever i execute select property('PROCESSCPU') i get the value 189 and whenever i...</a> by anilkumarsh (1/29/2004)</font></li>
+</ul>
+<p><font face="Arial">Other questions awaiting answers:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/related.html">10088 questions</a> related to other FAQs<br></font></li>
+<li><font face="Arial"><a href="/qa/unrelated.html">1765 general questions</a></font></li>
+<li><font face="Arial"><a href="/qa/answered.html">4091 answered questions</a><br></font></li>
+</ul>
+</td></tr></table> <br></center></div>
+<HR NOSHADE SIZE=2 WIDTH=450>
+[ <a href="/faqs/">Usenet FAQs</a> | <a href="/faqs/faqsearch.html">Search</a> | <a href="/contrib/">Web FAQs</a> | <a href="/docs/">Documents</a> | <a href="/rfcs/">RFC Index</a> ]
+<BR><HR NOSHADE SIZE=2 WIDTH=450>
+<P>
+<ADDRESS>
+Send corrections/additions to the FAQ Maintainer: <BR>dowen@midsomer.org (David Owen)
+</ADDRESS>
+<P>
+<SMALL>
+<STRONG>Last Update February 12 2004 @ 00:28 AM</STRONG>
+<BR>
+</SMALL>
+</DIV>
+</BODY>
+</HTML>
+

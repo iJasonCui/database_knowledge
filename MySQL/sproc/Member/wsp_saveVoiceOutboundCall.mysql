@@ -1,0 +1,49 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_saveVoiceOutboundCall;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_saveVoiceOutboundCall (
+/***********************************************************************
+**
+** CREATION:
+**   Author:        Frank Qi
+**   Date:          June, 2010
+**   Description:   save Voice Outbound Call
+**
+**
+*************************************************************************/
+at_userId             DECIMAL(12,0),
+at_targetUserId       DECIMAL(12,0),
+at_product            Char(1),
+at_community          Char(1),
+at_userPhoneNumber    Char(10)
+)
+BEGIN
+
+DECLARE at_dateGMT   DATETIME;
+
+CALL wsp_GetDateGMT(at_dateGMT);
+
+CALL wsp_getVoiceConnectId(at_userId,  at_targetUserId , at_community, at_userPhoneNumber);  
+
+     INSERT INTO VoiceConnect
+            (
+                userId,
+                targetUserId,
+                product,
+                community,
+                userPhoneNumber,
+                dateCreated,
+                dateModified
+            )
+     VALUES
+            (
+                 at_userId,
+                 at_targetUserId,
+                 at_product,  
+                 at_community,
+                 at_userPhoneNumber,
+                 at_dateGMT,
+                 at_dateGMT
+            ) ;
+            
+END;;
+DELIMITER ;

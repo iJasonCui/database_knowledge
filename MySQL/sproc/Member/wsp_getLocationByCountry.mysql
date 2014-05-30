@@ -1,0 +1,25 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getLocationByCountry;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getLocationByCountry (
+/******************************************************************************
+**
+** CREATION:
+**   Author: Jeff Yang/Jack Veiga
+**   Date:  September 19 2002
+**   Description: Retrieves geographical information by country 
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+at_country VARCHAR(24)
+)
+BEGIN
+     SELECT country_id,region_id,country_area_id
+       FROM location 
+      WHERE country = at_country ;
+
+END;;
+DELIMITER ;

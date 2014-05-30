@@ -1,0 +1,36 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getCardIdByCardNumber;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getCardIdByCardNumber (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:       SK
+**   Date:         Oct 6, 2003
+**   Description:  Retrieves card id for the specified number
+**
+**
+** REVISION(S):
+**   Author:       Andy Tran
+**   Date:         Feb 17, 2005
+**   Description:  Used encodedCardNum
+**                 Renamed from wsp_getCreditCardByNumber
+**
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_encodedCardNum VARCHAR(64)
+)
+BEGIN
+
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+SELECT creditCardId
+      FROM CreditCard
+     WHERE encodedCardNum = at_encodedCardNum;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

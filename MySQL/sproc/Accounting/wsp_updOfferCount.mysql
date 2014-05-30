@@ -1,0 +1,17 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updOfferCount;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updOfferCount (
+/******************************************************************************
+******************************************************************************/
+at_offerId int,
+at_offerType char(1)
+)
+BEGIN  
+   UPDATE OfferCounter 
+      SET offerCount = offerCount +  1
+   WHERE offerId = at_offerId
+     AND offerType = at_offerType;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

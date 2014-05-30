@@ -1,0 +1,170 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newUserReg2;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newUserReg2 (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         May 2008  
+**   Description:  Inserts row in user_info  
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_userId               DECIMAL(12,0)
+,at_username             VARCHAR(129)
+,at_password             VARCHAR(16)
+,at_userType             CHAR(1)
+,at_status               CHAR(1)
+,at_gender               CHAR(1)
+,at_birthdate            DATETIME
+,at_email                VARCHAR(129)
+,at_emailStatus          CHAR(1)
+,at_context              CHAR(3)
+,at_adcode               VARCHAR(30)
+,at_heightCm             INT
+,at_prefUnit             CHAR(1)
+,at_prefLaston           CHAR(1)
+,at_userAgent            VARCHAR(80)
+,at_postalCode           VARCHAR(10)
+,at_latRad               INT
+,at_longRad              INT
+,at_countryId            SMALLINT
+,at_stateId              INT
+,at_countyId             INT
+,at_cityId               INT
+,at_localeId             INT
+,at_signupIP             DECIMAL(12,0)
+,at_languagesSpokenMask  INT
+,at_searchLanguageMask   INT
+,at_brand varCHAR(5)
+)
+proc_label:
+BEGIN
+
+    DECLARE at_returnCode INT;
+    DECLARE at_universalId   DECIMAL(10,0) ;
+    DECLARE at_universalPass INT ;
+    DECLARE at_dateNow       DATETIME ;
+    DECLARE at_dateInt       INT ;
+
+    SET at_returnCode = 0;
+
+    -- set convert attributes
+    SET at_username = LTRIM(RTRIM(UPPER(at_username))) ;
+    SET at_password = LTRIM(RTRIM(UPPER(at_password))) ;
+    SET at_email = LTRIM(RTRIM(UPPER(at_email))) ;
+    SET at_postalCode = LTRIM(RTRIM(UPPER(at_postalCode))) ;
+    
+    IF (SELECT 1 FROM user_info WHERE status != 'J' 
+                                AND user_id != at_userId AND username = at_username AND user_type in ('F','P')) IS NOT NULL
+    THEN
+        SET at_returnCode = at_returnCode + 1 ;
+    END IF;
+
+    IF (SELECT 1 FROM user_info WHERE status != 'J' 
+                                  AND user_id != at_userId AND email = at_email AND user_type in ('F','P')) IS NOT NULL 
+    THEN    
+        SET at_returnCode = at_returnCode + 2 ;
+    END IF;
+
+    IF at_returnCode != 0
+    THEN
+	LEAVE proc_label;
+    ELSE
+        CALL wsp_UserId(at_userId);
+        CALL wsp_UniversalId(at_universalId);
+        CALL wsp_RandomNumber(at_universalPass ,1000,9999);
+        CALL wsp_GetDateGMT(at_dateNow);
+        
+        SET at_dateInt = TIMESTAMPDIFF(second,  '19700101', at_dateNow) ;
+    
+        INSERT INTO user_info
+                (
+                     user_id
+                    ,username
+                    ,password
+                    ,user_type
+                    ,status
+                    ,gender
+                    ,birthdate
+                    ,email
+                    ,emailStatus
+                    ,signup_adcode
+                    ,signup_context
+                    ,height_cm
+                    ,preferred_units
+                    ,pref_last_on
+                    ,user_agent
+                    ,zipcode
+                    ,lat_rad
+                    ,long_rad
+                    ,countryId
+                    ,jurisdictionId
+                    ,secondJurisdictionId
+                    ,cityId
+                    ,localePref
+                    ,signupLocalePref
+                    ,signupIP
+                    ,languagesSpokenMask
+                    ,searchLanguageMask
+                    ,signupBrand
+                    ,ethnic
+                    ,religion
+                    ,smoke
+                    ,body_type
+                    ,universal_id
+                    ,universal_password
+                    ,signuptime
+                    ,laston
+                    ,dateModified
+                )
+        VALUES
+                (
+                     at_userId
+                    ,at_username
+                    ,at_password
+                    ,at_userType
+                    ,at_status
+                    ,at_gender
+                    ,at_birthdate
+                    ,at_email
+                    ,at_emailStatus
+                    ,at_adcode
+                    ,at_context
+                    ,at_heightCm
+                    ,at_prefUnit
+                    ,at_prefLaston
+                    ,at_userAgent
+                    ,at_postalCode
+                    ,at_latRad
+                    ,at_longRad
+                    ,at_countryId
+                    ,at_stateId
+                    ,at_countyId
+                    ,at_cityId
+                    ,at_localeId
+                    ,at_localeId
+                    ,at_signupIP
+                    ,at_languagesSpokenMask
+                    ,at_searchLanguageMask
+                    ,at_brand
+                    ,'z'
+                    ,'z'
+                    ,'z'
+                    ,'z'
+                    ,at_universalId
+                    ,at_universalPass
+                    ,at_dateInt
+                    ,at_dateInt
+                    ,at_dateNow
+                ) ;
+            
+        SELECT at_userId AS userId ;
+    END IF;
+
+END;;
+DELIMITER ;

@@ -1,0 +1,28 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getUserAccountByUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getUserAccountByUserId (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author: Yan Liu 
+**   Date:  April 2, 2008
+**   Description:  retrieves user account info by userId
+**
+******************************************************************************/
+   at_userId DECIMAL(12, 0) 
+)
+BEGIN  
+   SELECT billingLocationId,
+          accountType,
+          purchaseOfferId,
+          usageCellId,
+          dateExpiry,
+          subscriptionOfferId
+     FROM UserAccount 
+    WHERE userId = at_userId ;
+   -- AT ISOLATION READ UNCOMMITTED
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

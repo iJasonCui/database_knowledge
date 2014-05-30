@@ -1,0 +1,59 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_saveAccountTrans;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_saveAccountTrans (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu 
+**   Date:  January 15 2009 
+**   Description:  save AccountTransaction.
+**
+** REVISION(S):
+**   Author: 
+**   Date: 
+**   Description:
+**
+******************************************************************************/
+   at_xactionId     INT,
+   at_userId        DECIMAL(12, 0),
+   at_xactionTypeId TINYINT,
+   at_creditTypeId  TINYINT, 
+   at_contentId     SMALLINT,
+   at_credits       SMALLINT,
+   at_balance       INT,
+   at_userType      CHAR(1)
+)
+
+BEGIN
+   DECLARE at_dateNow DATETIME;
+
+   SET at_dateNow = UTC_TIMESTAMP();
+
+   IF (SELECT 1 FROM AccountTransaction WHERE xactionId = at_xactionId) IS NULL THEN
+
+         INSERT INTO AccountTransaction(xactionId,
+                                        userId,
+                                        xactionTypeId,
+                                        creditTypeId,
+                                        contentId,
+                                        credits,
+                                        balance,
+                                        userType,
+                                        dateCreated)
+        VALUES(at_xactionId,
+               at_userId,
+               at_xactionTypeId,
+               at_creditTypeId,
+               at_contentId,
+               at_credits,
+               at_balance,
+               at_userType,
+               at_dateNow);
+
+
+   END IF;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

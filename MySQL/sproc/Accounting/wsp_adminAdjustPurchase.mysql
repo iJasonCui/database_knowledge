@@ -1,0 +1,62 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_adminAdjustPurchase;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_adminAdjustPurchase (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  June 13, 2005
+**   Description:  adjust  purchase for user
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date: July 7, 2005
+**   Description: pass in card processor
+**
+**   Author: Andy Tran
+**   Date: May 5, 2010
+**   Description: add location tax IDs
+**
+******************************************************************************/
+at_userId DECIMAL(12,0),
+at_xactionId DECIMAL(12,0),
+at_refXactionId DECIMAL(12,0),
+at_contentId SMALLINT,
+at_xactionTypeId TINYINT,
+at_cardProcessor CHAR(1),
+at_adminUserId INT,
+at_adminNote VARCHAR(255)
+)
+BEGIN 
+
+DECLARE at_creditTypeId                  TINYINT;
+DECLARE at_dateNow			 DATETIME;
+DECLARE at_balance                       INT;
+DECLARE at_cost                          DECIMAL (10,2);
+DECLARE at_costUSD                       DECIMAL (5,2);
+DECLARE at_tax                           DECIMAL (10,2);
+DECLARE at_taxUSD                        DECIMAL (5,2);
+DECLARE at_currencyId                    TINYINT;
+DECLARE at_purchaseOfferDetailId         SMALLINT;
+DECLARE at_purchaseTypeId                TINYINT;
+DECLARE at_billingLocationId             SMALLINT;
+DECLARE at_creditCardId                  INT;
+DECLARE at_taxCountryId                  SMALLINT;
+DECLARE at_taxJurisdictionId             INT;
+
+SET at_dateNow = UTC_TIMeSTAMP();
+CALL wsp_getTotalCredits (at_userId, at_balance);
+
+SELECT cost, costUSD, tax, taxUSD, creditTypeId, creditCardId, currencyId, purchaseOfferDetailId, billingLocationId, purchaseTypeId, taxCountryId, taxJurisdictionId
+     INTO at_cost, at_costUSD, at_tax, at_taxUSD, at_creditTypeId, at_creditCardId, at_purchaseOfferDetailId, at_billingLocationId, at_purchaseTypeId, at_taxCountryId, at_taxJurisdictionId 
+     FROM AccountTransaction,Purchase 
+     WHERE AccountTransaction.xactionId=at_refXactionId AND
+       AccountTransaction.xactionId=Purchase.xactionId;
+
+CALL wsp_transAdminAdjustPurchase (at_userId, at_xactionId, at_refXactionId, at_contentId, at_xactionTypeId, at_cardProcessor, at_adminUserId, at_adminNote,
+     				  at_creditTypeId, at_balance, at_dateNow, at_purchaseTypeId, at_billingLocationId, at_purchaseOfferDetailId, 
+				  at_currencyId, at_cost, at_costUSD, at_tax, at_taxUSD, at_creditCardId, at_taxCountryId, at_taxJurisdictionId);
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

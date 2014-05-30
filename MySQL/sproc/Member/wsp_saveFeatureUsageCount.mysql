@@ -1,0 +1,53 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_saveFeatureUsageCount;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_saveFeatureUsageCount (
+/******************************************************************************
+**
+** CREATION: 
+**   Author:  F.Schonberger
+**   Date:  August 24, 2010
+**   Description:  Records (increments) feature usage by a give userId
+**
+** REVISION(S):
+**
+******************************************************************************/
+at_featureId      varchar(255)
+,at_userId        DECIMAL(12,0)
+)
+BEGIN
+
+DECLARE at_gmtDate DATETIME ;
+
+CALL wsp_GetDateGMT(at_gmtDate);
+
+IF (SELECT 1 FROM FeatureUsage WHERE featureId=at_featureId AND userId = at_userId) IS NULL
+THEN
+    INSERT FeatureUsage 
+		(featureId
+		,userId
+		,`show`
+		,usageCount
+		,dateCreated
+		,dateModified
+		)
+    VALUES 
+		(at_featureId
+		,at_userId
+		,'Y'
+		,1
+		,at_gmtDate
+		,at_gmtDate
+		) ;
+
+ELSE
+    UPDATE FeatureUsage 
+       SET
+           usageCount = usageCount+1
+          ,dateModified = at_gmtDate
+     WHERE featureId=at_featureId
+       AND userId = at_userId ;
+
+END IF;
+ 
+END;;
+DELIMITER ;

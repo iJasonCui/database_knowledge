@@ -1,0 +1,13 @@
+exec sp_setreptable NonFinancialXActionId,true
+exec sp_setreptable SubscriptionCancelCode,true
+exec sp_setreptable SubscriptionEligibility,true
+exec sp_setreptable SubscriptionNonfinancialTrans,true
+exec sp_setreptable SubscriptionOffer,true
+exec sp_setreptable SubscriptionOfferDetail,true
+exec sp_setreptable SubscriptionTransaction,true
+exec sp_setreptable SubscriptionType,true
+exec sp_setreptable UserSubscriptionAccount,true
+exec sp_setreptable UserSubscriptionAccountHistory,true
+go
+
+

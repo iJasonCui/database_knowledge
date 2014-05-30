@@ -1,0 +1,53 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  csp_newOptimalPaymentsResponse;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE csp_newOptimalPaymentsResponse (
+    at_activityId           int,
+    at_code                 int,
+    at_actionCode           char(1),
+    at_confirmationNumber   varchar(20),
+    at_decision             varchar(10),
+    at_authCode             varchar(20),
+    at_avsResponse          char(1)    ,
+    at_cvdResponse          char(1)    ,
+    at_txnTime              varchar(20),
+    at_merchantRefNum       varchar(80),
+    at_description          varchar(1024)
+)
+BEGIN
+
+DECLARE at_dateCreated          DATETIME;
+
+SET at_dateCreated = NOW();
+
+INSERT INTO OptimalPaymentsResponse (
+    activityId ,
+    dateCreated,
+    code       ,
+    actionCode ,
+    confirmationNumber,
+    decision   ,
+    authCode   ,
+    avsResponse,
+    cvdResponse,
+    txnTime    ,
+    merchantRefNum,
+    description
+)
+VALUES (
+     at_activityId
+    ,at_dateCreated
+    ,at_code                 
+    ,at_actionCode           
+    ,at_confirmationNumber   
+    ,at_decision             
+    ,at_authCode             
+    ,at_avsResponse          
+    ,at_cvdResponse          
+    ,at_txnTime              
+    ,at_merchantRefNum       
+    ,at_description              
+);
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

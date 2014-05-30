@@ -1,0 +1,25 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getUserInfoFirstPayTime;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getUserInfoFirstPayTime (
+/***********************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu/jack Veiga
+**   Date:  Septerber 2003
+**   Description:  Retrieves firstpaytime, etc for a given user id
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+at_userId  DECIMAL(12,0)
+)
+BEGIN
+     SELECT firstpaytime
+       FROM user_info
+      WHERE user_id = at_userId ;
+
+END;;
+DELIMITER ;

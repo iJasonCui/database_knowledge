@@ -1,0 +1,23 @@
+[sybase@c151dbp07 data]$ df -h
+Filesystem            Size  Used Avail Use% Mounted on
+/dev/sda1              24G  2.4G   20G  11% /
+/dev/sda2              47G  3.1G   42G   8% /ccs
+/dev/sda4              61G   41G   17G  72% /ccs/dump
+tmpfs                  24G     0   24G   0% /dev/shm
+1.1.1.50:/vol/c151dbp07
+                      200G   76G  125G  38% /data/db
+
+
+[sybase@c151dbp06 install]$ df -h
+Filesystem            Size  Used Avail Use% Mounted on
+/dev/sda1              24G  2.2G   20G  10% /
+/dev/sda2              47G  1.8G   43G   5% /ccs
+/dev/sda5              61G   41G   17G  71% /ccs/dump
+tmpfs                  24G     0   24G   0% /dev/shm
+1.1.1.50:/vol/c151dbp06
+                      200G   85G  116G  43% /data/db
+
+
+
+
+

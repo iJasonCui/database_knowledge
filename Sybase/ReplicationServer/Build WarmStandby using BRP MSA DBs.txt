@@ -1,0 +1,112 @@
+========================================================
+Implementation warm standby using BRP MSA DBs
+========================================================
+
+[re-initializing the standby ]
+
+--step 1:
+Does not need to run "create logical connection to LogicalSRV.Msg_ar"
+admin logical_status
+
+--step 2:  add primary db 
+Does not need to add primary db
+admin who_is_down (no one should be down)
+
+--step 3:  set rep table and col (go to webccs)
+Does not need to run it
+
+--step 4: drop rep4p_maint_user as alias on new WS db and add it back as regular db user 
+USE Msg_ar
+go
+IF EXISTS (SELECT * FROM sysalternates WHERE suid=SUSER_ID('rep4p_maint_user'))
+BEGIN
+    EXEC sp_dropalias 'rep4p_maint_user'
+    IF EXISTS (SELECT * FROM sysalternates WHERE suid=SUSER_ID('rep4p_maint_user'))
+        PRINT '<<< FAILED DROPPING ALIAS rep4p_maint_user >>>'
+    ELSE
+        PRINT '<<< DROPPED ALIAS rep4p_maint_user >>>'
+END
+go
+
+USE Msg_ar
+go
+EXEC sp_adduser 'rep4p_maint_user','rep4p_maint_user','public'
+go
+
+
+--step 5: if the new warm stanby is loaded from prim db, need to disable the rep agent: 
+
+use Msg_ar
+dbcc gettrunc
+
+dbcc settrunc('ltm', ignore)
+sp_config_rep_agent Msg_ar, disable
+
+
+--step 6: ***** add ws db ***** without dump marker
+
+drop connection to WarmStandbyDB.Msg_ar (drop warm standby connection first) and then add a new ws db:
+
+/opt/etc/repserver126/REP-12_6/install/rs_init -r /opt/etc/repserver126/REP-12_6/init/logs/resource.Msg_ar.ws.31p.NoMarker
+
+--step 7: insert a row into RepTest of active DB
+
+--step 8: suspend log transfer from ActiveDB.Msg_ar
+
+--step 9: resume connection to ActiveDB and Standby DB
+
+--step 10: wait for quiesce
+
+--step 11: (w151dbp02) dump Msg_ar
+
+--step 12: load it into ws db and online database
+
+--step 13: dbo alias both on ws and prim
+
+USE Msg_ar
+go
+IF USER_ID('rep4p_maint_user') IS NOT NULL
+BEGIN
+    EXEC sp_dropuser 'rep4p_maint_user'
+    IF USER_ID('rep4p_maint_user') IS NOT NULL
+        PRINT '<<< FAILED DROPPING USER rep4p_maint_user >>>'
+    ELSE 
+        PRINT '<<< DROPPED USER rep4p_maint_user >>>'
+END
+go
+
+USE Msg_ar
+go
+EXEC sp_addalias 'rep4p_maint_user','dbo'
+go
+
+--dbo use only and trunc log on STANDBY
+
+USE master
+go
+EXEC sp_dboption 'Msg_ar','dbo use only',true
+go
+USE master
+go
+EXEC sp_dboption 'Msg_ar','trunc log on chkpt',true
+go
+USE Msg_ar
+go
+CHECKPOINT
+go
+
+--step 14: resume log transfer from ActiveDB.Msg_ar
+
+--step 15: test rep 
+
+SELECT T.repTestId, T.dateTime FROM Msg_md..RepTest T
+INSERT INTO Msg_md..RepTest ( repTestId, dateTime ) VALUES ( 108, getdate() )
+
+--step 16 : check the stable queue
+admin disk_space (on rep server)
+
+rs_helppartition (on rssd db)
+
+
+
+

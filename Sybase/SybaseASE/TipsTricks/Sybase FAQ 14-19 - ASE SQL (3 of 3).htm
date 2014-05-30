@@ -1,0 +1,1701 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<TITLE>Sybase FAQ: 14/19 - ASE SQL (3 of 3)</TITLE>
+<script language="JavaScript1.2">
+function edc(s,s2)
+{document.write("<font face=\"Arial\"><A href=\"",s,"\" target=\"_blank\" onclick=\"window.open('",s,"','Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=720,height=530,left=30,top=43');return false;\" )>Not finding the answers you need?&nbsp;",s2,"Submit your question for others to see.</A></font>");}
+//-->
+</script>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<DIV ALIGN=CENTER>
+<SMALL>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  Part14 -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A>
+</SMALL>
+<BR><HR SIZE=2 WIDTH=600 NOSHADE>
+<P><H1>Sybase FAQ: 14/19 - ASE SQL (3 of 3)</H1>
+<table border="0" cellpadding="4" cellspacing="4" width="35%">
+<tr><td width="100%" align="center" bgcolor="#D6D6C0">
+<p align=center><small>
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part14/index.html","<br>");
+// --></script>
+</small></p>
+</td></tr>
+</table>
+ <br>
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="40%">
+<tr><td width="100%" align="center" bgcolor="#CCCCFF"><font face="Arial">There are reader questions on this topic!<a href="#ct"><br>Help
+others by sharing your knowledge</a></font></td></tr>
+</table></center></div>
+<HR SIZE=2 WIDTH=600 NOSHADE>
+</DIV>
+<PRE>
+Message-ID: &lt;databases/sybase-faq/part14_1074677126@rtfm.mit.edu&gt;
+X-Last-Updated: 2003/03/02
+From: dowen@midsomer.org (David Owen)
+Newsgroups: <A HREF="http://groups.google.com/groups?group=comp.databases.sybase" target="new">comp.databases.sybase</A>
+Subject: Sybase FAQ: 14/19 - ASE SQL (3 of 3)
+Reply-To: <A HREF="mailto:dowen@midsomer.org">dowen@midsomer.org</A> (David Owen)
+Keywords: FAQ, DATABASES, SYBASE, ASA, ASE, REP
+Date: 21 Jan 2004 09:26:07 GMT
+
+Archive-name: databases/sybase-faq/part14
+URL: <A HREF="http://www.isug.com/Sybase_FAQ">http://www.isug.com/Sybase_FAQ</A>
+Version: 1.7
+Maintainer: David Owen
+Last-modified: 2003/03/02
+Posting-Frequency: posted every 3rd month
+   A how-to-find-the-FAQ article is posted on the intervening months.
+
+6.2.7: Hierarchy traversal - BOMs
+
+-------------------------------------------------------------------------------
+
+Alright, so you wanna know more about representing hierarchies in a relational
+database? Before I get in to the nitty gritty I should at least give all of the
+credit for this algorithm to: "_Hierarical_Structures:_The_Relational_Taboo!_,
+_(Can_ Transitive_Closure_Queries_be_Efficient?)_", by Michael J. Kamfonas as
+published in 1992 "Relational Journal" (I don't know which volume or issue).
+
+The basic algorithm goes like this, given a tree (hierarchy) that looks roughly
+like this (forgive the ASCII art--I hope you are using a fixed font to view
+this):
+
+                                    a
+                                   / \
+                                 /     \
+                               /         \
+                             b             c
+                            / \           /|\
+                           /   \        /  |  \
+                          /     \     /    |   \
+                         d       e   f     |    g
+
+   
+    Note, that the tree need not be balanced for this algorithm to work.
+   
+The next step assigned two numbers to each node in the tree, called left and
+right numbers, such that the left and right numbers of each node contain the
+left and right numbers of the ancestors of that node (I'll get into the
+algorithm for assigning these left and right numbers later, but, hint: use a
+depth-first search):
+
+                                   1a16
+                                   / \
+                                 /     \
+                               /         \
+                            2b7           8c15
+                            / \           /|\
+                           /   \        /  |  \
+                          /     \     /    |   \
+                        3d4     5e6 9f10 11g12 13h14
+
+   
+    Side Note: The careful observer will notice that these left and right
+    numbers look an awful lot like a B-Tree index.
+   
+So, you will notice that all of the children of node 'a' have left and right
+numbers between 1 and 16, and likewise all of the children of 'c' have left and
+right numbers between 8 and 15. In a slightly more relational format this table
+would look like:
+
+              Table: hier
+   node   parent left_nbr  right_nbr
+   -----  ------ --------  ---------
+   a        NULL        1         16
+   b           a        2          7
+   c           a        8         15
+   d           b        3          4
+   e           b        5          6
+   f           c        9         10
+   g           c       11         12
+   h           c       13         14
+
+So, given a node name, say @node (in Sybase variable format), and you want to
+know all of the children of the node you can do:
+
+    SELECT h2.node
+      FROM hier   h1,
+           hier   h2
+     WHERE h1.node      =   @node
+       AND h2.left_nbr  &gt;   h1.left_nbr
+       AND h2.left_nbr  &lt;   h1.right_nbr
+
+If you had a table that contained, say, the salary for each node in your
+hierarchy (assuming a node is actually a individual in a company) you could
+then figure out the total salary for all of the people working underneath of
+@node by doing:
+
+    SELECT sum(s.salary)
+      FROM hier   h1,
+           hier   h2,
+           salary s
+     WHERE h1.node      =   @node
+       AND h2.left_nbr  &gt;   h1.left_nbr
+       AND h2.right_nbr &gt;   h1.right_nbr
+       AND s.node       =   h2.node
+
+Pretty cool, eh? And, conversely, if you wanted to know how much it cost to
+manage @node (i.e. the combined salary of all of the boss's of @node), you can
+do:
+
+    SELECT sum(s.salary)
+      FROM hier   h1,
+           hier   h2,
+           salary s
+     WHERE h1.node      =   @node
+       AND h2.left_nbr  &lt;   h1.left_nbr
+       AND h2.left_nbr  &gt;   h1.right_nbr
+       AND s.node       =   h2.node
+
+Now that you can see the algorithm in action everything looks peachy, however
+the sticky point is the method in which left and right numbers get assigned.
+And, unfortunately, there is no easy method to do this relationally (it can be
+done, it just ain't that easy). For an real- world application that I have
+worked on, we had an external program used to build and maintain the
+hierarchies, and it was this program's responsibility to assign the left and
+right numbers.
+
+But, in brief, here is the algorithm to assign left and right numbers to every
+node in a hierarchy. Note while reading this that this algorithm uses an array
+as a stack, however since arrays are not available in Sybase, they are
+(questionably) emulated using a temp table.
+
+    DECLARE @skip            int,
+            @counter         int,
+            @idx             int,
+            @left_nbr        int,
+            @node            varchar(10)
+
+    /*-- Initialize variables --*/
+    SELECT @skip    = 1000,   /* Leave gaps in left &amp; right numbers */
+           @counter = 0,      /* Counter of next available left number */
+           @idx     = 0       /* Index into array */
+
+    /*
+     * The following table is used to emulate an array for Sybase,
+     * for Oracle this wouldn't be a problem. :(
+     */
+    CREATE TABLE #a (
+        idx          int           NOT NULL,
+        node         varchar(10)   NOT NULL,
+        left_nbr     int           NOT NULL
+    )
+
+    /*
+     * I know that I always preach about not using cursors, and there
+     * are ways to get around it, but in this case I am more worried
+     * about readability over performance.
+     */
+    DECLARE root_cur CURSOR FOR
+      SELECT h.node
+        FROM hier h
+       WHERE h.parent IS NULL
+    FOR READ ONLY
+
+    /*
+     * Here we are populating our "stack" with all of the root
+     * nodes of the hierarchy.  We are using the cursor in order
+     * to assign an increasing index into the "stack"...this could
+     * be done using an identity column and a little trickery.
+     */
+    OPEN root_cur
+    FETCH root_cur INTO @node
+    WHILE (@@sqlstatus = 0)
+    BEGIN
+      SELECT @idx = @idx + 1
+      INSERT INTO #a VALUES (@idx, @node, 0)
+      FETCH root_cur INTO @node
+    END
+    CLOSE root_cur
+    DEALLOCATE CURSOR root_cur
+
+    /*
+     * The following cursor will be employed to retrieve all of
+     * the children of a given parent.
+     */
+    DECLARE child_cur CURSOR FOR
+      SELECT h.node
+        FROM hier h
+       WHERE h.parent = @node
+    FOR READ ONLY
+
+    /*
+     * While our stack is not empty.
+     */
+    WHILE (@idx &gt; 0)
+    BEGIN
+      /*
+       * Look at the element on the top of the stack.
+       */
+      SELECT @node      = node,
+             @left_nbr  = left_nbr
+        FROM #a
+       WHERE idx = @idx
+
+      /*
+       * If the element at the top of the stack has not been assigned
+       * a left number yet, then we assign it one and copy its children
+       * on the stack as "nodes to be looked at".
+       */
+      IF (@left_nbr = 0)
+      BEGIN
+         /*
+          * Set the left number of the current node to be @counter + @skip.
+          * Note, we are doing a depth-first traversal, assigning left
+          * numbers as we go.
+          */
+         SELECT @counter  = @counter + @skip
+         UPDATE #a
+            SET left_nbr  = @counter
+          WHERE idx = @idx
+
+         /*
+          * Append the children of the current node to the "stack".
+          */
+         OPEN child_cur
+         FETCH child_cur INTO @node
+         WHILE (@@sqlstatus = 0)
+         BEGIN
+            SELECT @idx = @idx + 1
+            INSERT INTO #a VALUES (@idx, @node, 0)
+            FETCH child_cur INTO @node
+         END
+         CLOSE child_cur
+
+      END
+      ELSE
+      BEGIN
+         /*
+          * It turns out that the current node already has a left
+          * number assigned to it, so we just need to assign the
+          * right number and update the node in the actual
+          * hierarchy.
+          */
+         SELECT @counter = @counter + @skip
+
+         UPDATE h
+            SET left_nbr  = @left_nbr,
+                right_nbr = @counter
+          WHERE h.node    = @node
+
+         /*
+          * "Pop" the current node off our "stack".
+          */
+         DELETE #a WHERE idx = @idx
+         SELECT @idx = @idx - 1
+      END
+    END /* WHILE (@idx &gt; 0) */
+    DEALLOCATE CURSOR child_cur
+
+While reading through this, you should notice that assigning the left and right
+numbers to the entire hierarchy is very costly, especially as the size of the
+hierarchy grows. If you put the above code in an insert trigger on the hier
+table, the overhead for inserting each node would be phenomenal. However, it is
+possible to reduce the overall cost of an insertion into the hierarchy.
+
+ 1. By leaving huge gaps in the left &amp; right numbers (using the @skip
+    variable), you can reduce the circumstances in which the numbers need to be
+    reassigned for a given insert. Thus, as long as you can squeeze a new node
+    between an existing pair of left and right numbers you don't need to do the
+    re-assignment (which could affect all of the node in the hierarchy).
+ 2. By keeping an extra flag around in the hier table to indicate which nodes
+    are leaf nodes (this could be maintained with a trigger as well), you avoid
+    placing leaf nodes in the array and thus reduce the number of updates.
+
+Deletes on this table should never cause the left and right numbers to be
+re-assigned (you could even have a trigger automagically re-parent orphaned
+hierarchy nodes).
+
+All-in-all, this algorithm is very effective as long as the structure of the
+hierarchy does not change very often, and even then, as you can see, there are
+ways of getting around a lot of its inefficiencies.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.2.8: Calling OS commands from a trigger or a stored procedure
+
+-------------------------------------------------------------------------------
+
+11.5 and above
+
+The Adaptive Server (11.5) will allow O/S calls from within stored procedures
+and triggers. These stored procedures are known as extended stored procedures.
+
+Pre-11.5
+
+Periodically folks ask if it's possible to make a system command or call a UNIX
+process from a Trigger or a Stored Procedure.
+
+Guaranteed Message Processing
+
+The typical ways people have implemented this capability is:
+
+ 1. Buy Open Server and bind in your own custom stuff (calls to system() or
+    custom C code) and make Sybase RPC calls to it.
+ 2. Have a dedicated client application running on the server box which
+    regularly scans a table and executes the commands written into it (and
+    tucks the results into another table which can have a trigger on it to
+    gather results...). It is somewhat tricky but cheaper than option 1.
+
+Sybase ASE 10.0.2.5 and Above - syb_sendmsg()
+
+This release includes a new built-in function called syb_sendmsg(). Using this
+function you can send a message up to 255 bytes in size to another application
+from the ASE. The arguments that need to be passed to syb_sendmsg() are the IP
+address and port number on the destination host, and the message to be sent.
+The port number specified can be any UDP port, excluding ports 1-1024, not
+already in use by another process. An example is:
+
+1&gt; select syb_sendmsg("120.10.20.5", 3456, "Hello")
+2&gt; go
+
+This will send the message "Hello" to port 3456 at IP address '120.10.20.5'.
+Because this built-in uses the UDP protocol to send the message, the ASE does
+not guarantee the receipt of the message by the receiving application.
+
+    Also, please note that there are no security checks with this new function.
+    It is possible to send sensitive information with this command and Sybase
+    strongly recommends caution when utilizing syb_sendmsg to send sensitive
+    information across the network. By enabling this functionality, the user
+    accepts any security problems which result from its use (or abuse).
+   
+To enable this feature you should run the following commands as the System
+Security Officer.
+
+ 1. Login to the ASE using 'isql'.
+ 2. Enable the syb_sendmsg() feature using sp_configure.
+    1&gt; sp_configure "allow sendmsg", 1
+    2&gt; go
+    
+    1&gt; sp_configure "syb_sendmsg port number", &lt;port number&gt;
+    2&gt; go
+    
+    1&gt; reconfigure with override  -- Not necessary with 11.0 and above
+    2&gt; go
+
+The server must be restarted to set the port number.
+
+Using syb_sendmsg() with Existing Scripts
+
+Since syb_sendmsg() installs configuration parameter "allow sybsendmsg",
+existing scripts that contain the syntax
+
+1&gt; sp_configure allow, 1
+2&gt; go
+
+to enable updates to system tables should be altered to be fully qualified as
+in the following:
+
+1&gt; sp_configure "allow updates", 1
+2&gt; go
+
+If existing scripts are not altered they will fail with the following message:
+
+1&gt; sp_configure allow, 1
+2&gt; go
+Configuration option is not unique.
+duplicate_options
+----------------------------
+allow updates
+allow sendmsg
+
+(return status = 1)
+
+(The above error is a little out of date for the latest releases of ASE, there
+are now 8 rows that contain "allow", but the result is the same.)
+
+Backing Out syb_sendmsg()
+
+The syb_sendmsg() function requires the addition on two config values. If it
+becomes necessary to roll back to a previous ASE version which does not include
+syb_sendmsg(), please follow the instructions below.
+
+ 1. Edit the RUNSERVER file to point to the SWR ASE binary you wish to use.
+ 2. isql -Usa -P&lt;sa password&gt; -Sserver_name -n -iunconfig.sendmsg -ooutput_file
+
+Sample C program
+
+#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;netinet/in.h&gt;
+#include &lt;arpa/inet.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;fcntl.h&gt;
+
+main(argc, argv)
+int argc; char *argv[];
+{
+
+    struct sockaddr_in sadr;
+    int portnum,sck,dummy,msglen;
+    char msg[256];
+
+    if (argc &lt;2) {
+        printf("Usage: udpmon &lt;udp portnum&gt;\n");
+        exit(1);
+    }
+
+    if ((portnum=atoi(argv[1])) &lt;1) {
+        printf("Invalid udp portnum\n");
+        exit(1);
+    }
+
+    if ((sck="socket(AF_INET,SOCK_DGRAM,IPPROTO_UDP))" &lt; 0) {
+        printf("Couldn't create socket\n");
+        exit(1);
+    }
+
+    sadr.sin_family      = AF_INET;
+    sadr.sin_addr.s_addr = inet_addr("0.0.0.0");
+    sadr.sin_port        = portnum;
+
+    if (bind(sck,&amp;sadr,sizeof(sadr)) &lt; 0) {
+        printf("Couldn't bind requested udp port\n");
+        exit(1);
+    }
+
+    for (;;)
+    {
+
+        if((msglen="recvfrom(sck, msg, sizeof(msg), 0, NULL, &amp;dummy))" &lt; 0)
+            printf("Couldn't recvfrom() from udp port\n");
+
+        printf("%.*s\n", msglen, msg);
+    }
+} 
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.2.9: Identities and Sequential Keys
+
+-------------------------------------------------------------------------------
+
+This has several sections, culled from various sources. It is better described
+as "Everything you've ever wanted to know about identities." It will serve to
+answer the following frequently asked questions:
+
+What are the Features and Advantages of using Identities?
+What are the Problems with and Disadvantages of Identities?
+Common Questions about Identities
+
+  * Is Identity the equivalent of Oracle's Auto-sequencing?
+  * How do I configure a table to use the Identity field?
+  * How do I configure the burn factor?
+  * How do I find out if my tables have Identities defined?
+  * What is my current identity burn factor vulnerability?
+
+How do I optimize the performance of a table that uses Identities?
+How do I recover from a huge gap in my identity column?
+How do I fix a table that has filled up its identity values?
+
+OK, I hate identities. How do I generate sequential keys without using the
+Identity feature?
+How do I optimize a hand-made sequential key system for best performance?
+
+- Question 8.1 of the comp.database.sybase FAQ has a quick blurb about
+identities and sequential numbers. Search down in the page for the section
+titled, "Generating Sequential Numbers." Question 8.1 is a general document
+describing Performance and Tuning topics to be considered and thus doesn't go
+into as much detail as this page.
+
+- There's a white paper by Malcolm Colton available from the sybase web site.
+Goto the Sybase web site <A HREF="http://www.sybase.com">http://www.sybase.com</A> and type Surrogate in the search
+form. Select the Surrogate Primary Keys, Concurrency, and the Cache Hit Ratio
+document.
+
+-------------------------------------------------------------------------------
+
+Advantages/Features of Using Identities
+
+
+There's an entire section devoted to Identity columns in the ASE Reference
+manual, Chapter 5
+
+Sybase System 10 introduced many changes over the 4.9.x architecture. One of
+these changes was the Identity feature. The identity column is a special column
+type that gets automatically updated by the server upon a new row insert. Its
+purpose is to guarantee a unique row identifier not based on the other data in
+the row. It was integrated with the server and made memory based for fast value
+retrieval and no locking (as was/is the case with homegrown sequential key
+generation schemes).
+
+The Advantages and Features of Identities include:
+
+  * A non-SQL based solution to the problem of having an default unique value
+    assigned to a row. ASE prefetches identity values into cache and adds them
+    automatically to rows as they're inserted into tables that have a type
+    Identity column. There's no concurrency issues, no deadlocking in
+    high-insert situations, and no possibility of duplicate values.
+  * A high performance Unique identifier; ASE's optimizer is tuned to work well
+    with Unique indexes based on the identity value.
+  * The flexibility to insert into the identity field a specific value in the
+    case of a mistaken row deletion. (You can never update however). You
+    accomplish this by:
+    1&gt; set identity_insert [datababase]..[table] on
+    2&gt; go
+   
+    Note however that the System will not verify the uniqueness of the value
+    you specifically insert (unless of course you have a unique index existing
+    on the identity column).
+   
+  * The flexibility during bcp to either retain existing identity values or to
+    reset them upon bcping back in. To retain the specific identity values
+    during a bcp out/in process, bcp your data out normally (no special
+    options). Then create your bcp in target table with ddl specifying the
+    identity column in the correct location. Upon bcp'ing back in, add the "-E"
+    option at the end of the bcp line, like this (from O/S prompt):
+    % bcp [database]..[new_table] in [bcp datafile] -Usa -S[server] -f [fmt file] -E
+   
+    For procedures on resetting identity values during a bcp, see the section
+    regarding Identity gaps.
+   
+  * Databasewide Identity options: 1) The ability to set Sybase to
+    automatically create an Identity column on any table that isn't created
+    with a primary key or a unique constraint specified. 2) Sybase can
+    automatically include an Identity field in all indexes created,
+    guaranteeing all will be unique. These two options guarantee increased
+    index performance optimization and guarantees the use of updateable cursors
+    and isolation level 0 reads.
+    These features are set via sp_dboption, like this:
+    1&gt; sp_dboption [dbname], "auto identity", true
+    2&gt; go
+    or
+    1&gt; sp_dboption [dbname], "identity in nonunique index", true
+    2&gt; go
+   
+    To tune the size of the auto identity (it defaults to precision 10):
+   
+    1&gt; sp_configure "size of auto identity", [desired_precision]
+    2&gt; go
+   
+    (the identity in nonunique index db_option and the size of auto identity
+    sp_configure value are new with System 11: the auto identity existed with
+    the original Identity feature introduction in System 10)
+   
+    Like other dboptions, you can set these features on the model database
+    before creating new databases and all your future databases will be
+    configured. Be warned of the pitfalls of large identity gaps however; see
+    the question regarding Burn Factor Vulnerability in the Common Questions
+    about Identities section.
+   
+  * The existence of the @@identity global variable, which keeps track of the
+    identity value assigned during the last insert executed by the server. This
+    variable can be used programming SQL around tables that have identity
+    values (in case you need to know what the last value inserted was). If the
+    last value inserted in the server was to a non-identity table, this value
+    will be "0."
+
+Back to start of 6.2.9
+
+-------------------------------------------------------------------------------
+
+Disadvantages/Drawbacks of Using Identities
+
+Despite its efficacy of use, the Identity has some drawbacks:
+
+  * The mechanism that Sybase uses to allocate Identities involves a memory
+    based prefetch scheme for performance. The downside of this is, during
+    non-normal shutdowns of ASE (shutdown with nowait or flat out crashes) ASE
+    will simply discard or "burn" all the unused identity values it has
+    pre-allocated in memory. This sometimes leaves large "gaps" in your
+    monotonically increasing identity columns and can be unsettling for some
+    application developers and/or end users.
+   
+    NOTE: Sybase 11.02.1 (EBF 6717) and below had a bug (bugid 96089) which
+    would cause "large gaps to occur in identity fields after polite
+    shutdowns." The Sybase 11.02.2 rollup (EBF 6886) fixed this problem. If
+    you're at or below 11.02.1 and you use identities, you should definitely
+    upgrade.
+   
+  * (paraphrased from Sybooks P&amp;T guide, Chapter 6): If you do a large number
+    of inserts and you have built your clustered index on an Identity column,
+    you will have major contention and deadlocking problems. This will
+    instantly create a hot spot in your database at the point of the last
+    inserted row, and it will cause bad contention if multiple insert requests
+    are received at once. Instead, create your clustered index on a field that
+    will somewhat randomize the inserts across the physical disk (such as last
+    name, account number, social security number, etc) and then create a
+    non-clustered index based on the identity field that will "cover" any
+    eligible queries.
+   
+    The drawback here, as pointed out in the Identity Optimization section in
+    more detail, is that clustering on another field doesn't truly resolve the
+    concurrency issues. The hot spot simply moves from the last data page to
+    the last non-clustered index page of the index created on the Identity
+    column.
+   
+  * If you fill up your identity values, no more inserts can occur. This can be
+    a big problem, especially if you have a large number of inserts and you
+    have continually crashed your server. However this problem most often
+    occurs when you try to alter a table and add an Identity column that's too
+    small, or if you try to bcp into a table with an identity column thetas too
+    small. If this occurs, follow the procedures for recovering from identity
+    gaps.
+  * I've heard (but not been able to reproduce) that identities jump
+    significantly when dumping and loading databases. Not confirmed.
+   
+   
+    NOTE: there are several other System 11 bugs related to Identities. EBF
+    7312 fixes BugId 97748, which caused duplicate identity values to be
+    inserted at times. EBF 6886 fixed (in addition to the above described bug)
+    an odd bug (#82460) which caused a server crash when bcping into a table w/
+    an identity added via alter table. As always, try to stay current on EBFs.
+   
+Back to start of 6.2.9
+
+-------------------------------------------------------------------------------
+
+Common questions about Identities
+
+Is the Identity the equivalent of Oracle's auto-sequencing?:
+
+Answer: More or less yes. Oracle's auto-sequencing feature is somewhat
+transparent to the end user and automatically increments if created as a
+primary key upon a row insert. The Sybase Identity column is normally specified
+at table creation and thus is a functional column of the table. If however you
+set the "auto identity" feature for a database, the tables created will have a
+"hidden" identity column that doesn't even appear when you execute a select *
+from [table]. See the Advantages of Identities for more details.
+
+  * How do I configure Identities?: You can either create your table initially
+    with the identity column:
+    1&gt; create table ident_test
+    2&gt; (text_field varchar(10),
+    3&gt;  ident_field numeric(5,0) identity)
+    4&gt; go
+   
+    Or alter an existing table and add an identity column:
+   
+    1&gt; alter table existing_table
+    2&gt; add new_identity_field numeric(7,0) identity
+    3&gt; go
+   
+    When you alter a table and add an identity column, the System locks the
+    table while systematically incrementing and adding unique values to each
+    row. IF YOU DON'T SPECIFY a precision, Sybase defaults the size to 18!
+    Thats 1,000,000,000,000,000,000-1 possible values and some major major
+    problems if you ever crash your ASE and burn a default number of values...
+    (10^18 with the default burn factor will burn 5^14 or 500,000,000,000,000
+    values...yikes).
+   
+   
+  * How do I Configure the burn factor?: The number of identity values that
+    gets "burned" upon a crash or a shutdown can by found by logging into the
+    server and typing:
+    1&gt; sp_configure "identity burning set factor"
+    2&gt; go
+   
+    the Default value set upon install is 5000. The number "5000" in this case
+    is read as ".05% of all the potential identity values you can have in this
+    particular case will be burned upon an unexpected shutdown." The actual
+    number depends on the size of the identity field as you specified it when
+    you created your table.
+   
+    To set the burn factor, type:
+   
+    1&gt; sp_configure "identity burning set factor", [new value]
+    2&gt; go
+   
+    This is a static change; the server must be rebooted before it takes
+    effect.
+   
+   
+  * How do I tell which tables have identities?: You can tell if a table has
+    identities one of two ways:
+   
+     1. sp_help [tablename]: there is a field included in the sp_help output
+        describing a table called "Identity." It is set to 1 for identity
+        fields, 0 otherwise.
+     2. Within a database, execute this query:
+        1&gt; select object_name(id) "table",name "column", prec "precision"
+        2&gt; from syscolumns
+        3&gt; where convert(bit, (status &amp; 0x80)) = 1
+        4&gt; go
+   
+    this will list all the tables and the field within the table that serves as
+    an identity, and the size of the identity field.
+   
+   
+  * What is my identity burn factor vulnerability right now?:
+    In other words, what would happen to my tables if I crashed my server right
+    now?
+   
+    Identities are created type numeric, scale 0, and precision X. A precision
+    of 9 means the largest identity value the server will be able to process is
+    10^9-1, or 1,000,000,000-1, or 999,999,999. However, when it comes to
+    Burning identities, the server will burn (based on the default value of
+    5000) .05% of 1,000,000,000 or 500,000 values in the case of a crash. (You
+    may think an identity precision allowing for 1 Billion rows is optimistic,
+    but I once saw a precision set at 14...then the database crashed and their
+    identity values jumped 5 TRILLION. Needless to say they abandoned their
+    original design. Even worse, SQL server defaults precision to 18 if you
+    don't specify it upon table creation...that's a MINIMUM 10,000,000,000 jump
+    in identity values upon a crash with the absolute minimum burn factor)
+   
+    Lets say you have inserted 5 rows into a table, and then you crash your
+    server and then insert 3 more rows. If you select all the values of your
+    identity field, it will look like this:
+    1&gt; select identity_field from id_test
+    2&gt; go
+    identity_field
+    --------------
+    1
+    2
+    3
+    4
+    5
+    500006
+    500007
+    500008
+    
+    (8 rows affected)
+   
+    Here's your Identity burning options (based on a precision of 10^9 as
+    above):
+   
+    Burn value  % of values     # values burned during crash
+    5000                .05%            500,000
+    1000                .01%            100,000
+    100         .001%           10,000
+    10          .0001%          1,000
+    1           .00001%         100
+   
+    So, the absolute lowest amount of numbers you'll burn, assuming you
+    configure the burn factor down to 1 (sp_configure "identity burning set
+    factor", 1) and a precision of 9, is 100 values.
+   
+    Back to start of 6.2.9
+   
+    ---------------------------------------------------------------------------
+   
+    Optimizing your Identity setup for performance and maintenance
+   
+    If you've chosen to use Identities in your database, here are some
+    configuration tips to avoid typical Identity pitfalls:
+      + Tune the burn factor!: see the vulnerability section for a discussion
+        on what happens to identity values upon ASE crashes. Large jumps in
+        values can crash front ends that aren't equipped to handle and process
+        numbers upwards of 10 Trillion. I've seen Powerbuilder applications
+        crash and/or not function properly when trying to display these large
+        identity values.
+      + Run update statistics often on tables w/ identities: Any index with an
+        identity value as the first column in the search condition will have
+        its performance severely hampered if Update statistics is not run
+        frequently. Running a nightly update statistics/sp_recompile job is a
+        standard DBA task, and should be run often regardless of the existence
+        of identities in your tables.
+      + Tune the "Identity Grab Size": ASE defaults the number of Identity
+        values it pre-fetches to one (1). This means that in high insert
+        environments the Server must constantly update its internal identity
+        placeholder structure before adding the row. By tuning this parameter
+        up:
+        1&gt; sp_configure "identity grab size", [number]
+        2&gt; go
+       
+        You can prefetch larger numbers of values for each user as they log
+        into the server an insert rows. The downside of this is, if the user
+        doesn't use all of the prefetched block of identity values, the unused
+        values are lost (seeing as, if another user logs in the next block gets
+        assigned to him/her). This can quickly accelerate the depletion of
+        identity values and can cause gaps in Identity values.
+        (this feature is new with System 11)
+       
+      + Do NOT build business rules around Identity values. More generally
+        speaking the recommendation made by DBAs is, if your end users are EVER
+        going to see the identity field during the course of doing their job,
+        then DON'T use it. If your only use of the Identity field is for its
+        advertised purpose (that being solely to have a uniquely identifying
+        row for a table to index on) then you should be fine.
+      + Do NOT build your clustered index on your Identity field, especially if
+        you're doing lots of inserts. This will create a hot spot of contention
+        at the point of insertion, and in heavier OLTP environments can be
+        debilitating.
+   
+    - There is an excellent discussion in document <A HREF="http://www.sybase.com/">http://www.sybase.com/</A>
+    detail?id=860 on the performance and tuning aspects of Identities. It
+    supplements some of the information located here (Note: this will open in a
+    new browser window).
+   
+    Back to start of 6.2.9
+   
+    ---------------------------------------------------------------------------
+   
+    Recovery from Large Identity value gaps or
+    Recovery from Identity insert errors/Full Identity tables
+   
+   
+    This section will discuss how to re-order the identity values for a table
+    following a crash/abnormal shutdown that has resulted in huge gaps in the
+    values. The same procedure is used in cases where the identity field has
+    "filled up" and does not allow inserts anymore. Some applications that use
+    Identities are not truly candidates for this process (i.e., applications
+    that depend on the identity field for business purposes as opposed to
+    simple unique row identifiers). Applications like this that wish to rid
+    their dependence on identities will have to re-evaluate their database
+    design.
+      + Method 1:bcp out and in:
+        - First, (from O/S command line):
+        % bcp database..table out [data_file] -Usa -S[server] -N
+       
+        This will create a binary bcp datafile and will force the user to
+        create a .fmt file. The -N option tells the server to skip the identity
+        field while bcp'ing out.
+        - drop and recreate the table in question from ddl (make sure your
+        table ddl specifies the identity field).
+        - Now bcp back in:
+       
+        % bcp database.table in [data_file -Usa -S[server] -f[fmt file] -N
+       
+        The -N option during bcp in tells the server to ignore the data file's
+        placeholder column for the defined identity column.
+       
+       
+        Coincidentally, if you bcp out w/o the -N option, drop the table,
+        recreate from ddl specifying the identity field, and bcp back in w/o
+        the -N option, the same effect as above occurs.
+       
+        (note: if you bcp out a table w/ identity values and then want to
+        preserve the identity values during the bcp back in, use the "-E"
+        option.)
+       
+      + Method 2: select into a new table, adding the identity column as you go
+        : Follow this process:
+        1&gt; select [all columns except identity column]
+        2&gt; [identity column name ] = identity(desired_precision)
+        3&gt; into [new_table]
+        4&gt; from [old table]
+        5&gt; go
+      + There are alternate methods that perform the above in multi steps, and
+        might be more appropriate in some situations.
+          o You can bcp out all the fields of a table except the identity
+            column (create the bcp format file from the original table, edit
+            out the identity column, and re-bcp). At this point you can create
+            a new table with or without the identity column; if you create it
+            with, as you bcp back in the Server will assign new identity
+            values. If you create it without, you can bcp back in normally and
+            then alter the table and add the identity later.
+          o You can select all columns but the identity into a new table, then
+            alter that table and add an identity later on.
+   
+    Back to start of 6.2.9
+   
+    ---------------------------------------------------------------------------
+   
+    How do I generate Sequential Keys w/o the Identity feature?
+   
+   
+    There are many reasons not to use the Identity feature of Sybase. This
+    section will present several alternative methods, along with their
+    advantages and drawbacks. The methods are presented in increasing order of
+    complexity. The most often implemented is Method 3, which is a more robust
+    version of Method 2 and which uses a surrogate-key storage table.
+   
+    Throughout this section the test table I'm adding lines to and generating
+    sequential numbers for is table inserttest, created like this:
+   
+    1&gt; create table inserttest
+    2&gt; (testtext varchar(25), counter int)
+    3&gt; go
+      + Method 1: Create your table with a column called counter of type int.
+        Then, each time you insert a row, do something like this:
+        1&gt; begin tran
+        2&gt; declare @nextkey int
+        3&gt; select @nextkey=max(counter)+1 from inserttest holdlock
+        4&gt; insert inserttest (testtext,counter) values ("test_text,@nextkey")
+        5&gt; go
+        1&gt; commit tran
+        2&gt; go
+       
+        This method is rather inefficient, as large tables will take minutes to
+        return a max(column) value, plus the entire table must be locked for
+        each insert (since the max() will perform a table scan). Further, the
+        select statement does not guarantee an exclusive lock when it executes
+        unless you have the "holdlock" option; so either duplicate values might
+        be inserted to your target table or you have massive deadlocking.
+       
+       
+      + Method 2: See Question 10.1.1 of the comp.database.sybase FAQ is the
+        May 1994 (Volume 3, Number 2) Sybase Technical Note (these links will
+        open in a new browser window). Search down in the tech note for the
+        article titled, "How to Generate Sequential Keys for Table Key
+        Columns." This has a simplistic solution that is expanded upon in
+        Method 3.
+       
+      + Method 3: Create a holding table for keys in a common database: Here's
+        our central holding table.
+        1&gt; create table keystorage
+        2&gt; (tablename varchar(25),
+        4&gt;  lastkey int)
+        5&gt; go
+       
+        And initially populate it with the tablenames and last values inserted
+        (enter in a 0 for tables that are brand new).
+       
+        1&gt; insert into keystorage (tablename,lastkey)
+        2&gt; select "inserttest", max(counter) from inserttest
+        3&gt; go
+       
+        Now, whenever you go to insert into your table, go through a process
+        like this:
+       
+        1&gt; begin tran
+        2&gt; update keystorage set lastkey=lastkey+1 where tablename="inserttest"
+        3&gt; go
+        
+        1&gt; declare @lastkey int
+        2&gt; select @lastkey = lastkey from keystorage where tablename="inserttest"
+        3&gt; insert inserttest (testtext,counter) values ("nextline",@lastkey)
+        4&gt; go
+        
+        1&gt; commit tran
+        2&gt; go
+       
+        There is plenty of room for error checking with this process: for
+        example (code adapted from Colm O'Reilly (<A HREF="mailto:colm@mail.lk.blackbird.ie">colm@mail.lk.blackbird.ie</A>)
+        post to Sybase-L 6/20/97):
+       
+        1&gt; begin tran
+        2&gt;   update keystorage set lastkey=lastkey+1 where tablename="inserttest"
+        3&gt;   if @@rowcount=1
+        4&gt;   begin
+        5&gt;     declare @lastkey int
+        6&gt;     select @lastkey=lastkey from keystorage where tablename="inserttest"
+        7&gt;   end
+        8&gt; commit tran
+        9&gt; begin tran
+        10&gt;   if @lastkey is not null
+        11&gt;   begin
+        12&gt;     insert inserttest (testtext,counter) values ("third line",@lastkey)
+        13&gt;   end
+        14&gt; commit tran
+        15&gt; go
+       
+        This provides a pretty failsafe method of guaranteeing the success of
+        the select statements involved in the process. You still have a couple
+        of implementation decisions though:
+          o One transaction or Two? The above example uses two transactions to
+            complete the task; one to update the keystorage and one to insert
+            the new data. Using two transactions reduces the amount of time the
+            lock is held on keystorage and thus is better for high insertion
+            applications. However, the two transaction method opens up the
+            possibility that the first transaction will commit and the second
+            will roll back, leaving a gap in the sequential numbers. (of
+            course, this gap is small potatoes compared to the gaps that occur
+            in Identity values). Using one transaction (deleting lines 8 and 9
+            in the SQL above) will guarantee absolutely no gaps in the values,
+            but will lock the keystorage table longer, reducing concurrency in
+            high insert applications.
+          o Update first or select first? The examples given generally update
+            the keystorage table first, THEN select the new value. Performing
+            the select first (you will have to rework the creation scheme
+            slightly; by selecting first you're actually getting the NEXT key
+            to add, where as by updating first, the keystorage table actually
+            holds the LAST key added) you allow the application to continue
+            processing while it waits for the update lock on the table.
+            However, performing the update first guarantees uniqueness (selects
+            are not exclusive).
+       
+       
+        Some DBAs experienced with this keystorage table method warn of large
+        amounts of blocking in high insert activity situations, a potential
+        drawback.
+       
+       
+      + Method 4: Enhance the above method by creating an insert trigger on
+        your inserttest table that performs the next-key obtainment logic. Or
+        you could create an insert trigger on keystorage which updates the
+        table and obtains your value for you. Integrating the trigger logic to
+        your application might make this approach more complex. Also, because
+        of the nature of the trigger you'll have to define the sequence number
+        columns as allowing NULL values (a bad thing if you're depending on the
+        sequential number as your primary key). Plus, triggers will slow the
+        operation down because after obtaining the new value via trigger,
+        you'll have to issue an extra update command to insert the rest of your
+        table values.
+      + Method 5: (Thanks to John Drevicky (<A HREF="mailto:jdrevicky@tca-techsys.com">jdrevicky@tca-techsys.com</A>))
+        The following procedure is offered as another example of updating and
+        returning the Next Sequential Key, with an option that allows automatic
+        reuse of numbers......
+          -----------------------------------------------------------------
+          ----
+          --
+          DECLARE @sql_err int, @sql_count int
+          --
+          begin tran
+          --
+          select @out_seq = 0
+          --
+          UPDATE NEXT_SEQUENCE
+             SET next_seq_id
+                    =  ( next_seq_id
+                     * ( sign(1 + sign(max_seq_id - next_seq_id) ) -- evaluates: 0 [when
+                                                                   -- next &gt; max]; else 1
+                     *   sign(max_seq_id - next_seq_id)            -- evaluates: 0 [when next = max];
+                                                                   --            1 [next &lt; max];
+                                                                   --           -1 [next &gt; max]
+                       )                                           -- both evaluate to 1 when next &lt; max
+                                ) + 1                              -- increment by [or restart at] 1
+           WHERE seq_type = @in_seq_type
+          --
+          select @sql_err = @@error, @sql_count = @@rowcount
+          --
+          IF @sql_err = 0 and @sql_count = 1
+          BEGIN
+            select @out_seq = next_seq_id
+              from NEXT_SEQUENCE
+             where seq_type = @in_seq_type
+            --
+            commit tran
+            return 0
+          END
+          ELSE
+          BEGIN
+            RAISERROR 44999 'Error %1! returned from proc derive_next_sequence...no update occurred', @sql_err
+            rollback tran
+          END
+      + Other Methods: there are several other implementation alternatives
+        available that involve more complex logic but which might be good
+        solutions. One example has a central table that stores pre-inserted
+        sequential numbers that are deleted as they're inserted into the
+        production rows. This method allows the sequence numbers to be recycled
+        if their associated row is deleted from the production table. An
+        interesting solution was posted to Sybase-L 6/20/97 by Matt Townsend ( 
+        <A HREF="mailto:mtowns@concentric.net">mtowns@concentric.net</A>) and is based on the millisecond field of the
+        date/time stamp. His solution guarantees uniqueness without any
+        surrogate tables or extra inserts/updates, and is a superior performing
+        solution to other methods described here (including Identities), but
+        cannot support exact sequential numbers. Some other solutions are
+        covered in a white paper available at Sybase's Technical library
+        discussing Sequential Keys (this will open in a new browser window).
+   
+    Back to start of 6.2.9
+   
+    ---------------------------------------------------------------------------
+   
+    Optimizing your home grown Sequential key generating process for any
+    version of Sybase
+   
+      + max_rows_per_page/fillfactor/table padding to simulate row level
+        locking: This is the most important tuning mechanism when creating a
+        hand -made sequence key generation scheme. Because of Sybase's page
+        level locking mechanism, your concurrency performance in higher-insert
+        activity situations could be destroyed unless the server only grabs one
+        row at a time. However since Sybase doesn't currently have row-level
+        locking, we simulate row-level locking by creating our tables in such a
+        way as to guarantee one row per 2048 byte page.
+          o For pre-System 11 servers; Calculate the size of your rows, then
+            create dummy fields in the table that get populated with junk but
+            which guarantee the size of the row will fill an entire page. For
+            example (code borrowed from Gary Meyer's 5/8/94 ISUG presentation (
+            <A HREF="mailto:gmeyer@netcom.com">gmeyer@netcom.com</A>)):
+            1&gt; create table keystorage
+            2&gt; (tablename varchar(25),
+            3&gt;  lastkey int,
+            4&gt;  filler1 char(255) not null,
+            5&gt;  filler2 char(255) not null,
+            6&gt;  filler3 char(255) not null,
+            7&gt;  filler4 char(255) not null,
+            8&gt;  filler5 char(255) not null,
+            9&gt;  filler6 char(255) not null,
+            9&gt;  filler7 char(255) not null)
+            10&gt; with fillfactor = 100
+            11&gt; go
+           
+            We use 7 char(255) fields to pad our small table. We also specify
+            the fillfactor create table option to be 100. A fillfactor of 100
+            tells the server to completely fill every data page. Now, during
+            your initial insertion of a line of data, do this:
+           
+            1&gt; insert into keystorage
+            2&gt;   (tablename,lastkey,
+            3&gt;   filler1,filler2,filler3,filler4,filler5,filler6,filler7)
+            4&gt; values
+            5&gt;   ("yourtable",0,
+            6&gt;   replicate("x",250),replicate("x",250),
+            7&gt;   replicate("x",250),replicate("x",250),
+            8&gt;   replicate("x",250),replicate("x",250),
+            9&gt;   replicate("x",250))
+            10&gt; go
+           
+            This pads the row with 1750 bytes of junk, almost guaranteeing
+            that, given a row's byte size limit of 1962 bytes (a row cannot
+            span more than one page, thus the 2048 page size minus server
+            overhead == 1962), we will be able to simulate row level locking.
+           
+          o In Sybase 11, a new create table option was introduced:
+            max_rows_per_page. It automates the manual procedures above and
+            guarantees at a system level what we need to achieve; one row per
+            page.
+            1&gt; create table keystorage
+            2&gt; (tablename varchar(25),
+            3&gt;  lastkey int)
+            4&gt; with max_rows_per_page = 1
+            5&gt; go
+      + Create unique clustered indexes on the tablename/entity name within
+        your keystorage table. This can only improve its performance. Remember
+        to set max_rows_per_page or the fillfactor on your clustered index, as
+        clustered indexes physically reorder the data.
+      + Break up the process into multiple transactions wherever possible; this
+        will reduce the amount of time any table lock is held and will increase
+        concurrency in high insertion environments.
+      + Use Stored Procedures: Put the SQL commands that update the keystorage
+        table and then insert the updated key value into a stored procedure.
+        Stored procedures are generally faster than individual SQL statements
+        in your code because procedures are pre-compiled and have optimization
+        plans for index usage stored in Sybase's system tables.
+      + Enhance the keystorage table to contain a fully qualified table name as
+        opposed to just the tablename. This can be done by adding fields to the
+        table definition or by just expanding the entity name varchar field
+        definition. Then place the keystorage table in a central location/
+        common database that applications share. This will eliminate multiple
+        keystorage tables but might add length to queries (since you have to do
+        cross-database queries to obtain the next key).
+       
+        - There is an excellent discussion located in the whitepapers section
+        of Sybase's home page discussing the performance and tuning aspects of
+        any type of Sequential key use. It supplements the information here
+        (note: this page will open in a new browser window).
+       
+Back to start of 6.2.9
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.2.10: How can I execute dynamic SQL with ASE?
+
+-------------------------------------------------------------------------------
+
+Adaptive Server Enterprise: System 12
+
+ASE 12 supports dynamic SQL, allowing the following:
+
+declare @sqlstring varchar(255)
+select @sqlstring = "select count(*) from master..sysobjects"
+exec (@sqlstring)
+go
+
+Adaptive Server Enterprise: 11.5 and 11.9
+
+There is a neat trick that was reported first by Bret Halford ( <A HREF="mailto:bret@sybase.com">bret@sybase.com</A>
+).  (If anyone knows better, point me to the proof and I will change this!)  It
+utilises the CIS features of Sybase ASE.
+
+  * Firstly define your local server to be a remote server using
+    sp_addserver LOCALSRV,sql_server[,INTERFACENAME]
+    go
+
+  * Enable CIS
+    sp_configure "enable cis",1
+    go
+
+  * Finally, use sp_remotesql, sending the sql to the server defined in point
+    1.
+    declare @sqlstring varchar(255)
+    select @sqlstring = "select count(*) from master..sysobjects"
+    sp_remotesql LOCALSRV,@sqlstring
+    go
+
+Remember to ensure that all of the databases referred to in the SQL string are
+fully qualified since the call to sp_remotesql places you back in your default
+database.
+
+ 
+
+Sybase ASE (4.9.x, 10.x and 11.x before 11.5)
+
+Before System 11.5 there was no real way to execute dynamic SQL.  Rob Verschoor
+has some very neat ideas that fills some of the gaps (<A HREF="http://www.euronet.nl/">http://www.euronet.nl/</A>
+~syp_rob/dynsql.html).
+
+Dynamic Stored Procedure Execution
+
+With System 10, Sybase introduced the ability to execute a stored procedure
+dynamically.
+
+declare @sqlstring varchar(255)
+select @sqlstring = "sp_who"
+exec @sqlstring
+go
+
+For some reason Sybase chose never to document this feature.
+
+Obviously all of this is talking about executing dynamic SQL within the server
+itself ie stored procedures and triggers.  Dynamic SQL within client apps is a
+different matter altogether.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.2.11: Is it possible to concatenate all the values from a column and return a
+single row?
+
+-------------------------------------------------------------------------------
+
+Hey, this was quite cool I thought. It is now possible to concatenate a series
+of strings to return a single column, in a sort of analogous manner to sum
+summing all of the numbers in a column.  Obviously, in versions before 12.5,
+the longest string that you can have is 255 characters, but with very long
+varchars, this may prove useful to someone.
+
+Use a case statement, a la,
+
+1&gt; declare @string_var varchar(255)
+2&gt;
+3&gt; select @string_var = ""
+4&gt;
+5&gt; select @string_var = @string_var +
+6&gt;                       (case 1 when 1
+7&gt;                               then char_col
+8&gt;                        end)
+9&gt; from tbl_a
+10&gt;
+11&gt; print "%1!", @string_var
+12&gt; go
+(1 row affected)
+ ABCDEFGH
+(8 rows affected)
+1&gt; select * from tbl_a
+2&gt; go
+ char_col
+ --------
+ A
+ B
+ C
+ D
+ E
+ F
+ G
+ H
+
+(8 rows affected)
+1&gt; 
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.2.12: Selecting rows N to M without Oracle's rownum?
+
+-------------------------------------------------------------------------------
+
+Sybase does not have a direct equivalent to Oracle's rownum but its
+functionality can be emulated in a lot of cases.
+
+If you are simply trying to retrieve the first N rows of a table, then simple
+use:
+
+set rowcount 
+
+replacing &lt;N&gt; with your desired number of rows.  (set rowcount 0 restores
+normality.) If it is simply the last N rows, then use a descending order-by
+clause in the select.
+
+1&gt; set rowcount 
+2&gt; go
+1&gt; select foo
+2&gt; from bar
+3&gt; order by barID desc
+4&gt; go
+
+If you are trying to retrieve rows 100 to 150, say, from a table in a given
+order.  You could use this to retrieve rows for a set of web pages, but there
+are probably more efficient ways using cursors or well written queries or even
+Sybperl!  The general idea is select the rows into a temporary table adding an
+identity column at the same time.  Only select enough rows to do the job using
+the rowcount trick.  Finally, return the rows from the temporary table where
+the identity column is between 100 and 150.  Something like this:
+
+set rowcount 150
+
+select pseudo_key = identity(3),
+       col1,
+       col2
+  into #tempA
+  from masterTable
+ where clause...
+ order by 2,3
+
+select col1,col2 from #tempA where pseudo_key between 100 and 150
+
+Remember to reset rowcount back to 0 before issuing any more SQL or you will
+only get back 150 rows!
+
+A small optimisation would be to select only the key columns for the source
+table together with the identity key. Once you have the set of rows you require
+in the temporary table, join this back to the source using the key columns to
+get any data that you require.
+
+An alternative, which might be better if you needed to join back to this table
+a lot, would be to insert enough rows to cover the range as before, but then
+delete the set of unwanted rows. This would be a very efficient mechanism if
+the majority of your queries involved the first few rows of a table. A typical
+application for this might be a search engine displaying relevant items first.
+The chances are that the user is going to be bored after the first couple of
+pages and go back to playing 'Internet Doom'.
+
+set rowcount 150
+
+select col1,
+       col2
+  into #tempA
+  from masterTable
+ where clause...
+
+set rowcount 100
+
+delete #tempA
+
+Sybase does not guarantee to return rows in any particular order, so the delete
+may not delete the correct set of rows. In the above example, you should add an
+order-by to the 'select' and build a clustered index on a suitable key in the
+temporary table.
+
+The following stored proc was posted to the Sybase-L mailing list and uses yet
+another mechanism. You should check that it works as expected in your
+environment since it relies on the fact a variable will be set using the last
+row that is returned from a result set. This is not published behaviour and is
+not guaranteed by Sybase.
+
+CREATE PROCEDURE dbo.sp_get_posts
+    @perpage    INT,
+    @pagenumber INT
+WITH RECOMPILE
+AS
+
+   -- if we're on the first page no need to go through the @postid push
+   IF @pagenumber = 1
+   BEGIN
+      SET ROWCOUNT @perpage
+
+      SELECT ...
+      RETURN
+   END
+
+   -- otherwise
+
+   DECLARE @min_postid NUMERIC( 8, 0 ),
+           @position   INT
+
+   SELECT @position = @perpage * ( @pagenumber - 1 ) + 1
+
+   SET ROWCOUNT @position
+
+   -- What happens here is it will select through the rows
+   -- and order the whole set.
+   -- It will stop push postid into @min_postid until it hits
+   -- ROWCOUNT and does this out of the ordered set (a work
+   -- table).
+
+   SELECT @min_postid = postid
+     FROM post
+    WHERE ...
+    ORDER BY postid ASC
+
+   SET ROWCOUNT @perpage
+
+   -- we know where we want to go (say the 28th post in a set of 50).
+    SELECT ...
+      FROM post
+     WHERE postid &gt;= @min_postid
+           ...
+  ORDER BY postid ASC
+
+Yet another solution would be to use a loop and a counter. Probably the least
+elegant, but again, it would depend on what you were trying to do as to what
+would be most appropriate.
+
+As you can see, none of these are particularly pretty. If you know of a better
+method, please forward it to dowen@midsomer.org.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.2.13: How can I return number of rows that are returned from a grouped query
+without using a temporary table?
+
+-------------------------------------------------------------------------------
+
+This question is certainly not rocket science, but it is often nice to know how
+many rows are returned as part of a group by. This might be for a report or a
+web query, where you would want to tell the user how many rows were returned on
+page one. It is easy using a temp table, but how to do it without a temp table
+is a little harder. I liked this solution and thought that it might not be
+obvious to everyone, it was certainly educational to me. Thanks go to Karl Jost
+for a very nice answer.
+
+So, give data like:
+
+ name     item
+ ----     ----
+ Brown    1
+ Smith    2
+ Brown    5
+ Jones    7
+
+you wish to return a result set of the form:
+
+ name    sum(item)   rows
+ ----    ---------   ----
+ Brown   6           3
+ Jones   7           3
+ Smith   2           3
+
+rather than
+
+ name    sum(item)   rows
+ ----    ---------   ----
+ Brown   6           2
+ Jones   7           1
+ Smith   2           1
+
+Use the following, beguilingly simple query:
+
+select name, sum(item), sum(sign(count(*)))
+from data
+group by name
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+Useful SQL Tricks SQL Fundamentals ASE FAQ
+
+                               Useful SQL Tricks                               
+                                                                               
+ 
+
+    6.3.1    How to feed the result set of one stored procedure into another.
+    6.3.2    Is it possible to do dynamic SQL before ASE 12?
+   
+Open Client SQL Advanced ASE FAQ
+
+-------------------------------------------------------------------------------
+
+Note: A number of the following tips require CIS to be enabled (at this precise
+moment, all of them require CIS :-) The optimiser does take on a different
+slant, however small, when CIS is enabled, so it is up to you to ensure that
+things don't break when you do turn it on. Buyer beware. Test, test, test and
+when you have done that, check some more.
+
+-------------------------------------------------------------------------------
+
+6.3.1: How to feed the result set of one stored procedure into another.
+
+-------------------------------------------------------------------------------
+
+I am sure that this is all documented, but it is worth adding here. It uses
+CIS, as do a number of useful tricks. CIS is disabled by default before 12.0
+and not available before 11.5. It is courtesy of BobW from
+sybase.public.ase.general, full acceditation will be granted if I can find out
+who he is. Excellent tip!
+
+So, the scenario is that you have a stored procedure, AP_A, and you wish to use
+the result set that it returns in a query.
+
+Create a proxy table for SP_A.
+
+create table proxy_SP_A (
+  a int,
+  b int,
+  c int,
+  _p1 int null,
+  _p2 int null
+) external procedure
+ at "SELF.dbname.dbo.SP_A"
+
+Columns a, b, c correspond to the result set of SP_A. Columns _p1, _p2
+correspond to the @p1, @p2 parameters of SP_A. "SELF" is an alias put in
+sysservers to refer back to the local server.
+
+If you only have one row returned the proxy table can be used with the
+following:
+
+declare @a int, @b int, @c int
+select @a = a, @b = b, @c = c from proxy_SP_B
+where _p1 = 3 and _p2 = 5
+
+More rows can be handled with a cursor.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+6.3.2: Is it possible to do dynamic SQL before ASE 12?
+
+-------------------------------------------------------------------------------
+
+Again, using CIS, it is possible to fake dynamic SQL. Obviously for this to
+work, CIS must be enabled. In addition, the local server must be added to
+sysservers as a remote server. There is a stored procedure, sp_remotesql, that
+takes as an arguments a remote server and a string, containing SQL.
+
+As before, adding SELF as the 'dummy' server name pointing to the local server
+as if it were a remote server, we can execute the following:
+
+sp_remotesql "SELF","select * from sysdatabases"
+
+Which will do just what you expect, running the query on the local machine. The
+stored proc will take 251 (according to its own documentation) arguments of
+char(255) or varchar(255) arguments, and concatenate them all together. So we
+can do the following:
+1&gt; declare @p1 varchar(255),@p2 varchar(255),@p3 varchar(255), @p4 varchar(255)
+2&gt;
+3&gt; select @p1 = "select",
+4&gt;        @p2 = " name ",
+5&gt;        @p3 = "from ",
+6&gt;        @p4 = "sysdatabases"
+7&gt;
+8&gt; exec sp_remotesql "SELF", @p1, @p2, @p3, @p4
+9&gt; go
+(1 row affected)
+ name
+ ------------------------------
+ bug_track
+ dbschema
+ master
+ model
+ sybsystemprocs
+ tempdb
+
+(6 rows affected, return status = 0)
+
+Obviously, when the parameters are concatenated, they must form a legal T-SQL
+statement. If we remove one of the spaces from the above statement, then we
+see:
+
+1&gt; declare @p1 varchar(255),@p2 varchar(255),@p3 varchar(255), @p4 varchar(255)
+2&gt;
+3&gt; select @p1 = "select",
+4&gt;        @p2 = "name ",
+5&gt;        @p3 = "from ",
+6&gt;        @p4 = "sysdatabases"
+7&gt;
+8&gt; exec sp_remotesql "SELF", @p1, @p2, @p3, @p4
+9&gt; go
+Msg 156, Level 15, State 1
+, Line 1
+Incorrect syntax near the keyword 'from'.
+(1 row affected, return status = 156)
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+Open Client SQL Advanced ASE FAQ
+
+</PRE>
+<DIV ALIGN=CENTER>
+<SMALL>
+<P><HR WIDTH=1900 NOSHADE><BR>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  Part14 -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A></SMALL>
+<P>
+<div align="center">
+
+<center>
+<form method="post" action="rateit.php">
+<table border="1" cellpadding="0" cellspacing="0" width="150" bgcolor="#ffcccc" style="WIDTH: 150px">
+<tr><td width="100%">
+<div align="center">
+<table border="0" cellpadding="2" width="100%" bgcolor="#ffcccc">
+<tr><td width="100%" height="14">
+<p align="center"><font face="Arial">Rate this FAQ</font></p>
+</td></tr>
+<tr><td width="100%" height="14">
+<p align="center">
+<INPUT TYPE=HIDDEN NAME="pid" VALUE="databases/sybase-faq/part14/index.html">
+<select size="1" name="D1" style="COLOR: darkmagenta; BACKGROUND-COLOR: cornsilk">
+<option selected value="0">N/A</option>
+<option value="1">Worst</option>
+<option value="2">Weak</option>
+<option value="3">OK</option>
+<option value="4">Good</option>
+<option value="5">Great</option>
+</select>
+</p>
+</td></tr>
+<tr><td width="100%" height="27">
+<p align="center">
+<IMG onclick="mystr='/frate.php?pid='+pid.value+'&vote='+D1.value;
+Popup=window.open(mystr,'Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=380,height=270,left=230,top=43'); 
+ return false;" height=28 src="/images/vote.gif" alt="Vote" width=83 border=0 ></p>
+</td></tr>
+</table>
+</div>
+</td></tr>
+</table>
+<font size="-1" face="Arial"><br><a href="/topRated.html">Current Top-Rated FAQs</a><br></font>
+</form>
+</center>
+
+</div>
+
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="100%">
+<tr><td width="100%" bgcolor="#D6D6C0">
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part14/index.html"," ");
+// --></script>
+<p><font face="Arial"><a name="ct">Are you an expert in this area?</a> Share your knowledge and earn expert points by giving answers or rating people's questions and answers! This section of FAQS.ORG is not sanctioned in any way by FAQ authors or maintainers.</font></p>
+<p><font face="Arial">Questions strongly related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-6730.html">How can I display the table sizes of ALL tables in a database?   </a> by Caspar (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9594.html">how to use nested cursors in a stored procedure in ASE ? is there any template to use !...</a> by nino (12/18/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3265.html">to connect sybase and c++,how to connect and access the data </a> by kumaran (9/2/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6741.html">how do u tell the last time update statistics has been run on a table (11.0.3) </a> by yujo (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11075.html">I need to Execute an SP & set its output to the insert statement. This will be occured for...</a> by rose (1/14/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9435.html">I wanted to know EXACT technical details about what ACTUALLY happens when u fire a simple...</a> by anu (12/15/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-8395.html">Is there anyway to start dataserver in ASE 11.9.2 with only the master and tempdb online...</a> by steve_2000g (11/28/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-854.html">i get an error on the "convert" when i try to run this line of code, why is this?   print...</a> by shugarhi (7/14/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11834.html">Hi  &nbsp; We're using Sybase ASE 12.0 running on SUN 4500 Cluster server. We cannot...</a> by KK (1/26/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6297.html">I am creating a stored proc to create a report of dependencies. &nbsp;We are creating...</a> by RR (10/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7388.html">How is this hazardous if we do not close a cursor? </a> by amar (11/11/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9827.html">How can i reduce my tempdb size once i have increased it by creating a device also? </a> by rajs (12/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12835.html">how can i transfer a table from cybase to db2? &nbsp;please sendme step by step method if...</a> by maulik (2/9/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3213.html">My database is in bypass recovery mode. How do I put it in normal mode? </a> by Lach (9/1/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-1435.html">Hi ,  &nbsp;We are using Sybase ASE 11.9.2 with SCO Unix 7.1.1 &nbsp;as the operating ...</a> by gowri (7/27/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-2412.html">were is a database that will bring up  a person address without there last name </a> by travis (8/15/2003)</font></li>
+</ul>
+<p><font face="Arial">Questions somewhat related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-2221.html">Guys!   See the Sybase query below: select convert(float,substring(&lt;field1&gt;,3,...</a> by pathfinder (8/12/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7790.html">What are the side-effects of turning-on the built-in auditing capabilities of sybase? </a> by Choy (11/17/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12136.html">When ever i execute select property('PROCESSCPU') i get the value 189 and whenever i...</a> by anilkumarsh (1/29/2004)</font></li>
+</ul>
+<p><font face="Arial">Other questions awaiting answers:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/related.html">10088 questions</a> related to other FAQs<br></font></li>
+<li><font face="Arial"><a href="/qa/unrelated.html">1765 general questions</a></font></li>
+<li><font face="Arial"><a href="/qa/answered.html">4091 answered questions</a><br></font></li>
+</ul>
+</td></tr></table> <br></center></div>
+<HR NOSHADE SIZE=2 WIDTH=450>
+[ <a href="/faqs/">Usenet FAQs</a> | <a href="/faqs/faqsearch.html">Search</a> | <a href="/contrib/">Web FAQs</a> | <a href="/docs/">Documents</a> | <a href="/rfcs/">RFC Index</a> ]
+<BR><HR NOSHADE SIZE=2 WIDTH=450>
+<P>
+<ADDRESS>
+Send corrections/additions to the FAQ Maintainer: <BR>dowen@midsomer.org (David Owen)
+</ADDRESS>
+<P>
+<SMALL>
+<STRONG>Last Update February 12 2004 @ 00:28 AM</STRONG>
+<BR>
+</SMALL>
+</DIV>
+</BODY>
+</HTML>
+

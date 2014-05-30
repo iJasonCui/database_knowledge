@@ -1,0 +1,17 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getSmile;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getSmile (
+    at_userId     DECIMAL(12, 0),
+    at_targetUserId     DECIMAL(12, 0)
+)
+BEGIN
+    SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;
+    SELECT seen, 
+           smileNoteId1, 
+           smileNoteId2,
+           dateCreated 
+      FROM Smile
+     WHERE targetUserId = at_targetUserId
+       AND userId = at_userId;
+END;;
+DELIMITER ;

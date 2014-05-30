@@ -1,0 +1,62 @@
+Phase 1 , get information from RSSD
+
+Test.sql : 
+
+use rep2p_RSSD
+
+go
+
+ 
+
+select hdr.sys_trans_id, cmd_type, textval
+
+     from rs_exceptshdr hdr,
+
+         rs_exceptscmd cmd,
+
+         rs_systext
+
+     where error_site = 'webdb29p'  and error_db = 'Profile_ar'    and hdr.sys_trans_id = cmd.sys_trans_id
+
+         and cmd_id = parentid
+
+     order by log_time, src_cmd_line,
+
+         output_cmd_index, sequence
+
+go
+
+ 
+
+isql -Usa  -Swebgamma -Drep2p_RSSD -itest.sql -otest.log
+
+ 
+
+Phase 2 , get userid list
+
+grep values test.log > test.log1
+
+cat test.log1 | cut -c33-41 > test.log2
+
+ 
+
+Phase 3, bcp the userId list into a temp table on webdb28p
+
+ 
+
+Phase 4, insert lost record into temp table
+
+Select a.* into tempdb..lost_user from Profile_ar..a_profile_romance a, tempdb..user_id 
+
+ 
+
+Phase 5, generate insert sql via DBArtisan and insert into webdb29p.
+
+ 
+
+ 
+
+ 
+
+
+

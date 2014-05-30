@@ -1,0 +1,29 @@
+use tempdb
+go
+
+IF OBJECT_ID('dbo.DNIS_00084NE') IS NOT NULL
+   DROP TABLE DNIS_00084NE
+go
+
+CREATE TABLE dbo.DNIS_00084NE 
+(
+    dnis         char(25)     NOT NULL,
+    dnisPlatform varchar(40)  NOT NULL,
+    accessFee    numeric(6,2) NOT NULL
+)
+LOCK ALLPAGES
+go
+IF OBJECT_ID('dbo.DNIS_00084NE') IS NOT NULL
+    PRINT '<<< CREATED TABLE dbo.DNIS_00084NE >>>'
+ELSE
+    PRINT '<<< FAILED CREATING TABLE dbo.DNIS_00084NE >>>'
+go
+CREATE UNIQUE INDEX XPK_dnis
+    ON dbo.DNIS_00084NE(dnis)
+go
+IF EXISTS (SELECT * FROM sysindexes WHERE id=OBJECT_ID('dbo.DNIS_00084NE') AND name='XPK_dnis')
+    PRINT '<<< CREATED INDEX dbo.DNIS_00084NE.XPK_dnis >>>'
+ELSE
+    PRINT '<<< FAILED CREATING INDEX dbo.DNIS_00084NE.XPK_dnis >>>'
+go
+

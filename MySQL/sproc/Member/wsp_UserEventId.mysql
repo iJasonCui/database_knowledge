@@ -1,0 +1,27 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_UserEventId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_UserEventId (
+/******************************************************************************
+ **
+ ** CREATION:
+ **   Author:       Andy Tran
+ **   Date:         April 2006
+ **   Description:  Generation of UserEventId
+ **
+ ** REVISION(S):
+ **   Author:
+ **   Date:
+ **   Description:
+ **
+ ******************************************************************************/
+OUT  at_userEventId INT 
+)
+BEGIN 
+
+    UPDATE UserEventId
+    SET userEventId = userEventId + 1 ;
+
+    SELECT userEventId INTO at_userEventId FROM UserEventId ;
+
+END;;
+DELIMITER ;

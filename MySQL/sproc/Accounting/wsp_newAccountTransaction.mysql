@@ -1,0 +1,68 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newAccountTransaction;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newAccountTransaction (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:        Andy Tran
+**   Date:          Nov 12, 2004
+**   Description:   Add a new account transaction record
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_userId         DECIMAL(12,0)
+,at_productCode    CHAR(1)
+,at_communityCode  CHAR(1)
+,at_xactionTypeId  TINYINT
+,at_creditTypeId   TINYINT
+,at_contentId      SMALLINT
+,at_credits        SMALLINT
+)
+proc_label:BEGIN
+DECLARE at_dateNow        DATETIME;
+DECLARE at_xactionId      DECIMAL;
+DECLARE at_balance        SMALLINT;
+
+SET at_dateNow = UTC_TIMESTAMP();
+CALL wsp_XactionId (at_xactionId);
+IF !(at_xactionId > 0) THEN
+   LEAVE proc_label;
+END IF;
+CALL wsp_getTotalCredits (at_userId, at_balance);
+
+SET at_balance = at_balance + at_credits;
+
+INSERT INTO AccountTransaction (
+         xactionId
+        ,userId
+        ,product
+        ,community
+        ,creditTypeId
+        ,xactionTypeId
+        ,contentId
+        ,credits
+        ,balance
+        ,dateCreated
+    )
+    VALUES (
+         at_xactionId
+        ,at_userId
+        ,at_productCode
+        ,at_communityCode
+        ,at_creditTypeId
+        ,at_xactionTypeId
+        ,at_contentId
+        ,at_credits
+        ,at_balance
+        ,at_dateNow
+    );
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

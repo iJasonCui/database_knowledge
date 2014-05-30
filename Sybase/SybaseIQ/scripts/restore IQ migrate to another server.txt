@@ -1,0 +1,6 @@
+RESTORE DATABASE '/c151iqdb1_dump/data/db/IQTestNetApp.db'
+FROM '/c151iqdb1_dump/dumps/IQDB3/IQDB3_Full.dmp'
+RENAME IQ_SYSTEM_MAIN TO '/c151iqdb1_dump/data/db/IQTestNetApp_main1.iq'
+RENAME IQ_MAIN2 TO '/c151iqdb1_dump/data/db/IQTestNetApp_main2.iq'
+RENAME IQ_SYSTEM_TEMP TO '/c151iqdb1_dump/data/db/IQTestNetApp.iqtmp'
+RENAME IQ_SYSTEM_MSG TO '/c151iqdb1_dump/data/db/IQTestNetApp.iqmsg'

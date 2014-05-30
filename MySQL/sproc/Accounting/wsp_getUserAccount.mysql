@@ -1,0 +1,51 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getUserAccount;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getUserAccount (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  May 21, 2003
+**   Description:  retrieves user account info
+**
+**
+** REVISION(S):
+**   Author:  Andy Tran
+**   Date:  Nov. 11, 2004
+**   Description:  added dateExpiry
+**
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date: November 23, 2004
+**   Description: also retrieve subscription info
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date: Jan 6, 2006
+**   Description: also retrieve subscriptionOfferId
+**
+******************************************************************************/
+at_userId DECIMAL(12,0) 
+)
+BEGIN
+     SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;  
+     SELECT billingLocationId,
+            accountType,
+            purchaseOfferId,
+            usageCellId,
+            dateExpiry,
+            subscriptionOfferDetailId,
+            subscriptionStatus,
+            autoRenew,
+            subscriptionEndDate,
+            cardId,
+            subscriptionOfferId
+         FROM UserAccount u 
+              LEFT JOIN UserSubscriptionAccount s ON u.userId = s.userId
+         WHERE u.userId = at_userId;
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,30 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getUpsellExpiry;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getUpsellExpiry (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu 
+**   Date:  May 2 2008
+**   Description:  retrieves all expired upsells, which are marked ianctive.
+**
+** REVISION:
+**   Author:  
+**   Date:   
+**   Description: 
+**
+**
+******************************************************************************/
+)
+BEGIN
+
+DECLARE at_dateNow DATETIME;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+CALL wsp_cursorUpsellExpiry (at_dateNow);
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

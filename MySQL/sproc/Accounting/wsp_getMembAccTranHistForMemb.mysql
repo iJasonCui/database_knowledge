@@ -1,0 +1,59 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getMembAccTranHistForMemb;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getMembAccTranHistForMemb (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Mark Jaeckle
+**   Date:         Sept 5, 2003
+**   Description:  retrieves account transactions for the specified user
+**
+**
+** REVISION(S): 
+**   Author:       Malay Dave
+**   Date:         Feb 19, 2004
+**   Description:  1. Fixed bug - proc was getting currencyId instead of billingLocationId
+**                 2. Getting purchaseOfferDetailId to Member as well
+**
+**   Author:       Andy Tran
+**   Date:         December 2005
+**   Description:  retrieves currency as well
+**                 re-suffle to make field orders the same with admin history
+**
+******************************************************************************/
+     at_userId DECIMAL(12,0)
+    ,at_dateCreated DATETIME
+)
+BEGIN
+
+    SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+    SELECT a.xactionId
+          ,a.xactionTypeId
+          ,a.creditTypeId
+          ,a.contentId
+          ,a.credits
+          ,a.balance
+          ,a.dateCreated
+          , CASE pd.cost 
+               WHEN null THEN p.cost 
+               ELSE pd.cost 
+            END as cost
+          , CASE pd.tax 
+               WHEN null THEN p.tax 
+               ELSE pd.tax
+            END AS tax
+          ,a.description
+          ,p.billingLocationId
+          ,p.purchaseOfferDetailId
+          ,p.purchaseTypeId
+          ,p.currencyId 
+     FROM AccountTransaction a 
+     LEFT JOIN Purchase p ON a.xactionId = p.xactionId 
+     LEFT JOIN PurchaseCreditDetail pd ON p.xactionId = pd.xactionId
+    WHERE a.userId = at_userId
+      AND a.dateCreated >= at_dateCreated
+    ORDER BY a.xactionId;
+
+END;;
+DELIMITER ;

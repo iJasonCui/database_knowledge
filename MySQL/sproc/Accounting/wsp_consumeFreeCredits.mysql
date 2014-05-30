@@ -1,0 +1,71 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_consumeFreeCredits;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_consumeFreeCredits (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  October 2004
+**   Description:  insert row into AccountTransaction for some free consumption
+**                 where cost = 0
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_userId 				DECIMAL(12,0)
+,at_xactionTypeId				TINYINT
+,at_contentId				SMALLINT
+,at_product				CHAR(1)
+,at_community				CHAR(1)
+,at_userType				CHAR(1)
+,at_credits               SMALLINT
+,at_creditTypeId                          SMALLINT
+)
+proc_label:BEGIN
+
+DECLARE at_balance				SMALLINT;
+DECLARE at_dateNow 				DATETIME;
+DECLARE at_xactionId				INT;
+
+CALL wsp_getTotalCredits (at_userId, at_balance);
+
+SET at_dateNow = UTC_TIMESTAMP();
+	
+CALL wsp_XactionId (at_xactionId);
+IF !(at_xactionId > 0) THEN
+   LEAVE proc_label;
+END IF;
+INSERT INTO AccountTransaction 
+(xactionId
+,userId
+,xactionTypeId
+,creditTypeId
+,contentId
+,product
+,community
+,credits
+,balance
+,userType
+,dateCreated
+)
+VALUES 
+(at_xactionId
+,at_userId
+,at_xactionTypeId
+,at_creditTypeId
+,at_contentId
+,at_product
+,at_community
+,at_credits
+,at_balance
+,at_userType
+,at_dateNow
+);
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

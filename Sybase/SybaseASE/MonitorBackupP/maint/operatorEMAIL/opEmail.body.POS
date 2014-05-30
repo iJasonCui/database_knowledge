@@ -1,0 +1,27 @@
+                                                                                                                      
+ -------------------------------------------------------------------------------------------------------------------- 
+ 'POS Operator Change Report for the period from 'Jul 27 2009 12:00AM' to 'Aug  3 2009 12:00AM'                       
+                         
+ ----------------------- 
+ Newly Created Operators 
+ operatorCode opLastName           opFirstName          dateCreated                createdBy   activeStatusInd operatorGroupName                        securityLevelName                        
+ ------------ -------------------- -------------------- -------------------------- ----------- --------------- ---------------------------------------- ---------------------------------------- 
+                   
+ ----------------- 
+ Deleted Operators 
+ operatorCode opLastName           opFirstName          dateCreated                createdBy   dateModified               modifiedBy  Operator_Active 
+ ------------ -------------------- -------------------- -------------------------- ----------- -------------------------- ----------- --------------- 
+                         
+ ----------------------- 
+ Password Change History 
+ operatorCode dateUpdated                updatedBy   
+ ------------ -------------------------- ----------- 
+         2160        Jul 28 2009 11:35PM        1423 
+         2160        Jul 28 2009 11:38PM        2160 
+         3062        Aug  1 2009  3:59PM        3062 
+         3268        Jul 31 2009  1:18PM        4971 
+         3268        Jul 31 2009  1:20PM        3268 
+         7141        Jul 28 2009 10:48PM        7141 
+         8264        Jul 27 2009 10:00PM        8264 
+         8867        Jul 30 2009  5:07PM        8867 
+         9920        Jul 31 2009 10:49AM        9920 

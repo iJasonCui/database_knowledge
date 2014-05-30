@@ -1,0 +1,19 @@
+1. bcp out from sybase into text 
+
+[wxdbmaint] 
+select "bcp Plus45.." + name + " out " + name + ".out -c -t '|' -Ucron_sa -Sg151dbr07 -P" 
+from Plus45..sysobjects 
+where type = "U" and name not like "rs%"
+
+
+bcp Profile_ad..v_a_profile_dating out a_profile_dating.out -c -t "|" -Ucron_sa -Sw151dbr06
+
+2. scp into wxmydb1
+
+sybaseiq@g104db01 dumppoint]$ 
+scp -p Cookie.out root@w151dbp10:/opt/scripts/maint/ddl/my4100/
+
+3. load file into mysql
+
+LOAD DATA LOCAL INFILE 'a_profile_dating.out' INTO TABLE a_profile_dating FIELDS TERMINATED BY '|' LINES TERMINATED BY '\n' 
+(cookieId, adcode, brand, locale, dateCreated);

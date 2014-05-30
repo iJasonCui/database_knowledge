@@ -1,0 +1,132 @@
+                    
+ -------------------
+ Oct  1 2004 11:55AM
+
+(1 row affected)
+The replication status for 'Call' is set to true, owner_on.
+(return status = 0)
+The replication status for 'CallResult' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'BadCreditCard' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'JetPayRequest' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'BillingLocation' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'JetPayResponse' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'RiskMgmtReplyCode' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'Compensation' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'RiskMgmtType' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'Content' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'CreditBalance' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'CreditCard' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'CreditCardId' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'CreditType' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'CurrencyHistory' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'DefaultUserAccount' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'Locale' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'LocaleContent' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'Purchase' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'PurchaseOffer' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'CompensationId' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'PurchaseOfferDetail' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'XactionId' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'PurchaseType' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'TaxRate' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'BankCard' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'UsageCell' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'Currency' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'UsageCellDetail' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'CardType' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'UsageType' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'Merchant' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'UserAccount' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'XactionType' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'PurchaseDecline' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'AdminAccountTransaction' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'AccountFlag' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'AccountTransaction' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'AccountTransactionBalance' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'Process' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+The replication status for 'AccountingEvent' is set to true, owner_on.
+
+(1 row affected, return status = 0)
+                    
+ -------------------
+ Oct  1 2004 11:55AM
+
+(1 row affected)

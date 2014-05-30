@@ -1,0 +1,98 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getLatLongByZipCode;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getLatLongByZipCode (
+/******************************************************************************
+**
+** CREATION:
+**   Author: Jack Veiga
+**   Date:  June 4 2002
+**   Description: Retrieves latitude and longitude for a given zip code
+**
+** REVISION(S):
+**   Author: Travis McCauley
+**   Date:  June 24, 2004
+**   Description: Use the PostalCode table
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date:  June 23, 2006
+**   Description: also return cityId, jurisdictionId, and secondJurisdictionId
+**
+** REVISION(S):
+**   Author: F Schonberger
+**   Date:  May 07, 2010
+**   Description: find Canadian locations by the first 3 characters
+**
+******************************************************************************/
+    at_zipcode VARCHAR(10)
+)
+BEGIN
+   DECLARE at_zipPrefix VARCHAR(10);
+   DECLARE at_lat INT;
+   DECLARE at_long INT;
+   DECLARE at_countryId INT;
+   DECLARE at_jurisdictionId INT;
+   DECLARE at_secondJurisdictionId INT;
+   DECLARE at_cityId INT;
+
+   SET at_zipcode = REPLACE(UPPER(at_zipcode),' ',null) ;
+   SET at_zipPrefix = SUBSTRING(at_zipcode,1,3) + "%" ; 
+
+    /*-- try an exact match */
+    SELECT lat_rad, 
+           long_rad,
+           countryId,
+           cityId,
+           jurisdictionId,
+           secondJurisdictionId
+      INTO at_lat ,
+           at_long,
+           at_countryId,
+           at_cityId ,
+           at_jurisdictionId ,
+           at_secondJurisdictionId 
+      FROM PostalZipCode
+     WHERE zipcode = at_zipcode ;
+
+   IF (at_lat = NULL) 
+   THEN       
+       /*-- only canadian postal codes*/
+       IF (at_zipcode REGEXP "[A-Z][0-9][A-Z][0-9][A-Z][0-9]" )
+       THEN       
+           SELECT FLOOR(AVG(lat_rad)),
+                  FLOOR(AVG(long_rad)) 
+             INTO at_lat, at_long
+             FROM PostalZipCode 
+            WHERE zipcode LIKE at_zipPrefix ;
+       END IF; 
+   END IF;
+
+   IF (at_cityId = NULL) 
+   THEN
+       /*-- only canadian postal codes */
+       IF (at_zipcode REGEXP "[A-Z][0-9][A-Z][0-9][A-Z][0-9]" )
+       THEN       
+           SELECT  
+                  IFNULL(countryId,-1),
+                  IFNULL(cityId,-1),
+                  IFNULL(jurisdictionId,-1),
+                  IFNULL(secondJurisdictionId,-1)
+            INTO  at_countryId ,
+                  at_cityId, 
+                  at_jurisdictionId,
+                  at_secondJurisdictionId
+            FROM PostalZipCode
+           WHERE zipcode LIKE at_zipPrefix 
+             AND cityId > 0 LIMIT 1 ; 
+       END IF;
+   END IF;  
+
+   SELECT at_lat AS lat_rad, 
+          at_long AS long_rad,
+          IFNULL(at_countryId,-1) AS countryId,
+          IFNULL(at_cityId,-1) AS cityId,
+          IFNULL(at_jurisdictionId,-1) AS jurisdictionId,
+          IFNULL(at_secondJurisdictionId,-1) AS secondJurisdictionId ;
+
+END;;
+DELIMITER ;

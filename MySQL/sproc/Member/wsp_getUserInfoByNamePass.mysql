@@ -1,0 +1,90 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getUserInfoByNamePass;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getUserInfoByNamePass (
+/***********************************************************************
+**
+** CREATION:
+**   Author:       Mark Jaeckle
+**   Date:         September 12, 2002
+**   Description:  Retrieves user info for a given userName/password
+**
+** REVISION(S):
+**   Author:       Malay Dave
+**   Date:         Mar 4 2004
+**   Description:  Add new col 'pref_clubll_signup' - for storing clubll signup preference
+**
+**   Author:       Mike Stairs
+**   Date:         Oct 2005
+**   Description:  eliminated references to removed columns from user_info
+**
+**   Author:       Andy Tran
+**   Date:         Feb 2007
+**   Description:  always returns 'N' for mail preferences (collect call not accecpted)
+**
+**   Author:       Andy Tran
+**   Date:         Jul 30 2008
+**   Description:  use email address as username
+**
+**   Author:       Sean Dwyer
+**   Date:         Dec 2008
+**   Description:  added messageOnHoldStatus
+*************************************************************************/
+ at_userName VARCHAR(129)
+,at_password VARCHAR(16)
+)
+BEGIN
+
+    IF (SELECT 1 FROM user_info WHERE username = at_userName AND password = at_password) IS NULL
+    THEN    
+        SELECT username INTO at_userName 
+          FROM user_info
+         WHERE email = at_userName AND password = at_password ;
+    END IF; 
+
+    SELECT user_id
+          ,status
+          ,user_type
+          ,email
+          ,gender
+          ,laston
+          ,birthdate
+          ,height_cm
+          ,zipcode
+          ,long_rad
+          ,lat_rad
+          ,preferred_units
+          ,pref_last_on
+          ,'N' --mail_dating
+          ,'N' --mail_romance
+          ,'N' --mail_intimate
+          ,acceptnotify
+          ,body_type
+          ,smoke
+          ,ethnic
+          ,religion
+          ,signup_adcode
+          ,signup_context
+          ,onhold_greeting
+          ,last_logoff
+          ,emailStatus
+          ,signuptime
+          ,pref_clubll_signup
+          ,localePref 
+          ,languagesSpokenMask
+          ,countryId
+          ,jurisdictionId
+          ,secondJurisdictionId
+          ,cityId
+          ,searchLanguageMask
+          ,IFNULL(pref_community_checkbox,'MMM')
+          ,IFNULL(mediaReleaseFlag,'Y')
+          ,signupIP
+          ,username
+          ,messageOnHoldStatus
+          ,IFNULL(firstSession,1) as firstSession
+      FROM user_info
+     WHERE username = at_userName 
+       AND password = at_password ;
+
+END;;
+DELIMITER ;

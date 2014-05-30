@@ -1,0 +1,33 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAccountFlagByFromToRv;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAccountFlagByFromToRv (
+/***********************************************************************
+**
+** CREATION:
+**   Author:  Slobodan Kandic
+**   Date:  Aug 12 2003
+**   Description:  Retrieves Account Flags
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+at_from DATETIME,
+at_to DATETIME
+)
+BEGIN
+	SELECT
+	userId,
+	reasonContentId,
+	reviewed,
+        adminUserId,
+	dateCreated
+	FROM AccountFlag
+	WHERE dateCreated >= at_from AND dateCreated <= at_to
+	ORDER BY dateCreated;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

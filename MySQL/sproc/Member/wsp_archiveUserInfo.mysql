@@ -1,0 +1,40 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_archiveUserInfo;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_archiveUserInfo (
+/***************************************************************************
+***
+**
+** CREATION:
+**   Author:  Jason Cui
+**   Date:  March 2004
+**   Description:  
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date:   Oct 2005
+**   Description: eliminate a bunch of obsolete columns
+**
+** REVISION(S):
+**   Author: Mike Stairs
+**   Date:   Oct 2005
+**   Description: eliminated update of user_info_hist, write row to user_info_deleted, 
+**                to be picked up by reporting to update status, dateModified in user_info on reporting.
+**
+******************************************************************************/
+at_user_id DECIMAL(12,0)
+)
+BEGIN
+
+DECLARE at_dateNow DATETIME ;
+
+CALL wsp_GetDateGMT(at_dateNow);
+
+INSERT user_info_deleted (userId, dateCreated)
+SELECT user_id, at_dateNow	
+  FROM user_info 
+ WHERE user_id = at_user_id ;
+
+DELETE FROM user_info WHERE user_id = at_user_id ;
+
+END;;
+DELIMITER ;

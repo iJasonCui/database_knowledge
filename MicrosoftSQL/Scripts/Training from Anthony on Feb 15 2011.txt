@@ -1,0 +1,390 @@
+CUBE Training from Anthony on Feb 15 2011
+
+1. remote desktop connection 
+
+2. login as jcui with credential as krypton
+
+3. SQL server 2005 => Management studio => database succor (batch tracking database)_
+
+4. SQL server agent => job activity monitor
+4.1 DM Daily Midnight Jobs (create job schedule daily based)  (VIP)
+4.2 pIDailyLoads (VIP)
+4.3 
+
+5. Backup 
+
+5.1 Drive C: and E:  [local drive]
+5.2 Drive F: and H:  [BSI promise array]; if lost F: and H:, then cannot load CUBE.
+5.3 Drive G:         [Netapp Drive ]
+5.4 Drive I: and J:  [cheap USB drive I: and J: (secondary backup)]
+5.5 Drive N:         [Main backup drive N:]
+5.6 backup massive database such as "ARCHIVE" manually; small databases are backup automatically.
+
+[issue 1] after AS4 crashed, lost USB drive I and J
+[solution 1] go to "run" => run "diskmgmt.msc" => look for the drives with the x on it => right click and hit reactivate
+
+6. ETL 
+
+6.1 [server] dmvault (virtual server greping file from Adrian) [user] datamgmt [pass] 63v...
+6.2 
+
+7. Lavalife Voice affiliate report
+
+7.1 [user] Mathew Kennedy
+7.2 windows explore => E: Drive = > Projects => Excel report => IVR 
+    => Lavalife Voice Affiliate report Monthly.xlsx => open it
+    => chnage thedate (Row labels)
+
+--==================================================
+
+8. How to turn off NE?
+
+[database] succor => succor.audit.tObjectConfig
+
+[turn off] = [chnage the EndDate]
+
+select * from succor.audit.tObjectConfig where productKey = 5 and endDate > getdate()
+
+--======================================
+
+9. how to trouble shooting
+
+9.1 go to SQL Server profiler => file => new trace =>AS => tag [event selection] => de-select all and just select "error"
+
+10.Excel => new file => data => connections => from other sources => select analyse server (AS) => input "AS4.int.interactivemedia.com"
+
+10.1 CUBE connection
+10.2 PERSPECTIVE connection?
+
+--============================================
+
+11. Databases
+
+11.1 archive = archive data
+11.2 evolve = ETL stored procedures
+11.3 acumen = cube data source
+
+--===========================================
+
+12. Mobile Aggregator Cube missing data troubleshooting.
+
+12.1 Pick where to start, in this case I'll start with the Fact table - Identify objectkey
+
+SELECT    objectKey, objectName, object, objectType, businessUnit
+FROM      audit.vObject
+WHERE     (businessUnit = 'Mobile') AND (objectType = 'Fact Table')
+
+12.2 Check the tLoadTable for the above objectkey for the last couple of days
+
+select * from succor.audit.tLoadTable
+where 
+objectKey in (242) and 
+dateKey >= dateadd(day,-10,convert(char(11),getdate()))
+order by objectKey,dateKey
+
+12.3 THe above query tells me that the archive failed, so now I query the tLoadArchive table
+
+select * from succor.audit.tLoadArchive
+where 
+loadarchiveKey in (270553)
+
+12.4 The above query tells me that the # of attempts were max'd out, so update tLoadArchive table this will add it back to the queue
+
+update succor.audit.tLoadArchive set statusKey = 2,attempts = 0
+where loadArchiveKey  in (270553)
+
+
+
+--===============================================
+
+13. IVR Sales missing data trouble shooting
+
+13.1 Pick where to start, in this case I'll start with the Fact table - Identify objectkey
+
+SELECT    objectKey, objectName, object, objectType, businessUnit
+FROM      succor.audit.vObject
+WHERE     (businessUnit = 'IVR') AND (objectType = 'Fact Table')
+
+13.2 Check the tLoadTable for the above objectkey for the last couple of days
+
+select * from succor.audit.tLoadTable
+where 
+objectKey in (80, 75, 102) and 
+dateKey >= dateadd(day,-10,convert(char(11),getdate()))
+order by objectKey,dateKey
+
+select * from succor.audit.tObjectConfigTable where objectKey in (80,75, 102)
+--result
+75	acumen	dim	pIIvrNewUnique	evolve	ivr
+80	acumen	fact	pIIvrSales	evolve	ivr
+102	acumen	dim	pIIvrNewUniqueByProduct	evolve	ivr
+
+--=========================
+-- [succor].[audit].[pIDailyLoads]
+--=========================
+DECLARE @RC int
+DECLARE @dateKey smalldatetime
+DECLARE @results int
+
+-- TODO: Set parameter values here.
+
+select @dateKey = 'Jun 1 2011'
+
+EXECUTE @RC = [succor].[audit].[pIDailyLoads] 
+   @dateKey
+  ,@results OUTPUT
+
+
+13.2.1 missing depency 
+
+DECLARE @RC int
+DECLARE @loadTableKey int
+DECLARE @results int
+
+SELECT @loadTableKey = 318403
+
+WHILE @loadTableKey <= 318444
+BEGIN
+
+--75
+EXECUTE @RC = [evolve].[ivr].[pIIvrNewUnique] 
+   @loadTableKey
+  ,@results OUTPUT
+
+SELECT @loadTableKey = @loadTableKey + 1
+
+END
+
+
+13.2.2 missing depency 
+
+DECLARE @RC int
+DECLARE @loadTableKey int
+DECLARE @results int
+
+SELECT @loadTableKey = 318403
+
+WHILE @loadTableKey <= 318444
+BEGIN
+
+--102
+EXECUTE @RC = [evolve].[ivr].[pIIvrNewUniqueByProduct] 
+   @loadTableKey
+  ,@results OUTPUT
+
+SELECT @loadTableKey = @loadTableKey + 1
+
+END
+
+13.2.2 re-run the insert ivr sales
+
+DECLARE @RC int
+DECLARE @loadTableKey int
+DECLARE @results int
+
+-- TODO: Set parameter values here.
+
+--select @loadTableKey = 323526
+
+EXECUTE @RC = [evolve].[ivr].[pIIvrSales] 
+   @loadTableKey
+  ,@results OUTPUT
+
+
+13.3 THe above query tells me that the archive failed, so now I query the tLoadArchive table
+
+select * from succor.audit.tLoadArchive
+where 
+loadarchiveKey in (270553)
+
+13.4 The above query tells me that the # of attempts were max'd out, so update tLoadArchive table this will add it back to the queue
+-- set statusKey = 2 is very important step ---------
+update succor.audit.tLoadArchive set statusKey = 2,attempts = 0
+where loadArchiveKey  in (270553)
+
+--===============================================
+
+14. MTM project missing data trouble shooting
+
+[stored procedure] are residing on archive database instead of evolve database
+
+13.1 Pick where to start, in this case I'll start with the Fact table - Identify objectkey
+
+SELECT    objectKey, objectName, object, objectType, businessUnit
+FROM      succor.audit.vObject
+WHERE     (businessUnit = 'IVR') AND (objectType = 'Fact Table')
+
+13.2 Check the tLoadTable for the above objectkey for the last couple of days
+
+select * from succor.audit.tLoadTable
+where 
+objectKey in (242) and 
+dateKey >= dateadd(day,-10,convert(char(11),getdate()))
+order by objectKey,dateKey
+
+13.3 THe above query tells me that the archive failed, so now I query the tLoadArchive table
+
+select * from succor.audit.tLoadArchive
+where 
+loadarchiveKey in (270553)
+
+13.4 The above query tells me that the # of attempts were max'd out, so update tLoadArchive table this will add it back to the queue
+
+update succor.audit.tLoadArchive set statusKey = 2,attempts = 0
+where loadArchiveKey  in (270553)
+
+
+--================================================
+
+14. Mobile mBlox summary report
+
+http://reports.mblox.com
+
+14.1 After logging in, he would have clicked on “PSMS MT Breakdown”, 
+14.2 then selected the LavalifeUS account, 
+14.3 entered in start and end dates for each day (dd/mm/yyyy), 
+14.4 de-selected all options except “Full Breakdown”.
+
+14.5 Barry's Macro at FSCorp
+
+U:\Mobile\++CLEANUP++\+BARRY+\Mobile Docs '2009\mBlox Reports\GetWebStuff-AS4 V19
+
+
+--Mobile
+SELECT    objectKey, objectName, object, objectType, businessUnit
+FROM      succor.audit.vObject
+WHERE     (businessUnit = 'Mobile') AND (objectType = 'Fact Table')
+--277	tMBloxSummary	MBloxSummary 	Fact Table	Mobile
+
+SELECT    objectKey, objectName, object, objectType, businessUnit
+FROM      succor.audit.vObject
+WHERE     (businessUnit = 'Mobile') AND (objectType = 'Archive Table')
+--276	mBloxSummary	mBloxSummary	Archive Table	Mobile
+
+SELECT    * --objectKey, objectName, object, objectType, businessUnit
+FROM      succor.audit.vObject
+where     objectKey = 277
+
+select * from succor.audit.tLoadTable
+where 
+objectKey in (277) and 
+dateKey >= dateadd(day,-40,convert(char(11),getdate()))
+order by objectKey,dateKey
+
+select * from succor.audit.tLoadArchive
+where 
+objectKey in (276) and 
+dateKey >= dateadd(day,-40,convert(char(11),getdate()))
+order by objectKey,dateKey
+
+select * from acumen.fact.tMbloxSummary where loadTableKey = 335061
+select * from archive.mobile.mBloxSummary where loadArchiveKey = 304210
+
+--========================================
+[Microsoft system table]
+
+SELECT 'DBCC CHECKTABLE("' + TABLE_CATALOG + '.' + TABLE_SCHEMA + '.' + TABLE_NAME + '")'
+FROM evolve.INFORMATION_SCHEMA.TABLES
+where TABLE_TYPE = 'BASE TABLE'
+
+[backup database]
+
+BACKUP DATABASE [succor] TO  DISK = N'I:\SSDB_Backup\succor.2011Jun01.full.bak' 
+WITH NOFORMAT, NOINIT,  NAME = N'succor-Full Database Backup', SKIP, NOREWIND, NOUNLOAD,  STATS = 10
+GO
+
+[CREATE INDEX]
+
+USE [acumen]
+GO
+/****** Object:  Index [iIvrSales_loadTableKey]    Script Date: 06/01/2011 21:31:42 ******/
+IF  EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID(N'[fact].[tIvrSales]') AND name = N'iIvrSales_loadTableKey')
+DROP INDEX [iIvrSales_loadTableKey] ON [fact].[tIvrSales] WITH ( ONLINE = OFF )
+
+/****** Object:  Index [iIvrSales_loadTableKey]    Script Date: 06/01/2011 21:27:12 ******/
+CREATE NONCLUSTERED INDEX [iIvrSales_loadTableKey] ON [fact].[tIvrSales] 
+(
+	[loadTableKey] ASC
+)
+WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [SECONDARY]
+
+--================================================
+
+Questions:
+
+Q1: DM daily midnight jobs step 2
+
+what is sqlcmd -Q "exec succor.maint.pSDataDictionary" -o "c:\asreports\documentation\succor.html"  
+
+Q2: DM daily midnight jobs step 6
+
+Run Daily_ivrdb1r_2_AS4.dtsx
+
+Q3: make another partition in AS 
+
+Q4: how to determine which partition will be used?
+
+
+--========================
+
+trouble shooting
+
+--==============================
+
+--shrink database 
+--==========================
+
+SELECT DB_NAME() AS DatabaseName
+ , name AS FileName
+ , size/128.0 AS CurrentSizeOnDisk_MB
+ , CAST(FILEPROPERTY(name, 'SpaceUsed') AS INT)/128.0 AS SpaceUsed_MB
+ FROM athenaeum.sys.database_files
+
+DBCC OPENTRAN(athenaeum)
+
+EXEC sp_removedbreplication athenaeum
+
+SELECT name, log_reuse_wait_desc FROM sys.databases 
+
+select log_reuse_wait_desc,name from sys.databases
+
+--sp_repldone null, null, 0,0,1
+
+--ms sql 2000
+SELECT DB_NAME() AS DatabaseName
+ , name AS FileName
+ , size/128.0 AS CurrentSizeOnDisk_MB
+ , CAST(FILEPROPERTY(name, 'SpaceUsed') AS INT)/128.0 AS SpaceUsed_MB
+ FROM dbo.sysfiles
+
+--sp_helpdb athenaeum
+
+checkpoint
+--backup log   athenaeum with no_log
+
+dump tran  athenaeum with truncate_only
+
+--DBCC SHRINKFILE (athenaeum_log, 10000) WITH NO_INFOMSGS
+--DBCC SHRINKFILE (athenaeum2, 20000) WITH NO_INFOMSGS
+--DBCC SHRINKFILE (athenaeum3, 40000) WITH NO_INFOMSGS
+
+--the end of shrink database
+--==================================
+
+TITLE: Microsoft SQL Server Management Studio
+------------------------------
+
+Backup failed for Server 'AS4'.  (Microsoft.SqlServer.Smo)
+
+For help, click: http://go.microsoft.com/fwlink?ProdName=Microsoft+SQL+Server&ProdVer=9.00.4035.00&EvtSrc=Microsoft.SqlServer.Management.Smo.ExceptionTemplates.FailedOperationExceptionText&EvtID=Backup+Server&LinkId=20476
+
+------------------------------
+ADDITIONAL INFORMATION:
+
+System.Data.SqlClient.SqlError: A nonrecoverable I/O error occurred on file "F:\Program Files\Microsoft SQL Server\MSSQL.1\MSSQL\Data\archive.mdf:" 2(The system cannot find the file specified.). (Microsoft.SqlServer.Smo)
+
+For help, click: http://go.microsoft.com/fwlink?ProdName=Microsoft+SQL+Server&ProdVer=9.00.4035.00&LinkId=20476
+
+
+
+

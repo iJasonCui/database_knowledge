@@ -1,0 +1,438 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<TITLE>Sybase FAQ: 10/19 - ASE Admin (7 of 7)</TITLE>
+<script language="JavaScript1.2">
+function edc(s,s2)
+{document.write("<font face=\"Arial\"><A href=\"",s,"\" target=\"_blank\" onclick=\"window.open('",s,"','Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=720,height=530,left=30,top=43');return false;\" )>Not finding the answers you need?&nbsp;",s2,"Submit your question for others to see.</A></font>");}
+//-->
+</script>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<DIV ALIGN=CENTER>
+<SMALL>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  Part10 -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A>
+</SMALL>
+<BR><HR SIZE=2 WIDTH=600 NOSHADE>
+<P><H1>Sybase FAQ: 10/19 - ASE Admin (7 of 7)</H1>
+<table border="0" cellpadding="4" cellspacing="4" width="35%">
+<tr><td width="100%" align="center" bgcolor="#D6D6C0">
+<p align=center><small>
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part10/index.html","<br>");
+// --></script>
+</small></p>
+</td></tr>
+</table>
+ <br>
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="40%">
+<tr><td width="100%" align="center" bgcolor="#CCCCFF"><font face="Arial">There are reader questions on this topic!<a href="#ct"><br>Help
+others by sharing your knowledge</a></font></td></tr>
+</table></center></div>
+<HR SIZE=2 WIDTH=600 NOSHADE>
+</DIV>
+<PRE>
+Message-ID: &lt;databases/sybase-faq/part10_1074677126@rtfm.mit.edu&gt;
+X-Last-Updated: 2003/03/02
+From: dowen@midsomer.org (David Owen)
+Newsgroups: <A HREF="http://groups.google.com/groups?group=comp.databases.sybase" target="new">comp.databases.sybase</A>
+Subject: Sybase FAQ: 10/19 - ASE Admin (7 of 7)
+Reply-To: <A HREF="mailto:dowen@midsomer.org">dowen@midsomer.org</A> (David Owen)
+Keywords: FAQ, DATABASES, SYBASE, ASA, ASE, REP
+Date: 21 Jan 2004 09:26:05 GMT
+
+Archive-name: databases/sybase-faq/part10
+URL: <A HREF="http://www.isug.com/Sybase_FAQ">http://www.isug.com/Sybase_FAQ</A>
+Version: 1.7
+Maintainer: David Owen
+Last-modified: 2003/03/02
+Posting-Frequency: posted every 3rd month
+   A how-to-find-the-FAQ article is posted on the intervening months.
+
+1.5.9: You and showplan output
+
+-------------------------------------------------------------------------------
+
+As recently pointed out in the Sybase-L list, the showplan information that was
+here is terribly out of date. It was written back when the output from ASE and
+MS SQL Server were identical. (To see just how differenet they have become,
+have a look at the O'Reilly book "Transact-SQL Programming". It does a line for
+line comparison.) The write up in the Performance and Tuning Guide is
+excellent, and this section was doing nothing but causing problems.
+
+If you do have a need for the original document, then it can be found here, but
+it will no longer be considered part of the official FAQ.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+1.5.10: Poor man's sp_sysmon
+
+-------------------------------------------------------------------------------
+
+This is needed for System 10 and Sybase 4.9.2 where there is no sp_sysmon
+command available.
+
+Fine tune the waitfor for your application. You may need TS Role -- see Q3.1.
+
+use master
+go
+dbcc traceon(3604)
+dbcc monitor ("clear", "all", "on")
+waitfor delay "00:01:00"
+dbcc monitor ("sample", "all", "on")
+dbcc monitor ("select", "all", "on")
+dbcc traceon(8399)
+select field_name, group_name, value
+  from sysmonitors
+dbcc traceoff(8399)
+go
+dbcc traceoff(3604)
+go
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+1.5.11: View MRU-LRU procedure cache chain
+
+-------------------------------------------------------------------------------
+
+dbcc procbuf gives a listing of the current contents of the procedure cache. By
+repeating the process at intervals it is possible to watch procedures moving
+down the MRU-LRU chain, and so to see how long procedures remain in cache. The
+neat thing about this approach is that you can size your cache according to
+what is actually happening, rather than relying on estimates based on
+assumptions that may not hold on your site.
+
+To run it:
+
+dbcc traceon(3604)
+go
+dbcc procbuf
+go
+
+If you use sqsh it's a bit easier to grok the output:
+
+dbcc traceon(3604);
+dbcc procbuf;|fgrep &lt;pbname&gt; 
+
+See Q1.5.7 regarding procedure cache sizing.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+1.5.12: Improving Text/Image Type Performance
+
+-------------------------------------------------------------------------------
+
+If you know that you are going to be using a text/insert column immediately,
+insert the row setting the column to a non-null value.
+
+There's a noticeable performance gain.
+
+Unfortunately, text and image datatypes cannot be passed as parameters to
+stored procedures. The address of the text or image location must be created
+and returned where it is then manipulated by the calling code. This means that
+transactions involving both text and image fields and stored procedures are not
+atomic. However, the datatypes can still be declared as not null in the table
+definition.
+
+Given this example -
+
+        create table key_n_text
+        (
+            key         int     not null,
+            notes       text    not null
+        )
+
+This stored procedure can be used -
+
+        create procedure sp_insert_key_n_text
+            @key        int,
+            @textptr    varbinary(16)   output
+        as
+
+        /*
+        ** Generate a valid text pointer for WRITETEXT by inserting an
+        ** empty string in the text field.
+        */
+        insert key_n_text
+        (
+            key,
+            notes
+        )
+        values
+        (
+            @key,
+            ""
+        )
+
+        select  @textptr = textptr(notes)
+        from    key_n_text
+        where   key      = @key
+
+        return 0
+        go
+
+The return parameter is then used by the calling code to update the text field,
+via the dbwritetext() function if using DB-Library for example.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+Server Monitoring General Troubleshooting ASE FAQ
+
+                               Server Monitoring                               
+                                                                               
+ 
+
+    1.6.1   What is Monitor Server and how do I configure it?
+    1.6.2   OK, that was easy, how do I configure a client?
+   
+Platform Specific Issues - Solaris Performance and Tuning ASE FAQ
+
+-------------------------------------------------------------------------------
+
+1.6.1: How do I configure Monitor Server?
+
+-------------------------------------------------------------------------------
+
+Monitor Server is a separate server from the normal dataserver. Its purpose, as
+the name suggests, is to monitor ASE. It uses internal counters to determine
+what is happening. On its own, it does not actually do a lot. You need to hook
+up a client of some sort in order to be able to view the results.
+
+Configuration is easy. The Sybase documentation is very good on this one for
+either Unix or NT. Rather than repeat myself, go to the Sybase web site and
+check out the Monitor Server User's Guide. Obviously the link should take you
+to the HTML edition of the book. There is also a PDF available. Look for
+"monbook.pdf". If Sybase has skipped to ASE 99.9 and this link no longer works,
+then you will have to go search the Sybase home pages.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+1.6.2: OK, that was easy, how do I configure a client?
+
+-------------------------------------------------------------------------------
+
+I see that you like a challenge! Syase offer a Java client to view the output
+from Monitor Server. It is accessible either standalone or via the Win32
+edition of Sybase Central.
+
+Standalone on NT/2000
+
+I could not find anything about setting up the clients in the standard
+documentation set. However, there is a small paper on it here (towards the
+bottom). It does miss out a couple of important details, but is helpful for all
+that.
+
+I did not try too hard to get the 11.9.2 version running, since the 12.5
+version will monitor 11.9 servers.
+
+I do not have a boxed release of ASE 12.5 for NT, just the developers release.
+This does not come with all of the necessary files. In order to run the Monitor
+Client, you will need the PC Client CD that came with the boxed release. If all
+you have is the developer's edition, you might be stuck. It would be worth
+getting in touch with Sybase to see if they could ship you one. There is
+probably a charge!
+
+You will need to install the client software. If you have a release of ASE
+already installed and running you might want to install this into a separate
+area. I am not sure what files it includes and versions etc, but if you have
+the space I recommend saving yourself some hassle. If you have an older edition
+of ASE installed, the installation will ask if you want to overwrite two files,
+mclib.dll and mchelp.dll, both of which should reside in your winnt/system32
+directory. It is important that you accept both of the overwrites. The older
+versions of these files do not seem to work.
+
+Once installed, you will also need to spend some time playing with environment
+variables. I have got 3 editions of ASE all running successfully on the one
+machine (see Q1.3.9). I chose to have one user for each ASE instance, each with
+their own local environment variables pointing to the relevant installation for
+them, plus a generic account for my main user that I configured to use the
+software installed from the client CD. I adjusted the variables so that each
+user had their own set of variables and all of the installations worked OK.
+
+Next, you need a copy of Java 1.1.8 installed. The client CD has a copy of JDK
+1.1.8 in the "ASEP_Win32" directory. This is the one to go for, as I am sure
+that it was the one that the Monitor Client was built with. I did try a version
+from Sun's Java archive, but it failed.
+
+Next, set up the JAVA_HOME environment variable. If you installed the JDK into
+its default location, that will be C:\jdk1.1.8.
+
+Check to ensure that your CLASSPATH is defined as (assuming that you installed
+the client into C:\Sybase_Client):
+
+C:\Sybase_Client\ASEP_Win32\monclass.zip;C:\Sybase_Client\ASEP_Win32\3pclass.zip;%JAVA_HOME%\lib\rt.jar
+
+You may want to check that the files mclib.dll and mchelp.dll exist in your
+winnt/system32 directory if you were not asked to replace them earlier. You may
+also want to check that the defauly Java command is correct with java -version.
+It should return
+
+java version "1.1.8"
+
+You should now be able to fire up the main window with:
+
+java sybase.monclt.mcgui.procact.ProcActApp  12.5  sa "sa_password" en 0 sccsen.hlp
+
+(The paper says that you should use "jre" and not "java". That gives me a
+cosistent "Class not found...". I do not know why.)
+
+You should be presented with a screen like this, which will fill with process
+information after 10 seconds. Choose "File-&gt;Monitors &gt;" to choose a monitoring
+graph. Here are a couple of screenshots from various monitors:
+
+  * Performance Summary
+  * Performance Trends...
+  * Process Current SQL Statement
+  * Network Activity
+
+Obviously, all of this can be set from the command line or via a batch script.
+Shove the following into a file called mon.bat and invoke using mon ASE_SERVER
+MON_SERVER PASSWORD
+
+  SET JAVA_HOME=C:\JDK1.1.8
+  SET PATH=%JAVA_HOME%\bin;%PATH%
+  SET CLASSPATH=C:\SYBASE_CLIENT\ASEP_Win32\monclass.zip;C:\SYBASE_CLIENT\ASEP_Win32\3pclass.zip
+  java sybase.monclt.mcgui.procact.ProcActApp %1 12.5 %2 sa "%3" en 0 scssen.hlp
+
+Obviously, you will need to replace "C:\SYBASE_CLIENT" with the correct string
+pointing to your Sybase ASE installation.
+
+Via Sybase Central on NT/2000
+
+You will need to have installed the version of the Java Development Kit that
+comes with your CD, as per standalone installation. Next, create a shortcut to
+the file %SYBASE%\Sybase Central 3.2\win32\scview.exe. This is the Win 32
+version of Sybase Central. Next, edit the shortcut's properties (right click on
+the shortcut and select "Properties"). Now, edit the "Start In" field to be "C:
+\jdk1.1.8\bin", assuming that you installed the JDK into its default location.
+
+Now, assuming that both the ASE and Monitor servers are running, start up this
+version of Sybase Central. Unlike the Java edition, all of the Servers from the
+SQL.INI file are displayed at startup. Right click on the ASE server you wish
+to monitor and select "Properties". This brings up a triple tabbed screen.
+Select the "Monitor Server" tab and use the drop down to select the appropriate
+monitor server. Now, connect to the ASE server and you will see another level
+in the options tree called "Monitors". Click on it and you should see a
+complete list of the monitors you can choose from. Double clicking on one
+should display it. The output is exactly the same as for standalone operation.
+
+Back to top
+
+-------------------------------------------------------------------------------
+
+Platform Specific Issues - Solaris Performance and Tuning ASE FAQ
+
+</PRE>
+<DIV ALIGN=CENTER>
+<SMALL>
+<P><HR WIDTH=1900 NOSHADE><BR>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  Part10 -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A></SMALL>
+<P>
+<div align="center">
+
+<center>
+<form method="post" action="rateit.php">
+<table border="1" cellpadding="0" cellspacing="0" width="150" bgcolor="#ffcccc" style="WIDTH: 150px">
+<tr><td width="100%">
+<div align="center">
+<table border="0" cellpadding="2" width="100%" bgcolor="#ffcccc">
+<tr><td width="100%" height="14">
+<p align="center"><font face="Arial">Rate this FAQ</font></p>
+</td></tr>
+<tr><td width="100%" height="14">
+<p align="center">
+<INPUT TYPE=HIDDEN NAME="pid" VALUE="databases/sybase-faq/part10/index.html">
+<select size="1" name="D1" style="COLOR: darkmagenta; BACKGROUND-COLOR: cornsilk">
+<option selected value="0">N/A</option>
+<option value="1">Worst</option>
+<option value="2">Weak</option>
+<option value="3">OK</option>
+<option value="4">Good</option>
+<option value="5">Great</option>
+</select>
+</p>
+</td></tr>
+<tr><td width="100%" height="27">
+<p align="center">
+<IMG onclick="mystr='/frate.php?pid='+pid.value+'&vote='+D1.value;
+Popup=window.open(mystr,'Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=380,height=270,left=230,top=43'); 
+ return false;" height=28 src="/images/vote.gif" alt="Vote" width=83 border=0 ></p>
+</td></tr>
+</table>
+</div>
+</td></tr>
+</table>
+<font size="-1" face="Arial"><br><a href="/topRated.html">Current Top-Rated FAQs</a><br></font>
+</form>
+</center>
+
+</div>
+
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="100%">
+<tr><td width="100%" bgcolor="#D6D6C0">
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part10/index.html"," ");
+// --></script>
+<p><font face="Arial"><a name="ct">Are you an expert in this area?</a> Share your knowledge and earn expert points by giving answers or rating people's questions and answers! This section of FAQS.ORG is not sanctioned in any way by FAQ authors or maintainers.</font></p>
+<p><font face="Arial">Questions strongly related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-6730.html">How can I display the table sizes of ALL tables in a database?   </a> by Caspar (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9594.html">how to use nested cursors in a stored procedure in ASE ? is there any template to use !...</a> by nino (12/18/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3265.html">to connect sybase and c++,how to connect and access the data </a> by kumaran (9/2/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6741.html">how do u tell the last time update statistics has been run on a table (11.0.3) </a> by yujo (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11075.html">I need to Execute an SP & set its output to the insert statement. This will be occured for...</a> by rose (1/14/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9435.html">I wanted to know EXACT technical details about what ACTUALLY happens when u fire a simple...</a> by anu (12/15/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-8395.html">Is there anyway to start dataserver in ASE 11.9.2 with only the master and tempdb online...</a> by steve_2000g (11/28/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-854.html">i get an error on the "convert" when i try to run this line of code, why is this?   print...</a> by shugarhi (7/14/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11834.html">Hi  &nbsp; We're using Sybase ASE 12.0 running on SUN 4500 Cluster server. We cannot...</a> by KK (1/26/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6297.html">I am creating a stored proc to create a report of dependencies. &nbsp;We are creating...</a> by RR (10/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7388.html">How is this hazardous if we do not close a cursor? </a> by amar (11/11/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9827.html">How can i reduce my tempdb size once i have increased it by creating a device also? </a> by rajs (12/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12835.html">how can i transfer a table from cybase to db2? &nbsp;please sendme step by step method if...</a> by maulik (2/9/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3213.html">My database is in bypass recovery mode. How do I put it in normal mode? </a> by Lach (9/1/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-1435.html">Hi ,  &nbsp;We are using Sybase ASE 11.9.2 with SCO Unix 7.1.1 &nbsp;as the operating ...</a> by gowri (7/27/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-2412.html">were is a database that will bring up  a person address without there last name </a> by travis (8/15/2003)</font></li>
+</ul>
+<p><font face="Arial">Questions somewhat related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-2221.html">Guys!   See the Sybase query below: select convert(float,substring(&lt;field1&gt;,3,...</a> by pathfinder (8/12/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7790.html">What are the side-effects of turning-on the built-in auditing capabilities of sybase? </a> by Choy (11/17/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12136.html">When ever i execute select property('PROCESSCPU') i get the value 189 and whenever i...</a> by anilkumarsh (1/29/2004)</font></li>
+</ul>
+<p><font face="Arial">Other questions awaiting answers:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/related.html">10088 questions</a> related to other FAQs<br></font></li>
+<li><font face="Arial"><a href="/qa/unrelated.html">1765 general questions</a></font></li>
+<li><font face="Arial"><a href="/qa/answered.html">4091 answered questions</a><br></font></li>
+</ul>
+</td></tr></table> <br></center></div>
+<HR NOSHADE SIZE=2 WIDTH=450>
+[ <a href="/faqs/">Usenet FAQs</a> | <a href="/faqs/faqsearch.html">Search</a> | <a href="/contrib/">Web FAQs</a> | <a href="/docs/">Documents</a> | <a href="/rfcs/">RFC Index</a> ]
+<BR><HR NOSHADE SIZE=2 WIDTH=450>
+<P>
+<ADDRESS>
+Send corrections/additions to the FAQ Maintainer: <BR>dowen@midsomer.org (David Owen)
+</ADDRESS>
+<P>
+<SMALL>
+<STRONG>Last Update February 12 2004 @ 00:28 AM</STRONG>
+<BR>
+</SMALL>
+</DIV>
+</BODY>
+</HTML>
+

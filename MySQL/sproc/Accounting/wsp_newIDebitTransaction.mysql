@@ -1,0 +1,63 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newIDebitTransaction;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newIDebitTransaction (
+
+/*******************************************************************
+**
+** CREATION:
+**   Author:      Andy Tran
+**   Date:        November 2006
+**   Description: Inserts row into IDebitTransaction
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*******************************************************************/
+     at_xactionId           DECIMAL(12,0)
+    ,at_errorNumber         SMALLINT
+    ,at_errorDescription    VARCHAR(255)
+    ,at_transactionError    CHAR(1)
+    ,at_transactionApproved CHAR(1)
+    ,at_exactRespCode       CHAR(2)
+    ,at_exactRespMessage    VARCHAR(50)
+    ,at_bankRespCode        CHAR(3)
+    ,at_bankRespMessage     VARCHAR(80)
+    ,at_authorizationNumber VARCHAR(8)
+)
+BEGIN
+DECLARE at_dateCreated DATETIME;
+
+SET at_dateCreated = UTC_TIMESTAMP();
+
+INSERT INTO IDebitTransaction (
+         xactionId
+        ,errorNumber
+        ,errorDescription
+        ,transactionError
+        ,transactionApproved
+        ,exactRespCode
+        ,exactRespMessage
+        ,bankRespCode
+        ,bankRespMessage
+        ,authorizationNumber
+        ,dateCreated
+    )
+    VALUES (
+         at_xactionId
+        ,at_errorNumber
+        ,at_errorDescription
+        ,at_transactionError
+        ,at_transactionApproved
+        ,at_exactRespCode
+        ,at_exactRespMessage
+        ,at_bankRespCode
+        ,at_bankRespMessage
+        ,at_authorizationNumber
+        ,at_dateCreated
+    );
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

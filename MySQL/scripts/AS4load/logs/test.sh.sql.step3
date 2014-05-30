@@ -1,0 +1,20 @@
+SELECT 
+   cookie_id 
+   ,adcode 
+   ,context 
+   ,IFNULL(gender, '') 
+   ,IFNULL(user_id, 0) 
+   ,IFNULL(dateRegistered, '') 
+   ,dateCreated 
+   ,dateModified 
+   ,ipAddress 
+   ,brand 
+   ,517107 AS loadArchiveKey 
+INTO OUTFILE '/data/dump/w151dbp30_7100/bcp/Jump/jump_user.2013-03-19.362.517107.out' 
+FIELDS TERMINATED BY '|~|'  
+LINES TERMINATED BY '|@|\n' 
+FROM Jump.jump_user 
+WHERE (dateCreated >= '2013-03-19 4:00:00' 
+  AND dateCreated <  TIMESTAMPADD(day, 1, '2013-03-19 4:00:00')) 
+  OR  (dateModified >= '2013-03-19 4:00:00' 
+  AND dateModified <  TIMESTAMPADD(day, 1, '2013-03-19 4:00:00')); 

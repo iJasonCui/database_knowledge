@@ -1,0 +1,16 @@
+
+Sent: Monday, July 31, 2006 6:09 PM
+
+Subject: Case/Subcase ID: 11274069
+
+
+I left a message for you to call me. 
+
+Basically, if you start with -iqdroplks it will mark all the pages as in use (and show that you are 100% full).  This is normal. 
+If you start with -iqdroplks you must then immediately run sp_iqcheckdb to see if there are any problems.  If no problems are found the space is recovered and the allocation maps updated. If there is a problem (corruption) you will get a message letting you know which object has the problem.
+
+Please call me and let me know if you need more details on how to run sp_iqcheckdb with -iqdroplks.  
+ 
+
+Maggie
+

@@ -1,0 +1,43 @@
+
+Sent: Monday, July 31, 2006 11:17 AM
+
+Subject: Case/Subcase ID: 11274069
+
+
+My suggestion is that we try getting the server up as soon as possible by doing a 
+"forced recovery" (see instructions below).
+
+===========================================
+To start a server in forced recovery mode:
+===========================================
+Jason:
+
+
+1. Start the server with forced recovery (to mark all pages as used),
+using the -iqfrec server startup option in the start_asiq command. For example:
+
+start_asiq -n my_server -x 'tcpip(port=7934)' -gd dba -iqfrec my_db /database/my_db.db
+
+You specify the database name twice, once to specify the database undergoing forced recovery and once to specify the database to start. The -iqfrec server startup 
+option requires the database name. Note that this is the physical database name, which is case sensitive. Do not use select_dbname to determine the database name, 
+as it returns the logical name assigned by the -n startup option.
+
+Sybase strongly recommends that you start the IQ server with the -gd option set, to restrict server access to the DBA. Forced recovery operates in all modes, but 
+restricted access gives the DBA greater control over inadvertent opens of the database.
+
+2. Stop the server after it has started successfully. To stop the server, use stop_asiq on UNIX or the shutdown button in the console window on Windows.
+3. Start the server with the drop leaks option -iqdroplks. See the section "Leaked space recovery" for more details.
+
+start_asiq -n my_server -x "tcpip(port=2638)" -gd dba -iqdroplks my_db /database/my_db.db
+
+4. Run sp_iqcheckdb in allocation mode to free up unallocated pages.
+
+sp_iqcheckdb 'allocation database';
+
+5. Stop the server after sp_iqcheckdb finishes.
+6. Restart the server using your usual method, without the -iqfrec and -iqdroplks options.
+
+
+Hope this helps!
+regards,
+JOhn

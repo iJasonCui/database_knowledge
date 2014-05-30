@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="bootstrapDemoApp" id="top">
+<head>
+    <meta charset="utf-8">
+    <title>Angular directives for Bootstrap</title>
+    <meta name="description" content="AngularJS (Angular) native directives for Twitter Bootstrap. Small footprint (5kB gzipped!), no 3rd party JS dependencies (jQuery, bootstrap JS) required! Widgets: Accordion, Alert, Buttons, Carousel, Collapse, Datepicker, Dropdown Toggle, Modal, Pagination, Popover, Progressbar, Rating, Tabs, Timepicker, Tooltip, Typeahead, ">
+    <meta name="google-site-verification" content="7lc5HyceLDqpV_6oNHteYFfxDJH7-S3DwnJKtNUKcRg" />
+
+    <script src="lib/angular/angular.min.js"></script>
+    <script src="ui-bootstrap-tpls-0.8.0-SNAPSHOT.js"></script>
+    <script src="assets/plunker.js"></script>
+    <script src="assets/app.js"></script>
+    <script src="assets/rainbow.js"></script>
+    <script src="assets/rainbow-generic.js"></script>
+    <script src="assets/rainbow-javascript.js"></script>
+    <script src="assets/rainbow-html.js"></script>
+
+    <link rel="stylesheet" href="assets/rainbow.css"/>
+    <link rel="stylesheet" href="assets/demo.css"/>
+</head>
+
+<body class="ng-cloak" ng-controller="MainCtrl">
+
+<section id="carousel">
+<div class="page-header">
+    <h1>Carousel<small>
+        (<a target="_blank" href="https://github.com/angular-ui/bootstrap/tree/master/src/carousel">ui.bootstrap.carousel</a>)
+          </small></h1>
+</div>
+<div class="row">
+   <div class="span6">
+      <div ng-controller="CarouselDemoCtrl">
+        <carousel interval="myInterval">
+          <slide ng-repeat="slide in slides" active="slide.active">
+             <img ng-src="{{slide.image}}" style="margin:auto;">
+             <div class="carousel-caption">
+                <h4>Slide {{$index}}</h4>
+                <p>{{slide.text}}</p>
+             </div>
+          </slide>
+        </carousel>
+
+        <div class="row-fluid">
+           <div class="span6">
+           <ul>
+           <li ng-repeat="slide in slides">
+           <button class="btn btn-mini" ng-class="{'btn-info': !slide.active, 'btn-success': slide.active}" ng-disabled="slide.active" ng-click="slide.active = true">select</button>
+          {{$index}}: {{slide.text}}
+           </li>
+           </ul>
+           <a class="btn" ng-click="addSlide()">Add Slide</a>
+           </div>
+           <div class="span6">
+              Interval, in milliseconds: <input type="number" ng-model="myInterval">
+              <br />Enter a negative number to stop the interval.
+           </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+   
+   <hr>
+        
+</section>
+
+<script>function CarouselDemoCtrl($scope) {
+  $scope.myInterval = 5000;
+  var slides = $scope.slides = [];
+  $scope.addSlide = function() {
+    var newWidth = 200 + ((slides.length + (25 * slides.length)) % 150);
+    slides.push({
+      image: 'http://placekitten.com/' + newWidth + '/200',
+      //image: ['./img/html5-web-apps-with-nodejs.jpg',
+      //        './img/lavalifeFrog.jpg',
+      //        './img/lavalifeDog.gif',
+      //        './img/lavalifeSubway.png'][slides.length % 4] ,
+      text: ['More','Extra','Lots of','Surplus'][slides.length % 4] + ' ' +
+        ['Cats', 'Kittys', 'Felines', 'Cutes'][slides.length % 4]
+    });
+  };
+  for (var i=0; i<5; i++) {
+    $scope.addSlide();
+  }
+}
+</script>
+ 
+
+<div class="phone-images">
+  <img ng-src="{{img}}"
+       class="phone"
+       ng-repeat="img in phone.images"
+       ng-class="{active: mainImageUrl==img}">
+</div>
+
+
+
+<h1>{{phone.name}}</h1>
+
+<p>{{phone.description}}</p>
+
+<ul class="phone-thumbs">
+  <li ng-repeat="img in phone.images">
+    <img ng-src="{{img}}" ng-click="setImage(img)">
+  </li>
+</ul>
+
+<ul class="specs">
+  <li>
+    <span>Availability and Networks</span>
+    <dl>
+      <dt>Availability</dt>
+      <dd ng-repeat="availability in phone.availability">{{availability}}</dd>
+    </dl>
+  </li>
+  <li>
+    <span>Battery</span>
+    <dl>
+      <dt>Type</dt>
+      <dd>{{phone.battery.type}}</dd>
+      <dt>Talk Time</dt>
+      <dd>{{phone.battery.talkTime}}</dd>
+      <dt>Standby time (max)</dt>
+      <dd>{{phone.battery.standbyTime}}</dd>
+    </dl>
+  </li>
+  <li>
+    <span>Storage and Memory</span>
+    <dl>
+      <dt>RAM</dt>
+      <dd>{{phone.storage.ram}}</dd>
+      <dt>Internal Storage</dt>
+      <dd>{{phone.storage.flash}}</dd>
+    </dl>
+  </li>
+  <li>
+    <span>Connectivity</span>
+    <dl>
+      <dt>Network Support</dt>
+      <dd>{{phone.connectivity.cell}}</dd>
+      <dt>WiFi</dt>
+      <dd>{{phone.connectivity.wifi}}</dd>
+      <dt>Bluetooth</dt>
+      <dd>{{phone.connectivity.bluetooth}}</dd>
+      <dt>Infrared</dt>
+      <dd>{{phone.connectivity.infrared | checkmark}}</dd>
+      <dt>GPS</dt>
+      <dd>{{phone.connectivity.gps | checkmark}}</dd>
+    </dl>
+  </li>
+  <li>
+    <span>Android</span>
+    <dl>
+      <dt>OS Version</dt>
+      <dd>{{phone.android.os}}</dd>
+      <dt>UI</dt>
+      <dd>{{phone.android.ui}}</dd>
+    </dl>
+  </li>
+  <li>
+    <span>Size and Weight</span>
+    <dl>
+      <dt>Dimensions</dt>
+      <dd ng-repeat="dim in phone.sizeAndWeight.dimensions">{{dim}}</dd>
+      <dt>Weight</dt>
+      <dd>{{phone.sizeAndWeight.weight}}</dd>
+    </dl>
+  </li>
+  <li>
+    <span>Display</span>
+    <dl>
+      <dt>Screen size</dt>
+      <dd>{{phone.display.screenSize}}</dd>
+      <dt>Screen resolution</dt>
+      <dd>{{phone.display.screenResolution}}</dd>
+      <dt>Touch screen</dt>
+      <dd>{{phone.display.touchScreen | checkmark}}</dd>
+    </dl>
+  </li>
+  <li>
+    <span>Hardware</span>
+    <dl>
+      <dt>CPU</dt>
+      <dd>{{phone.hardware.cpu}}</dd>
+      <dt>USB</dt>
+      <dd>{{phone.hardware.usb}}</dd>
+      <dt>Audio / headphone jack</dt>
+      <dd>{{phone.hardware.audioJack}}</dd>
+      <dt>FM Radio</dt>
+      <dd>{{phone.hardware.fmRadio | checkmark}}</dd>
+      <dt>Accelerometer</dt>
+      <dd>{{phone.hardware.accelerometer | checkmark}}</dd>
+    </dl>
+  </li>
+  <li>
+    <span>Camera</span>
+    <dl>
+      <dt>Primary</dt>
+      <dd>{{phone.camera.primary}}</dd>
+      <dt>Features</dt>
+      <dd>{{phone.camera.features.join(', ')}}</dd>
+    </dl>
+  </li>
+  <li>
+    <span>Additional Features</span>
+    <dd>{{phone.additionalFeatures}}</dd>
+  </li>
+</ul>
+
+</body>
+</html>

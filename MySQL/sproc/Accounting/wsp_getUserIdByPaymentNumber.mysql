@@ -1,0 +1,28 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getUserIdByPaymentNumber;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getUserIdByPaymentNumber (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  September 2003
+**   Description:  returns userId for given purchase payment number or payId. The payId is a historical
+**                 id saved in the paymentNumber field for old Purchases.
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+
+ at_paymentNumber 	VARCHAR(40)
+)
+BEGIN
+
+  SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+  SELECT userId FROM Purchase WHERE paymentNumber = at_paymentNumber;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

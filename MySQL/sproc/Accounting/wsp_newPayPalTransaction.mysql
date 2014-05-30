@@ -1,0 +1,61 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newPayPalTransaction;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newPayPalTransaction (
+
+/*******************************************************************
+**
+** CREATION:
+**   Author:      Andy Tran
+**   Date:        July 2009 
+**   Description: Inserts row into PayPalTransaction
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*******************************************************************/
+ at_xactionId     DECIMAL(12,0)
+,at_paymentNumber VARCHAR(17)
+,at_paymentType   VARCHAR(16)
+,at_paymentStatus VARCHAR(9)
+,at_paymentDate   VARCHAR(30)
+,at_paymentAmount VARCHAR(7)
+,at_feeAmount     VARCHAR(7)
+,at_currencyCode  VARCHAR(3)
+,at_pendingReason VARCHAR(14)
+)
+BEGIN
+
+DECLARE at_dateNow DATETIME;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+INSERT INTO PayPalTransaction (
+         xactionId
+        ,paymentNumber
+        ,paymentType
+        ,paymentStatus
+        ,paymentDate
+        ,paymentAmount
+        ,feeAmount
+        ,currencyCode
+        ,pendingReason
+        ,dateCreated
+    )
+    VALUES (
+         at_xactionId
+        ,at_paymentNumber
+        ,at_paymentType
+        ,at_paymentStatus
+        ,at_paymentDate
+        ,at_paymentAmount
+        ,at_feeAmount
+        ,at_currencyCode
+        ,at_pendingReason
+        ,at_dateNow
+    );
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

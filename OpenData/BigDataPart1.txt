@@ -1,0 +1,9 @@
+Business and government can never have too much information for making the organization more efficient, profitable, or productive. For that reason organizations turned to powerful data stores, including very large databases (VLDBs), to meet their information storage and retrieval needs. Due to exponential data growth in recent years, we have embraced new storage technologies and the enterprise database now shares the spotlight with complementary technologies for storing and managing big data.
+
+There are four key characteristics that define big data: Volume, Velocity, Variety and Value. Volume and velocity aren't necessarily new problems for IT managers; these issues are just amplified today. The distinguishing characteristics of big data that do create new problems are the variety and low density value of the data. Big data comes in many different formats that go beyond the traditional transactional data formats. It is also typically very low density; one single observation on its own doesn't have a lot of value. However, when this data is aggregated and analyzed, meaningful trends can be identified.
+
+Exponential Data Growth
+
+The global data explosion is driven in part by technology such as digital video and music, smartphones, and growth of the internet. For example, clickstream data became available for hundreds of millions of internet users after the browser became a universal client. Social networks have grown so large that the scope of data mining activity now encompasses hundreds of millions. Smartphones that can provide information for location-based services will soon be in the hands of 1 billion users. There is useful information to be derived from these disparate sources such as Web server logs, data streams from instruments, real-time trading data, blogs, and social media such as Twitter and Facebook.
+
+

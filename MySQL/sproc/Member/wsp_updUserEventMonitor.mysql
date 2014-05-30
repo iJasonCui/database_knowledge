@@ -1,0 +1,37 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updUserEventMonitor;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updUserEventMonitor (
+/***********************************************************************
+**
+** CREATION:
+**   Author:        Andy Tran
+**   Date:          April, 2006
+**   Description:   Updates user event monitor
+**
+** REVISION(S):
+**   Author:
+**   Date:
+** Description:
+**
+*************************************************************************/
+ at_userEventId        INT
+,at_adminUserId        INT
+)
+BEGIN
+
+DECLARE at_dateGMT            DATETIME;
+
+CALL wsp_GetDateGMT(at_dateGMT);
+
+IF (SELECT 1 FROM UserEventMonitor WHERE userEventId = at_userEventId) IS NOT NULL
+THEN        
+    UPDATE UserEventMonitor
+       SET adminUserId = at_adminUserId
+          ,reviewedFlag = 'Y'
+          ,dateModified = at_dateGMT
+     WHERE userEventId = at_userEventId ;
+            
+END IF;
+
+END;;
+DELIMITER ;

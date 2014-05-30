@@ -1,0 +1,21 @@
+ fid    spid   status       loginame                       origname                       hostname   blk_spid dbname                         cmd              block_xloid 
+ ------ ------ ------------ ------------------------------ ------------------------------ ---------- -------- ------------------------------ ---------------- ----------- 
+      0      2 sleeping     NULL                           NULL                                      0        master                         DEADLOCK TUNE              0 
+      0      3 sleeping     NULL                           NULL                                      0        master                         MIRROR HANDLER             0 
+      0      4 sleeping     NULL                           NULL                                      0        master                         ASTC HANDLER               0 
+      0      5 sleeping     NULL                           NULL                                      0        master                         ASTC HANDLER               0 
+      0      6 sleeping     NULL                           NULL                                      0        master                         CHECKPOINT SLEEP           0 
+      0      7 sleeping     NULL                           NULL                                      0        master                         HK WASH                    0 
+      0      8 sleeping     NULL                           NULL                                      0        master                         HK GC                      0 
+      0      9 sleeping     NULL                           NULL                                      0        master                         HK CHORES                  0 
+      0     10 sleeping     NULL                           NULL                                      0        master                         PORT MANAGER               0 
+      0     11 sleeping     NULL                           NULL                                      0        master                         NETWORK HANDLER            0 
+      0    295 running      sa                             sa                             opsdb1p    0        master                         SELECT                     0 
+      0    369 recv sleep   sa                             sa                             ESANCH_WKS 0        MonitorBackupP                 AWAITING COMMAND           0 
+      0    514 recv sleep   sa                             sa                             ESANCH_WKS 0        MonitorBackupP                 AWAITING COMMAND           0 
+      0    584 recv sleep   sa                             sa                             HHELAL     0        MonitorBackupP                 AWAITING COMMAND           0 
+      0    692 recv sleep   sa                             sa                             ESANCH_WKS 0        MonitorBackupP                 AWAITING COMMAND           0 
+      0    706 recv sleep   sa                             sa                             ESANCH_WKS 0        MonitorBackupP                 AWAITING COMMAND           0 
+
+(16 rows affected)
+(return status = 0)

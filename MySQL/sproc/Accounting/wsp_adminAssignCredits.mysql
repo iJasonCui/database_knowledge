@@ -1,0 +1,126 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_adminAssignCredits;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_adminAssignCredits (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  Sept 9, 2003
+**   Description:  adds some admin credits for user
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+
+at_userId DECIMAL(12,0),
+at_credits SMALLINT,
+at_xactionTypeId TINYINT,
+at_creditTypeId TINYINT,
+at_adminUserId INT,
+at_contentId SMALLINT,
+at_reason VARCHAR(255),
+at_dateExpiry DATETIME
+)
+proc_label:BEGIN
+
+DECLARE at_dateNow 	DATETIME;
+DECLARE at_xactionId 	INT;
+DECLARE at_balance      INT;
+
+DECLARE EXIT HANDLER FOR SQLWARNING
+BEGIN
+        ROLLBACK;
+END;
+
+DECLARE EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+        ROLLBACK;
+END;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+CALL wsp_XactionId (at_xactionId);
+IF !(at_xactionId > 0)	THEN
+   LEAVE proc_label;
+END IF;
+CALL wsp_getTotalCredits (at_userId, at_balance);
+
+SET at_balance = at_balance + at_credits;
+
+IF at_dateExpiry IS NULL THEN 
+   SET at_dateExpiry = '2052-12-31 00:00:00';
+END IF;
+
+START TRANSACTION;
+
+INSERT INTO AccountTransaction 
+        (   xactionId,
+            userId,
+            creditTypeId,
+            xactionTypeId,
+            contentId,
+            credits,
+            balance,
+            dateCreated,
+            description
+        )
+        VALUES 
+        (   at_xactionId,
+            at_userId,
+            at_creditTypeId,
+            at_xactionTypeId,
+            at_contentId,
+            at_credits,
+            at_balance,
+            at_dateNow,
+            at_reason
+        );
+
+INSERT INTO AdminAccountTransaction 
+            (   xactionId,
+                adminUserId,
+		userId,
+		dateCreated
+            )
+            VALUES
+            (
+                at_xactionId,
+                at_adminUserId,
+		at_userId,
+		at_dateNow
+             );
+
+IF (SELECT 1 FROM CreditBalance WHERE userId = at_userId AND creditTypeId = at_creditTypeId) IS NOT NULL THEN
+   UPDATE CreditBalance 
+                            SET credits = credits + at_credits,
+                                dateModified = at_dateNow,
+                                dateExpiry = at_dateExpiry
+                            WHERE userId = at_userId AND creditTypeId = at_creditTypeId;
+ELSE
+   INSERT INTO CreditBalance
+                            (   userId,
+                                creditTypeId,
+                                credits,
+                                dateExpiry,
+                                dateModified,
+                                dateCreated
+                            )
+                            VALUES 
+                            (   at_userId,
+                                at_creditTypeId,
+                                at_credits,
+                                at_dateExpiry,
+                                at_dateNow,
+                                at_dateNow
+                            );
+END IF;
+
+COMMIT;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

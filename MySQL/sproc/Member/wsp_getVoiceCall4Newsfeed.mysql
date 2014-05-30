@@ -1,0 +1,39 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getVoiceCall4Newsfeed;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getVoiceCall4Newsfeed (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         February 2010
+**   Description:  Get voice calls by target user and newer than cutoff date
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_targetUserId DECIMAL(12,0)
+,at_community    CHAR(1)
+,at_cutoff       DATETIME
+,at_rowcount     SMALLINT
+)
+BEGIN
+
+    SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;
+
+    SELECT userId
+          ,dateCreated
+      FROM VoiceConnect
+     WHERE targetUserId = at_targetUserId
+       AND targetUserId != userId
+       AND targetPhoneNumber IS NULL
+       AND rejectReason = 'OL'
+       AND community = at_community
+       AND dateCreated > at_cutoff
+    ORDER BY dateCreated DESC
+    LIMIT at_rowcount ;     
+
+END;;
+DELIMITER ;

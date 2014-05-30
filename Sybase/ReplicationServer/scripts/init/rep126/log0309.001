@@ -1,0 +1,202 @@
+2012/03/09 14:32:49 rs_init/12.6/EBF 12161/Sun_svr4/OS 5.8/1/OPT/Fri Sep  3
+                    18:05:21 2004
+2012/03/09 14:32:49 Confidential property of Sybase, Inc.
+                    Copyright 1992, 2004
+                    Sybase, Inc.  All rights reserved.
+                    Unpublished rights reserved under U.S. copyright laws.
+                    
+                    This software contains confidential and trade secret
+                    information of Sybase,
+                    Inc.   Use,  duplication or disclosure of the software and
+                    documentation by
+                    the  U.S.  Government  is  subject  to  restrictions set
+                    forth in a license
+                    agreement  between  the  Government  and  Sybase,  Inc.  or 
+                    other  written
+                    agreement  specifying  the  Government's rights to use the
+                    software and any
+                    applicable FAR provisions, for example, FAR 52.227-19.
+                    Sybase, Inc. One Sybase Drive, Dublin, CA 94568, USA
+
+2012/03/09 14:32:49 BEGIN ENVIRONMENT INFORMATION
+
+USER ENVIRONMENT
+----------------------------------------
+user name:                     repserve
+current directory:             /net/w151rep01/ccs/sun4-solaris/repserver126/REP-12_6/init/logs
+character set:                 iso_1
+language:                      us_english
+Component Directory:           /opt/etc/repserver126/REP-12_6
+working release directory:     /opt/etc/repserver126
+
+
+2012/03/09 14:32:49 END ENVIRONMENT INFORMATION
+2012/03/09 14:32:49 Directory service provider: 'InterfacesDriver'. 
+2012/03/09 14:32:49 Using resource file
+                    '/opt/etc/repserver126/REP-12_6/init/logs/w151dbp06.Profile_ai.WS.rs'
+                    for product attributes.
+2012/03/09 14:32:49 Running task: check the SQL Server.
+2012/03/09 14:32:49 Task succeeded: check the SQL Server.
+2012/03/09 14:32:49 Running task: verify users and their passwords.
+2012/03/09 14:32:49 Verified that 'w151rep01_ra_user' can log into Replication
+                    Server 'w151rep01'.
+2012/03/09 14:32:49 Verified that 'sa' can log into Replication Server
+                    'w151rep01'.
+2012/03/09 14:32:49 Task succeeded: verify users and their passwords.
+2012/03/09 14:32:49 Running task: check the database.
+2012/03/09 14:32:49 Verified that database 'Profile_ai' exists.
+2012/03/09 14:32:49 Sending the following SQL command to the server: 'dbcc
+                    is_replication_enabled'.
+2012/03/09 14:32:49 Verified that SQL Server 'w151dbp07' supports replication.
+2012/03/09 14:32:49 Sending the following SQL command to the server: 'use
+                    master'.
+2012/03/09 14:32:49 Sending the following SQL command to the server: 'use
+                    master'.
+2012/03/09 14:32:49 Sending the following SQL command to the server: 'if exists
+                    (select * from sysobjects where name = 	
+                    'rs_install_sql_proc_1') 		drop procedure
+                    rs_install_sql_proc_1'.
+2012/03/09 14:32:49 Sending the following SQL command to the server: 'if exists
+                    (select * from sysobjects where name = 	
+                    'rs_install_sql_proc_2') 		drop procedure
+                    rs_install_sql_proc_2'.
+2012/03/09 14:32:49 Sending the following SQL command to the server: 'use
+                    Profile_ai'.
+2012/03/09 14:32:49 Sending the following SQL command to the server: 'if exists
+                    (select * from sysobjects where name = 	
+                    'rs_install_sql_proc_2') 		 drop procedure
+                    rs_install_sql_proc_2'.
+2012/03/09 14:32:49 Sending the following SQL command to the server: 'use
+                    master'.
+2012/03/09 14:32:49 Sending the following SQL command to the server: 'create
+                    procedure rs_install_sql_proc_1 as if exists (select name
+                    from syslogins where name = "w151rep01_maint_user") begin 
+                    if exists (select * from Profile_ai..sysusers, syslogins   
+                    where Profile_ai..sysusers.name = "w151rep01_maint_user"    
+                    and Profile_ai..sysusers.suid = syslogins.suid     and
+                    (Profile_ai..sysusers.name = syslogins.name     or
+                    Profile_ai..sysusers.uid = 1))      return 1  else   begin  
+                    if exists (select name from syslogins,
+                    Profile_ai..sysalternates   where syslogins.name =
+                    "w151rep01_maint_user" and   syslogins.suid =
+                    Profile_ai..sysalternates.suid)    return 2   else    
+                    return 3  end  end else  return 4'.
+2012/03/09 14:32:49 Sending the following SQL command to the server: 'exec
+                    rs_install_sql_proc_1'.
+2012/03/09 14:32:49 Verified that the maintenance user 'w151rep01_maint_user' is
+                    defined in database 'Profile_ai'.
+2012/03/09 14:32:49 Sending the following SQL command to the server: 'use
+                    master'.
+2012/03/09 14:32:49 Sending the following SQL command to the server: 'if exists
+                    (select * from sysobjects where name = 	
+                    'rs_install_sql_proc_1') 		drop procedure
+                    rs_install_sql_proc_1'.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'if exists
+                    (select * from sysobjects where name = 	
+                    'rs_install_sql_proc_2') 		drop procedure
+                    rs_install_sql_proc_2'.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'use
+                    Profile_ai'.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'if exists
+                    (select * from sysobjects where name = 	
+                    'rs_install_sql_proc_2') 		 drop procedure
+                    rs_install_sql_proc_2'.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'use
+                    master'.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'use
+                    master'.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'if exists
+                    (select * from sysobjects where name = 	
+                    'rs_install_sql_proc_1') 		drop procedure
+                    rs_install_sql_proc_1'.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'if exists
+                    (select * from sysobjects where name = 	
+                    'rs_install_sql_proc_2') 		drop procedure
+                    rs_install_sql_proc_2'.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'use
+                    Profile_ai'.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'if exists
+                    (select * from sysobjects where name = 	
+                    'rs_install_sql_proc_2') 		 drop procedure
+                    rs_install_sql_proc_2'.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'use
+                    master'.
+2012/03/09 14:32:50 Verified that maintenance user 'w151rep01_maint_user' can
+                    log into SQL Server 'w151dbp07'.
+2012/03/09 14:32:50 Verified that maintenance user 'w151rep01_maint_user' can
+                    log into SQL Server 'w151dbp06'.
+2012/03/09 14:32:50 Task succeeded: check the database.
+2012/03/09 14:32:50 Running task: configure database for primary data.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'use
+                    Profile_ai'.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'grant all
+                    on rs_update_lastcommit to w151rep01_maint_user'.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'grant
+                    execute on rs_get_lastcommit to w151rep01_maint_user'.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'grant all
+                    on rs_lastcommit to w151rep01_maint_user'.
+2012/03/09 14:32:50 Granted maintenance user permissions on the lastcommit
+                    functions and rs_marker.
+2012/03/09 14:32:50 WARNING: Please verify that suids in the syslogins table of
+                    the Standby SQL server correspond to syslogins of the Active
+                    SQL Server
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'sp_role
+                    "grant", replication_role, w151rep01_maint_user'.
+2012/03/09 14:32:50 SQL Server message: msg 11107, level 10, state 1
+2012/03/09 14:32:50 "All the roles specified to be granted in the grant role
+                    statement have already been granted to grantee
+                    'w151rep01_maint_user'.
+                    " 
+2012/03/09 14:32:50 Granted replication role to maintenance user 
+2012/03/09 14:32:50 Task succeeded: configure database for primary data.
+2012/03/09 14:32:50 Running task: configure the Replication Agent.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'use
+                    Profile_ai'.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'exec
+                    sp_config_rep_agent "Profile_ai", enable,"w151rep01",
+                    "w151rep01_ra_user", "stickt0it"'.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'exec
+                    sp_config_rep_agent "Profile_ai", "send warm",true '.
+2012/03/09 14:32:50 Task succeeded: configure the Replication Agent.
+2012/03/09 14:32:50 Running task: set connection to the database.
+2012/03/09 14:32:50 Adding database 'Profile_ai' to the replication system.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'admin
+                    version'.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'admin
+                    logical_status,"w151dbp06","Profile_ai"'.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'drop
+                    connection to "w151dbp06"."Profile_ai"'.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'use
+                    Profile_ai'.
+2012/03/09 14:32:50 Sending the following SQL command to the server:
+                    'sp_setreplicate rs_lastcommit,false'.
+2012/03/09 14:32:50 SQL Server message: msg 17962, level 16, state 1
+2012/03/09 14:32:50 WARNING: "The replication status for 'rs_lastcommit' is
+                    already set to false. Replication status for 'rs_lastcommit'
+                    does not change." 
+2012/03/09 14:32:50 Sending the following SQL command to the server:
+                    'sp_setreplicate rs_update_lastcommit,true'.
+2012/03/09 14:32:50 SQL Server message: msg 17962, level 16, state 1
+2012/03/09 14:32:50 WARNING: "The replication status for 'rs_update_lastcommit'
+                    is already set to true. Replication status for
+                    'rs_update_lastcommit' does not change." 
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'create
+                    connection to "w151dbp06"."Profile_ai" set error class
+                    rs_sqlserver_error_class set function string class
+                    rs_sqlserver_function_class set username
+                    "w151rep01_maint_user" set password  "stickt0it"  with log
+                    transfer on as standby for "LogicalSRV"."Profile_ai" use
+                    dump marker'.
+2012/03/09 14:32:50 Successfully executed 'create connection'. Database
+                    'Profile_ai' is now managed by Replication Server
+                    'w151rep01'.
+2012/03/09 14:32:50 Task succeeded: set connection to the database.
+2012/03/09 14:32:50 Running task: start the Replication Agent.
+2012/03/09 14:32:50 Sending the following SQL command to the server: 'exec
+                    sp_start_rep_agent "Profile_ai" '.
+2012/03/09 14:32:50 Task succeeded: start the Replication Agent.
+2012/03/09 14:32:50 Configuration completed successfully.
+2012/03/09 14:32:50 Exiting.
+2012/03/09 14:32:50 The log file for this session is
+                    '/opt/etc/repserver126/REP-12_6/init/logs/log0309.001'.
+2012/03/09 14:32:50 Log close.

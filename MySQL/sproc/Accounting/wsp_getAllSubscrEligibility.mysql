@@ -1,0 +1,34 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAllSubscrEligibility;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAllSubscrEligibility (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  November 2004
+**   Description:  retrieves all subscription types
+**
+**
+******************************************************************************/
+)
+  BEGIN  
+	SELECT 
+          eligibilityId,
+          subscriptionOfferId,
+          localeId,
+          cityId,
+          jurisdictionId,
+          secondJurisdictionId,
+          countryId,
+          billingLocationId,
+          product,
+          community,
+          userType,
+          brand,
+          gender
+        FROM SubscriptionEligibility
+        ORDER BY subscriptionOfferId ;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

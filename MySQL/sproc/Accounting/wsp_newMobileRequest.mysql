@@ -1,0 +1,35 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newMobileRequest;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newMobileRequest (
+ at_userId       DECIMAL(12,0)
+,at_xactionId    DECIMAL(12,0)
+,at_totalAmount  VARCHAR(7)
+,at_phoneNumber  CHAR(20)
+,at_billingLocationId int 
+)
+BEGIN
+
+DECLARE at_dateNow DATETIME;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+INSERT INTO MobilePaymentRequest (
+         xactionId
+        ,userId
+        ,totalAmount
+        ,billingLocationId
+        ,phoneNumber
+        ,dateCreated
+    )
+    VALUES (
+         at_xactionId
+        ,at_userId
+        ,at_totalAmount
+        ,at_billingLocationId
+        ,at_phoneNumber
+        ,at_dateNow
+    );
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

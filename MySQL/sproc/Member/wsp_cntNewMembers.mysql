@@ -1,0 +1,29 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_cntNewMembers;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_cntNewMembers (
+ /******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  Jan 7, 2005  
+**   Description:  Counts number of new users within time range 
+**          
+** REVISION(S):
+**   Author: 
+**   Date: 
+**   Description:
+**
+******************************************************************************/
+at_startSeconds INT,
+at_endSeconds   INT
+)
+BEGIN
+    SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;
+    SELECT count(*)
+      FROM user_info
+     WHERE user_type IN('F', 'P') AND
+           signuptime >= at_startSeconds AND
+           signuptime <= at_endSeconds ;
+        
+END;;
+DELIMITER ;

@@ -1,0 +1,27 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newRenewalEmailLog;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newRenewalEmailLog (
+/******************************************************************************
+******************************************************************************/
+    at_userId                    DECIMAL(12, 0),
+    at_subscriptionEndDate       DATETIME
+)
+BEGIN  
+        DECLARE at_now DATETIME;
+        SET at_now = UTC_TIMESTAMP();
+
+  	IF (SELECT 1 FROM RenewalEmailLog where userId=at_userId) IS NOT NULL THEN 
+           UPDATE RenewalEmailLog SET 
+                  counter=counter+1, 
+                  subscriptionEndDate = at_subscriptionEndDate, 
+                  dateModified = at_now
+           WHERE userId=at_userId; 
+        ELSE
+           INSERT INTO RenewalEmailLog (userId, dateCreated, dateModified, subscriptionEndDate) 
+           VALUES (at_userId, at_now, at_now, at_subscriptionEndDate);
+	END IF;
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

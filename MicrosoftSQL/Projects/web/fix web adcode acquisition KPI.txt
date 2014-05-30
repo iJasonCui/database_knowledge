@@ -1,0 +1,35 @@
+
+--check archive for gaps in the data
+select * from audit.tLoadArchive where objectKey =  232 and dateKey >= 'jun 1 2011' order by dateKey
+--check fact table for gaps in data
+select * from audit.tLoadTable where objectKey =  283 and dateKey >= 'jun 1 2011' order by dateKey
+
+--look at data by day where adcodekey = 0; this shows a spike in new free with adcodekey = 0 but adcode has values, this means the lookups failed for these days
+select signupDateKey,count(*) from acumen.fact.tWebMEmber
+where signupDateKey >= 'jun 1 2011' and AdcodeKey = 0
+group by signupDateKey
+order by signupDateKey
+
+-- compare smaple day to lookup table to verify that they weren't update correctly
+select adcode,adcodeKey,av_listID from acumen.fact.tWebMEmber m , evolve.web.av_adcode_lookup al
+where m.adCode like al.av_adcode
+and al.av_search_order = 1
+and signupDateKey = 'jun 15 2011' and AdcodeKey = 0
+
+
+-- loop through data correcting each effected day
+declare @d datetime 
+set @d = 'jun 12 2011'
+while @d <= 'jun 25 2011'
+ begin
+ --set rowcount 0
+                update acumen.fact.tWebMEmber
+                                set adCodeKey = av_listID
+                                from acumen.fact.tWebMEmber wml, evolve.web.av_adcode_lookup al
+                                where wml.adCode like al.av_adcode
+                                and al.av_search_order = 1 and wml.signupDateKey = @d and wml.AdcodeKey = 0
+                set @d = dateadd(d,1,@d)
+                select @d
+end          
+
+

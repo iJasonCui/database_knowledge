@@ -1,0 +1,47 @@
+1, figure out the current version
+
+select @@version
+ Adaptive Server Enterprise/12.5.4/EBF 13916 ESD#2/P/Sun_svr4/OS 5.8/ase1254/201
+         9/64-bit/FBO/Wed Oct 11 12:36:56 2006
+
+OR
+
+dataserver -v
+
+2, download and extract patch
+
+gunzip -S EBF14650.tgz
+tar xvf EBF14650.tar
+OR
+gtar xvfz EBF14650.tar
+
+3, setup patch 
+ 
+ shutdown the server
+
+ cd ebf14650
+ ./setup -console
+
+
+4, run installmaster and install messages
+
+ startup the server 
+
+ isql -Usa -i./installmaster -o ./installmaster.log.1031
+
+ isql -Usa -i./instmsgs.ebf -o ./instmsgs.ebf.log.1031 
+
+5, if you enable tow phase commit , HA or MDA, etc
+   you need to install corresponding script.
+
+6,  confirm the version
+
+ select @@version
+ Adaptive Server Enterprise/12.5.4/EBF 14650 ESD#6/P/Sun_svr4/OS 5.8/ase1254/207
+         9/64-bit/FBO/Wed Jul 11 12:18:11 2007 
+OR
+
+dataserver -v
+
+7, if the patch is 1254ESD#7, we are supposed to add $SYBASE/OCS-12_5/lib3p64 
+   to be part of LD_LIBRARY_PATH                               

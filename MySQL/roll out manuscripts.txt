@@ -1,0 +1,15 @@
+step 1: shutdown the site
+
+step 2:  clean up
+
+[jcui@gxcvs1 maint]$ pwd
+/home/jcui/web/javalife/db/scripts/maint
+
+changeDB_option.sqsh w151dbp07
+
+step3:  migration
+
+[sybase@wxdbmaint mysqlMigration]$ pwd
+/opt/scripts/maint/mysqlMigration
+
+step 4: call Jeff

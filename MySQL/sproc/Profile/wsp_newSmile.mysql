@@ -1,0 +1,52 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newSmile;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newSmile (
+/***********************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga/Michael Stairs
+**   Date:  September 21 2002
+**   Description:  Inserts row into Smile
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+ at_productCode CHAR(1)
+,at_communityCode CHAR(1)
+,at_userId DECIMAL(12,0)
+,at_targetUserId DECIMAL(12,0)
+,at_smileNoteId1 INT
+,at_smileNoteId2 INT
+
+)
+BEGIN
+DECLARE at_dateCreated DATETIME;
+
+CALL wsp_GetDateGMT(at_dateCreated);
+
+IF (SELECT 1 FROM Blocklist WHERE userId = at_targetUserId and targetUserId = at_userId) IS NULL 
+THEN
+  IF (SELECT 1 FROM Smile WHERE userId = at_userId and targetUserId = at_targetUserId) IS NULL
+  THEN 
+				INSERT INTO Smile 
+				(userId
+				,targetUserId
+				,seen
+				,smileNoteId1
+				,smileNoteId2
+				,dateCreated
+				) VALUES
+				(at_userId
+				,at_targetUserId
+				,'N'
+				,at_smileNoteId1
+				,at_smileNoteId2
+				,at_dateCreated
+				);
+  END IF;
+END IF;
+END;;
+DELIMITER ;

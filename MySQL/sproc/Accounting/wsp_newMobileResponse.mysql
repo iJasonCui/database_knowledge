@@ -1,0 +1,29 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newMobileResponse;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newMobileResponse (
+at_xactionId    DECIMAL(12,0)
+,at_billingRequestId DECIMAL(12,0)
+,at_billingStatusCode int 
+)
+BEGIN
+
+DECLARE at_dateNow DATETIME;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+INSERT INTO MobilePaymentResponse (
+         xactionId
+        ,billingRequestId
+        ,billingStatusCode
+        ,dateCreated
+    )
+    VALUES (
+         at_xactionId
+        ,at_billingRequestId
+        ,at_billingStatusCode
+        ,at_dateNow
+    );
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,31 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_chkPurchaseByCardId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_chkPurchaseByCardId (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Andy Tran
+**   Date:  June 2008
+**   Description:  check if a purchase was made with the credit card before
+**
+** REVISION(S):
+**   Author:
+**   Date: 
+**   Description: 
+**
+******************************************************************************/
+ at_cardId INT
+)
+BEGIN
+
+SELECT 1 AS isExisted
+          FROM Purchase p, CreditCard c
+         WHERE p.creditCardId = at_cardId
+           AND p.xactionTypeId IN (6, 31) -- successful purchase
+           AND p.creditCardId = c.creditCardId
+           AND p.dateCreated > c.dateCreated;
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

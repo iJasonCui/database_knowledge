@@ -1,0 +1,41 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getLatLongFixByZip;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getLatLongFixByZip (
+/***********************************************************************
+**
+** CREATION:
+**   Author: Generator 
+**   Date: at_TIMESTAMPat_ 
+**   Description: getLatLongFixByZip 
+**
+*************************************************************************/
+    at_postalCode varchar(10)
+)
+BEGIN
+
+   DECLARE at_lat int;
+   DECLARE at_lon int;
+   DECLARE at_countryId int ;  
+
+   SELECT lat_rad, long_rad, countryId INTO at_lat, at_lon, at_countryId
+     FROM PostalZipCode
+    WHERE zipcode = at_postalCode ;
+
+   IF at_lat IS NOT NULL
+   THEN
+       -- this is to fix the inconsistent data in zipcode table
+       IF (at_countryId = 244 OR at_countryId = 40) 
+       THEN 
+           SET at_lat=at_lat-157079 ;   
+           SET at_lon=at_lon* (-1) ;
+       ELSE     
+           IF (at_countryId = 13 OR at_countryId = 242)    
+           THEN
+               SET at_lat=at_lat-2 ; 
+           END IF;
+       END IF;
+       SELECT at_lat as latitude, at_lon as longitude ; 
+   END IF;
+
+END;;
+DELIMITER ;

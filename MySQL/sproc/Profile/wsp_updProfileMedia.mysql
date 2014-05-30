@@ -1,0 +1,68 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updProfileMedia;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updProfileMedia (
+ at_productCode           CHAR(1)
+,at_communityCode         CHAR(1)
+,at_userId                DECIMAL(12,0)
+,at_mediaId               INT
+,at_mediaType             CHAR(1)  -- v = video, p = picture, a = audio
+,at_profileFlag           CHAR(1)  -- value Y means display with profile
+,at_backstageFlag         CHAR(1)  -- value Y means display with backstage
+,at_galleryFlag           CHAR(1)  -- value Y means display with gallery
+,at_slideshowFlag         CHAR(1)  -- value Y means display in slideshow
+,at_filename              VARCHAR(80)
+,at_decisionDate          DATETIME
+)
+BEGIN
+
+IF at_profileFlag = 'N' AND at_backstageFlag = 'N' AND at_galleryFlag = 'N' THEN
+        DELETE FROM ProfileMedia WHERE mediaId = at_mediaId;
+        CALL wsp_delPassIfNoBackstage(at_userId, at_productCode, at_communityCode);
+ELSE
+BEGIN
+  -- first unset any previously set profile or backstage or gallery media 
+  IF at_profileFlag = 'Y' and at_mediaType !='v' THEN
+         UPDATE ProfileMedia SET  profileFlag='N'
+         WHERE userId=at_userId AND
+               mediaType=at_mediaType AND
+               mediaId != at_mediaId AND 
+               profileFlag = 'Y';
+  ELSEIF (SELECT at_mediaId FROM ProfileMedia WHERE mediaId = at_mediaId) IS NULL THEN
+        INSERT INTO ProfileMedia
+        (mediaId,
+         userId,
+         filename,
+         mediaType,
+         profileFlag,
+         backstageFlag,
+         galleryFlag,
+         slideshowFlag,
+         dateCreated,
+         dateModified)
+         VALUES 
+        (at_mediaId,
+         at_userId,
+         at_filename,
+         at_mediaType,
+         at_profileFlag,
+         at_backstageFlag,
+         at_galleryFlag,
+         at_slideshowFlag,
+         at_decisionDate,
+         at_decisionDate);
+  ELSE     -- used to toggle video/pict/audio between profile/backstage/gallery
+        UPDATE ProfileMedia
+        SET profileFlag=at_profileFlag,
+            backstageFlag=at_backstageFlag,
+            galleryFlag=at_galleryFlag,
+            slideshowFlag=at_slideshowFlag,
+            dateModified=at_decisionDate
+        WHERE 
+        mediaId = at_mediaId AND
+        (backstageFlag!=at_backstageFlag OR profileFlag!=at_profileFlag OR galleryFlag!=at_galleryFlag OR slideshowFlag!=at_slideshowFlag);
+  END IF;
+END;
+END IF;
+
+END;;
+DELIMITER ;

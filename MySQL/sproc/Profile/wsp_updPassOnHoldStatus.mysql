@@ -1,0 +1,16 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updPassOnHoldStatus;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updPassOnHoldStatus (
+    at_userId                  DECIMAL(12, 0),
+    at_messageOnHoldStatus     CHAR(1),
+    at_messageOnHoldDate 	     DATETIME    
+)
+
+BEGIN
+
+    UPDATE Pass 
+       SET messageOnHoldStatus = at_messageOnHoldStatus  
+     WHERE userId = at_userId
+       AND dateCreated > at_messageOnHoldDate;
+END;;
+DELIMITER ;

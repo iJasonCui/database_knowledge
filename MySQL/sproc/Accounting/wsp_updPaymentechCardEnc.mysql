@@ -1,0 +1,39 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updPaymentechCardEnc;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updPaymentechCardEnc (
+
+/*******************************************************************
+ **
+ ** CREATION:
+ **   Author:       Andy Tran
+ **   Date:         February 2008
+ **   Description:  replace encodedCardNum with encodedCardId.
+ **
+ ** REVISION(S):
+ **   Author:
+ **   Date:
+ **   Description:
+ **
+*******************************************************************/
+ at_encodedCardNum VARCHAR(64)
+,at_encodedCardId  INT
+)
+BEGIN
+
+IF (SELECT 1 FROM PaymentechRequest WHERE cardNumber = at_encodedCardNum) IS NOT NULL THEN
+   UPDATE PaymentechRequest
+               SET cardNumber = ''
+                  ,encodedCardId = at_encodedCardId
+             WHERE cardNumber = at_encodedCardNum;
+END IF;
+
+IF (SELECT 1 FROM PaymentechResponse WHERE cardNumber = at_encodedCardNum) IS NOT NULL THEN 
+   UPDATE PaymentechResponse
+               SET cardNumber = ''
+                  ,encodedCardId = at_encodedCardId
+             WHERE cardNumber = at_encodedCardNum;
+END IF;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

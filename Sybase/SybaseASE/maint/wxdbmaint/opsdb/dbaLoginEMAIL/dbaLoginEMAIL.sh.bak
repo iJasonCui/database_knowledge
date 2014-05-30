@@ -1,0 +1,57 @@
+#!/bin/sh
+
+if [ $# -ne 1 ] ; then
+  echo "Usage: <groupName> "
+  exit 1
+fi
+
+
+#
+# Initialize arguments
+#
+
+DatabaseName=master
+#Server=webdb27p
+sysName=${1}
+SYBMAILTO=`cat ./mail_${sysName}.list`
+
+echo "DBA Login Report" > dbaEmail.body.${sysName}
+echo "" >> dbaEmail.body.${sysName}
+
+. /home/sybase/.bash_profile
+
+while read Server
+do
+
+echo "" >> dbaEmail.body.${sysName}
+
+Password=`cat $HOME/.sybpwd | grep $Server | awk '{print $2}'`
+$SYBASE/$SYBASE_OCS/bin/isql -w90000 -S${Server} -Ucron_sa -P${Password}  <<EOF1 >> dbaEmail.body.${sysName}
+set nocount on
+go
+use ${DatabaseName}
+go
+
+select "${Server}" as ServerName ,convert(char(15),L.name) as LoginName , L.fullname as LoginFullName 
+, convert(char(15),SR.name) as RoleName  , convert(char(11),L.accdate) as CreateDate 
+, convert(char(20),L.pwdate) as PassDateTime 
+--,L.*, SR.* 
+from syslogins L , syssrvroles SR , sysloginroles LR
+where 
+L.suid = LR.suid and
+LR.srid = SR.srid and
+L.status = 0 and
+SR.name in ( 'sa_role' , 'sso_role' )
+order by 1 , 2
+
+go
+EOF1
+
+done < Server.list
+
+mail -s "DBA Login Report for `date`" ${SYBMAILTO} < dbaEmail.body.${sysName}
+
+exit 0
+~
+~
+~

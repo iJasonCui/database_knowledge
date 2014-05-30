@@ -1,0 +1,147 @@
+#! /usr/bin/perl
+print "Hello,word!\n" ;
+
+
+$count = 0;
+while ($count < 10) 
+{
+      $count += 2;
+      print "count is now $count\n"; 
+}
+
+#-------------------------
+# array pop
+#------------------------
+@array = 5..9;
+$fred = pop(@array); #$fred ??9,@array ???(5,6,7,8)
+print "\$fred is now $fred\n";
+
+$barney = pop @array; #$barney gets 8, @array ???(5,6,7)
+print "\$barney is now $barney\n";
+
+pop @array; #@array ???(5,6)(7 ????)
+
+#---------------------------------
+# array push
+#---------------------------------
+push(@array,0); #@array ???(5,6,0)
+push @array,11; #@array ???(5,6,0,8)
+push @array,20..30; #@array ????10 ???
+@others =qw/31 32 33/;
+push @array,@others;
+
+print "The array is now @array\n";
+
+#---------------------------------
+# array shift and unshift 
+#--------------------------------
+@array = qw# dino fred barney #;
+print "The array is now @array\n";
+
+$m = shift (@array); 
+print "The array is now @array\n";
+
+$n = shift @array; 
+print "The array is now @array\n";
+
+shift @array; 
+
+$o = shift @array; 
+unshift(@array,5); 
+unshift @array,4; 
+@others = 1..3;
+unshift @array, @others; #array (1,2,3,4,5)
+print "The array is now @array\n";
+
+#--------------------------------
+# array 
+#--------------------------------
+@fred = qw(hello dolly);
+print "The array is now @fred\n";
+$y = 2;
+$x ="This is $fred[1]'s place"; # This is dolly's place
+print "The \$x is now $x\n";
+$x ="This is $fred[$y-1]'s place";
+print "The \$x is now $x\n";
+
+#----------------------------------
+# array
+#----------------------------------
+@fred = qw(eating rocks is wrong);
+print "The array is now @fred\n";
+$fred = "right"; 
+print "The \$fred is now $fred\n";
+print "this is $fred[3]\n"; 
+print "this is ${fred}[3]\n"; 
+print "this is $fred". "[3]\n"; 
+print "this is $fred\[3]\n"; 
+
+#--------------------------------
+# array foreach 
+#--------------------------------
+foreach $rock qw( bedrock slate lava ) 
+{
+print "One rock is $rock.\n"; 
+}
+
+@rocks = qw/ bedrock slate lava /;
+foreach $rocks(@rocks){
+print "The current rock is: $rocks \n";
+}
+print "The rocks are: @rocks \n";
+
+#-------------------------
+# array reverse
+#-------------------------
+@fred = 6 ..10;
+print "The fred are: @fred \n";
+@barney = reverse (@fred); #10,9,8,7,6
+print "The barney are: @barney \n";
+
+@wilma = reverse 6 ..10; 
+print "The wilma are: @wilma \n";
+@fred = reverse @fred;
+print "The fred are: @fred \n";
+
+@fred = 10 ..16;
+print "The fred are: @fred \n";
+
+#--------------------------------
+# sort
+#-------------------------------
+@rocks = qw/ bedrock slate rubble granite /;
+print "The rocks are: @rocks \n";
+
+@sorted = sort(@rocks); #bedrock, granite, rubble, slate
+print "The rocks are: @sorted \n";
+
+@back = reverse sort @rocks; #slate ..bedrock
+print "The rocks are: @back \n";
+
+@rocks = sort @rocks; 
+@numbers = sort 97 ..102;
+print "The numbers are: @numbers \n";
+
+#--------------------------------
+# array
+#--------------------------------
+@people = qw( fred barney betty );
+print "The names are: @people \n";
+
+@sorted = sort @people; #context:barney , betty, fred
+print "The sorted name are: @sorted \n";
+
+$number = 42 + @people;
+print "The numbers are: $number \n";
+
+
+#-------------------------------
+# list and scalar
+#-------------------------------
+
+@rocks = qw(talc quartz jade obsidian);
+print "How many rocks do you have?\n";
+print "I have , @rocks, rocks!\n";
+print "I have " , scalar @rocks, " rocks!\n" ;
+
+

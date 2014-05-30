@@ -1,0 +1,194 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newUserInfo;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newUserInfo (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Jack Veiga/Jeff Yang 
+**   Date:  June 9 2002  
+**   Description:  Inserts row in user_info and web900create  
+**
+** REVISION(S):
+**   Author: Jack Veiga
+**   Date: August 2003
+**   Description: Eliminated insert to web900create
+**
+**   Author:  Malay Dave
+**   Date:  Mar 4 2004
+**   Description:  Add new col 'pref_clubll_signup' - for storing clubll signup preference
+**
+**   Author:  Valeri Popov
+**   Date:  Apr. 16 2004
+**   Description:  Add languagesSpokenMask, countryId, jurisdictionId, secondJursidictionId,
+**                 cityId
+**
+**   Author:  Valeri Popov
+**   Date:  May 4 2004
+**   Description:  Removed UPPER for City
+**
+**   Author:  Travis McCauley
+**   Date:  July 19, 2004
+**   Description:  Added localePref
+**
+**   Author:  Travis McCauley
+**   Date:  August 5, 2004
+**   Description:  Added signupLocalePref
+**
+**   Author:  Malay Dave
+**   Date:  May 6 2005
+**   Description:  Added searchLanguageMask
+**
+**   Author: Mike Stairs
+**   Date: Oct 2005
+**   Description: eliminated references to removed columns from user_info
+**
+**   Author: Andy Tran
+**   Date: Aug 2006
+**   Description: Added signupIP
+**
+**   Author: Andy Tran
+**   Date: Jul 30 2008
+**   Description: use email address as username
+**
+******************************************************************************/
+OUT at_userId             DECIMAL(12,0) 
+,at_username           VARCHAR(129)
+,at_user_type          CHAR(1)
+,at_password           VARCHAR(16)
+,at_gender             CHAR(1)
+,at_status             CHAR(1)
+,at_signuptime         INT
+,at_laston             INT
+,at_height_cm          INT
+,at_birthdate          DATETIME
+,at_email              VARCHAR(129)
+,at_lat_rad            INT
+,at_long_rad           INT
+,at_zipcode            VARCHAR(10)
+,at_ethnic             CHAR(1)
+,at_religion           CHAR(1)
+,at_smoke              CHAR(1)
+,at_body_type          CHAR(1)
+,at_pref_last_on       CHAR(1)
+,at_preferred_units    CHAR(1)
+,at_signup_adcode      VARCHAR(30)
+,at_signup_context     CHAR(3)
+,at_user_agent         VARCHAR(80)
+,at_emailStatus        CHAR(1)
+,at_pref_clubll_signup CHAR(1)
+,at_languagesSpokenMask INT
+,at_countryId          SMALLINT
+,at_jurisdictionId     SMALLINT
+,at_secondJurisdictionId SMALLINT
+,at_cityId             INT
+,at_localePref         INT
+,at_signupLocalePref   INT
+,at_searchLanguageMask INT
+,at_signupIP           DECIMAL(12,0)
+)
+BEGIN
+
+DECLARE at_universalId DECIMAL(10,0) ;
+DECLARE at_randomNumber       INT ;
+DECLARE at_dateNow DATETIME ;
+DECLARE at_lat_rad1 int ;
+DECLARE at_long_rad1 int ;
+DECLARE at_maxUserCellId SMALLINT;
+
+CALL wsp_GetDateGMT(at_dateNow);
+	
+CALL wsp_UserId(at_userId);
+CALL wsp_UniversalId( at_universalId);
+CALL wsp_RandomNumber( at_randomNumber ,1000,9999 );
+
+CALL wsp_getLatLong(at_lat_rad, at_long_rad, at_countryId, at_cityId, at_lat_rad1 , at_long_rad1);
+
+SELECT maxUserCellId INTO at_maxUserCellId FROM UserCellId ;
+
+INSERT INTO user_info
+(user_id
+,username
+,user_type
+,password
+,gender
+,status
+,signuptime
+,laston
+,height_cm
+,birthdate
+,email
+,lat_rad
+,long_rad
+,lat_rad1
+,long_rad1
+,zipcode
+,ethnic
+,religion
+,smoke
+,body_type
+,pref_last_on
+,preferred_units
+,universal_id
+,universal_password
+,signup_adcode
+,signup_context
+,user_agent
+,emailStatus
+,pref_clubll_signup
+,languagesSpokenMask
+,countryId
+,jurisdictionId
+,secondJurisdictionId
+,cityId
+,localePref
+,signupLocalePref
+,searchLanguageMask
+,dateModified
+,signupIP
+,userCellId
+)
+VALUES
+(at_userId
+,LTRIM(UPPER(at_username))
+,at_user_type
+,LTRIM(UPPER(at_password))
+,at_gender
+,at_status
+,at_signuptime
+,at_laston
+,at_height_cm
+,at_birthdate
+,LTRIM(UPPER(at_email))
+,at_lat_rad
+,at_long_rad
+,at_lat_rad1
+,at_long_rad1
+,LTRIM(UPPER(at_zipcode))
+,at_ethnic
+,at_religion
+,at_smoke
+,at_body_type
+,at_pref_last_on
+,at_preferred_units
+,at_universalId
+,at_randomNumber
+,at_signup_adcode
+,at_signup_context
+,at_user_agent
+,at_emailStatus
+,at_pref_clubll_signup
+,at_languagesSpokenMask
+,at_countryId
+,at_jurisdictionId
+,at_secondJurisdictionId
+,at_cityId
+,at_localePref
+,at_signupLocalePref
+,at_searchLanguageMask
+,at_dateNow
+,at_signupIP
+,(at_userId % at_maxUserCellId + 1)
+) ;
+	
+END;;
+DELIMITER ;

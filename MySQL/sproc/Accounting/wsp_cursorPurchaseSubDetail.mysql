@@ -1,0 +1,99 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_cursorPurchaseSubDetail;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_cursorPurchaseSubDetail (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Mike Stairs
+**   Date:         Oct 1, 2003
+**   Description:  retrieves purchase transactions for the specified user
+**
+** REVISION(S):
+**   Author:       Mike Stairs
+**   Date:         November 26, 2004
+**   Description:  retrieve subcription related info too
+**
+**   Author:       Andy Tran
+**   Date:         December 2005
+**   Description:  use union to retrieve both regular and subscription purchases
+**
+**   Author:       Andy Tran
+**   Date:         August 2006
+**   Description:  added userIP (the IP number at time of purchase)
+**
+**   Author:       Yan Liu 
+**   Date:         April 2008
+**   Description:  rewrite this proc for upsell 
+**
+**   Author:       Eugene Huang 
+**   Date:         February 2009
+**   Description:  added fetching for X for Y Subscription purchases,
+*                  and append discountCode to description
+**
+**   Author:       Andy Tran 
+**   Date:         July 2009
+**   Description:  added SpeedDating purchases
+**
+**   Author:       TK Chan  
+**   Date:         May 2010
+**   Description:  added support to show Tax codes
+**
+******************************************************************************/
+at_userId            DECIMAL(12, 0),
+at_xactionId         DECIMAL(12, 0),
+at_xactionTypeId     TINYINT,
+at_dateCreated       DATETIME,
+at_purchaseTypeId    TINYINT,
+at_paymentNumber     VARCHAR(40),    
+at_creditCardId      INT,    
+at_currencyId        TINYINT,        
+at_cardProcessor     CHAR(1),        
+at_billingLocationId SMALLINT,       
+at_refXactionId      DECIMAL(12, 0), 
+at_adminUserId       INT, 
+at_purchaseType      VARCHAR(2),        
+at_userIP            DECIMAL(12, 0), 
+at_discountFlag      CHAR(1),
+at_taxCountryId      SMALLINT,
+at_taxJurisdictionId INT,
+at_taxCodeName       VARCHAR(203),
+OUT at_subRecordCount    TINYINT
+)
+BEGIN
+
+DECLARE at_cost              DECIMAL(10, 2); 
+DECLARE at_costUSD           DECIMAL(5, 2);
+DECLARE at_tax               DECIMAL(10, 2);
+DECLARE at_taxUSD            DECIMAL(5, 2);
+DECLARE at_offerDetailId     SMALLINT;
+DECLARE at_contentId         SMALLINT;       
+DECLARE at_description       VARCHAR(255);
+
+DECLARE done INT DEFAULT FALSE;
+DECLARE CUR_purchaseSubDetail CURSOR FOR SELECT subscriptionOfferDetailId,cost,costUSD,tax,taxUSD FROM PurchaseSubscriptionDetail WHERE xactionId = at_xactionId;
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+OPEN CUR_purchaseSubDetail;
+-- --------------- subscription detail  while loop begin --------------     
+read_loop: LOOP
+   FETCH CUR_purchaseSubDetail INTO at_offerDetailId, at_cost, at_costUSD, at_tax, at_taxUSD;
+   IF done THEN
+      LEAVE read_loop;
+   END IF;
+   IF (SELECT 1 FROM SubscriptionTransaction WHERE xactionId = at_xactionId AND subscriptionOfferDetailId = at_offerDetailId) IS NOT NULL 
+   THEN
+      SELECT contentId, description INTO at_contentId, at_description FROM SubscriptionTransaction WHERE xactionId = at_xactionId AND subscriptionOfferDetailId = at_offerDetailId;
+   ELSE
+      SET at_contentId = NULL;
+      SET at_description = NULL;
+   END IF;
+   CALL wsp_transPurchaseHistForAdmin (at_userId,at_xactionId,at_xactionTypeId,at_dateCreated,at_cost,at_costUSD,at_tax,at_taxUSD,at_purchaseTypeId,at_paymentNumber,at_creditCardId,
+	      				    at_offerDetailId,at_currencyId,at_cardProcessor,at_billingLocationId,at_refXactionId,at_contentId,at_description,at_adminUserId,
+					    at_purchaseType,at_userIP,at_discountFlag,at_taxCountryId,at_taxJurisdictionId,at_taxCodeName,at_subRecordCount);
+END LOOP;
+-- --------------- subscription detail  while loop end --------------
+CLOSE CUR_purchaseSubDetail ;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

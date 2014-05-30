@@ -1,0 +1,1471 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<TITLE>Sybase FAQ: 6/19 - ASE Admin (3 of 7)</TITLE>
+<script language="JavaScript1.2">
+function edc(s,s2)
+{document.write("<font face=\"Arial\"><A href=\"",s,"\" target=\"_blank\" onclick=\"window.open('",s,"','Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=720,height=530,left=30,top=43');return false;\" )>Not finding the answers you need?&nbsp;",s2,"Submit your question for others to see.</A></font>");}
+//-->
+</script>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<DIV ALIGN=CENTER>
+<SMALL>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  Part6 -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A>
+</SMALL>
+<BR><HR SIZE=2 WIDTH=600 NOSHADE>
+<P><H1>Sybase FAQ: 6/19 - ASE Admin (3 of 7)</H1>
+<table border="0" cellpadding="4" cellspacing="4" width="35%">
+<tr><td width="100%" align="center" bgcolor="#D6D6C0">
+<p align=center><small>
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part6/index.html","<br>");
+// --></script>
+</small></p>
+</td></tr>
+</table>
+ <br>
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="40%">
+<tr><td width="100%" align="center" bgcolor="#CCCCFF"><font face="Arial">There are reader questions on this topic!<a href="#ct"><br>Help
+others by sharing your knowledge</a></font></td></tr>
+</table></center></div>
+<HR SIZE=2 WIDTH=600 NOSHADE>
+</DIV>
+<PRE>
+Message-ID: &lt;databases/sybase-faq/part6_1074677126@rtfm.mit.edu&gt;
+X-Last-Updated: 2003/03/02
+From: dowen@midsomer.org (David Owen)
+Newsgroups: <A HREF="http://groups.google.com/groups?group=comp.databases.sybase" target="new">comp.databases.sybase</A>
+Subject: Sybase FAQ: 6/19 - ASE Admin (3 of 7)
+Reply-To: <A HREF="mailto:dowen@midsomer.org">dowen@midsomer.org</A> (David Owen)
+Keywords: FAQ, DATABASES, SYBASE, ASA, ASE, REP
+Date: 21 Jan 2004 09:26:03 GMT
+
+Archive-name: databases/sybase-faq/part6
+URL: <A HREF="http://www.isug.com/Sybase_FAQ">http://www.isug.com/Sybase_FAQ</A>
+Version: 1.7
+Maintainer: David Owen
+Last-modified: 2003/03/02
+Posting-Frequency: posted every 3rd month
+   A how-to-find-the-FAQ article is posted on the intervening months.
+
+                          Advanced ASE Administration                          
+                                                                               
+ 
+
+    1.3.1   How do I clear a log suspend'd connection?
+    1.3.2   What's the best value for cschedspins?
+    1.3.3   What traceflags are available?
+    1.3.4   How do I use traceflags 5101 and 5102?
+    1.3.5   What is cmaxpktsz good for?
+    1.3.6   What do all the parameters of a buildmaster -d&lt;device&gt; -yall mean?
+    1.3.7   What is CIS and how do I use it?
+    1.3.8   If the master device is full how do I make the master database
+    bigger?
+    1.3.9   How do I run multiple versions of Sybase on the same server?
+    1.3.10  How do I capture a process's SQL?
+   
+ 
+
+General Troubleshooting User Database Administration ASE FAQ
+
+-------------------------------------------------------------------------------
+
+1.3.1 How to clear a log suspend
+
+-------------------------------------------------------------------------------
+
+A connection that is in a log suspend state is there because the transaction
+that it was performing couldn't be logged. The reason it couldn't be logged is
+because the database transaction log is full. Typically, the connection that
+caused the log to fill is the one suspended. We'll get to that later.
+
+In order to clear the problem you must dump the transaction log. This can be
+done as follows:
+
+    dump tran db_name to data_device
+    go
+
+At this point, any completed transactions will be flushed out to disk. If you
+don't care about the recoverability of the database, you can issue the
+following command:
+
+    dump tran db_name with truncate_only
+
+If that doesn't work, you can use the with no_log option instead of the with
+truncate_only.
+
+After successfully clearing the log the suspended connection(s) will resume.
+
+Unfortunately, as mentioned above, there is the situation where the connection
+that is suspended is the culprit that filled the log. Remember that dumping the
+log only clears out completed transaction. If the connection filled the log
+with one large transaction, then dumping the log isn't going to clear the
+suspension.
+
+System 10
+
+What you need to do is issue an ASE kill command on the connection and then
+un-suspend it:
+
+    select lct_admin("unsuspend", db_id("db_name"))
+
+System 11
+
+See Sybase Technical News Volume 6, Number 2
+
+Retaining Pre-System 10 Behaviour
+
+By setting a database's abort xact on log full option, pre-System 10 behaviour
+can be retained. That is, if a connection cannot log its transaction to the log
+file, it is aborted by ASE rather than suspended.
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.3.2 What's the best value for cschedspins?
+
+-------------------------------------------------------------------------------
+
+It is crucial to understand that cschedspins is a tunable parameter
+(recommended values being between 1-2000) and the optimum value is completely
+dependent on the customer's environment. cschedspins is used by the scheduler
+only when it finds that there are no runnable tasks. If there are no runnable
+tasks, the scheduler has two options:
+
+ 1. Let the engine go to sleep (which is done by an OS call) for a specified
+    interval or until an event happens. This option assumes that tasks won't
+    become runnable because of tasks executing on other engines. This would
+    happen when the tasks are waiting for I/O more than any other resource such
+    as locks. Which means that we could free up the CPU resource (by going to
+    sleep) and let the system use it to expedite completion of system tasks
+    including I/O.
+ 2. Go and look for a ready task again. This option assumes that a task would
+    become runnable in the near term and so incurring the extra cost of an OS
+    context switch through the OS sleep/wakeup mechanism is unacceptable. This
+    scenario assumes that tasks are waiting on resources such as locks, which
+    could free up because of tasks executing on other engines, more than they
+    wait for I/O.
+
+cschedspins controls how many times we would choose option 2 before choosing
+option 1. Setting cschedspins low favours option 1 and setting it high favours
+option 2. Since an I/O intensive task mix fits in with option 1, setting
+cschedspins low may be more beneficial. Similarly since a CPU intensive job mix
+favours option 2, setting cschedspins high may be beneficial.
+
+The consensus is that a single CPU server should have cschedspins set to 1.
+However, I strongly recommend that users carefully test values for cschedspins
+and monitor the results closely. I have seen more than one site that has shot
+themselves in the foot so to speak due to changing this parameter in production
+without a good understanding of their environment.
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.3.3 Trace Flag Definitions
+
+-------------------------------------------------------------------------------
+
+To activate trace flags, add them to the RUN_* script. The following example is
+using the 1611 and 260 trace flags. Note that there is no space between the
+'-T' and the traceflag, despite what is written in some documentation.
+
+    Use of these traceflags is not recommended by Sybase. Please use at your
+    own risk.
+   
+% cd ~sybase/install
+% cat RUN_BLAND
+#!/bin/sh
+#
+# SQL Server Information:
+#  name:                          BLAND
+#  master device:                 /usr/sybase/dbf/BLAND/master.dat
+#  master device size:            25600
+#  errorlog:                      /usr/sybase/install/errorlog_BLAND
+#  interfaces:                    /usr/sybase
+#
+/usr/sybase/dataserver -d/usr/sybase/dbf/BLAND/master.dat \
+-sBLAND -e/usr/sybase/install/errorlog_BLAND -i/usr/sybase \
+-T1611 -T260
+-------------------------------------------------------------------------------
+
+                                                                               
+                                  Trace Flags                                  
++-----------------------------------------------------------------------------+
+|      |                                                                      |
+|------+----------------------------------------------------------------------|
+| Flag |                             Description                              |
+|------+----------------------------------------------------------------------|
+| 108  | (Documented) To allow dynamic and host variables in create view      |
+|      | statements in ASE 12.5 and above.                                    |
+|------+----------------------------------------------------------------------|
+| 200  | Displays messages about the before image of the query-tree.          |
+|------+----------------------------------------------------------------------|
+| 201  | Displays messages about the after image of the query-tree.           |
+|------+----------------------------------------------------------------------|
+| 241  | Compress all query-trees whenever the SQL dataserver is started.     |
+|------+----------------------------------------------------------------------|
+|      | Reduce TDS (Tabular Data Stream) overhead in stored procedures. Turn |
+|      | off done-in-behaviour packets. Do not use this if your application   |
+|      | is a ct-lib based application; it'll break.                          |
+| 260  |                                                                      |
+|      | Why set this on? Glad you asked, typically with a db-lib application |
+|      | a packet is sent back to the client for each batch executed within a |
+|      | stored procedure. This can be taxing in a WAN/LAN environment.       |
+|------+----------------------------------------------------------------------|
+|      | Changes the hierarchy and casting of datatypes to pre-11.5.1         |
+|      | behaviour. There was an issue is some very rare cases where a wrong  |
+|      | result could occur, but that's been cleared up in 11.9.2 and above.  |
+|      |                                                                      |
+| 291  | The trace can be used at boot time or at the session level. Keep in  |
+|      | mind that it does not disqualify a table scan from occurring. What   |
+|      | it will do is result in fewer datatype mismatch situations and thus  |
+|      | the optimizer will be able to estimate the costs of SARGs and joins  |
+|      | on columns involved in a mismatch.                                   |
+|------+----------------------------------------------------------------------|
+| 299  | This trace flag instructs the dataserver to not recompile a child    |
+|      | stored procedure that inherits a temp table from a parent procedure. |
+|------+----------------------------------------------------------------------|
+| 302  | Print information about the optimizer's index selection.             |
+|------+----------------------------------------------------------------------|
+| 303  | Display OR strategy                                                  |
+|------+----------------------------------------------------------------------|
+|      | Revert special or optimizer strategy to that strategy used in        |
+| 304  | pre-System 11 (this traceflag resolved several bug issues in System  |
+|      | 11, most of these bugs are fixed in ASE 11.0.3.2)                    |
+|------+----------------------------------------------------------------------|
+| 310  | Print information about the optimizer's join selection.              |
+|------+----------------------------------------------------------------------|
+| 311  | Display the expected IO to satisfy a query. Like statistics IO       |
+|      | without actually executing.                                          |
+|------+----------------------------------------------------------------------|
+| 317  | Provide extra optimization information.                              |
+|------+----------------------------------------------------------------------|
+| 319  | Reformatting strategies.                                             |
+|------+----------------------------------------------------------------------|
+| 320  | Turn off the join order heuristic.                                   |
+|------+----------------------------------------------------------------------|
+| 324  | Turn off the like optimization for ad-hoc queries using              |
+|      | @local_variables.                                                    |
+|------+----------------------------------------------------------------------|
+|      | (Only valid in ASE versions prior to 11.9.2.)  Instructs the server  |
+|      | to use arithmetic averaging when calculating density instead of a    |
+| 326  | geometric weighted average when updating statistics.  Useful for     |
+|      | building better stats when an index has skew on the leading column.  |
+|      | Use only for updating the stats of a table/index with known skewed   |
+|      | data.                                                                |
+|------+----------------------------------------------------------------------|
+|      |                                                                      |
+|------+----------------------------------------------------------------------|
+| 602  | Prints out diagnostic information for deadlock prevention.           |
+|------+----------------------------------------------------------------------|
+| 603  | Prints out diagnostic information when avoiding deadlock.            |
+|------+----------------------------------------------------------------------|
+| 699  | Turn off transaction logging for the entire SQL dataserver.          |
+|------+----------------------------------------------------------------------|
+| 1204 | Send deadlock detection to the errorlog.                             |
+| *    |                                                                      |
+|------+----------------------------------------------------------------------|
+| 1205 | Stack trace on deadlock.                                             |
+|------+----------------------------------------------------------------------|
+| 1206 | Disable lock promotion.                                              |
+|------+----------------------------------------------------------------------|
+| 1603 | Use standard disk I/O (i.e. turn off asynchronous I/O).              |
+| *    |                                                                      |
+|------+----------------------------------------------------------------------|
+| 1605 | Start secondary engines by hand                                      |
+|------+----------------------------------------------------------------------|
+|      | Create a debug engine start file. This allows you to start up a      |
+|      | debug engine which can access the server's shared memory for running |
+|      | diagnostics. I'm not sure how useful this is in a production         |
+| 1606 | environment as the debugger often brings down the server. I'm not    |
+|      | sure if Sybase have ported the debug stuff to 10/11. Like most of    |
+|      | their debug tools it started off quite strongly but was never        |
+|      | developed.                                                           |
+|------+----------------------------------------------------------------------|
+|      | Startup only engine 0; use dbcc engine("online") to incrementally    |
+| 1608 | bring up additional engines until the maximum number of configured   |
+|      | engines.                                                             |
+|------+----------------------------------------------------------------------|
+| 1610 | Boot the SQL dataserver with TCP_NODELAY enabled.                    |
+| *    |                                                                      |
+|------+----------------------------------------------------------------------|
+| 1611 | If possible, pin shared memory -- check errorlog for success/        |
+| *    | failure.                                                             |
+|------+----------------------------------------------------------------------|
+| 1613 | Set affinity of the SQL dataserver engine's onto particular CPUs --  |
+|      | usually pins engine 0 to processor 0, engine 1 to processor 1...     |
+|------+----------------------------------------------------------------------|
+| 1615 | SGI only: turn on recoverability to filesystem devices.              |
+|------+----------------------------------------------------------------------|
+|      | Linux only: Revert to using cached filesystem I/O.  By default, ASE  |
+| 1625 | on Linux (11.9.2 and above) opens filesystem devices using O_SYNC,   |
+|      | unlike other Unix based releases, which means it is safe to use      |
+|      | filesystems devices for production systems.                          |
+|------+----------------------------------------------------------------------|
+| 2512 | Prevent dbcc from checking syslogs. Useful when you are constantly   |
+|      | getting spurious allocation errors.                                  |
+|------+----------------------------------------------------------------------|
+| 3300 | Display each log record that is being processed during recovery. You |
+|      | may wish to redirect stdout because it can be a lot of information.  |
+|------+----------------------------------------------------------------------|
+| 3500 | Disable checkpointing.                                               |
+|------+----------------------------------------------------------------------|
+| 3502 | Track checkpointing of databases in errorlog.                        |
+|------+----------------------------------------------------------------------|
+| 3601 | Stack trace when error raised.                                       |
+|------+----------------------------------------------------------------------|
+| 3604 | Send dbcc output to screen.                                          |
+|------+----------------------------------------------------------------------|
+| 3605 | Send dbcc output to errorlog.                                        |
+|------+----------------------------------------------------------------------|
+| 3607 | Do not recover any database, clear behaviour start up checkpoint     |
+|      | process.                                                             |
+|------+----------------------------------------------------------------------|
+| 3608 | Recover master only. Do not clear tempdb or start up checkpoint      |
+|      | process.                                                             |
+|------+----------------------------------------------------------------------|
+| 3609 | Recover all databases. Do not clear tempdb or start up checkpoint    |
+|      | process.                                                             |
+|------+----------------------------------------------------------------------|
+| 3610 | Pre-System 10 behaviour: divide by zero to result in NULL instead of |
+|      | error - also see Q6.2.5.                                             |
+|------+----------------------------------------------------------------------|
+| 3620 | Do not kill infected processes.                                      |
+|------+----------------------------------------------------------------------|
+| 4001 | Very verbose logging of each login attempt to the errorlog. Includes |
+|      | tons of information.                                                 |
+|------+----------------------------------------------------------------------|
+| 4012 | Don't spawn chkptproc.                                               |
+|------+----------------------------------------------------------------------|
+| 4013 | Place a record in the errorlog for each login to the dataserver.     |
+|------+----------------------------------------------------------------------|
+| 4020 | Boot without recover.                                                |
+|------+----------------------------------------------------------------------|
+|      | Forces all I/O requests to go through engine 0. This removes the     |
+| 5101 | contention between processors but could create a bottleneck if       |
+|      | engine 0 becomes busy with non-I/O tasks. For more information...    |
+|      | 5101/5102.                                                           |
+|------+----------------------------------------------------------------------|
+| 5102 | Prevents engine 0 from running any non-affinitied tasks. For more    |
+|      | information...5101/5102.                                             |
+|------+----------------------------------------------------------------------|
+| 7103 | Disable table lock promotion for text columns.                       |
+|------+----------------------------------------------------------------------|
+| 8203 | Display statement and transaction locks on a deadlock error.         |
+|------+----------------------------------------------------------------------|
+| *    | Starting with System 11 these are sp_configure'able                  |
++-----------------------------------------------------------------------------+
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.3.4 Trace Flags -- 5101 and 5102
+
+-------------------------------------------------------------------------------
+
+5101
+
+Normally, each engine issues and checks for its own Disk I/O on behalf of the
+tasks it runs. In completely symmetric operating systems, this behavior
+provides maximum I/O throughput for ASE. Some operating systems are not
+completely symmetric in their Disk I/O routines. For these environments, the
+server can be booted with the 5101 trace flag. While tasks still request disk I
+/O from any engine, the actual request to/from the OS is performed by engine 0.
+The performance benefit comes from the reduced or eliminated contention on the
+locking mechanism inside the OS kernel. To enable I/O affinity to engine 0,
+start ASE with the 5101 Trace Flag.
+
+Your errorlog will indicate the use of this option with the message:
+
+        Disk I/O affinitied to engine: 0
+
+This trace flag only provides performance gains for servers with 3 or more
+dataserver engines configured and being significantly utilized.
+
+Use of this trace flag with fully symmetric operating systems will degrade
+performance!
+
+5102
+
+The 5102 trace flag prevents engine 0 from running any non-affinitied tasks.
+Normally, this forces engine 0 to perform Network I/O only. Applications with
+heavy result set requirements (either large results or many connections issuing
+short, fast requests) may benefit. This effectively eliminates the normal
+latency for engine 0 to complete running its user thread before it issues the
+network I/O to the underlying network transport driver. If used in conjunction
+with the 5101 trace flag, engine 0 would perform all Disk I/O and Network I/O.
+For environments with heavy disk and network I/O, engine 0 could easily
+saturate when only the 5101 flag is in use. This flag allows engine 0 to
+concentrate on I/O by not allowing it to run user tasks. To force task affinity
+off engine 0, start ASE with the 5102 Trace Flag.
+
+Your errorlog will indicate the use of this option with the message:
+
+        I/O only enabled for engine: 0
+-------------------------------------------------------------------------------
+
+Warning: Not supported by Sybase. Provided here for your enjoyment.
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.3.5 What is cmaxpktsz good for?
+
+-------------------------------------------------------------------------------
+
+cmaxpktsz corresponds to the parameter "maximum network packet size" which you
+can see through sp_configure. I recommend only updating this value through
+sp_configure. If some of your applications send or receive large amounts of
+data across the network, these applications can achieve significant performance
+improvement by using larger packet sizes. Two examples are large bulk copy
+operations and applications reading or writing large text or image values.
+Generally, you want to keep the value of default network packet size small for
+users performing short queries, and allow users who send or receive large
+volumes of data to request larger packet sizes by setting the maximum network
+packet size configuration variable.
+
+caddnetmem corresponds to the parameter "additional netmem" which you can see
+through sp_configure. Again, I recommend only updating this value through
+sp_configure. "additional netmem" sets the maximum size of additional memory
+that can be used for network packets that are larger than ASE's default packet
+size. The default value for additional netmem is 0, which means that no extra
+space has been allocated for large packets. See the discussion below, under
+maximum network packet size, for information on setting this configuration
+variable. Memory allocated with additional netmem is added to the memory
+allocated by memory. It does not affect other ASE memory uses.
+
+ASE guarantees that every user connection will be able to log in at the default
+packet size. If you increase maximum network packet size and additional netmem
+remains set to 0, clients cannot use packet sizes that are larger than the
+default size: all allocated network memory will be reserved for users at the
+default size. In this situation, users who request a large packet size when
+they log in receive a warning message telling them that their application will
+use the default size. To determine the value for additional netmem if your
+applications use larger packet sizes:
+
+  * Estimate the number of simultaneous users who will request the large packet
+    sizes, and the sizes their applications will request.
+  * Multiply this sum by three, since each connection needs three buffers.
+  * Add 2% for overhead, rounded up to the next multiple of 512
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.3.6 Buildmaster Configuration Definitions
+
+-------------------------------------------------------------------------------
+
+   
+    Attention! Please notice, be very careful with these parameters. Use only
+    at your own risk. Be sure to have a copy of the original parameters. Be
+    sure to have a dump of all dbs (include master) handy.
+   
+    Since the release of 11.x (and above), there is almost no need for 
+    buildmaster to configure parameters.  In fact, buildmaster has gone been
+    removed from ASE 12.5. This section is really kept for anyone out there
+    running old versions of ASE. I still see the odd post from people asking
+    about 4.9.2, so this is for you.
+   
+    Anyone else who feels a need to use buildmaster should check sp_configure
+    and/or SERVERNAME.cfg to see if the configuration parameter is there before
+    using buildmaster.
+   
+    YOU HAVE BEEN WARNED. See the  .
+   
+-------------------------------------------------------------------------------
+
+The following is a list of configuration parameters and their effect on the
+ASE. Changes to these parameters can affect performance of the server. Sybase
+does not recommend modifying these parameters without first discussing the
+change with Sybase Tech Support. This list is provided for information only.
+
+These are categorized into two kinds:
+
+  * Configurable through sp_configure and
+  * not configurable but can be changed through 'buildmaster -y&lt;variable&gt;=value
+    -d&lt;dbdevice&gt;'
+
+Configurable variables:
+
+crecinterval:
+
+The recovery interval specified in minutes.
+
+ccatalogupdates:
+
+A flag to inform whether system catalogs can be updated or not.
+
+cusrconnections:
+
+                This is the number of user connections allowed in SQL
+                Server.  This value + 3 (one for checkpoint, network
+                and mirror handlers) make the number of pss configured
+                in the server.
+-------------------------------------------------------------------------------
+
+cfgpss:
+
+                Number of PSS configured in the server. This value will
+                always be 3 more than cusrconnections. The reason is we
+                need PSS for checkpoint, network and mirror handlers.
+
+                THIS IS NOT CONFIGURABLE.
+-------------------------------------------------------------------------------
+
+cmemsize:
+
+                The total memory configured for the Server in 2k
+                units.  This is the memory the server will use for both
+                Server and Kernel Structures.  For Stratus or any 4k
+                pagesize implementation of ASE, certain values
+                will change as appropriate.
+
+cdbnum:
+
+                This is the number of databases that can be open in SQL
+                Server at any given time.
+
+clocknum:
+
+                Variable that defines and controls the number of logical
+                locks configured in the system.
+
+cdesnum:
+
+                This is the number of open objects that can be open at
+                a given point of time.
+
+cpcacheprcnt:
+
+                This is the percentage of cache that should be used
+                for procedures to be cached in.
+
+cfillfactor:
+
+Fill factor for indexes.
+
+ctimeslice:
+
+                This value is in units of milli-seconds. This value determines
+                how much time a task is allowed to run before it yields.
+                This value is internally converted to ticks. See below
+                the explanations for cclkrate, ctimemax etc.
+
+ccrdatabasesize:
+
+                The default size of the database when it is created.
+                This value is Megabytes and the default is 2Meg.
+
+ctappreten:
+
+An outdated not used variable.
+
+crecoveryflags:
+
+                A toggle flag which will display certain recovery information
+                during database recoveries.
+
+cserialno:
+
+                An informational variable that stores the serial number
+                of the product.
+
+cnestedtriggers:
+
+Flag that controls whether nested triggers allowed or not.
+
+cnvdisks:
+
+                Variable that controls the number of device structures
+                that are allocated which affects the number of devices
+                that can be opened during server boot up. If user
+                defined 20 devices and this value is configured to be
+                10, during recovery only 10 devices will be opened and
+                the rest will get errors.
+cfgsitebuf:
+                This variable controls maximum number of site handler
+                structures that will be allocated. This in turn
+                controls the number of site handlers that can be
+                active at a given instance.
+cfgrembufs:
+                This variable controls the number of remote buffers
+                that needs to send and receive from remote sites.
+                Actually this value should be set to number of
+                logical connections configured. (See  below)
+cfglogconn:
+                This is the number of logical connections that can
+                be open at any instance. This value controls
+                the number of resource structure allocated and
+                hence it will affect the overall logical connection
+                combined with different sites. THIS IS NOT PER SITE.
+
+cfgdatabuf:
+
+                Maximum number of pre-read packets per logical connections.
+                If logical connection is set to 10, and cfgdatabuf is set
+                to 3 then the number of resources allocated will be
+                30.
+
+cfupgradeversion:
+
+Version number of last upgrade program ran on this server.
+
+csortord:
+
+Sort order of ASE.
+
+cold_sortdord:
+
+                When sort orders are changed the old sort order is
+                saved in this variable to be used during recovery
+                of the database after the Server is rebooted with
+                the sort order change.
+
+ccharset:
+
+Character Set used by ASE
+
+cold_charset:
+
+                Same as cold_sortord except it stores the previous
+                Character Set.
+-------------------------------------------------------------------------------
+
+cdflt_sortord:
+
+                page # of sort order image definition. This should
+                not be changed at any point. This is a server only
+                variable.
+
+cdflt_charset:
+
+                page # of character set image definition. This should
+                not be changed at any point. This is a server only
+                variable.
+
+cold_dflt_sortord:
+
+                page # of previous sort order image definition. This
+                should not be changed at any point. This is a server
+                only variable.
+
+cold_dflt_charset:
+
+                page # of previous chracter set image definition. This
+                should not be changed at any point.  This is a server
+                only variable.
+-------------------------------------------------------------------------------
+
+cdeflang:
+
+Default language used by ASE.
+
+cmaxonline:
+
+        Maximum number of engines that can be made online. This
+        number should not be more than the # of cpus available on this
+        system. On Single CPU system like RS6000 this value is always
+        1.
+
+cminonline:
+
+        Minimum number of engines that should be online. This is 1 by
+        default.
+
+cengadjinterval:
+
+A noop variable at this time.
+
+cfgstacksz:
+
+        Stack size per task configured. This doesn't include the guard
+        area of the stack space. The guard area can be altered through
+        cguardsz.
+-------------------------------------------------------------------------------
+
+cguardsz:
+
+        This is the size of the guard area. ASE will
+        allocate stack space for each task by adding cfgstacksz
+        (configurable through sp_configure) and cguardsz (default is
+        2K).  This has to be a multiple of PAGESIZE which will be 2k
+        or 4k depending on the implementation.
+
+behaviour:
+
+        Size of fixed stack space allocated per task including the
+        guard area.
+-------------------------------------------------------------------------------
+
+Non-configurable values :
+
+-------------------------------------------------------------------------------
+
+TIMESLICE, CTIMEMAX ETC:
+
+-------------------------------------------------------------------------------
+
+1 millisecond = 1/1000th of a second.
+1 microsecond = 1/1000000th of a second. "Tick" : Interval between two clock
+interrupts occur in real time.
+
+"cclkrate" :
+
+        A value specified in microsecond units.
+        Normally on systems where a fine grained timer is not available
+        or if the Operating System cannot set sub-second alarms, this
+        value is set to 1000000 milliseconds which is 1 second. In
+        other words an alarm will go off every 1 second or you will
+        get 1 tick per second.
+
+        On Sun4 this is set to 100000 milliseconds which will result in
+        an interrupt going at 1/10th of a second. You will get 6 ticks
+        per second.
+
+"avetimeslice" :
+
+        A value specified in millisecond units.
+        This is the value given in "sp_configure",&lt;timeslice value&gt;.
+        Otherwise the milliseconds are converted to milliseconds and
+        finally  to tick values.
+
+                ticks = &lt;avetimeslice&gt; * 1000 / cclkrate.
+
+"timeslice" :
+
+-------------------------------------------------------------------------------
+        The unit of this variable is in ticks.
+        This value is derived from "avetimeslice". If "avetimeslice"
+        is less than 1000 milliseconds then timeslice is set to 1 tick.
+
+"ctimemax" :
+
+The unit of this variable is in ticks.
+
+        A task is considered in infinite loop if the consumed ticks
+        for a particular task is greater than ctimemax value. This
+        is when you get timeslice -201 or -1501 errors.
+
+"cschedspins" :
+
+For more information see Q1.3.2.
+
+        This value alters the behavior of ASE scheduler.
+        The scheduler will either run a qualified task or look
+        for I/O completion or sleep for a while before it can
+        do anything useful.
+
+        The cschedspins value determines how often the scheduler
+        will sleep and not how long it will sleep. A low value
+        will be suited for a I/O bound ASE but a
+        high value will be suited for CPU bound ASE. Since
+        ASE will be used in a mixed mode, this value
+        need to be fined tuned.
+
+        Based on practical behavior in the field, a single engine
+        ASE should have cschedspins set to 1 and a multi-engine
+        server should have set to 2000.
+
+Now that we've defined the units of these variables what happens when we change
+cclkrate ?
+
+Assume we have a cclkrate=100000.
+
+A clock interrupt will occur every (100000/1000000) 1/10th milliseconds.
+Assuming a task started with 1 tick which can go up to "ctimemax=1500" ticks
+can potentially take 1/10us * (1500 + 1) ticks which will be 150 milliseconds
+or approx. .15 milliseconds per task.
+
+Now changing the cclkrate to 75000
+
+A clock interrupt will occur every (75000/1000000) 1/7th milliseconds. Assuming
+a task started with 1 tick which can go up to ctimemax=1500 ticks can
+potentially take 1/7us * (1500 + 1) ticks which will be 112 milliseconds or
+approx. .11 milliseconds per task.
+
+Decreasing the cclkrate value will decrease the time spent on each task. If the
+task could not voluntarily yield within the time, the scheduler will kill the
+task.
+
+UNDER NO CIRCUMSTANCES the cclkrate value should be changed. The default
+ctimemax value should be set to 1500. This is an empirical value and this can
+be changed under special circumstances and strictly under the guidance of DSE.
+
+-------------------------------------------------------------------------------
+
+cfgdbname:
+
+                Name of the master device is saved here. This is 64
+                bytes in length.
+
+cfgpss:
+
+                This is a derived value from cusrconnections + 3.
+                See cusrconnections above.
+
+cfgxdes:
+
+                This value defines the number of transactions that
+                can be done by a task at a given instance.
+                Changing this value to be more than 32 will have no
+                effect on the server.
+cfgsdes:
+                This value defines the number of open tables per
+                task. This will be typically for a query. This
+                will be the number of tables specified in a query
+                including subqueries.
+
+                Sybase Advises not to change this value. There
+                will be significant change in the size of per user
+                resource in ASE.
+
+cfgbuf:
+
+                This is a derived variable based on the total
+                memory configured and subtracting different resource
+                sizes for Databases, Objects, Locks and other
+                Kernel memories.
+
+cfgdes:
+
+        This is same as cdesnum. Other values will have no effect on it. 
+
+cfgprocedure:
+
+        This is a derived value. Based on cpcacheprcnt variable. 
+
+cfglocks:
+
+        This is same as clocknum. Other values will have no effect on it. 
+
+cfgcprot:
+
+        This is variable that defines the number of cache protectors per
+        task. This is used internally by ASE.
+
+        Sybase advise not to modify this value as a default of 15 will
+        be more than sufficient.
+
+cnproc:
+
+        This is a derived value based on cusrconnections + &lt;extra&gt; for
+        Sybase internal tasks that are both visible and non-visible.
+
+cnmemmap:
+
+        This is an internal variable that will keep track of ASE
+        memory.
+
+        Modifying this value will not have any effect.
+
+cnmbox:
+
+        Number of mail box structures that need to be allocated.
+        More used in VMS environment than UNIX environment.
+
+cnmsg:
+
+        Used in tandem with cnmbox.
+
+cnmsgmax:
+
+        Maximum number of messages that can be passed between mailboxes. 
+
+cnblkio:
+
+        Number of disk I/O request (async and direct) that can be
+        processed at a given instance. This is a global value for all
+        the engines and not per engine value.
+
+        This value is directly depended on the number of I/O request
+        that can be processed by the Operating System. It varies
+        depending on the Operating System.
+
+cnblkmax:
+
+        Maximum number of I/O request that can be processed at any given
+        time.
+
+        Normally cnblkio,cnblkmax and cnmaxaio_server should be the same.
+
+cnmaxaio_engine:
+
+        Maximum number of I/O request that can be processed by one engine.
+        Since engines are Operating System Process, if there is any limit
+        imposed by the Operating System on a per process basis then
+        this value should be set. Otherwise it is a noop.
+
+cnmaxaio_server:
+
+        This is the total number of I/O request ASE can do.
+        This value s directly depended on the number of I/O request
+        that can be processed by the Operating System. It varies
+        depending on the Operating System.
+
+csiocnt:
+
+        not used. 
+
+cnbytio:
+
+        Similar to disk I/O request, this is for network I/O request.
+        This includes disk/tape dumps also. This value is for
+        the whole ASE including other engines.
+
+cnbytmax:
+
+        Maximum number of network I/O request including disk/tape dumps. 
+
+cnalarm:
+
+        Maximum number of alarms including the alarms used by
+        the system. This is typically used when users do "waitfor delay"
+        commands.
+
+cfgmastmirror:
+
+        Mirror device name for the master device. 
+
+cfgmastmirror_stat:
+
+        Status of mirror devices for the master device  like  serial/dynamic
+        mirroring etc.
+
+cindextrips:
+
+        This value determines the ageing of a index buffer before it
+        is removed from the cache.
+
+coamtrips:
+
+        This value determines the aging of a OAM buffer before it
+        is removed from the cache.
+
+cpreallocext:
+
+        This value determines the number of extents that will be
+        allocated while doing BCP.
+
+cbufwashsize:
+
+        This value determines when to flush buffers in the cache
+        that are modified.
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.3.7: What is CIS and how can I use it?
+
+-------------------------------------------------------------------------------
+
+CIS is the new name for Omni ASE.  The biggest difference is that CIS is
+included with Adaptive Server Enterprise as standard.  Actually, this is not
+completely accurate; the ability to connect to other ASEs and ASEs, including
+Microsoft's, is included as standard.  If you need to connect to DB2 or Oracle
+you have to obtain an additional licence.
+
+So, what is it?
+
+CIS is a means of connecting two servers together so that seamless cross-server
+joins can be executed.  It is not just restricted to selects, pretty much any
+operation that can be performed on a local table can also be performed on a
+remote table.  This includes dropping it, so be careful!
+
+What servers can I connect to?
+
+  * Sybase ASE
+  * Microsoft SQL Server
+  * IBM DB2
+  * Oracle
+
+What are the catches?
+
+Well, nothing truly comes for free.  CIS is not a means of providing true load
+sharing, although you will find nothing explicitly in the documentation to tell
+you this.   Obviously there is a performance hit which seems to affect cursors
+worst of all.   CIS itself is implemented using cursors and this may be part of
+the explanation.
+
+OK, so how do I use it?
+
+Easy!  Add the remote server using sp_addserver.  Make sure that you define it
+as type sql_server or ASEnterprise.  Create an "existing" table using the
+definition of the remote table.  Update statistics on this new "existing"
+table.  Then simply use it in joins exactly as if it were a local table.
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.3.8: If the master device is full, how do I make the master database bigger?
+
+-------------------------------------------------------------------------------
+
+It is not possible to extend the master database across another device, so the
+following from Eric McGrane (recently of Sybase Product Support Engineering)
+should help.
+
+  * dump the current master database
+  * Pre-12.5 users use buildmaster to create a new master device with a larger
+    size. ASE 12.5 users use dataserver to build the new, larger, master
+    database.
+  * start the server in single user mode using the new master device
+  * login to the server and execute the following tsql:
+   
+   
+    select * from sysdevices
+   
+   
+  * take note of the high value
+  * load the dump of the master you had just taken
+  * restart the server (as it will be shut down when master is done loading),
+    again
+    in single user mode so that you can update system tables
+  * login to the server and update sysdevices setting high for master to the
+    value
+    that you noted previously
+  * shut the server down and start it back up, but this time not in single user
+    mode.
+
+The end result of the above is that you will now have a larger master device
+and you can alter your master database to be a larger size. For details about
+starting the server in single user mode and how to use buildmaster (if you need
+the details) please refer to the documentation.
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.3.9: How do I run multiple versions of Sybase on the same server?
+
+-------------------------------------------------------------------------------
+
+The answer to this relies somewhat on the platform that you are using.
+
+Unix
+
+ASE Versions Before 12.0
+
+This applies to Unix and variants, Linux included. Install the various releases
+of software into logical places within your filesystem. I like to store all
+application software below a single directory for ease of maintenance, choose
+something like /sw. I know that some are keen on /opt and others /usr/local. It
+is all down to preference and server usage. If you have both Oracle and Sybase
+on the same server you might want /sw/sybase or /opt/sybase. Be a little
+careful here if your platform is Linux or FreeBSD. The standard installation
+directories for Sybase on those platforms is /opt/sybase. Finally, have a
+directory for the release, say ASE11_9_2 or simply 11.9.2 if you only ever have
+Sybase ASE running on this server. A little imagination is called for!
+
+So, now you have a directory such as /sw/sybase/ASE/11.9.2 (my preferred choice
+:-), and some software installed under the directories, what now? In the most
+minimal form, that is all you need. Non of the environment variables are
+essential. You could quite successfully run
+
+  /sw/sybase/ASE/11.9.2/bin/isql -Usa -SMYSERV -I/sw/sybase/ASE/11.9.2/interfaces
+
+and get to the server, but that is a lot of typing. By setting the SYBASE
+environment variable to /sw/sybase/ASE/11.9.2 you never need tell isql or other
+apps where to find the interfaces. Then, you can set the path with a cool
+
+  PATH=$SYBASE/bin:$PATH
+
+to pick up the correct set of Sybase binaries. That reduces the previous mass
+of typing to
+
+  isql -Usa -SMYSERV
+
+which is much more manageable.
+
+You can create yourself a couple of shell scripts to do the changes for you. So
+if the script a11.9 contained:
+
+  SYBASE=/sw/sybase/ASE/11.9.2
+  PATH=$SYBASE/bin:$SYBASE
+
+  # Remember to export the variables!
+  EXPORT PATH SYBASE
+
+and a11.0 contained:
+
+  SYBASE=/sw/sybase/ASE/11.0.3.3
+  PATH=$SYBASE/bin:$SYBASE
+
+  # Remember to export the variables!
+  EXPORT PATH SYBASE
+
+you would toggle between being connect to and 11.9.2 server and a 12.0 server,
+depending upon which one you executed last. The scripts are not at all
+sophisticated, you could quite easily have one script and pass a version string
+into it. You will notice that the PATH variable gets longer each time the
+script is executed. You could add greps to see if there was already a Sybase
+instance on the path. Have I mentioned imagination?
+
+ASE 12.0 and Beyond
+
+Sybase dramatically changed the structure of the installation directory tree
+with ASE 12. You still have a SYBASE environment variable pointing to the
+route, but now the various packages fit below that directory. So, if we take /
+sw/sybase as the root directory, we have the following (the following is for a
+12.5 installation, but all versions follow the same format):
+
+  /sw/sybase/ASE-12_5
+            /OCS-12_5
+
+Below ASE-12_5 is most of the stuff that we have come to expect under $SYBASE,
+the install, bin and scripts directories. This is also where the SERVER.cfg
+file has moved to. (Note the the interfaces file is still in $SYBASE.) The bin
+directory on this side includes the dataserver, diagserver and srvbuild
+binaries.
+
+The OCS-12_5 is the open client software directory. It means that Sybase can
+update the client software without unduly affecting the server. isql, bcp and
+other clients are to be found here.
+
+It does take a little getting used to if you have been using the pre-12 style
+for a number of years. However, in its defence, it is much more logical, even
+if it about triples the length of your PATH variable!
+
+That is another good part of the new installation. Sybase actually provides you
+with the shell script to do all of this. There is a file in /sw/sybase called
+SYBASE.sh (there is an equivalent C shell version in the same place) that sets
+everything you need!
+
+Interfaces File
+
+The only real addition to all of the above is an easier way to manage the
+interfaces file. As mentioned before, ASE based apps look for the interfaces
+file in $SYBASE/interfaces by default. Unix is nice in that it allows you to
+have symbolic links that make it appear as if a file is somewhere that it
+isn't. Place the real interfaces file somewhere independent of the software
+trees. /sw/sybase/ASE/interfaces might be a sound logical choice. Now, cd to
+$SYBASE and issue
+
+  ln -s /sw/sybase/ASE/interfaces
+
+and the interfaces will appear to exist in the $SYBASE directory, but will in
+fact remain in its own home.
+
+Note: make sure that interfaces file is copied to its own home before removing
+it from $SYBASE.
+
+Now you can put symbolic links in each and every software installation and only
+have to worry about maintaining the server list, on that server, in one place.
+Having the interfaces file common to many physical servers is trickier, but not
+impossible. Personally I would choose to put it in a central CVS repository and
+use that to keep each server reasonably up-to-date.
+
+NT/2000
+
+Firstly, I have tried the following on W2K and it all works OK. I have read a
+number of reports of people having difficulty getting clean installs under NT.
+11.5 and 12.0 mainly. I cannot remeber having a problem with either of those
+myself, but I only ever installed it to test that stuff I write runs on all
+platforms. I have no intention of upgrading to XP until MS pays me to do it. It
+looks like a cheap plastic version of an operating system and I pity anyone
+that is forced to use it.
+
+NT is tougher than UNIX to run multiple instances on, mainly due to the fact
+that it wants to do stuff for you in the background, namely configure
+environment variables. The following worked for me with the following versions
+of Sybase ASE all installed and running on a single server: 11.5.1, 11.9.2,
+12.5. I don't have a version of ASE 12.0 for NT. If I can persuade Sybase to
+send them it to me, I might be able to get that running too. Notably, each and
+every one of the databases runs as a service!!!
+
+ 1. Start by installing each software release into its own area. Make sure that
+    it is a local disk. (See Q2.2.3.) I chose to install ASE 12.5 into C:\
+    Sybase12_5 and ASE 11.9.2 into C:\Sybase11_9_2 etc. When it asks you about
+    configuring the server, select "no" or "cancel".
+ 2. Add a user for each installation that you are going to run. Again, I added
+    a user sybase12_5 for ASE 12.5 and sybase11_9_2 for ASE 11.9.2.
+ 3. As a system account, edit the environment variables (On W2K this is
+    Settings-&gt;Control Panel-&gt;System-&gt;Advanced-&gt;Environment Variables...) and
+    remove any reference to Sybase from the system path. Make sure that you
+    store away what has been set. A text file on your C drive is a good idea at
+    this stage.
+ 4. Similarly, remove references to Sybase from the Lib, Include and CLASSPATH
+    variables, storing the strings away.
+ 5. Remove the SYBASE, DSEDIT and DSQUERY variable.
+ 6. As I said before, I do not own 12.0, so I cannot tell you what to do about
+    the new Sybase variables SYBASE_OCS, SYBASE_ASE, SYBASE_FTS, SYBASE_JRE
+    etc. I can only assume that you need to cut them out too. If you are
+    installing pre-12 with only 1 of 12 or 12.5, then it is not necessary.
+ 7. Login as each new Sybase user in turn and add to each of these a set of
+    local variables corresponding to path, Include, Lib and set them to be the
+    appropriate parts from the strings you removed from the system versions
+    above. So, if you installed ASE 12.5 in the method described, you will have
+    a whole series of variables with settings containing "C:\Sybase_12_5", add
+    all of these to local variables belonging to the user sybase12_5. Repeat
+    for each instance of ASE installed. This is a tedious process and I don't
+    know a way of speading it up. It may be possible to edit the registry, but
+    I was not happy doing that.
+ 8. If you have made each of the Sybase users administrators, then you can
+    configure the software from that account, and install a new ASE server.
+    Remember that each one needs its own port. 11.5.1 and 11.9.2 did not give
+    me an option to change the port during the install, so I had to do that
+    afterwards by editing the SQL.INI for each server in its own installation
+    tree.
+ 9. If you are not able to make each user and administrator, you will need to
+    work with an admin to configure the software. (ASE requires administrative
+    rights in order to be able to add the service entries.) You will need to
+    log in as this admin account, set the path to the appropriate value for
+    each installation, install the software and then set the path to the new
+    values, install the next ASE etc. On NT for sure you will have to log out
+    and log in after changing the path variable. 2000 may be less brain dead.
+    Just be thankful you are not having to reboot!
+10. Log back in as your tame administrator account and go into the control
+    panel. You need to start the "Services" applet. This is either there if you
+    are running NT or you have to go into "Administrative Tools" for 2000.
+    Scroll down and select the first of the services, which should be of the
+    form
+   
+    "Sybase SQLServer _MYSERVER".
+   
+    Right click and select "Properties" (I think this is how it was for NT, but
+    you want that services properties, however you get there.) In 2000 there is
+    a "Log On" tab. NT has a button (I think) that serves the same purpose.
+    Whether tab or button, click on it. You should have a panel that starts, at
+    the top, with "Log on as" and a a pair of radio options. The top one will
+    probably be selected, "Local System account". Choose the other and enter
+    the details for the sybase account associated with this server. So if the
+    server is ASE 12.5 enter "sybase12_5" for "This account" and enter the
+    password associated with this account in the next two boxes. Select enough
+    "OK"s to take you out of the service properties editor.
+11. None of the installations made a good job of the services part. All of them
+    added services for all of the standard servers (data, backup, monitor and
+    XP), even though I had not configured any but XP server. (The NT
+    installation is of a different form to the UNIX/Linux versions.) The 12.5
+    XP configuration was OK, but the pre-12 ones were not. You will have to go
+    in and manually set the user to connect as (as described earlier). If you
+    do not do this, the services will not start properly.
+12. You should then be able to start any or all of the services by pressing the
+    "play" button.
+13. Finally, you need to re-edit the local copies of the path, Include and Lib
+    variables for your tame admin account if you use that account to connect to
+    Sybase.
+
+It worked for me, as I said. I was able to run all 3 services simultaneously
+and connect from the local and external machines. There is no trick as neat as
+the symbolic link on Unix. Links under NT work differently.
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+1.3.10: How do I capture a process's SQL?
+
+-------------------------------------------------------------------------------
+
+This is a bit of a wide question, and there are many answers to it. Primarily,
+it depends on why you are trying to capture it. If you are trying to debug a
+troublesome stored procedure that is behaving differently in production to how
+it did in testing, then you might look at the DBCC method. Alternatively, if
+you wanted to do some longer term profiling, then auditing or one of the third
+party tools might be the way forward. If you know of methods that are not
+included here, please let me know.
+
+DBCCs
+
+If you want to look at the SQL a particular process is running at the moment,
+one of the following should work. Not sure which versions of ASE these work
+with. Remember to issue dbcc traceon(3604) before running any of the dbcc's so
+that you can see the output at your terminal.
+
+  * dbcc sqltext(spid)
+  * dbcc pss(0, spid, 0)
+
+The first of the commands issues the SQL of the spid only a bit like this:
+
+[27] BISCAY.master.1&gt; dbcc sqltext(9)
+[27] BISCAY.master.2&gt; go
+SQL Text: select spid,        status,        suser_name(suid),        hostname,
+db_name(dbid),        cmd,        cpu,        physical_io,        memusage,
+convert(char(5),blocked)   from master..sysprocesses
+DBCC execution completed. If DBCC printed error messages, contact a user with
+System Administrator (SA) role.
+[28] BISCAY.master.1&gt;
+
+The second issues an awful lot of other stuff before printing the text at the
+bottom. Mercifully, this means that you don't have to scroll up to search for
+the SQL text, which is in much the same format as with dbcc sqltext.
+
+There are a number of third party tools that will execute these commands from a
+list of processes. One of the problems is that you do have to be 'sa' or have
+'sa_role' in order to run them.
+
+Certainly the first, and possibly both, have one major drawback, and that is
+that they are limited to displaying about 400 bytes worth of text, which can be
+a bit annoying. However, if what you are trying to do is catch a piece of rogue
+SQL that is causing a table scan or some other dastardly trick, a unique
+comment in the early part of the query will lead to its easy identification.
+
+Monitor Server
+
+Since ASE 11.5, monitor server has had the capability for capturing a processes
+SQL. See Q1.6.2 for how to configure a Monitor Server Client. When you are
+done, you can get see the SQL text from a process using the "Process Current
+SQL Statement" monitor. The output looks like this.
+
+Auditing
+
+The second way of wanting to do this is for a number of processes for a period
+of time. There are several methods of doing this. Probably the most popular is
+to use auditing, and it is almost certainly the most popular because it
+requires no additional software purchases.
+
+Auditing is a very powerful tool that can collect information on just about
+everything that happens on the server. It can be configured to capture
+'cmdtext' for any or all users on a system. The data will be loaded into the
+sysaudits database for later perusal. The SQL captured is not limited to a
+number of bytes, like the previous examples, but if it is more than 255 bytes
+long, then it will span several audit records, which must be put back together
+to see the whole picture. To be honest, I am not sure what happens now that
+varchars can be greater than 255 bytes in length. Personal experience with
+auditing leaves to think that the load on the server is up to about 3%,
+depending on the number of engines you have (the more engines, the more of a
+load auditing is) and, obviously, the number of processes you wish to monitor.
+I calculated 3% based on auditing all of 400 users, each of which had 2
+connections to the server, on a server with 7 engines.
+
+Ribo
+
+Another option for capturing the SQL text is to use the free Ribo utility that
+is provided with as part of ASE these days. This is a small server written in
+Java as an example of what can be done using jConnect. This utility is nice in
+that it does not place any load on the ASE server. However, it probably has an
+effect on the client that is using it. This utility's other draw back is that
+each client that you wish to monitor via Ribo must be directly configured to
+use it. It is not possibly mid-session to just magically turn it on.
+
+The way it works is to act as an intermediary between the ASE server and the
+client wishing to connect. All is SQL is passed through and executed exactly as
+if the client was directly connected, and the results passed back. What the
+Ribo server does is enable you to save the inbound SQL to a file.
+
+3rd Party Tools
+
+Again, there are a number of third party tools that do this job as well,
+OpenSwitch being one of them. There are also a number of third party tools that
+do a better job than this. They do not have any impact on the client or the
+server. They work by sniffing the network for relevant packets and then put
+them pack together. In actuality, they do a lot more than just generate the
+SQL, but they are capable of that.
+
+Return to top
+
+-------------------------------------------------------------------------------
+
+General Troubleshooting User Database Administration ASE FAQ
+
+</PRE>
+<DIV ALIGN=CENTER>
+<SMALL>
+<P><HR WIDTH=1900 NOSHADE><BR>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  Part6 -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  <A HREF="../part18/">Part18</A> -  <A HREF="../part19/">Part19</A></SMALL>
+<P>
+<div align="center">
+
+<center>
+<form method="post" action="rateit.php">
+<table border="1" cellpadding="0" cellspacing="0" width="150" bgcolor="#ffcccc" style="WIDTH: 150px">
+<tr><td width="100%">
+<div align="center">
+<table border="0" cellpadding="2" width="100%" bgcolor="#ffcccc">
+<tr><td width="100%" height="14">
+<p align="center"><font face="Arial">Rate this FAQ</font></p>
+</td></tr>
+<tr><td width="100%" height="14">
+<p align="center">
+<INPUT TYPE=HIDDEN NAME="pid" VALUE="databases/sybase-faq/part6/index.html">
+<select size="1" name="D1" style="COLOR: darkmagenta; BACKGROUND-COLOR: cornsilk">
+<option selected value="0">N/A</option>
+<option value="1">Worst</option>
+<option value="2">Weak</option>
+<option value="3">OK</option>
+<option value="4">Good</option>
+<option value="5">Great</option>
+</select>
+</p>
+</td></tr>
+<tr><td width="100%" height="27">
+<p align="center">
+<IMG onclick="mystr='/frate.php?pid='+pid.value+'&vote='+D1.value;
+Popup=window.open(mystr,'Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=380,height=270,left=230,top=43'); 
+ return false;" height=28 src="/images/vote.gif" alt="Vote" width=83 border=0 ></p>
+</td></tr>
+</table>
+</div>
+</td></tr>
+</table>
+<font size="-1" face="Arial"><br><a href="/topRated.html">Current Top-Rated FAQs</a><br></font>
+</form>
+</center>
+
+</div>
+
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="100%">
+<tr><td width="100%" bgcolor="#D6D6C0">
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part6/index.html"," ");
+// --></script>
+<p><font face="Arial"><a name="ct">Are you an expert in this area?</a> Share your knowledge and earn expert points by giving answers or rating people's questions and answers! This section of FAQS.ORG is not sanctioned in any way by FAQ authors or maintainers.</font></p>
+<p><font face="Arial">Questions strongly related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-6730.html">How can I display the table sizes of ALL tables in a database?   </a> by Caspar (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9594.html">how to use nested cursors in a stored procedure in ASE ? is there any template to use !...</a> by nino (12/18/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3265.html">to connect sybase and c++,how to connect and access the data </a> by kumaran (9/2/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6741.html">how do u tell the last time update statistics has been run on a table (11.0.3) </a> by yujo (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11075.html">I need to Execute an SP & set its output to the insert statement. This will be occured for...</a> by rose (1/14/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9435.html">I wanted to know EXACT technical details about what ACTUALLY happens when u fire a simple...</a> by anu (12/15/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-8395.html">Is there anyway to start dataserver in ASE 11.9.2 with only the master and tempdb online...</a> by steve_2000g (11/28/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-854.html">i get an error on the "convert" when i try to run this line of code, why is this?   print...</a> by shugarhi (7/14/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11834.html">Hi  &nbsp; We're using Sybase ASE 12.0 running on SUN 4500 Cluster server. We cannot...</a> by KK (1/26/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6297.html">I am creating a stored proc to create a report of dependencies. &nbsp;We are creating...</a> by RR (10/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7388.html">How is this hazardous if we do not close a cursor? </a> by amar (11/11/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9827.html">How can i reduce my tempdb size once i have increased it by creating a device also? </a> by rajs (12/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12835.html">how can i transfer a table from cybase to db2? &nbsp;please sendme step by step method if...</a> by maulik (2/9/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3213.html">My database is in bypass recovery mode. How do I put it in normal mode? </a> by Lach (9/1/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-1435.html">Hi ,  &nbsp;We are using Sybase ASE 11.9.2 with SCO Unix 7.1.1 &nbsp;as the operating ...</a> by gowri (7/27/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-2412.html">were is a database that will bring up  a person address without there last name </a> by travis (8/15/2003)</font></li>
+</ul>
+<p><font face="Arial">Questions somewhat related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-2221.html">Guys!   See the Sybase query below: select convert(float,substring(&lt;field1&gt;,3,...</a> by pathfinder (8/12/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7790.html">What are the side-effects of turning-on the built-in auditing capabilities of sybase? </a> by Choy (11/17/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12136.html">When ever i execute select property('PROCESSCPU') i get the value 189 and whenever i...</a> by anilkumarsh (1/29/2004)</font></li>
+</ul>
+<p><font face="Arial">Other questions awaiting answers:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/related.html">10088 questions</a> related to other FAQs<br></font></li>
+<li><font face="Arial"><a href="/qa/unrelated.html">1765 general questions</a></font></li>
+<li><font face="Arial"><a href="/qa/answered.html">4091 answered questions</a><br></font></li>
+</ul>
+</td></tr></table> <br></center></div>
+<HR NOSHADE SIZE=2 WIDTH=450>
+[ <a href="/faqs/">Usenet FAQs</a> | <a href="/faqs/faqsearch.html">Search</a> | <a href="/contrib/">Web FAQs</a> | <a href="/docs/">Documents</a> | <a href="/rfcs/">RFC Index</a> ]
+<BR><HR NOSHADE SIZE=2 WIDTH=450>
+<P>
+<ADDRESS>
+Send corrections/additions to the FAQ Maintainer: <BR>dowen@midsomer.org (David Owen)
+</ADDRESS>
+<P>
+<SMALL>
+<STRONG>Last Update February 12 2004 @ 00:28 AM</STRONG>
+<BR>
+</SMALL>
+</DIV>
+</BODY>
+</HTML>
+

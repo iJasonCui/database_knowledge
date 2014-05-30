@@ -1,0 +1,26 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getCampaignUserGift;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getCampaignUserGift (
+/***********************************************************************
+**
+** CREATION:
+**   Date:          April 2010
+**
+** REVISION:
+**   Author:        
+**   Date:          
+**   Description:   
+*************************************************************************/
+ at_campaignId                 INT,
+ at_senderUserId               INT,
+ at_targetUserId               INT 
+)
+BEGIN
+    SELECT giftId 
+    FROM CampaignUserGift
+    WHERE campaignId = at_campaignId
+    AND senderUserId = at_senderUserId 
+    AND targetUserId = at_targetUserId; 
+
+END;;
+DELIMITER ;

@@ -1,0 +1,44 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_delProfileMediaById;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_delProfileMediaById (
+/*******************************************
+**
+** CREATION:
+**   Author:  Yan Liu.
+**   Date:  Nov 15 2004
+**   Description: Delete all the profile media record linked to a userId 
+**
+** REVISION(S):
+**   Author:  
+**   Date:  
+**   Description:  
+**
+*************************************************************************/
+    at_productCode   CHAR(1),
+    at_communityCode CHAR(1),
+    at_userId        DECIMAL(12, 0)
+)
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE at_mediaId INT;
+    
+    DECLARE CUR_delProfileMediaById CURSOR FOR SELECT mediaId FROM ProfileMedia WHERE userId = at_userId;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN CUR_delProfileMediaById;
+
+    read_loop: LOOP
+      FETCH CUR_delProfileMediaById INTO at_mediaId;      
+
+      IF done THEN 
+        LEAVE read_loop;
+      END IF;
+
+      CALL wsp_delProfileMediaByUserId(at_userId, at_productCode, at_communityCode, at_mediaId);       
+     
+    END LOOP;
+
+    CLOSE CUR_delProfileMediaById;
+
+END;;
+DELIMITER ;

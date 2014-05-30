@@ -1,0 +1,35 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_cntConsumptByCreditType;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_cntConsumptByCreditType (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  October 2003
+**   Description:  
+**
+** REVISION(S):
+**   Author: Jason C.	
+**   Date:   Apr 26 2004
+**   Description: erase the equal sign for dateCreated < at_toDate to prevent dateCreated from overlapping 
+**
+******************************************************************************/
+
+
+ at_fromDate 				DATETIME
+,at_toDate 				DATETIME
+)
+BEGIN
+
+SELECT creditTypeId, -(SUM(credits))
+FROM AccountTransaction 
+WHERE dateCreated >= at_fromDate AND dateCreated < at_toDate 
+AND creditTypeId > 0 
+AND credits < 0 
+AND xactionTypeId != 11 -- ignore credits that expired
+GROUP BY creditTypeId; 	
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

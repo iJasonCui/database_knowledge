@@ -1,0 +1,30 @@
+step 1:
+
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason]$ cp -p -R /home/sybase/ .
+
+
+step 2: 
+--space issue
+
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason]$ cp -p -R /sybase/ .
+
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/SYSAM-2_0/ .
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/_jvm/ .
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/OCS-15_0/ .
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/charsets/ .
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/config/ .
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/collate/ .
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/jConnect-6_0/ .
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/UAF-2_0/ .
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/DBISQL/ .
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/ASEP/ .
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/WS-15_0/ .
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/RPL-15_0/ .
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/locales/ .
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/jutils-2_0/ .
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/SYSAM-2_0/ .
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/AMCP/ .
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/uninstall/ .
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/shared/ .
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/maint/ .
+[sybase@v151dbp01:/v151dbp01ivr/backup_Jason/sybase/sybase15]$ cp -r -P /sybase/sybase15/ASE-15_0/ .

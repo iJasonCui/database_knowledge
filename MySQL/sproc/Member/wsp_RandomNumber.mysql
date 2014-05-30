@@ -1,0 +1,14 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_RandomNumber;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_RandomNumber (
+OUT at_randomNumber INT 
+,at_minNumber INT
+,at_maxNumber INT
+)
+BEGIN
+
+SET at_randomNumber =  FLOOR(at_minNumber + (RAND() * ( at_maxNumber - at_minNumber) ));
+##SELECT at_randomNumber  ;
+
+END;;
+DELIMITER ;

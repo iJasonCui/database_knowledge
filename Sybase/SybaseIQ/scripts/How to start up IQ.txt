@@ -1,0 +1,36 @@
+--how to start up
+
+sybase@webdbiq:/data/db/IQDB1/start_asiq @IQDB1.cfg
+
+--the sample config file
+
+[sybaseiq@g104db01 g104db01_iq]$ more g104iqdb01.cfg
+# default.cfg
+# ----------------------------------------------------------------------
+# This file contains the default ASIQ startup parameters.  All servers
+# started will default to these parameters, unless overriden by contents
+# of parameter list.
+# ----------------------------------------------------------------------
+# Must be in the format: One parameter per line
+# ----------------------------------------------------------------------
+-n g104iqdb01 /g104db01_iq/iqdb_2011Nov21/g104iqdb01.db
+-x  tcpip{port=8150}
+-iqnumbercpus 4
+-iqmc 2048
+-iqtc 2048 
+-c  48m
+-gc 20
+-gd DBA
+-gl all
+-gm 20
+-gp 4096
+-ti 1440
+-tl 1200
+-zo g104iqdb01_qry.sql
+-zr SQL
+
+
+--how to stop it for Sybase IQ 12.6
+
+stop_asiq
+

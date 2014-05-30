@@ -1,0 +1,110 @@
+16 Setting the MySQL Replication 
+
+16.1.1.1. Setting the Replication Master Configuration
+
+On a replication master, you must enable binary logging and establish a unique server ID. 
+If this has not already been done, this part of master setup requires a server restart.
+
+/etc/my.cnf
+[mysqld]
+log-bin=mysql-bin
+server-id=104100
+
+binlog-do-db = Plus45
+
+16.1.1.2. Setting the Replication Slave Configuration
+
+/etc/my.cnf
+[mysqld]
+log-bin=mysql-bin
+server-id=2000
+
+16.1.1.3. Creating a User for Replication
+
+on master server:
+
+mysql> CREATE USER 'rep_user'@'%.int.interactivemedia.com' IDENTIFIED BY 'PASSWORD';
+mysql> GRANT REPLICATION SLAVE ON *.* TO 'rep_user'@'%.int.interactivemedia.com';
+
+mysql> CREATE USER 'rep_user'@'10.50.4.30' IDENTIFIED BY 'PASSWORD';
+mysql> GRANT REPLICATION SLAVE ON *.* TO 'rep_user'@'10.50.4.30';
+
+
+
+16.1.1.4. Obtaining the Replication Master Binary Log Coordinates
+
+  To configure replication on the slave you must determine the master's current coordinates within its binary log. 
+
+  To obtain the master binary log coordinates, follow these steps:
+
+1.  Start a session on the master by connecting to it with the command-line client, and flush all tables and block write statements by executing the FLUSH TABLES WITH READ LOCK statement:
+
+  mysql> FLUSH TABLES WITH READ LOCK;
+
+2.  In a different session on the master, use the SHOW MASTER STATUS statement to determine the current binary log file name and position:
+
+mysql > SHOW MASTER STATUS;
++------------------+----------+--------------+------------------+
+| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB |
++------------------+----------+--------------+------------------+
+| mysql-bin.000003 | 73       | test         | manual,mysql     |
++------------------+----------+--------------+------------------+
+  The File column shows the name of the log file and Position shows the position within the file. In this example, the binary log file is mysql-bin.000003 and the position is 73. Record these values. You need them later when you are setting up the slave. They represent the replication coordinates at which the slave should begin processing new updates from the master.
+
+  If the master has been running previously without binary logging enabled, the log file name and position values displayed by SHOW MASTER STATUS or mysqldump --master-data will be empty. In that case, the values that you need to use later when specifying the slave's log file and position are the empty string ('') and 4.
+
+  You now have the information you need to enable the slave to start reading from the binary log in the correct place to start replication.
+
+  If you have existing data that needs be to synchronized with the slave before you start replication, leave the client running so that the lock remains in place and then proceed to Section 16.1.1.5, “Creating a Data Snapshot Using mysqldump”, or Section 16.1.1.6, “Creating a Data Snapshot Using Raw Data Files”. The idea here is to prevent any further changes so that the data copied to the slaves is in synchrony with the master.
+
+16.1.1.5. Creating a Data Snapshot Using mysqldump
+One way to create a snapshot of the data in an existing master database is to use the mysqldump tool. Once the data dump has been completed, you then import this data into the slave before starting the replication process.
+
+To obtain a snapshot of the data using mysqldump:
+
+If you have not already locked the tables on the server to prevent statements that update data from executing:
+
+Start a session on the server by connecting to it with the command-line client, and flush all tables and block write statements by executing the FLUSH TABLES WITH READ LOCK statement:
+
+mysql> FLUSH TABLES WITH READ LOCK;
+Remember to use SHOW MASTER STATUS and record the binary log details for use when starting up the slave. The point in time of your snapshot and the binary log position must match. See Section 16.1.1.4, “Obtaining the Replication Master Binary Log Coordinates”.
+
+In another session, use mysqldump to create a dump either of all the databases you want to replicate, or of selected individual databases. For example:
+
+shell> mysqldump --all-databases --lock-all-tables >dbdump.db
+shell> mysqldump -h127.0.0.1 -P4100 --all-databases --lock-all-tables >w151dbp10_4100.dump;
+
+
+An alternative to using a bare dump, is to use the --master-data option, which automatically appends the CHANGE MASTER TO statement required on the slave to start the replication process.
+
+shell> mysqldump --all-databases --master-data >dbdump.db
+In the client where you acquired the read lock, release the lock:
+
+mysql> UNLOCK TABLES;
+Alternatively, exit the first session to release the read lock.
+
+
+  If you are setting up a brand new master and slave replication group, you can exit the first session to release the read lock.
+
+16.1.1.10. Setting the Master Configuration on the Slave
+To set up the slave to communicate with the master for replication, you must tell the slave the necessary connection information. To do this, execute the following statement on the slave, replacing the option values with the actual values relevant to your system:
+
+mysql> CHANGE MASTER TO
+    ->     MASTER_HOST='master_host_name',
+    ->     MASTER_USER='replication_user_name',
+    ->     MASTER_PASSWORD='replication_password',
+    ->     MASTER_LOG_FILE='recorded_log_file_name',
+    ->     MASTER_LOG_POS=recorded_log_position;
+
+CHANGE MASTER TO
+    MASTER_HOST='10.50.4.10',
+    MASTER_PORT=4100,
+    MASTER_USER='rep_user',
+    MASTER_PASSWORD='PASSWORD',
+    MASTER_LOG_FILE='mysql-bin.000004',
+    MASTER_LOG_POS=107;
+
+Note
+Replication cannot use Unix socket files. You must be able to connect to the master MySQL server using TCP/IP.
+
+

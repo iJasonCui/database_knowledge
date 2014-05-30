@@ -1,0 +1,72 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_reverseSDPurchase;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_reverseSDPurchase (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         July 2009
+**   Description:  reverses SD purchase for user
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_userId         DECIMAL(12,0)
+,at_xactionId      DECIMAL(12,0)
+,at_refXactionId   DECIMAL(12,0)
+,at_contentId      SMALLINT
+,at_xactionTypeId  TINYINT
+,at_cardProcessor  CHAR(1)
+,at_adminUserId    INT
+,at_adminNote      VARCHAR(255)
+,at_paymentNumber  VARCHAR(40)
+)
+proc_label:BEGIN
+
+DECLARE at_passes                 SMALLINT;
+DECLARE at_passTypeId             TINYINT;
+DECLARE at_dateNow                DATETIME;
+DECLARE at_balance                INT;
+DECLARE at_cost                   DECIMAL(10,2);
+DECLARE at_costUSD                DECIMAL(5,2);
+DECLARE at_tax                    DECIMAL(10,2);
+DECLARE at_taxUSD                 DECIMAL(5,2);
+DECLARE at_currencyId             TINYINT;
+DECLARE at_purchaseOfferDetailId  SMALLINT;
+DECLARE at_purchaseTypeId         TINYINT;
+DECLARE at_billingLocationId      SMALLINT;
+DECLARE at_creditCardId           INT;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+SELECT IFNULL(SUM(balance), 0) INTO at_balance FROM SDBalance WHERE userId = at_userId AND dateExpiry > at_dateNow;
+
+SELECT  cost, costUSD, tax, taxUSD, passes, passTypeId, creditCardId, currencyId, purchaseOfferDetailId, billingLocationId, purchaseTypeId 
+INTO at_cost, at_costUSD, at_tax, at_taxUSD, at_passes, at_passTypeId, at_creditCardId, at_currencyId, at_purchaseOfferDetailId, at_billingLocationId, at_purchaseTypeId 
+FROM SDTransaction t, Purchase p WHERE t.xactionId = p.xactionId AND t.xactionId = at_refXactionId;
+
+SET at_balance = at_balance - at_passes;
+
+IF at_xactionId = -1  
+THEN -- if reversal not passed through card processor, generate new xactionId and set cardProcessor = null
+   SET at_cardProcessor = NULL;
+   CALL wsp_XactionId(at_xactionId);
+   IF !(at_xactionId > 0)
+   THEN
+      LEAVE proc_label;
+   END IF;
+END IF;
+
+CALL wsp_transReverseSDPurchase (at_userId,at_xactionId,at_refXactionId,at_contentId,at_xactionTypeId,at_cardProcessor,at_adminUserId,at_adminNote,at_paymentNumber,
+     				at_passes,at_passTypeId,at_dateNow,at_balance,at_cost,at_costUSD,at_tax,at_taxUSD,at_currencyId,at_purchaseOfferDetailId,at_purchaseTypeId,
+				at_billingLocationId,at_creditCardId);
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,40 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updUserInfoCommonAttribut;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updUserInfoCommonAttribut (
+/***********************************************************************
+**
+** CREATION:
+**   Author:  Jeff Yang 
+**   Date:  Oct. 20 2002
+**   Description:  Updates common row on profile(after creating a new profile)
+**
+**   Author: Mike Stairs
+**   Date: Oct 2005
+**   Description: eliminated references to removed columns from user_info
+**
+*************************************************************************/
+ at_userId DECIMAL(12,0)
+,at_body_type char(1)
+,at_ethnic char(1)
+,at_religion char(1)
+,at_smoke char(1)
+,at_height_cm int
+)
+BEGIN
+
+     DECLARE at_dateNow DATETIME ;
+
+     CALL wsp_GetDateGMT(at_dateNow);
+	
+     UPDATE user_info 
+        SET
+            body_type=at_body_type,
+            ethnic=at_ethnic,
+            religion=at_religion,
+            smoke=at_smoke,
+            height_cm=at_height_cm,
+            dateModified=at_dateNow
+     WHERE user_id=at_userId ;
+
+END;;
+DELIMITER ;

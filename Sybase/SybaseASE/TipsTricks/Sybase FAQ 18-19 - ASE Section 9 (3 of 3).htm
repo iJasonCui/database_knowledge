@@ -1,0 +1,4068 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<TITLE>Sybase FAQ: 18/19 - ASE Section 9 (3 of 3)</TITLE>
+<script language="JavaScript1.2">
+function edc(s,s2)
+{document.write("<font face=\"Arial\"><A href=\"",s,"\" target=\"_blank\" onclick=\"window.open('",s,"','Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=720,height=530,left=30,top=43');return false;\" )>Not finding the answers you need?&nbsp;",s2,"Submit your question for others to see.</A></font>");}
+//-->
+</script>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<DIV ALIGN=CENTER>
+<SMALL>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  Part18 -  <A HREF="../part19/">Part19</A>
+</SMALL>
+<BR><HR SIZE=2 WIDTH=600 NOSHADE>
+<P><H1>Sybase FAQ: 18/19 - ASE Section 9 (3 of 3)</H1>
+<table border="0" cellpadding="4" cellspacing="4" width="35%">
+<tr><td width="100%" align="center" bgcolor="#D6D6C0">
+<p align=center><small>
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part18/index.html","<br>");
+// --></script>
+</small></p>
+</td></tr>
+</table>
+ <br>
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="40%">
+<tr><td width="100%" align="center" bgcolor="#CCCCFF"><font face="Arial">There are reader questions on this topic!<a href="#ct"><br>Help
+others by sharing your knowledge</a></font></td></tr>
+</table></center></div>
+<HR SIZE=2 WIDTH=600 NOSHADE>
+</DIV>
+<PRE>
+Message-ID: &lt;databases/sybase-faq/part18_1074677126@rtfm.mit.edu&gt;
+X-Last-Updated: 2003/03/02
+From: dowen@midsomer.org (David Owen)
+Newsgroups: <A HREF="http://groups.google.com/groups?group=comp.databases.sybase" target="new">comp.databases.sybase</A>
+Subject: Sybase FAQ: 18/19 - ASE Section 9 (3 of 3)
+Reply-To: <A HREF="mailto:dowen@midsomer.org">dowen@midsomer.org</A> (David Owen)
+Keywords: FAQ, DATABASES, SYBASE, ASA, ASE, REP
+Date: 21 Jan 2004 09:26:09 GMT
+
+Archive-name: databases/sybase-faq/part18
+URL: <A HREF="http://www.isug.com/Sybase_FAQ">http://www.isug.com/Sybase_FAQ</A>
+Version: 1.7
+Maintainer: David Owen
+Last-modified: 2003/03/02
+Posting-Frequency: posted every 3rd month
+   A how-to-find-the-FAQ article is posted on the intervening months.
+
+#!/usr/bin/perl
+
+# Author:  Vincent Yin  (<A HREF="mailto:umyin@mctrf.mb.ca">umyin@mctrf.mb.ca</A>)   Aug 1994    Last Modified: May 1996
+
+chomp($basename = `basename $0`);
+
+$usage = &lt;&lt;EOF;
+USAGE
+    $basename database userid passwd pattern [ pattern... ]
+
+DESCRIPTION
+    Prints isql scripts that would insert records into the
+    tables whose names match any of the patterns in command line.  In
+    other words, this program reverse engineers the data in a given
+    table(s).  Roughly, it `select * from &lt;table&gt;', analyses the data
+    and table structure, then prints out a bunch of
+            insert &lt;table&gt; values ( ... )
+    statements that would re-populate the table.  It's an alternative
+    to `bcp'.  `bcp' has its limitations (e.g. one often needs to turn on
+    "select into/bulk copy" option in the database before running bcp.)
+
+    Table names are matched to &lt;pattern&gt; with Transact-SQL's LIKE clause.
+    When more than one pattern is specified on command line, the LIKE
+    clauses are OR'ed.  In any case, the LIKE clause(s) is logged to
+    the beginning of the output as a comment, so that you'll see how this
+    program interprets the command line.
+
+    The SQL script is printed to stdout.  Since it only prints out the SQL
+    but doesn't submit it to the SQL server, this procedure is safe to run.
+    It doesn't modify database in any way.
+
+EXAMPLES
+    To print this usage page:
+            % $basename
+    To print SQL that populates the table master..sysobjects and systypes:
+            % $basename master userid passwd "sysobjects" "systypes"
+    To print SQL that populates all system tables in master db:
+            % $basename master userid passwd "sys%"
+
+BUGS
+    Embedded line breaks in strings are allowed in Sybase's isql, but not
+    allowed in SQLAnywhere's isql.  So this script converts embedded line
+    breaks (both DOS styled and UNIX styled) to blank characters.
+
+EOF
+
+$batchsize = 10;        # The number of INSERTs before a `go' is issued.
+                        # This is to make the output compact.
+
+# .................... No change needed below this line ........................
+
+use Sybase::DBlib;
+
+die $usage unless $#ARGV &gt;= 3;
+($db, $user, $passwd, @pattern) = @ARGV;
+
+$likeclause = &amp;sql_pattern_to_like_clause("name", @pattern);
+
+print &lt;&lt;EOF;
+-- This script is created by $0.
+-- It would generate INSERT statements for tables whose names match the
+-- following pattern:
+/* $likeclause
+*/
+
+set nocount on
+go
+EOF
+
+$dbh = new Sybase::DBlib $user, $passwd;
+$dbh-&gt;{dbNullIsUndef} = 1;
+$dbh-&gt;dbuse($db);
+
+    # Get the list of tables.
+$tablelist = $dbh-&gt;sql("select name
+                          from sysobjects
+                         where type in (\'S\',\'U\')
+                           and $likeclause
+                         order by name
+                  ");
+
+foreach $tableref (@$tablelist) {
+  $table = @$tableref[0];
+  print "\n\n/*.............. $table ...............*/\n";
+  print "-- ", `date`, "\n";
+  print "declare \@d datetime\n";
+  print "select \@d = getdate()\n";
+  print "print        '       %1!    $table', \@d\ngo\n\n";
+  print "truncate table $table  -- Lookout !!!!!!\ngo\n\n";
+
+  $dbh-&gt;dbcmd("select * from $table");
+  $dbh-&gt;dbsqlexec;
+  $dbh-&gt;dbresults;
+
+  while (@row = $dbh-&gt;dbnextrow()) {
+    print "insert $table values(";
+
+    for ($i=0; $i &lt;= $#row; $i++) { # build the INSERT statement
+      # Analyse datatype to decide if this column needs to be quoted.
+      $coltype = $dbh-&gt;dbcoltype($i+1);
+
+      if (!defined($row[$i])) {
+        print "NULL";    # Never quote NULL regardless of datatype
+      }
+      elsif ($coltype==35 or $coltype==39 or $coltype==47 or
+             $coltype==58 or $coltype==61 or $coltype==111 ){
+        # See systypes.type/name for explanation of $coltype.
+        $row[$i] =~ s/\r|\n/ /g; # Handles both DOS and UNIX line breaks
+        $row[$i] =~ s/\'/\'\'/g;    # Stuff double quotes
+        print '\'' . $row[$i] . '\'';
+      } else {
+        print $row[$i];
+      }
+      print ", " unless $i == $#row;
+    }
+
+    print ")\n";            # wrap up the INSERT statement.
+                              # print `go' at every $batchsize interval.
+    print "go\n" unless $dbh-&gt;DBCURROW % $batchsize;
+  }
+  print "\ngo\n\n";           # print a `go' after the entire table is done.
+  print "-- ### End for $table:  rowcount = ", $dbh-&gt;DBCURROW, "\n";
+}
+
+# ................................. sub ........................................
+sub sql_pattern_to_like_clause {
+  local($field_name, @pattern) = @_;
+  $like_clause = "\t(  1 = 0 ";
+  foreach (@pattern) {
+    $like_clause .= "\n     or $field_name like '" . $_ . "' ";
+  }
+  $like_clause .= "\n\t) \n";
+}
+#!/bin/sh
+#-*-sh-*-
+# Code for question 9.3: Generating dump/load database command.
+#
+# This script calls the function gen_dumpload_command to generate
+# either a dump or a load command.
+#
+# This function works for both System 10 and Sybase 4.x
+# installations.  You simply need to change your method of thinking.
+# In Sybase 4.x, we only had a single stripe.  In System 10, most
+# of the time we define a single stripe but in our bigger databases
+# we define more stripes.
+#
+# Therefore, everything is a stripe.  Whether we use one stripe or
+# many... cool?  Right on!
+#
+#
+# The function gen_dumpload_command assumes that all dump devices
+# adhere to the following naming convention:
+#
+#     stripe_NN_database
+#
+# NOTE:  If your shop is different search for "stripe" and replace
+#        with your shop's value.
+#
+#
+
+
+# gen_dumpload_command():
+#
+#        purpose:  to generate a dump/load to/from command based on
+#                  what is defined in sysdevices.  The environment
+#                  variable D_DEV is set.
+#
+#        return:   zero on success, non-zero on failure.
+#
+#        sets var: D_DEV is set with the actual dump/load command;
+#                  stripe devices are also handled.
+#
+#        calls:    *none*
+#
+#        parms:    1 = DSQUERY
+#                  2 = PASSWD
+#                  3 = DB
+#                  4 = CMD -&gt; "dump" or "load"
+#
+
+
+gen_dumpload_command()
+{
+   LOCAL_DSQUERY=$1
+   LOCAL_PASSWD=$2
+   DB_TO_AFFECT=$3
+   CMD=$4 # dump/load
+
+   if [ "$CMD" = "dump" ] ; then
+      VIA="to"
+   else
+      VIA="from"
+   fi
+
+   # Check for a dump device
+
+   echo "Checking for standard $CMD device"
+    #   D_DEV=`echo "$LOCAL_PASSWD
+$SYBIN/isql -U sa -S $LOCAL_DSQUERY -w1000 | sed -n -e '/stripe/p' | \
+select name from sysdevices where name like \"stripe%_$DB_TO_AFFECT\"
+go"
+EOSQL
+      gawk '{ if (NR == 1) print "'$CMD' database '$DB_TO_AFFECT' '$VIA'", $0
+                         else print "stripe on", $0
+                         }'`
+
+   if [ -z "$D_DEV" ] ; then # nothing defined... :(
+      return 1
+   fi
+
+   return 0
+}
+
+SYBIN=$SYBASE/bin
+
+gen_dumpload_command $1 $2 $3 $4
+
+if [ $? -eq 1 ] ; then
+   echo "Error..."
+   exit 1
+fi
+
+# so what does this generate?  :-)
+echo $D_DEV
+
+# ... and it can be used as follows:
+
+echo "$PASSWD
+$D_DEV
+go" | isql ...
+
+exit 0
+#!/usr/bin/perl
+
+# $Id: int.pl,v 1.4 1995/11/04 03:16:38 mm Exp mm $
+
+# convert a sun4 interfaces file to a different format (see @modelist)
+# limitations:
+# - does not handle tli/spx entries (yet)
+# - drivers for desktop platform hard coded
+# - no sanity checks (duplicate names, incomplete entries)
+# - ignores extraneous tokens silently (e.g. a 6th field)
+# - don't know whether/how to convert decnet to tli format
+# - ???
+
+require 'getopts.pl';
+
+sub usage
+{
+        local(@token) = @_;
+
+        if (!($token[0] eq 'short' || $token[0] eq 'long'))
+        {
+                printf STDERR "Environment variable(s) @token not defined.\n";
+                exit (1);
+        }
+
+        print STDERR &lt;&lt;EOM;
+Usage:  $progname  -f &lt;sun4 interfaces file&gt;
+                -o { $modetext1 }
+                [-V] [-v] [-h]
+EOM
+
+        if ($token[0] eq 'long')
+        {
+                print STDERR &lt;&lt;EOM;
+where
+        -f &lt;file&gt; input file to process
+        -o &lt;mode&gt; specify output mode
+                  (e.g. $modetext2)
+        -V        turn on verbose mode
+        -v        print version string
+        -h        print this message
+EOM
+        }
+        else
+        {
+                print STDERR "For more details run $progname -h\n";
+        }
+        exit(1);
+} # end of usage
+
+
+# FUNCTION NAME:     parse_command_line
+# DESCRIPTION:       call getopts and assign command line arguments or
+#                    default values to global variables
+# FORMAL PARAMETERS: none
+# IMPLICIT INPUTS:   command line arguments
+# IMPLICIT OUTPUTS:  $inputfile, $mode, $verbose
+# RETURN VALUE:      none, exits (in usage) if -h was specified
+#                    (help option).
+# SIDE EFFECTS:      none
+#
+sub parse_command_line {
+        &amp;Getopts('f:o:hvV') || &amp;usage('short');
+        $inputfile = $opt_f;
+        $mode = $opt_o;
+        $verbose = $opt_V ? 1 : 0;
+
+        print("$progname version is: $version\n"), exit 0 if $opt_v;
+        &amp;usage('long') if $opt_h;
+        &amp;usage('short') if ! $inputfile || ! $mode;
+        &amp;usage('short') if ! grep($mode eq $_, @modelist);
+} # end of parse_command_line
+
+# FUNCTION NAME:     process_file
+# DESCRIPTION:       parse file, try to convert it line by line.
+# FORMAL PARAMETERS: $file - file to process
+# IMPLICIT INPUTS:   none
+# IMPLICIT OUTPUTS:  none
+# RETURN VALUE:      none
+# SIDE EFFECTS:      none
+
+sub process_file {
+        local($file) = @_;
+        open(INPUT, "&lt;$file") ||
+                die "can't open file $file: $!\nExit.";
+        local($line) = 0;
+        local($type, $prot, $stuff, $host, $port, $tmp);
+        print $os2_header if $mode eq 'os2';
+        while (&lt;INPUT&gt;)
+        {
+                $line++;
+                # handle empty lines (actually lines with spaces and tabs only)
+                #print('\n'), next if /^\s*$/;
+                next if /^\s*$/;
+                chop;
+                # comments, strip leading spaces and tabs
+                s/^\s*//, print("$_$lf{$mode}\n"), next if /^\s*#/;
+                #s/^\s*//, next if /^\s*#/;
+
+                # server names
+                if (/^\w+/)
+                {
+                        if ($mode eq 'sol' || $mode eq 'ncr'
+                                || $mode eq 'vms' || $mode eq 'nw386')
+                        {
+                                print "$_$lf{$mode}\n";
+                                next;
+                        }
+                        elsif ($mode eq 'os2')
+                        {
+                                $server = $_;
+                                next;
+                        }
+                        else {
+                                print "[$_]$lf{$mode}\n" if !(/SPX$/);
+                                next;
+                        }
+                }
+
+                if (/^\tmaster|^\tquery|\tconsole/)
+                {
+                        # descriptions
+                        # parse first whitespace delimited word and
+                        # following space(s)
+                        # quietly ignore any extraerraneous characters
+                        # I actually tried to catch them, but - believe
+                        # it or not - perl would chop off the last digit of
+                        # $port.                                   vvvv
+                        # /^\t(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\d+)(.+)$/;
+                        if (!(($type, $prot, $stuff, $host, $port) =
+                                /^\t(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/))
+                        {
+                                print STDERR "line $line: unknown format: $_";
+                                next;
+                        }
+                        #print ("line $line: more than 5 tokens &gt;$etc&lt;, \n"),
+                        #       next if $etc;
+                        if (!($type eq 'master' || $type eq 'query'
+                                || $type eq 'console'))
+                        {
+                                # unknown type
+                                print STDERR "line $line: unknown type $type\n";
+                                next;
+                        }
+                        if ($prot eq 'tli')
+                        {
+                                #print STDERR "line $line: can't handle tli",
+                                #       " entries (yet)\n";
+                                # adjust to tli format
+                                ($layer, $prot, $device, $entry) =
+                                        ($prot, $stuff, $host, $port);
+                                print "\t$type tli $prot $device ",
+                                        "$entry$lf{$mode}\n" if $mode ne 'win3';
+                                next;
+                        }
+                        if (!($prot eq 'tcp' || $prot eq 'decnet'))
+                        {
+                                # unknown protocol
+                                print STDERR
+                                        "line $line: unknown protocol $prot\n";
+                                next;
+                        }
+                        if ($mode eq 'sol' || $mode eq 'ncr' || $mode eq 'nw386')
+                        {
+                                $ip = &amp;get_ip_address($host, 'hex');
+                                $hexport = sprintf("%4.4x", $port);
+                                print "\t$type tli $prot $device{$prot} \\x",
+                                "$prefix{$mode}$hexport$ip$nulls{$mode}\n";
+                                next;
+                        }
+                        if ($mode eq 'vms')
+                        {
+                                $ip = &amp;get_ip_address($host, 'dot');
+                                print "\t$type $prot $stuff $ip $port\n";
+                                next;
+                        }
+                        if ($mode eq 'nt386')
+                        {
+                                $type =~ tr/a-z/A-Z/;
+                                print "\t$type=$sock{$mode},$host,",
+                                        "$port$lf{$mode}\n";
+                                next;
+                        }
+                        if ($mode eq 'dos' || $mode eq 'win3')
+                        {
+                                next if $type ne 'query';
+                                print "\t${mode}_$type=$sock{$mode},",
+                                        "$host,$port$lf{$mode}\n";
+                                next;
+                        }
+                        if ($mode eq 'ntdoswin3')
+                        {
+                                ($tmp = $type) =~ tr/a-z/A-Z/;
+                                # watch out for this local($mode) !!
+                                # its scope is this BLOCK only and
+                                # (within this block) overrides the
+                                # other $mode!!! But we can still access
+                                # the array %sock.
+                                local($mode) = 'nt386';
+                                print "\t$tmp=$sock{$mode},$host,$port",
+                                        "$lf{$mode}\n";
+                                next if $type ne 'query';
+                                $mode = 'dos';
+                                print "\t${mode}_$type=$sock{$mode},",
+                                        "$host,$port$lf{$mode}\n";
+                                $mode = 'win3';
+                                print "\t${mode}_$type=$sock{$mode},",
+                                        "$host,$port$lf{$mode}\n";
+                                next;
+                        }
+                        if ($mode eq 'os2')
+                        {
+                          print "  \'$server\' \'$type\' \'$sock{'os2'}",",$host,$port\'\n";
+                          next;
+                        }
+                }
+                printf STDERR "line $line is -&gt;%s&lt;-\n", chop($_);
+        }
+        close(INPUT);
+        print $os2_tail if $mode eq 'os2';
+
+} # end of process_file
+
+# FUNCTION NAME:     print_array
+# DESCRIPTION:       print the array
+# FORMAL PARAMETERS: *array - array to be printed, passed by reference
+# IMPLICIT INPUTS:   none
+# IMPLICIT OUTPUTS:  none
+# RETURN VALUE:      none
+# SIDE EFFECTS:      none
+#
+sub print_array {
+        local(*array) = @_;
+        foreach (sort keys %array)
+        {
+                printf STDERR "%-16s %s\n", $_, $array{$_};
+        }
+
+} # end of print_array
+
+# FUNCTION NAME:     get_ip_address
+# DESCRIPTION:       get the ip address of a host specified by name, return
+#                    it as a string in the requested format, e.g.
+#                    requested format == 'dot' --&gt; return 130.214.140.2
+#                    requested format == 'hex' --&gt; return 82d68c02
+#                    In order to avoid repeated calls of gethostbyname with
+#                    the same host, store (formatted) results of gethostbyname
+#                    in array %map.
+# FORMAL PARAMETERS: name of host, requested return type: hex or dot format
+# IMPLICIT INPUTS:   %map
+# IMPLICIT OUTPUTS:  none
+# RETURN VALUE:      ip address
+# SIDE EFFECTS:      maintains %map, key is host name, value is ip address.
+#
+sub get_ip_address {
+        local($host, $mode) = @_;
+        if (!$map{$host})
+        {
+                #print "calling gethostbyname for $host";
+                ($name, $aliases, $addrtype, $length, @addrs) =
+                        gethostbyname($host);
+                $map{$host} = join('.', unpack('C4', $addrs[0]));
+                if ($mode eq 'hex')
+                {
+                        $map{$host} = sprintf("%2.2x%2.2x%2.2x%2.2x",
+                                        split(/\./, $map{$host}));
+                }
+                #print " - $map{$host}\n";
+        }
+        return $map{$host};
+} # end of get_ip_address
+
+
+$version = "\$Id: int.pl,v 1.4 1995/11/04 03:16:38 mm Exp mm \$";
+$| = 1;
+($progname = $0) =~ s#.*/##g;
+@modelist = ('sol', 'ncr', 'vms', 'nw386', 'os2',
+                 'nt386', 'win3', 'dos', 'ntdoswin3');
+$modetext1 = join('|', @modelist);
+$modetext2 = join(', ', @modelist);
+
+# tli on solaris needs more zeroes
+$nulls{'sol'} = "0000000000000000";
+$nulls{'nw386'} = "0000000000000000";
+$nulls{'ncr'} = "";
+$nulls{'nt386'} = "";
+
+# prefix for tli entries
+$prefix{'sol'} = "0002";
+$prefix{'nw386'} = "0200";
+$prefix{'ncr'} = "0002";
+$prefix{'nt386'} = "0200";
+
+# protocol devices
+$device{'tcp'} = "/dev/tcp";
+$device{'spx'} = "/dev/nspx";
+$device{'decnet'} = "/dev/tcp";
+
+# socket driver names
+$sock{'nt386'}="NLWNSCK";
+$sock{'dos'}="NLFTPTCP";
+$sock{'win3'}="WNLWNSCK";
+$sock{'os2'}="nlibmtcp";
+
+# linefeed's (^M) for the MS world
+$lf{'nt386'}="
+";
+$lf{'dos'}="
+";
+$lf{'win3'}="
+";
+$lf{'ntdoswin3'}="
+";
+$lf{'os2'}="";
+$lf{'vms'}="";
+$lf{'sol'}="";
+$lf{'ncr'}="";
+$lf{'nw386'}="";
+
+$os2_header = sprintf("STRINGTABLE\nBEGIN\n%s", "  \'\'\n" x 10);
+$os2_tail = "END\n";
+
+&amp;parse_command_line;
+&amp;process_file($inputfile);
+&amp;print_array(*map) if $verbose;
+#!/usr/bin/perl -w
+
+use Getopt::Std;
+use strict;
+use English;
+
+my($fullRow, @processStats, $owner, $pid, $parentPid);
+my($started, $engineNum, %engine);
+my($cpuTime, $servType, $param, $servParam, @dirComps);
+my(@engineParts, %stypes, @procParts);
+my($serverName, %server, $srvType, $engine);
+my($cmd);
+
+# (Empirically) I have found with large numbers of engines, that not
+# all of the child parent relationships are as you imagine, ie engine
+# 0 does not start off all other engines.  "-l" indents to show this
+# heirarchy.
+
+getopts('l');
+
+# Script to show, in a nice fashion, all of the Sybase servers on a
+# system.
+
+$cmd = "ps -ef -o user,pid,ppid,start,comm";
+
+SWITCH:
+    for ($OSNAME) {
+
+        /AIX|OSF1/  &amp;&amp; do {
+            $cmd = "ps auwwx";
+            last SWITCH;
+        };
+
+        /freebsd/   &amp;&amp; do {
+            $cmd = "ps ps awwxo user,pid,ppid,start,command";
+            last SWITCH;
+        };
+
+        /linux/     &amp;&amp; do {
+            $cmd = "ps -awxo user,pid,ppid,stime,command";
+            last SWITCH;
+        };
+
+        /solaris/   &amp;&amp; do {
+            $cmd = "ps -ef -o user,pid,ppid,stime,args";
+            last SWITCH;
+        };
+    }
+
+
+open(PSCMD, "$cmd |") or die("Cannot fork: $!");
+
+while (&lt;PSCMD&gt;) {
+    next if !/dataserver|backupserver|repserver|rsmsrvr|monserver/;
+
+    # Remove any white space after the -[sS] command.
+
+    s/(-[sS])[\s\s*]/$1/;
+
+    # Remove leading space.
+
+    s/^  *//;
+
+    $fullRow      = $_;
+    @processStats = split(/\s+/);
+
+    $owner     = shift(@processStats);
+    $pid       = shift(@processStats);
+    $parentPid = shift(@processStats);
+    $started   = shift(@processStats);
+
+#    $cpuTime     = shift(@processStats);
+
+    $cpuTime = 999;
+
+    # Is it a parent or a child?
+
+    if ($fullRow =~ /-ONLINE:/) {
+        # Child!
+        @procParts = split(/[:]/, $processStats[1]);
+        @engineParts = split(/[,]/, $procParts[1]);
+        $engineNum   = $engineParts[0];
+        push(@{ $engine{$parentPid} }, [ $pid, $engineNum, $cpuTime ]);
+    } else {
+
+        $servParam = shift(@processStats);
+        @dirComps = split(/\//, $servParam);
+        $servType = pop(@dirComps);
+
+      PROCSTAT:
+        foreach $param (@processStats) {
+            if ($param =~ /^-[sS]/) {
+                $serverName = substr($param, 2);
+                last PROCSTAT;
+            }
+        }
+        $server{$pid} = [ $serverName, $owner, $started ];
+        push(@{ $stypes{$servType} }, $pid);
+        push(@{ $engine{$pid} }, [ $pid, 0, $cpuTime ]);
+    }
+}
+
+close(PSCMD);
+
+foreach $srvType (keys(%stypes)) {
+    print "\n$srvType\'s\n";
+    print "-" x (length($srvType) + 2);
+
+
+    foreach $pid (@{ $stypes{$srvType} }) {
+        print "\n  $server{$pid}[0] Owner: $server{$pid}[1], Started: $server{$pid}[2]";
+
+        printEngines($pid, 0);
+    }
+    print "\n";
+}
+
+print "\n";
+$Getopt::Std::opt_l = 0;
+
+sub printEngines {
+
+    my($pid)   = shift;
+    my($level) = shift;
+
+    if (defined($engine{$pid})) {
+        foreach $engine (@{ $engine{$pid} }) {
+            print  "\n      ";
+
+            print "  " x $level if defined($Getopt::Std::opt_l);
+
+            printf "Engine: %2.2s (PID: %s)", @$engine[1], @$engine[0];
+
+            if (@$engine[0] ne $pid) {
+                printEngines(@$engine[0], $level + 1);
+            }
+        }
+    }
+}
+
+
+use sybsystemprocs
+go
+
+CREATE PROCEDURE sp__create_crosstab
+        ,@code_table    varchar(30)     -- table containing code lookup rows
+        ,@code_key_col  varchar(30)     -- name of code/lookup ID column
+        ,@code_desc_col varchar(30)     -- name of code/lookup descriptive text column
+        ,@value_table   varchar(30)     -- name of table containing detail rows
+        ,@value_col     varchar(30)     -- name of value column in detail table
+        ,@value_group_by varchar(30)    -- value table column to group by.
+        ,@value_aggregate varchar(5)    -- operator to apply to value being aggregated
+
+AS
+/*
+Copyright (c) 1997, Clayton Groom. All rights reserved.
+Procedure to generate a cross tab query script
+Reqires:
+        1. A lookup table with a code/id column and/or descriptive text column
+        2. A data table with a foreign key from the lookup table &amp; a data value to aggregate
+        3. column(s) name from data table to group by
+        4. Name of an aggregate function to perform on the data value column.
+*/
+
+set nocount on
+
+if sign(charindex(upper(@value_aggregate), 'MAX MIN AVG SUM COUNT')) = 0
+BEGIN
+        print "@value_aggregate value is not a valid aggregate function"
+        -- return -1
+END
+
+declare @value_col_type         varchar(12)     -- find out data type for aggregated column.
+        ,@value_col_len         int             -- get length of the value column
+        ,@str_eval_char         varchar(255)
+        ,@str_eval_int          varchar(255)
+-- constants
+        ,@IS_CHAR               varchar(100)    -- character data types
+        ,@IS_NOT_ALLOWED        varchar(100)    -- data types not allowed
+        ,@IS_NUMERIC            varchar(255)    -- numeric data type names
+        ,@NL                    char(2)         -- new line
+        ,@QUOTE                 char(1)         -- ascii character 34 '"'
+--test variables
+        ,@value_col_is_char     tinyint         -- 1 = string data type, 0 = numeric or not allowed
+        ,@value_col_is_ok       tinyint         -- 1 = string or numeric type, 0 = type cannot be used.
+        ,@value_col_is_num      tinyint         -- 1 = numeric data type, 0 = string or not allowed
+
+select   @IS_CHAR       = 'varchar char nchar nvarchar text sysname'
+        ,@IS_NOT_ALLOWED= 'binary bit varbinary smalldatetime datetime datetimn image timestamp'
+        ,@IS_NUMERIC    = 'decimal decimaln float floatn int intn money moneyn numeric numericn real smallint smallmoney tinyint'
+        ,@NL            = char(13) + char(10)
+        ,@QUOTE         = '"'   -- ascii 34
+
+-- get the base data type &amp; length of the value column. Is it a numeric type or a string type?
+-- need to know this to use string or numeric functions in the generated select statement.
+select  @value_col_type = st.name
+        ,@value_col_len = sc.length
+                        from syscolumns sc
+                                ,systypes st
+                        where   sc.id = object_id(@value_table)
+                        and     sc.name = @value_col
+                        and     sc.type = st.type
+                        and     st.usertype = (select min(usertype)
+                                                from systypes st2
+                                                where st2.type = sc.type)
+--select @value_col_type, @value_col_len
+
+select @value_col_is_char = sign(charindex( @value_col_type, @IS_CHAR))
+        ,@value_col_is_ok = 1 - sign(charindex( @value_col_type, @IS_NOT_ALLOWED))
+        ,@value_col_is_num = sign(charindex( @value_col_type, @IS_NUMERIC))
+
+IF @value_col_is_ok = 1
+BEGIN
+        if @value_col_is_char = 1
+        begin
+                select @str_eval_char = ''
+        end
+        else
+        if @value_col_is_num = 1
+        begin
+                select @str_eval_char = ''
+        end
+        else
+        begin
+                print " @value_col data type unnown. must be string or numeric"
+                -- return -1
+        end
+END
+ELSE    --ERROR
+BEGIN
+        print " @value_col data type not allowed. must be string or numeric"
+        -- return -1
+END
+
+-- template. first level expansion query.
+-- result must be executed to generate final output query.
+
+SELECT "select 'select " + @value_group_by + "'"
+IF @value_col_is_char = 1
+BEGIN
+        SELECT "select '," + @QUOTE + "' + convert(varchar(40), " + @code_desc_col+ " ) + '" + @QUOTE + @NL
+        + " = "
+        + @value_aggregate
+        + "(isnull( substring("
+        + @value_col
+        + ", 1, ( "
+        + convert(varchar(3), @value_col_len )
+        + " * charindex( "
+        + @QUOTE
+        + "'+"
+        + @code_key_col
+        + "+'"
+        + @QUOTE
+        + ", "
+        + @code_key_col
+        + " ))), "
+        + @QUOTE + @QUOTE
+        + "))'"
+END
+ELSE IF @value_col_is_num = 1
+BEGIN
+        SELECT "select '," + @QUOTE + "' + convert(varchar(40), " + @code_desc_col+ " ) + '" + @QUOTE + @NL
+        + " = "
+        + @value_aggregate
+        + "("
+        + @value_col
+        + " * charindex( "
+        + @QUOTE
+        + "'+"
+        + @code_key_col
+        + "+'"
+        + @QUOTE
+        + ", "
+        + @code_key_col
+        + "))'"
+END
+SELECT "from " + @code_table + @NL
+        + "select  'from " + @value_table + "'" + @NL
+        + "select 'group by " + @value_group_by + "'"
+
+-- end
+go
+use sybsystemprocs
+go
+
+if object_id('sp__indexreport') is not null
+    drop procedure sp__indexreport
+go
+
+/*
+** A system sproc to report on user indexes.
+**
+** Written by Anthony Mandic - July 2000.
+*/
+create procedure sp__indexreport
+as
+
+if @@trancount = 0
+    set chained off
+
+set transaction isolation level 1
+
+set nocount on
+
+/*
+** Check for user tables first.
+*/
+if (select count(*) from sysobjects where type = "U") = 0
+begin
+	print "No user tables found in current database"
+	return 1
+end
+
+/*
+** Check for tables without any indexes.
+*/
+select	name
+into	#tablelist
+from	sysindexes
+group by id
+having	count(id) = 1
+and	indid	  = 0
+and	id	  &gt; 99
+and	name not like "#tablelist%"   /* Avoid finding it if run in tempdb */
+
+if @@rowcount &gt; 0
+	select	"Tables without indexes" = name
+	from	#tablelist
+	order by name
+
+drop table #tablelist
+
+/*
+** Select all user indexes where there are multiple indexes on a table.
+*/
+select	tid		= id,
+	tname		= object_name(id),
+	iname		= name,
+	iid		= indid,
+	indexcolumns	= convert(varchar(254), "")
+into	#indexlist
+from	sysindexes
+where	id		&gt; 99
+and	indid	between 1 and 254
+group by id
+having	count(id)	&gt; 1
+and	indid	between 1 and 254
+
+if @@rowcount = 0
+begin
+	print "No duplicate indexes found in current database"
+	return 1
+end
+
+declare	@count		int,
+	@tid		int,
+	@size		int,
+	@icolumns	varchar(254)
+
+select	@count	= 1
+
+while	@count &lt; 17	/* 16 appears to be the max number of indexes */
+begin
+	update	#indexlist
+	set	indexcolumns	=
+				case
+				    when @count &gt; 1 then indexcolumns + ', '
+				end
+				+ index_col(tname, iid, @count)
+	where	index_col(tname, iid, @count) is not null
+
+        if @@rowcount = 0
+	    break
+
+        select	@count	= @count + 1
+end
+
+create	table	#finallist
+(
+	table_name	varchar(30),
+	index_name	varchar(30),
+	tid		int,
+	index_columns	varchar(254)
+)
+
+insert	#finallist
+select	b.tname,
+	b.iname,
+	b.tid,
+	b.indexcolumns
+from	#indexlist a,
+	#indexlist b
+where	a.tid		= b.tid
+and	a.indexcolumns	like b.indexcolumns + '%'
+group by a.tid,
+	a.iname
+having	count(*)	&gt; 1
+and	a.tid		= b.tid
+and	a.indexcolumns	like b.indexcolumns + '%'
+
+if (select count(*) from #finallist) = 0
+begin
+	print "No duplicate indexes found in current database"
+	return 1
+end
+
+select	@size	= low / 1024
+from	master..spt_values
+where	number	= 1
+and	type	= "E"
+
+print "Duplicate leading index columns"
+print "-------------------------------"
+print ""
+
+/*
+** The distinct is needed to eliminate duplicated identical indexes on tables.
+** The order by is to get the resultant distinct list sorted.
+*/
+select	distinct
+	"table name"	= table_name,
+	"index name"	= index_name,
+	"size"		= str(
+			  (data_pgs(id, doampg) + data_pgs(id, ioampg)) * @size)
+			+ " KB",
+	"index columns"	= index_columns
+from	#finallist,
+	sysindexes
+where	id	= tid
+and	name	= index_name
+order by table_name, index_columns
+
+return 0
+go
+
+exec sp_procxmode 'sp__indexreport', 'anymode'
+go
+
+grant execute on sp__indexreport to public
+go
+set flushmessage on
+go
+
+use sybsystemprocs
+go
+
+if exists (select 1
+        from sysobjects
+                where sysstat &amp; 7 = 4
+                        and name = 'sp__optdiag')
+begin
+        print "Dropping sp__optdiag"
+        drop procedure sp__optdiag
+end
+go
+
+print "Installing sp__optdiag"
+go
+
+create procedure sp__optdiag
+	@tabname	varchar(62) = null,  /* user table name */
+	@colname	varchar(30) = null,	/* column name */
+	@option		varchar(60) = null		/* output format */
+ , @proc_version varchar(78) = "sp__optdiag/0.4/0/P/KJS/AnyPlat/AnyOS/G/Fri Jan  5 14:56:32 2001"
+as
+/*************************************************************************************************
+**
+**	Description: Format opdiag info from stored procedure
+**
+**	Options:  NULL - default
+**
+**                "V/?/HELP/H" - will print the current version string of this proc
+**                "CR" - will approximate cluster ratio calculations.  Note that these are simply
+**                       simply approximations since cluster ratio calculations are not published.
+**                       (future change, not supported yet)
+**
+**	Future Info:  Other options can be added in the future
+**                    using the @option parameter.
+**
+**	Dependencies:  This proc relies on the object_id built-in
+**                    and sp_namecrack
+**
+**	Errors:
+**
+**	Version:  This proc is for ASE 11.9.x and beyond
+**
+**	Usage:  exec &lt;dbname&gt;..sp__optdiag &lt;tabname&gt;, &lt;colname&gt;, &lt;opt&gt;
+**
+**	History: 10/31/2000 (ksherlock) 0.1
+**                  Original
+**               11/14/2000 (ksherlock) 0.2
+**                  Fixed bug to handle binary histograms and handle user defined types
+**               12/20/2000 (ksherlock) 0.3
+**                  Fixed bug with column groups not being retrieved in col_cursor
+**               01/05/2001 (ksherlock) 0.4
+**                  Final version which handles numeric decimals correctly
+**
+*************************************************************************************************/
+
+declare
+        @colid int  /* Variable to hold colid from syscolumns */
+      , @tabid int  /* Variable to hold object_id from sysobjects */
+      , @tabtype char(2)  /* Variable to hold type from sysobjects */
+      , @s_dbname varchar(30)
+      , @s_tabowner varchar(30)
+      , @s_tabname varchar(30)
+      , @u_tabname varchar(30)
+      , @u_tabowner varchar(30)
+      , @colgroup_name varchar(255)
+      , @u_dbname varchar(30)
+      , @u_dbid int
+      , @colidarray varbinary(100)
+      , @colidarray_len smallint
+      , @indid int
+      , @index_cols varchar(254)
+      , @index_name varchar(30)
+      , @keycnt int
+      , @dol_clustered int
+      , @clustered int
+      , @last_updt varchar(28)
+      , @c1stat int
+      , @statid smallint
+      , @used_count int
+      , @rownum int
+      , @coltype int
+      , @typename varchar(30)
+      , @collength varchar(5)
+      , @precision varchar(3)
+      , @scale varchar(3)
+      , @rc_density varchar(24)
+      , @tot_density varchar(24)
+      , @r_sel varchar(24)
+      , @between_sel varchar(24)
+      , @freq_cell smallint
+      , @steps_act int
+      , @steps_req int
+      , @step char(9)
+      , @weight char(10)
+      , @prev_step char(9)
+      , @prev_weight char(10)
+      , @value_raw varbinary(255)
+      , @value_c varchar(255)
+      , @leafcnt varchar(32) -- int
+      , @pagecnt varchar(32) -- int
+      , @emptypgcnt varchar(32) -- int
+      , @rowcnt varchar(32)
+      , @forwrowcnt varchar(32)
+      , @delrowcnt varchar(32)
+      , @dpagecrcnt varchar(32)
+      , @dpagecr varchar(32)
+      , @ipagecrcnt varchar(32)
+      , @ipagecr varchar(32)
+      , @drowcrcnt varchar(32)
+      , @drowcr varchar(32)
+      , @oamapgcnt varchar(32) -- int
+      , @extent0pgcnt varchar(32)
+      , @datarowsize varchar(32)
+      , @leafrowsize varchar(32)
+      , @indexheight varchar(32) -- int
+      , @spare1 varchar(32) -- int
+      , @spare2 varchar(32)
+      , @ptn_data_pgs int
+      , @seq int
+
+
+if @@trancount = 0
+begin
+	set chained off
+end
+
+set transaction isolation level 1
+set nocount on
+set flushmessage on
+
+if ( (select lower(@option)) in ("v","version","?","h","help") )
+begin
+   print "%1!",@proc_version
+   return 0
+end
+
+exec sp_namecrack @tabname, " ", @s_dbname out, @s_tabowner out, @s_tabname out
+select @s_dbname = isnull(@s_dbname,db_name())
+
+declare object_cursor cursor for
+select  id,
+        db_name(),
+        db_id(),
+        user_name(uid),
+        name
+from sysobjects
+where user_name(uid) like isnull(@s_tabowner,"%")
+and   name like isnull(@s_tabname,"%")
+and type = "U" and id &gt; 100
+order by user_name(uid), name
+for read only
+
+declare index_cursor cursor for
+select  st.indid
+      , si.name
+      , abs(sign(si.status2 &amp; 512)) /* DOL clustered index */
+      , abs(sign(si.status &amp; 16)) /* clustered bit */
+      , si.keycnt
+from systabstats st, sysindexes si
+where st.id = @tabid
+  and si.id = @tabid
+  and st.id = si.id
+  and st.indid = si.indid
+order by st.indid
+for read only
+
+declare col_cursor cursor for
+select  sc.colid,
+        ss.colidarray,
+        datalength(ss.colidarray),
+        sc.name,
+        ss.statid,
+        convert(int,ss.c1),
+        convert(varchar,ss.moddate,109),
+        ltrim(str(round(convert(double precision,ss.c2),16),24,16)),
+        ltrim(str(round(convert(double precision,ss.c3),16),24,16)),
+        convert(int,ss.c4),
+        convert(int,ss.c5),
+        st.name,
+        ltrim(str(convert(int,ss.c7),5)),
+        ltrim(str(convert(int,ss.c8),3)),
+        ltrim(str(convert(int,ss.c9),3)),
+        ltrim(str(round(convert(double precision,ss.c10),16),24,16)),
+        ltrim(str(round(convert(double precision,ss.c11),16),24,16))
+from syscolumns sc, sysstatistics ss, systypes st
+where sc.id = @tabid
+and   sc.name like isnull(@colname,"%")
+and   ss.id = sc.id
+and   convert(int,ss.c6) *= st.type
+and   st.name not in ("timestamp","sysname", "nchar", "nvarchar")
+and   st.usertype &lt; 100
+and   convert(tinyint,substring(ss.colidarray,1,1)) = sc.colid
+and   ss.formatid = 100
+order by sc.id, sc.name, ss.colidarray
+for read only
+
+declare nostats_cursor cursor for
+select sc.name
+from syscolumns sc,
+ sysstatistics ss
+where ss.id =* sc.id
+and  sc.id = @tabid
+and  ss.formatid = 100
+and  ss.statid = 0
+and  ss.sequence = 1
+and  sc.colid *= convert(tinyint,substring(ss.colidarray,1,1))
+and  datalength(ss.colidarray) = 1
+group by sc.name
+having count(ss.id) = 0
+order by sc.name
+for read only
+
+create table #cells(seq int,colnum int)
+
+/** DO NOT FOLD, SPINDAL, OR MUTILATE (unless its sysstatistics) **/
+/** OK, bear with me, here we go... **/
+
+declare histogram_cursor cursor for
+select
+      /** Here is the step number **/
+      str(
+      ((c.seq-1)*80 + 1 )*(1-abs(sign(c.colnum-1 ))) + ((c.seq-1)*80 + 2 )*(1-abs(sign(c.colnum-2 ))) +
+      ((c.seq-1)*80 + 3 )*(1-abs(sign(c.colnum-3 ))) + ((c.seq-1)*80 + 4 )*(1-abs(sign(c.colnum-4 ))) +
+      ((c.seq-1)*80 + 5 )*(1-abs(sign(c.colnum-5 ))) + ((c.seq-1)*80 + 6 )*(1-abs(sign(c.colnum-6 ))) +
+      ((c.seq-1)*80 + 7 )*(1-abs(sign(c.colnum-7 ))) + ((c.seq-1)*80 + 8 )*(1-abs(sign(c.colnum-8 ))) +
+      ((c.seq-1)*80 + 9 )*(1-abs(sign(c.colnum-9 ))) + ((c.seq-1)*80 + 10)*(1-abs(sign(c.colnum-10))) +
+      ((c.seq-1)*80 + 11)*(1-abs(sign(c.colnum-11))) + ((c.seq-1)*80 + 12)*(1-abs(sign(c.colnum-12))) +
+      ((c.seq-1)*80 + 13)*(1-abs(sign(c.colnum-13))) + ((c.seq-1)*80 + 14)*(1-abs(sign(c.colnum-14))) +
+      ((c.seq-1)*80 + 15)*(1-abs(sign(c.colnum-15))) + ((c.seq-1)*80 + 16)*(1-abs(sign(c.colnum-16))) +
+      ((c.seq-1)*80 + 17)*(1-abs(sign(c.colnum-17))) + ((c.seq-1)*80 + 18)*(1-abs(sign(c.colnum-18))) +
+      ((c.seq-1)*80 + 19)*(1-abs(sign(c.colnum-19))) + ((c.seq-1)*80 + 20)*(1-abs(sign(c.colnum-20))) +
+      ((c.seq-1)*80 + 21)*(1-abs(sign(c.colnum-21))) + ((c.seq-1)*80 + 22)*(1-abs(sign(c.colnum-22))) +
+      ((c.seq-1)*80 + 23)*(1-abs(sign(c.colnum-23))) + ((c.seq-1)*80 + 24)*(1-abs(sign(c.colnum-24))) +
+      ((c.seq-1)*80 + 25)*(1-abs(sign(c.colnum-25))) + ((c.seq-1)*80 + 26)*(1-abs(sign(c.colnum-26))) +
+      ((c.seq-1)*80 + 27)*(1-abs(sign(c.colnum-27))) + ((c.seq-1)*80 + 28)*(1-abs(sign(c.colnum-28))) +
+      ((c.seq-1)*80 + 29)*(1-abs(sign(c.colnum-29))) + ((c.seq-1)*80 + 30)*(1-abs(sign(c.colnum-30))) +
+      ((c.seq-1)*80 + 31)*(1-abs(sign(c.colnum-31))) + ((c.seq-1)*80 + 32)*(1-abs(sign(c.colnum-32))) +
+      ((c.seq-1)*80 + 33)*(1-abs(sign(c.colnum-33))) + ((c.seq-1)*80 + 34)*(1-abs(sign(c.colnum-34))) +
+      ((c.seq-1)*80 + 35)*(1-abs(sign(c.colnum-35))) + ((c.seq-1)*80 + 36)*(1-abs(sign(c.colnum-36))) +
+      ((c.seq-1)*80 + 37)*(1-abs(sign(c.colnum-37))) + ((c.seq-1)*80 + 38)*(1-abs(sign(c.colnum-38))) +
+      ((c.seq-1)*80 + 39)*(1-abs(sign(c.colnum-39))) + ((c.seq-1)*80 + 40)*(1-abs(sign(c.colnum-40))) +
+      ((c.seq-1)*80 + 41)*(1-abs(sign(c.colnum-41))) + ((c.seq-1)*80 + 42)*(1-abs(sign(c.colnum-42))) +
+      ((c.seq-1)*80 + 43)*(1-abs(sign(c.colnum-43))) + ((c.seq-1)*80 + 44)*(1-abs(sign(c.colnum-44))) +
+      ((c.seq-1)*80 + 45)*(1-abs(sign(c.colnum-45))) + ((c.seq-1)*80 + 46)*(1-abs(sign(c.colnum-46))) +
+      ((c.seq-1)*80 + 47)*(1-abs(sign(c.colnum-47))) + ((c.seq-1)*80 + 48)*(1-abs(sign(c.colnum-48))) +
+      ((c.seq-1)*80 + 49)*(1-abs(sign(c.colnum-49))) + ((c.seq-1)*80 + 50)*(1-abs(sign(c.colnum-50))) +
+      ((c.seq-1)*80 + 51)*(1-abs(sign(c.colnum-51))) + ((c.seq-1)*80 + 52)*(1-abs(sign(c.colnum-52))) +
+      ((c.seq-1)*80 + 53)*(1-abs(sign(c.colnum-53))) + ((c.seq-1)*80 + 54)*(1-abs(sign(c.colnum-54))) +
+      ((c.seq-1)*80 + 55)*(1-abs(sign(c.colnum-55))) + ((c.seq-1)*80 + 56)*(1-abs(sign(c.colnum-56))) +
+      ((c.seq-1)*80 + 57)*(1-abs(sign(c.colnum-57))) + ((c.seq-1)*80 + 58)*(1-abs(sign(c.colnum-58))) +
+      ((c.seq-1)*80 + 59)*(1-abs(sign(c.colnum-59))) + ((c.seq-1)*80 + 60)*(1-abs(sign(c.colnum-60))) +
+      ((c.seq-1)*80 + 61)*(1-abs(sign(c.colnum-61))) + ((c.seq-1)*80 + 62)*(1-abs(sign(c.colnum-62))) +
+      ((c.seq-1)*80 + 63)*(1-abs(sign(c.colnum-63))) + ((c.seq-1)*80 + 64)*(1-abs(sign(c.colnum-64))) +
+      ((c.seq-1)*80 + 65)*(1-abs(sign(c.colnum-65))) + ((c.seq-1)*80 + 66)*(1-abs(sign(c.colnum-66))) +
+      ((c.seq-1)*80 + 67)*(1-abs(sign(c.colnum-67))) + ((c.seq-1)*80 + 68)*(1-abs(sign(c.colnum-68))) +
+      ((c.seq-1)*80 + 69)*(1-abs(sign(c.colnum-69))) + ((c.seq-1)*80 + 70)*(1-abs(sign(c.colnum-70))) +
+      ((c.seq-1)*80 + 71)*(1-abs(sign(c.colnum-71))) + ((c.seq-1)*80 + 72)*(1-abs(sign(c.colnum-72))) +
+      ((c.seq-1)*80 + 73)*(1-abs(sign(c.colnum-73))) + ((c.seq-1)*80 + 74)*(1-abs(sign(c.colnum-74))) +
+      ((c.seq-1)*80 + 75)*(1-abs(sign(c.colnum-75))) + ((c.seq-1)*80 + 76)*(1-abs(sign(c.colnum-76))) +
+      ((c.seq-1)*80 + 77)*(1-abs(sign(c.colnum-77))) + ((c.seq-1)*80 + 78)*(1-abs(sign(c.colnum-78))) +
+      ((c.seq-1)*80 + 79)*(1-abs(sign(c.colnum-79))) + ((c.seq-1)*80 + 80)*(1-abs(sign(c.colnum-80)))
+       ,9),
+
+      /** And here is the Weight of the cell **/
+
+      str(
+      isnull(convert(real,s.c0)*(1-abs(sign(c.colnum-1 ))) ,0) + isnull(convert(real,s.c1)*(1-abs(sign(c.colnum-2 ))) ,0) +
+      isnull(convert(real,s.c2)*(1-abs(sign(c.colnum-3 ))) ,0) + isnull(convert(real,s.c3)*(1-abs(sign(c.colnum-4 ))) ,0) +
+      isnull(convert(real,s.c4)*(1-abs(sign(c.colnum-5 ))) ,0) + isnull(convert(real,s.c5)*(1-abs(sign(c.colnum-6 ))) ,0) +
+      isnull(convert(real,s.c6)*(1-abs(sign(c.colnum-7 ))) ,0) + isnull(convert(real,s.c7)*(1-abs(sign(c.colnum-8 ))) ,0) +
+      isnull(convert(real,s.c8)*(1-abs(sign(c.colnum-9 ))) ,0) + isnull(convert(real,s.c9)*(1-abs(sign(c.colnum-10))) ,0) +
+      isnull(convert(real,s.c10)*(1-abs(sign(c.colnum-11))) ,0) + isnull(convert(real,s.c11)*(1-abs(sign(c.colnum-12))) ,0) +
+      isnull(convert(real,s.c12)*(1-abs(sign(c.colnum-13))) ,0) + isnull(convert(real,s.c13)*(1-abs(sign(c.colnum-14))) ,0) +
+      isnull(convert(real,s.c14)*(1-abs(sign(c.colnum-15))) ,0) + isnull(convert(real,s.c15)*(1-abs(sign(c.colnum-16))) ,0) +
+      isnull(convert(real,s.c16)*(1-abs(sign(c.colnum-17))) ,0) + isnull(convert(real,s.c17)*(1-abs(sign(c.colnum-18))) ,0) +
+      isnull(convert(real,s.c18)*(1-abs(sign(c.colnum-19))) ,0) + isnull(convert(real,s.c19)*(1-abs(sign(c.colnum-20))) ,0) +
+      isnull(convert(real,s.c20)*(1-abs(sign(c.colnum-21))) ,0) + isnull(convert(real,s.c21)*(1-abs(sign(c.colnum-22))) ,0) +
+      isnull(convert(real,s.c22)*(1-abs(sign(c.colnum-23))) ,0) + isnull(convert(real,s.c23)*(1-abs(sign(c.colnum-24))) ,0) +
+      isnull(convert(real,s.c24)*(1-abs(sign(c.colnum-25))) ,0) + isnull(convert(real,s.c25)*(1-abs(sign(c.colnum-26))) ,0) +
+      isnull(convert(real,s.c26)*(1-abs(sign(c.colnum-27))) ,0) + isnull(convert(real,s.c27)*(1-abs(sign(c.colnum-28))) ,0) +
+      isnull(convert(real,s.c28)*(1-abs(sign(c.colnum-29))) ,0) + isnull(convert(real,s.c29)*(1-abs(sign(c.colnum-30))) ,0) +
+      isnull(convert(real,s.c30)*(1-abs(sign(c.colnum-31))) ,0) + isnull(convert(real,s.c31)*(1-abs(sign(c.colnum-32))) ,0) +
+      isnull(convert(real,s.c32)*(1-abs(sign(c.colnum-33))) ,0) + isnull(convert(real,s.c33)*(1-abs(sign(c.colnum-34))) ,0) +
+      isnull(convert(real,s.c34)*(1-abs(sign(c.colnum-35))) ,0) + isnull(convert(real,s.c35)*(1-abs(sign(c.colnum-36))) ,0) +
+      isnull(convert(real,s.c36)*(1-abs(sign(c.colnum-37))) ,0) + isnull(convert(real,s.c37)*(1-abs(sign(c.colnum-38))) ,0) +
+      isnull(convert(real,s.c38)*(1-abs(sign(c.colnum-39))) ,0) + isnull(convert(real,s.c39)*(1-abs(sign(c.colnum-40))) ,0) +
+      isnull(convert(real,s.c40)*(1-abs(sign(c.colnum-41))) ,0) + isnull(convert(real,s.c41)*(1-abs(sign(c.colnum-42))) ,0) +
+      isnull(convert(real,s.c42)*(1-abs(sign(c.colnum-43))) ,0) + isnull(convert(real,s.c43)*(1-abs(sign(c.colnum-44))) ,0) +
+      isnull(convert(real,s.c44)*(1-abs(sign(c.colnum-45))) ,0) + isnull(convert(real,s.c45)*(1-abs(sign(c.colnum-46))) ,0) +
+      isnull(convert(real,s.c46)*(1-abs(sign(c.colnum-47))) ,0) + isnull(convert(real,s.c47)*(1-abs(sign(c.colnum-48))) ,0) +
+      isnull(convert(real,s.c48)*(1-abs(sign(c.colnum-49))) ,0) + isnull(convert(real,s.c49)*(1-abs(sign(c.colnum-50))) ,0) +
+      isnull(convert(real,s.c50)*(1-abs(sign(c.colnum-51))) ,0) + isnull(convert(real,s.c51)*(1-abs(sign(c.colnum-52))) ,0) +
+      isnull(convert(real,s.c52)*(1-abs(sign(c.colnum-53))) ,0) + isnull(convert(real,s.c53)*(1-abs(sign(c.colnum-54))) ,0) +
+      isnull(convert(real,s.c54)*(1-abs(sign(c.colnum-55))) ,0) + isnull(convert(real,s.c55)*(1-abs(sign(c.colnum-56))) ,0) +
+      isnull(convert(real,s.c56)*(1-abs(sign(c.colnum-57))) ,0) + isnull(convert(real,s.c57)*(1-abs(sign(c.colnum-58))) ,0) +
+      isnull(convert(real,s.c58)*(1-abs(sign(c.colnum-59))) ,0) + isnull(convert(real,s.c59)*(1-abs(sign(c.colnum-60))) ,0) +
+      isnull(convert(real,s.c60)*(1-abs(sign(c.colnum-61))) ,0) + isnull(convert(real,s.c61)*(1-abs(sign(c.colnum-62))) ,0) +
+      isnull(convert(real,s.c62)*(1-abs(sign(c.colnum-63))) ,0) + isnull(convert(real,s.c63)*(1-abs(sign(c.colnum-64))) ,0) +
+      isnull(convert(real,s.c64)*(1-abs(sign(c.colnum-65))) ,0) + isnull(convert(real,s.c65)*(1-abs(sign(c.colnum-66))) ,0) +
+      isnull(convert(real,s.c66)*(1-abs(sign(c.colnum-67))) ,0) + isnull(convert(real,s.c67)*(1-abs(sign(c.colnum-68))) ,0) +
+      isnull(convert(real,s.c68)*(1-abs(sign(c.colnum-69))) ,0) + isnull(convert(real,s.c69)*(1-abs(sign(c.colnum-70))) ,0) +
+      isnull(convert(real,s.c70)*(1-abs(sign(c.colnum-71))) ,0) + isnull(convert(real,s.c71)*(1-abs(sign(c.colnum-72))) ,0) +
+      isnull(convert(real,s.c72)*(1-abs(sign(c.colnum-73))) ,0) + isnull(convert(real,s.c73)*(1-abs(sign(c.colnum-74))) ,0) +
+      isnull(convert(real,s.c74)*(1-abs(sign(c.colnum-75))) ,0) + isnull(convert(real,s.c75)*(1-abs(sign(c.colnum-76))) ,0) +
+      isnull(convert(real,s.c76)*(1-abs(sign(c.colnum-77))) ,0) + isnull(convert(real,s.c77)*(1-abs(sign(c.colnum-78))) ,0) +
+      isnull(convert(real,s.c78)*(1-abs(sign(c.colnum-79))) ,0) + isnull(convert(real,s.c79)*(1-abs(sign(c.colnum-80))) ,0)
+      ,10,8),
+
+      /** And finally, here is the Value of the cell **/
+
+      substring(convert(varbinary(255),v.c0),(1-abs(sign(c.colnum-1 ))) ,255) + substring(convert(varbinary(255),v.c1),(1-abs(sign(c.colnum-2 ))) ,255) +
+      substring(convert(varbinary(255),v.c2),(1-abs(sign(c.colnum-3 ))) ,255) + substring(convert(varbinary(255),v.c3),(1-abs(sign(c.colnum-4 ))) ,255) +
+      substring(convert(varbinary(255),v.c4),(1-abs(sign(c.colnum-5 ))) ,255) + substring(convert(varbinary(255),v.c5),(1-abs(sign(c.colnum-6 ))) ,255) +
+      substring(convert(varbinary(255),v.c6),(1-abs(sign(c.colnum-7 ))) ,255) + substring(convert(varbinary(255),v.c7),(1-abs(sign(c.colnum-8 ))) ,255) +
+      substring(convert(varbinary(255),v.c8),(1-abs(sign(c.colnum-9 ))) ,255) + substring(convert(varbinary(255),v.c9),(1-abs(sign(c.colnum-10))) ,255) +
+      substring(convert(varbinary(255),v.c10),(1-abs(sign(c.colnum-11))) ,255) + substring(convert(varbinary(255),v.c11),(1-abs(sign(c.colnum-12))) ,255) +
+      substring(convert(varbinary(255),v.c12),(1-abs(sign(c.colnum-13))) ,255) + substring(convert(varbinary(255),v.c13),(1-abs(sign(c.colnum-14))) ,255) +
+      substring(convert(varbinary(255),v.c14),(1-abs(sign(c.colnum-15))) ,255) + substring(convert(varbinary(255),v.c15),(1-abs(sign(c.colnum-16))) ,255) +
+      substring(convert(varbinary(255),v.c16),(1-abs(sign(c.colnum-17))) ,255) + substring(convert(varbinary(255),v.c17),(1-abs(sign(c.colnum-18))) ,255) +
+      substring(convert(varbinary(255),v.c18),(1-abs(sign(c.colnum-19))) ,255) + substring(convert(varbinary(255),v.c19),(1-abs(sign(c.colnum-20))) ,255) +
+      substring(convert(varbinary(255),v.c20),(1-abs(sign(c.colnum-21))) ,255) + substring(convert(varbinary(255),v.c21),(1-abs(sign(c.colnum-22))) ,255) +
+      substring(convert(varbinary(255),v.c22),(1-abs(sign(c.colnum-23))) ,255) + substring(convert(varbinary(255),v.c23),(1-abs(sign(c.colnum-24))) ,255) +
+      substring(convert(varbinary(255),v.c24),(1-abs(sign(c.colnum-25))) ,255) + substring(convert(varbinary(255),v.c25),(1-abs(sign(c.colnum-26))) ,255) +
+      substring(convert(varbinary(255),v.c26),(1-abs(sign(c.colnum-27))) ,255) + substring(convert(varbinary(255),v.c27),(1-abs(sign(c.colnum-28))) ,255) +
+      substring(convert(varbinary(255),v.c28),(1-abs(sign(c.colnum-29))) ,255) + substring(convert(varbinary(255),v.c29),(1-abs(sign(c.colnum-30))) ,255) +
+      substring(convert(varbinary(255),v.c30),(1-abs(sign(c.colnum-31))) ,255) + substring(convert(varbinary(255),v.c31),(1-abs(sign(c.colnum-32))) ,255) +
+      substring(convert(varbinary(255),v.c32),(1-abs(sign(c.colnum-33))) ,255) + substring(convert(varbinary(255),v.c33),(1-abs(sign(c.colnum-34))) ,255) +
+      substring(convert(varbinary(255),v.c34),(1-abs(sign(c.colnum-35))) ,255) + substring(convert(varbinary(255),v.c35),(1-abs(sign(c.colnum-36))) ,255) +
+      substring(convert(varbinary(255),v.c36),(1-abs(sign(c.colnum-37))) ,255) + substring(convert(varbinary(255),v.c37),(1-abs(sign(c.colnum-38))) ,255) +
+      substring(convert(varbinary(255),v.c38),(1-abs(sign(c.colnum-39))) ,255) + substring(convert(varbinary(255),v.c39),(1-abs(sign(c.colnum-40))) ,255) +
+      substring(convert(varbinary(255),v.c40),(1-abs(sign(c.colnum-41))) ,255) + substring(convert(varbinary(255),v.c41),(1-abs(sign(c.colnum-42))) ,255) +
+      substring(convert(varbinary(255),v.c42),(1-abs(sign(c.colnum-43))) ,255) + substring(convert(varbinary(255),v.c43),(1-abs(sign(c.colnum-44))) ,255) +
+      substring(convert(varbinary(255),v.c44),(1-abs(sign(c.colnum-45))) ,255) + substring(convert(varbinary(255),v.c45),(1-abs(sign(c.colnum-46))) ,255) +
+      substring(convert(varbinary(255),v.c46),(1-abs(sign(c.colnum-47))) ,255) + substring(convert(varbinary(255),v.c47),(1-abs(sign(c.colnum-48))) ,255) +
+      substring(convert(varbinary(255),v.c48),(1-abs(sign(c.colnum-49))) ,255) + substring(convert(varbinary(255),v.c49),(1-abs(sign(c.colnum-50))) ,255) +
+      substring(convert(varbinary(255),v.c50),(1-abs(sign(c.colnum-51))) ,255) + substring(convert(varbinary(255),v.c51),(1-abs(sign(c.colnum-52))) ,255) +
+      substring(convert(varbinary(255),v.c52),(1-abs(sign(c.colnum-53))) ,255) + substring(convert(varbinary(255),v.c53),(1-abs(sign(c.colnum-54))) ,255) +
+      substring(convert(varbinary(255),v.c54),(1-abs(sign(c.colnum-55))) ,255) + substring(convert(varbinary(255),v.c55),(1-abs(sign(c.colnum-56))) ,255) +
+      substring(convert(varbinary(255),v.c56),(1-abs(sign(c.colnum-57))) ,255) + substring(convert(varbinary(255),v.c57),(1-abs(sign(c.colnum-58))) ,255) +
+      substring(convert(varbinary(255),v.c58),(1-abs(sign(c.colnum-59))) ,255) + substring(convert(varbinary(255),v.c59),(1-abs(sign(c.colnum-60))) ,255) +
+      substring(convert(varbinary(255),v.c60),(1-abs(sign(c.colnum-61))) ,255) + substring(convert(varbinary(255),v.c61),(1-abs(sign(c.colnum-62))) ,255) +
+      substring(convert(varbinary(255),v.c62),(1-abs(sign(c.colnum-63))) ,255) + substring(convert(varbinary(255),v.c63),(1-abs(sign(c.colnum-64))) ,255) +
+      substring(convert(varbinary(255),v.c64),(1-abs(sign(c.colnum-65))) ,255) + substring(convert(varbinary(255),v.c65),(1-abs(sign(c.colnum-66))) ,255) +
+      substring(convert(varbinary(255),v.c66),(1-abs(sign(c.colnum-67))) ,255) + substring(convert(varbinary(255),v.c67),(1-abs(sign(c.colnum-68))) ,255) +
+      substring(convert(varbinary(255),v.c68),(1-abs(sign(c.colnum-69))) ,255) + substring(convert(varbinary(255),v.c69),(1-abs(sign(c.colnum-70))) ,255) +
+      substring(convert(varbinary(255),v.c70),(1-abs(sign(c.colnum-71))) ,255) + substring(convert(varbinary(255),v.c71),(1-abs(sign(c.colnum-72))) ,255) +
+      substring(convert(varbinary(255),v.c72),(1-abs(sign(c.colnum-73))) ,255) + substring(convert(varbinary(255),v.c73),(1-abs(sign(c.colnum-74))) ,255) +
+      substring(convert(varbinary(255),v.c74),(1-abs(sign(c.colnum-75))) ,255) + substring(convert(varbinary(255),v.c75),(1-abs(sign(c.colnum-76))) ,255) +
+      substring(convert(varbinary(255),v.c76),(1-abs(sign(c.colnum-77))) ,255) + substring(convert(varbinary(255),v.c77),(1-abs(sign(c.colnum-78))) ,255) +
+      substring(convert(varbinary(255),v.c78),(1-abs(sign(c.colnum-79))) ,255) + substring(convert(varbinary(255),v.c79),(1-abs(sign(c.colnum-80))) ,255)
+from #cells c, sysstatistics s, sysstatistics v
+where s.id = @tabid
+and s.colidarray = convert(varbinary(1),convert(tinyint,@colid))
+and s.formatid = 104
+and v.id =* s.id
+and v.colidarray =* s.colidarray
+and v.statid =* s.statid
+and v.sequence =* s.sequence
+and v.formatid = 102
+and c.seq = s.sequence
+for read only
+
+/** Wow, I'm glad that's over **/
+/** Let's get on with the business at hand **/
+
+print "%1!",@proc_version
+print "%1!",@@version
+print ''
+
+/** Standard optdiag output **/
+begin
+   print 'Server name:                            "%1!"',@@servername
+   print ''
+   print 'Specified database:                     "%1!"',@s_dbname
+   if (@s_tabowner is null)
+     print 'Specified table owner:                  not specified'
+   else
+     print 'Specified table owner:                  "%1!"',@s_tabowner
+   if (@s_tabname is null)
+     print 'Specified table:                        not specified'
+   else
+     print 'Specified table:                        "%1!"',@s_tabname
+   if (@colname is null)
+     print 'Specified column:                       not specified'
+   else
+     print 'Specified column:                       "%1!"',@colname
+   print ''
+
+/*
+** Check to see if the @tabname is in sysobjects.
+*/
+
+   open object_cursor
+
+   fetch object_cursor into
+      @tabid, @u_dbname, @u_dbid,
+      @u_tabowner, @u_tabname
+
+while (@@sqlstatus = 0)
+begin
+   print 'Table owner:                            "%1!"',@u_tabowner
+   print 'Table name:                             "%1!"',@u_tabname
+   print ''
+
+   dbcc flushstats(@u_dbid, @tabid)
+
+   select @ptn_data_pgs = convert(int, max(ptn_data_pgs(@tabid, partitionid)))
+   from syspartitions
+   where id = @tabid
+
+   ---------------------
+   -- Work on Indexes --
+   ---------------------
+   open index_cursor
+   fetch index_cursor into
+              @indid ,@index_name ,@dol_clustered, @clustered, @keycnt
+
+   while (@@sqlstatus = 0)
+   begin
+      select @keycnt = @keycnt - isnull(abs(sign(@clustered - 1)),0)
+            ,@index_cols = null
+      while (@keycnt &gt; 0)
+      begin
+         select @index_cols = substring(', ' ,abs(sign(@keycnt - 1)),2)
+                            + '"' + index_col(@u_tabname, @indid, @keycnt, user_id(@u_tabowner)) + '"'
+                            + @index_cols
+         select @keycnt = @keycnt - 1
+      end
+      select @leafcnt = ltrim(convert(varchar(32),convert(int,leafcnt))),
+             @pagecnt = ltrim(convert(varchar(32),convert(int,pagecnt))),
+             @emptypgcnt = ltrim(convert(varchar(32),convert(int,emptypgcnt))),
+             @rowcnt = ltrim(convert(varchar(32),str(round(convert(double precision,rowcnt),16),32,16))),
+             @forwrowcnt = ltrim(convert(varchar(32),str(round(convert(double precision,forwrowcnt),16),32,16))),
+             @delrowcnt = ltrim(convert(varchar(32),str(round(convert(double precision,delrowcnt),16),32,16))),
+             @dpagecrcnt = ltrim(convert(varchar(32),str(round(convert(double precision,dpagecrcnt),16),32,16))),
+             @dpagecr = ltrim(convert(varchar(32),str(round(convert(double precision,dpagecrcnt),16),32,16))),
+             @ipagecrcnt = ltrim(convert(varchar(32),str(round(convert(double precision,ipagecrcnt),16),32,16))),
+             @ipagecr = ltrim(convert(varchar(32),str(round(convert(double precision,ipagecrcnt),16),32,16))),
+             @drowcrcnt = ltrim(convert(varchar(32),str(round(convert(double precision,drowcrcnt),16),32,16))),
+             @drowcr = ltrim(convert(varchar(32),str(round(convert(double precision,drowcrcnt),16),32,16))),
+             @oamapgcnt = ltrim(convert(varchar(32),convert(int,oamapgcnt))),
+             @extent0pgcnt = ltrim(convert(varchar(32),convert(int,extent0pgcnt))),
+             @datarowsize = ltrim(convert(varchar(32),str(round(convert(double precision,datarowsize),16),32,16))),
+             @leafrowsize = ltrim(convert(varchar(32),str(round(convert(double precision,leafrowsize),16),32,16))),
+             @indexheight = ltrim(convert(varchar(32),convert(smallint,indexheight))),
+             @spare1 = ltrim(convert(varchar(32),convert(int,spare1))),
+             @spare2 = ltrim(convert(varchar(32),str(round(convert(double precision,spare2),16),32,16)))
+      from systabstats
+      where id = @tabid and indid = @indid
+
+      ----------------------
+      -- print index info --
+      ----------------------
+
+      if (@indid = 0)
+         print 'Statistics for table:                   "%1!"',@index_name
+      else if (1 in (@clustered,@dol_clustered))
+         print 'Statistics for index:                   "%1!" (clustered)',@index_name
+      else
+         print 'Statistics for index:                   "%1!" (nonclustered)',@index_name
+      if (@indid &gt; 0)
+         print 'Index column list:                      %1!',@index_cols
+      else
+         print ''
+      if (@clustered = 1 or @indid = 0)
+         print '     Data page count:                   %1!',@pagecnt
+      else
+         print '     Leaf count:                        %1!',@leafcnt
+
+      if (1 in (@clustered,@dol_clustered) or @indid = 0)
+         print '     Empty data page count:             %1!',@emptypgcnt
+      else
+         print '     Empty leaf page count:             %1!',@emptypgcnt
+
+      if (@clustered = 1 or @indid = 0)
+      begin
+         print '     Data row count:                    %1!',@rowcnt
+         print '     Forwarded row count:               %1!',@forwrowcnt
+         print '     Deleted row count:                 %1!',@delrowcnt
+      end
+
+      print '     Data page CR count:                %1!',@dpagecrcnt
+      if ((@clustered = 0 or @dol_clustered = 1) and @indid &gt; 0)
+      begin
+         print '     Index page CR count:               %1!',@ipagecrcnt
+         print '     Data row CR count:                 %1!',@drowcrcnt
+      end
+
+      if (@clustered = 1 or @indid = 0)
+         print '     OAM + allocation page count:       %1!',@oamapgcnt
+
+      if (@indid = 0)
+         print '     First extent data pages:           %1!',@extent0pgcnt
+      else
+         print '     First extent leaf pages:           %1!',@extent0pgcnt
+      if (@clustered = 1 or @indid = 0)
+         print '     Data row size:                     %1!',@datarowsize
+      else
+         print '     Leaf row size:                     %1!',@leafrowsize
+      if (@indid &gt; 0)
+         print '     Index height:                      %1!',@indexheight
+      if ((@clustered = 1 or @indid = 0) and @ptn_data_pgs is not null)
+         print '     Pages in largest partition:        %1!',@ptn_data_pgs
+
+      print ''
+      print '  Derived statistics:'
+
+      if ( (select lower(@option)) in ("cr","cluster ratio") )
+      begin
+         print '     Data page cluster ratio:           proprietary'
+      end
+      else
+         print '     Data page cluster ratio:           proprietary'
+      if ((@clustered = 0 or @dol_clustered = 1) and @indid &gt; 0)
+      begin
+         print '     Index page cluster ratio:          proprietary'
+         print '     Data row cluster ratio:            proprietary'
+      end
+      print ''
+
+      fetch index_cursor into
+                 @indid ,@index_name ,@dol_clustered ,@clustered, @keycnt
+   end
+   close index_cursor
+
+   ---------------------
+   -- Work on Columns --
+   ---------------------
+      open col_cursor
+      fetch col_cursor into
+         @colid, @colidarray, @colidarray_len, @colname, @statid, @c1stat, @last_updt, @rc_density, @tot_density
+        ,@steps_act, @steps_req, @typename, @collength, @precision, @scale, @r_sel, @between_sel
+
+      while (@@sqlstatus = 0)
+      begin
+         if (@steps_act is not null)
+            print 'Statistics for column:                  "%1!"',@colname
+         else
+         begin   -- BUILD A COLUMN GROUP NAME
+            select @colgroup_name = null
+            while (@colidarray_len &gt; 0)
+            begin
+               select @colgroup_name =
+                                substring(', ' ,abs(sign(@colidarray_len - 1)),2)
+                              + '"' + name + '"'
+                              + @colgroup_name
+               from syscolumns
+               where id = @tabid
+                 and colid = convert(tinyint,substring(@colidarray,@colidarray_len,1))
+               select @colidarray_len = @colidarray_len - 1
+            end
+            print 'Statistics for column group:            %1!',@colgroup_name
+         end
+         print 'Last update of column statistics:       %1!',@last_updt
+         if (@c1stat &amp; 2 = 2)
+            print 'Statistics loaded from Optdiag.'
+         print ''
+         print '     Range cell density:                %1!',@rc_density
+         print '     Total density:                     %1!',@tot_density
+         if (@r_sel is not null)
+            print '     Range selectivity:                 %1!',@r_sel
+         else
+            print '     Range selectivity:                 default used (0.33)'
+         if (@between_sel is not null)
+            print '     In between selectivity:            %1!',@between_sel
+         else
+            print '     In between selectivity:            default used (0.25)'
+         print ''
+         if (@steps_act is not null) /** Print a Histogram **/
+         begin
+            truncate table #cells
+            select @freq_cell = 0, @seq = 1
+            select @used_count = isnull(sum(usedcount),0)
+            from sysstatistics
+            where id = @tabid
+             and  statid = @statid
+             and  colidarray = convert(varbinary(1),convert(tinyint,@colid))
+             and  formatid = 104
+             and  sequence = @seq
+            while (@used_count &gt; 0)
+            begin
+               select @rownum = 1
+               while (@rownum &lt;= @used_count)
+               begin
+                  insert into #cells(seq,colnum) values (@seq,@rownum)
+                  select @rownum = @rownum + 1
+               end
+               select @seq = @seq + 1
+               select @used_count = isnull(sum(usedcount),0)
+               from sysstatistics
+               where id = @tabid
+                and  statid = @statid
+                and  colidarray = convert(varbinary(1),convert(tinyint,@colid))
+                and  formatid = 104
+                and  sequence = @seq
+            end
+
+            print 'Histogram for column:                   "%1!"',@colname
+            if (@typename in ("int","intn"))
+               select @typename = "integer"
+            if (@typename = "float" and @collength = "4")
+               select @typename = "real"
+            if (@typename = "float" and @collength = "8")
+               select @typename = "double precision"
+            if (@typename in ("varchar","nvarchar","char","nchar","binary","varbinary","float","floatn"))
+               print 'Column datatype:                        %1!(%2!)',@typename,@collength
+            else if (@typename in ("numeric","decimal","numericn","decimaln"))
+               print 'Column datatype:                        %1!(%2!,%3!)',@typename,@precision,@scale
+            else
+               print 'Column datatype:                        %1!',@typename
+            print 'Requested step count:                   %1!',@steps_req
+            print 'Actual step count:                      %1!',@steps_act
+            print ''
+            print '     Step     Weight                    Value'
+            print ''
+
+            open histogram_cursor
+            fetch histogram_cursor into
+               @step, @weight, @value_raw
+            while (@@sqlstatus = 0)
+            begin
+               select
+                 @value_c =
+                     CASE
+                      WHEN @typename in ("varchar","nvarchar","char","nchar")
+                       THEN '"' + convert(varchar(255),@value_raw) + '"'
+
+                      WHEN @typename in ("int","intn","integer")
+                       THEN str(convert(int,@value_raw),10)
+
+                      WHEN @typename in ("smallint")
+                       THEN str(convert(smallint,@value_raw),10)
+
+                      WHEN @typename in ("tinyint")
+                       THEN str(convert(tinyint,@value_raw),10)
+
+                      /** Oh, oh, a scaled numeric, where does the decimal place go??? **/
+                      WHEN (@typename in ("numeric","decimal","numericn","decimaln") and convert(smallint,@scale) &gt; 0)
+                       THEN str(convert(numeric(38),right(replicate(0x00,255-convert(smallint,@collength)) + @value_raw,17))
+                              /* move over @scale decimal places please */
+                                /power(convert(numeric,10),convert(smallint,@scale))
+                              /* make room for @precision, minus, and decimal signs */
+                               , convert(smallint,@precision)+2,convert(smallint,@scale))
+
+                      WHEN (@typename in ("numeric","decimal","numericn","decimaln") and @scale = "0")
+                       THEN str(convert(numeric(38),right(replicate(0x00,255-convert(smallint,@collength)) + @value_raw,17))
+                                , convert(smallint,@precision))
+
+                      WHEN (@typename in ("float","floatn","real") and @collength = "4")
+                       THEN str(convert(real,@value_raw),40,8)
+
+                      WHEN (@typename in ("float","floatn","double precision") and @collength = "8")
+                       THEN str(convert(double precision,@value_raw),40,16)
+
+                      WHEN @typename in ("money","moneyn","smallmoney")
+                       THEN str(convert(money,@value_raw),22,2)
+
+                      WHEN @typename in ("datetime","datetimn")
+                       THEN '"' + convert(varchar(255),convert(datetime,@value_raw),109) + '"'
+
+                      WHEN @typename in ("smalldatetime")
+                       THEN '"' + convert(varchar(255),convert(smalldatetime,@value_raw),100) + '"'
+
+                      ELSE @value_raw
+                     END
+
+               if (@value_raw is null)
+                 select @freq_cell =1 , @prev_step = @step, @prev_weight = @weight, @value_c = "null"
+               else
+               begin
+                 select @value_c = ltrim(@value_c)
+                 if (@freq_cell = 1)
+                 begin /* Printing a frequency cell */
+                    if (@typename in ("binary","varbinary","timestamp"))
+                    begin
+                       print '%1!     %2!        &lt;       %3!',@prev_step,@prev_weight,@value_raw
+                       print '%1!     %2!        =       %3!',@step,@weight,@value_raw
+                    end
+                    else
+                    begin
+                       print '%1!     %2!        &lt;       %3!',@prev_step,@prev_weight,@value_c
+                       print '%1!     %2!        =       %3!',@step,@weight,@value_c
+                    end
+                 end
+                 else /* NOT printing a frequency cell */
+                 begin
+                    if (@typename in ("binary","varbinary","timestamp"))
+                       print '%1!     %2!       &lt;=       %3!',@step,@weight,@value_raw
+                    else
+                       print '%1!     %2!       &lt;=       %3!',@step,@weight,@value_c
+                 end
+                 select @freq_cell = 0
+               end
+
+               fetch histogram_cursor into
+                  @step, @weight, @value_raw
+            end
+            close histogram_cursor
+            /* Is there only one cell (a freqency cell) */
+            if (@freq_cell = 1)
+                    print '%1!     %2!        =       %3!',@prev_step,@prev_weight,@value_c
+            print ''
+         end /* histogram print */
+
+      fetch col_cursor into
+         @colid, @colidarray, @colidarray_len,  @colname, @statid, @c1stat, @last_updt, @rc_density, @tot_density
+        ,@steps_act, @steps_req, @typename, @collength, @precision, @scale, @r_sel, @between_sel
+      end
+      close col_cursor
+      -----------------------
+      -- Done with columns --
+      -----------------------
+
+      ------------------------------
+      -- print cols with no stats --
+      ------------------------------
+      select @keycnt = 0
+      open nostats_cursor
+      fetch nostats_cursor into @colname
+      while (@@sqlstatus = 0)
+      begin
+         select @keycnt = @keycnt + 1
+         if (@keycnt = 1)
+            print 'No statistics for remaining columns:    "%1!"',@colname
+         else if (@keycnt = 2)
+            print '(default values used)                   "%1!"',@colname
+         else
+            print '                                        "%1!"',@colname
+         fetch nostats_cursor into @colname
+      end
+      close nostats_cursor
+      if (@keycnt = 1)
+         print '(default values used)'
+
+      print ''
+
+      fetch object_cursor into
+         @tabid, @u_dbname, @u_dbid,
+         @u_tabowner, @u_tabname
+   end
+   close object_cursor
+-----------------------
+-- Done with Objects --
+-----------------------
+end
+
+go
+
+grant execute on sp__optdiag to public
+go
+use sybsystemprocs
+go
+drop procedure sp__rev_configure
+go
+create procedure sp__rev_configure
+as
+declare @sptlang        int             /* current sessions language */
+declare @whichone       int             /* using english or default lang ? */
+
+if @@trancount = 0
+begin
+        set transaction isolation level 1
+        set chained off
+end
+
+select @whichone = 0
+
+select @sptlang = @@langid
+
+if @@langid != 0
+begin
+        if not exists (
+                select * from master.dbo.sysmessages where error
+                between 17015 and 17049
+                and langid = @@langid)
+            select @sptlang = 0
+        else
+        if not exists (
+                select * from master.dbo.sysmessages where error
+                between 17100 and 17109
+                and langid = @@langid)
+            select @sptlang = 0
+end
+
+if @sptlang = 0
+begin
+    select "-- sp_configure settings"
+        = "sp_configure '" + name + "', "
+        + convert( char(12), c.value)
+        + char(13) + char(10) + "go"
+    from master.dbo.spt_values a,
+        master.dbo.syscurconfigs c
+        where a.type = "C"
+                and a.number *= c.config
+                and a.number &gt;= 0
+end
+else
+begin
+    select "-- sp_configure settings"
+        = "sp_configure '" + name + "', "
+        + convert(char(12), c.value)
+        + char(13) + char(10) + "go"
+    from master.dbo.spt_values a,
+        master.dbo.syscurconfigs c,
+        master.dbo.sysmessages d
+        where  type = "C"
+                and a.number *= c.config
+                and a.number &gt;= 0
+                and msgnum = error and isnull(langid, 0) = @sptlang
+end
+return (0)
+go
+--
+-- You may or may not wish to do the following.
+--
+--grant execute on sp__rev_configure to public
+--gouse sybsystemprocs
+go
+
+/*
+ * DROP PROC sp__revroles
+ */
+IF OBJECT_ID('sp__revroles') IS NOT NULL
+BEGIN
+    DROP PROC sp__revroles
+    PRINT '&lt;&lt;&lt; Dropped proc sp__revroles &gt;&gt;&gt;'
+END
+go
+create procedure sp__revroles
+as
+/* Created 03/05/97 by Clayton Groom
+creates a reverse engineered set of commands to restore user roles
+*/
+select "exec sp_role grant, " + u.name + ", " + s.name + char(13) + char(10) + "go"
+from    master..syssrvroles s,
+        sysroles r,
+        sysusers u
+where   r.id    = s.srid
+and     r.lrid  = u.uid
+and     s.name &lt;&gt; u.name
+go
+
+IF OBJECT_ID('sp__revroles') IS NOT NULL
+    PRINT '&lt;&lt;&lt; Created proc sp__revroles &gt;&gt;&gt;'
+ELSE
+    PRINT '&lt;&lt;&lt; Failed to create proc sp__revroles &gt;&gt;&gt;'
+go
+use sybsystemprocs
+go
+
+if object_id('sp_days') is not NULL
+    drop proc sp_days
+go
+
+create proc sp_days @days tinyint OUTPUT, @month tinyint, @year smallint
+as
+  declare @date datetime
+  select @date=convert(char,@month)+'/01/'+convert(char, @year)
+  select @days=datediff(dd,@date, dateadd(mm,1,@date))
+  select @days
+go
+
+grant exec on sp_days to public
+gouse sybsystemprocs
+go
+
+if object_id('dbo.sp_ddl_create_table') is not null
+    drop procedure sp_ddl_create_table
+    print "Dropping sp_ddl_create_table"
+go
+
+create proc sp_ddl_create_table
+as
+
+-- Creates the DDL for all the user tables in the
+-- current database
+
+select  right('create table ' + so1.name + '(' + '
+', 255 * ( abs( sign(sc1.colid - 1) - 1 ) ) )+
+        sc1.name + ' ' +
+        st1.name + ' ' +
+        substring( '(' + rtrim( convert( char, sc1.length ) ) + ') ', 1,
+        patindex('%char', st1.name ) * 10 ) +
+        substring( '(' + rtrim( convert( char, sc1.prec ) ) + ', ' + rtrim(
+        convert( char, sc1.scale ) ) + ') ' , 1, patindex('numeric', st1.name ) * 10 ) +
+        substring( 'NOT NULL', ( convert( int, convert( bit,( sc1.status &amp; 8 ) ) ) * 4 ) + 1,
+        8 * abs(convert(bit, (sc1.status &amp; 0x80)) - 1 ) ) +
+        right('identity ', 9 * convert(bit, (sc1.status &amp; 0x80)) ) +
+        right(',', 5 * ( convert(int,sc2.colid) - convert(int,sc1.colid) ) ) +
+        right(' )
+' + 'go' + '
+' + '
+', 255 * abs( sign( ( convert(int,sc2.colid) - convert(int,sc1.colid) ) ) -
+1 ) )
+from    sysobjects so1,
+        syscolumns sc1,
+        syscolumns sc2,
+        systypes st1
+where so1.type = 'U'
+and sc1.id = so1.id
+and st1.usertype = sc1.usertype
+and sc2.id = sc1.id
+and sc2.colid = (select max(colid)
+                from syscolumns
+                where id = sc1.id)
+order by so1.name, sc1.colid
+go
+
+if object_id('dbo.sp_ddl_create_table') is not null
+begin
+    grant execute on sp_ddl_create_table to public
+    print "Created sp_ddl_create_table"
+end
+else
+    print "Failed to create sp_ddl_create_table"
+go
+
+goIF OBJECT_ID('sp_desc') IS NOT NULL
+BEGIN
+    DROP PROCEDURE sp_desc
+    IF OBJECT_ID('sp_desc') IS NOT NULL
+        PRINT '&lt;&lt;&lt; FAILED DROPPING PROCEDURE sp_desc &gt;&gt;&gt;'
+    ELSE
+        PRINT '&lt;&lt;&lt; DROPPED PROCEDURE sp_desc &gt;&gt;&gt;'
+END
+go
+
+create procedure sp_desc @table_name char(30) = NULL
+--
+-- Snarfed from CDS, cannot remember who posted the original.
+-- Update for dec and numeric data types, plus ensured that
+-- varchars came out as that.
+--
+-- David Owen 2001 (dowen@midsomer.org)
+
+as
+  -- This stored procedure returns a description of a SQL Server table in
+  -- a format more like the Oracle DESC command.
+
+    if (@table_name IS NULL)
+    begin
+        raiserror 20001 "Must specify table name for sp_desc!"
+        return
+    end
+
+    declare @min_id int
+
+    select
+        C.colid    'column_id',
+        C.name     'column_name',
+        T.name     'column_type',
+        T.usertype 'user_type',
+        T.type     'base_type',
+        C.length   'column_length',
+        C.scale    'column_scale',
+        C.status   'column_is_null'
+    into
+        #tab_descr
+    from
+        syscolumns C,
+        sysobjects O,
+        systypes   T
+    where
+        C.id       = O.id
+    and C.usertype = T.usertype
+    and O.name     = @table_name
+
+    if (@@rowcount = 0)
+    begin
+        raiserror 20001 "Table specified does not exist"
+        return
+    end
+
+    update
+        #tab_descr
+    set
+        user_type = systypes.usertype
+    from
+        systypes
+    where
+        systypes.type     = #tab_descr.base_type
+    and systypes.usertype &lt; 100
+
+--    update
+--        #tab_descr
+--    set
+--        column_type = name
+--    from
+--        systypes
+--    where
+--        #tab_descr.user_type = systypes.usertype
+
+    update
+        #tab_descr
+    set
+        column_type = name
+    from
+        systypes   st,
+        #tab_descr td
+    where td.base_type = st.type
+      and td.user_type &gt; 100
+
+    update
+        #tab_descr
+    set
+        column_type = column_type + "(" + LTRIM(RTRIM(str(column_length)))+")"
+    where
+        column_type in ("char", "varchar", "nchar", "nvarchar", "binary", "varbinary")
+
+    update
+        #tab_descr
+    set
+        column_type = column_type + "(" +
+                                     LTRIM(RTRIM(str(column_length))) +
+                                     "," +
+                                     LTRIM(RTRIM(str(column_scale))) +
+                                     ")"
+    where
+        column_type in ("dec", "numeric", "decimal")
+
+--    update
+--        #tab_descr
+--    set
+--        column_type = "varchar("+LTRIM(RTRIM(str(column_length)))+")"
+--    where
+--        column_type = "sysname"
+
+    select
+        @min_id = min(column_id)
+    from
+        #tab_descr
+
+    update
+        #tab_descr
+    set
+        column_id = column_id - @min_id + 1
+
+    print @table_name
+
+    select
+        convert(char(5), "("+LTRIM(str(column_id))+")") 'No.',
+        column_name                                     'Column Name',
+        convert(char(20), column_type)                  'Datatype',
+        case column_is_null
+        when 0 then "NOT NULL"
+        else ""
+        end
+    from
+        #tab_descr
+    order by column_id
+go
+
+IF OBJECT_ID('dbo.sp_desc') IS NOT NULL
+BEGIN
+    PRINT '&lt;&lt;&lt; CREATED PROCEDURE dbo.sp_desc &gt;&gt;&gt;'
+    GRANT EXECUTE ON dbo.sp_desc TO public
+END
+ELSE
+    PRINT '&lt;&lt;&lt; FAILED CREATING PROCEDURE dbo.sp_desc &gt;&gt;&gt;'
+go
+use sybsystemprocs
+go
+/*
+ * DROP PROC dbo.sp_devusage
+ */
+IF OBJECT_ID('dbo.sp_devusage') IS NOT NULL
+BEGIN
+    DROP PROC dbo.sp_devusage
+    PRINT '&lt;&lt;&lt; DROPPED PROC dbo.sp_devusage &gt;&gt;&gt;'
+END
+go
+CREATE PROCEDURE sp_devusage (@device_name char(30) = NULL)
+AS
+IF  @device_name != NULL
+ BEGIN
+   SELECT  dev_name = substring(dv.name,1,20),db_name = substring(db.name,1,20),
+   size_mb = u.size/512.0,
+   u.segmap,
+   vdevno = u.vstart/power(2,24)
+   FROM master..sysusages u , master..sysdevices dv,
+        master..sysdatabases db
+   WHERE  u.vstart between dv.low and dv.high
+   AND db.dbid = u.dbid
+   AND cntrltype  = 0
+  AND dv.name = @device_name
+  ORDER BY dv.name
+  COMPUTE sum(u.size/512.0) by dv.name
+   END
+ELSE
+ BEGIN
+ SELECT  dev_name = substring(dv.name,1,20),db_name = substring(db.name,1,20),
+  size_mb = u.size/512.0, u.segmap,
+  vdevno = u.vstart/power(2,24)
+  FROM master..sysusages u , master..sysdevices dv,
+        master..sysdatabases db
+ WHERE  u.vstart between dv.low and dv.high
+ AND db.dbid = u.dbid
+ AND cntrltype  = 0
+ ORDER BY dv.name
+ COMPUTE sum(u.size/512.0) by dv.name
+END
+go
+
+IF OBJECT_ID('dbo.sp_devusage') IS NOT NULL
+    PRINT '&lt;&lt;&lt; CREATED PROC dbo.sp_devusage &gt;&gt;&gt;'
+ELSE
+    PRINT '&lt;&lt;&lt; FAILED CREATING PROC dbo.sp_devusage &gt;&gt;&gt;'
+go
+/*
+ * Granting/Revoking Permissions on dbo.sp_devusage
+ */
+GRANT EXECUTE ON dbo.sp_devusage TO public
+go
+
+/*&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; sp_dos &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;*/
+IF OBJECT_ID('dbo.sp_dos') IS NOT NULL
+    DROP PROCEDURE sp_dos
+go
+
+CREATE PROCEDURE sp_dos
+    @vcObjectName varchar(30) = NULL
+AS
+/***********************************************************************
+* sp_dos - Display Object Scope
+*       This procedure graphically displays the scope of a object in
+*       the database.
+*
+* Copyright 1996, all rights reserved.
+*
+* Author:  David W. Pledger, Strategic Data Systems, Inc.
+*
+* Parameters
+*       ----------------------------------------------------------------
+*       Name            In/Out  Description
+*       ----------------------------------------------------------------
+*       @vcObjectName    In     Mandatory - The exact name of a single
+*                               database object for which the call
+*                               hierarchy is to be extracted.
+*
+* Selected Data
+*       A sample report follows:
+*       ----------------------------------------------------------------
+*
+*               SCOPE OF EFFECT FOR OBJECT:  ti_users
+*       +------------------------------------------------------------------+
+*       (T) ti_users (Trigger on table 'users')
+*       |
+*       +--(P) pUT_GetError
+*       |  |
+*       |  +--(U) ui_error
+*       |
+*       +--(U) BGRP
+*       |
+*       +--(U) user_information (See Triggers: tu_user_information)
+*       |
+*       +--(U) users (See Triggers: ti_users, tu_users, td_users)
+*       |
+*       +--(P) pUT_LUDVersion
+*          |
+*          +--(P) pUT_GetError
+*          |  |
+*          |  +--(U) ui_error
+*          |
+*          +--(U) BGRP_LUDVersion
+*
+*       &lt;End of Sample&gt;
+*
+* Return Values
+*       ----------------------------------------------------------------
+*       Value           Description
+*       ----------------------------------------------------------------
+*       &lt; -99           Unexpected error - should never occur.
+*
+*       -99 to -1       Sybase **reserved** return status values.
+*
+*       0               Execution succeeded
+*
+*       1               Execution of this procedure failed.
+*
+*       &gt; 1             Unexpected error - should never occur.
+*
+***********************************************************************/
+BEGIN
+
+    /*------------------- Local Declarations -------------------------*/
+    DECLARE @iObjectID    int           /* System ID of object        */
+    DECLARE @cObjectType  char(1)       /* System Object Type code    */
+    DECLARE @vcName       varchar(30)   /* System Object name         */
+    DECLARE @vcMsg        varchar(255)  /* Error Message if needed    */
+    DECLARE @iInsTrigID   int           /* Insert Trigger ID          */
+    DECLARE @iUpdTrigID   int           /* Update Trigger ID          */
+    DECLARE @iDelTrigID   int           /* Delete Trigger ID          */
+    DECLARE @vcErrMsg     varchar(255)  /* Error Message              */
+
+    /* Local variables to facilitate descending the parent-child
+    ** object hierarchy.
+    */
+    DECLARE @iCurrent     int           /* Current node in the tree   */
+    DECLARE @iRoot        int           /* The root node in the tree  */
+    DECLARE @iLevel       int           /* The current level          */
+
+    /* Local variables that contain the fragments of the text to
+    ** be displayed while descending the hierarchy.
+    */
+    DECLARE @iDotIndex    int           /* Index for locating periods */
+    DECLARE @cConnector   char(3)       /* '+--'                      */
+    DECLARE @cSibSpacer   char(3)       /* '|  '                      */
+    DECLARE @cBar         char(1)       /* '|'                        */
+    DECLARE @cSpacer      char(3)       /* '   '                      */
+    DECLARE @cPrntStrng1  char(255)     /* The first string to print  */
+    DECLARE @cPrntStrng2  char(255)     /* The second string to print */
+    DECLARE @iLoop        int           /* Temp var used for loop     */
+    DECLARE @vcDepends    varchar(255)  /* Dependency String          */
+    DECLARE @iDependsItem int           /* Index to a string item     */
+
+    /* Create a temporary table to handle the hierarchical
+    ** decomposition of the task parent-child relationship.  The Stack
+    ** table keeps track of where we are while the leaf table keeps
+    ** track of the leaf tasks which need to be performed.
+    */
+    CREATE TABLE #Stack
+        (iItem int,
+         iLevel int)
+
+    /*------------------- Validate Input Parameters --------------------*/
+    /* Make sure the table is local to the current database. */
+    IF (@vcObjectName LIKE "%.%.%") AND (SUBSTRING(@vcObjectName, 1,
+            CHARINDEX(".", @vcObjectName) - 1) != DB_NAME())
+        GOTO ErrorNotLocal
+
+    /* Now check to see that the object is in sysobjects. */
+    IF OBJECT_ID(@vcObjectName) IS NULL
+        GOTO ErrorNotFound
+
+    /* ---------------------- Initialization -------------------------*/
+
+    /* Do print any rowcounts while this is in progress. */
+    SET NOCOUNT ON
+
+    /* Retrieve the object ID out of sysobjects */
+    SELECT @iObjectID = O.id,
+           @cObjectType = O.type
+    FROM   sysobjects O
+    WHERE  O.name = @vcObjectName
+
+    /* Make sure a job exists. */
+    IF NOT (@@rowcount = 1 and @@error = 0 and @iObjectID &gt; 0)
+        GOTO ErrorNotFound
+
+    /* Initialize the print string pieces. */
+    SELECT @cConnector  = "+--",
+           @cSibSpacer  = "|..",
+           @cBar        = "|",
+           @cSpacer     = "...",
+           @cPrntStrng1 = "",
+           @cPrntStrng2 = ""
+
+    /* Print a separator line. */
+    PRINT " "
+    PRINT "** Utility by David Pledger, Strategic Data Systems, Inc.  **"
+    PRINT "**         PO Box 498, Springboro, OH  45066               **"
+    PRINT " "
+    PRINT "         SCOPE OF EFFECT FOR OBJECT:  %1!",@vcObjectName
+    PRINT "+------------------------------------------------------------------+"
+
+    /* -------------------- Show the Hierarchy -----------------------*/
+    /* Find the root task for this job.  The root task is the only task
+    ** that has a parent task ID of null.
+    */
+    SELECT @iRoot = @iObjectID
+
+    /* Since there is a root task, we can assign the first
+    ** stack value and assign it a level of one.
+    */
+    SELECT @iCurrent = @iRoot,
+           @iLevel = 1
+
+    /* Prime the stack with the root level. */
+    INSERT INTO #Stack values (@iCurrent, 1)
+
+    /* As long as there are nodes which have not been visited
+    ** within the tree, the level will be &gt; 0.  Continue until all
+    ** nodes are visited.  This outer loop descends the tree through
+    ** the parent-child relationship of the nodes.
+    */
+    WHILE (@iLevel &gt; 0)
+    BEGIN
+
+        /* Do any nodes exist at the current level?  If yes, process them.
+        ** If no, then back out to the previous level.
+        */
+        IF EXISTS
+            (SELECT *
+             FROM   #Stack S
+             WHERE  S.iLevel = @iLevel)
+        BEGIN
+
+            /* Get the smallest numbered node at the current level. */
+            SELECT @iCurrent = min(S.iItem)
+            FROM   #Stack S
+            WHERE  S.iLevel = @iLevel
+
+            /* Get the name and type of this node.  */
+            SELECT @cObjectType = O.type,
+                   @vcName = O.name,
+                   @iInsTrigID = ISNULL(O.instrig, 0),
+                   @iUpdTrigID = ISNULL(O.updtrig, 0),
+                   @iDelTrigID = ISNULL(O.deltrig, 0)
+            FROM   sysobjects O
+            WHERE  O.id = @iCurrent
+
+           /*
+            *    *=================================================*    *
+            *    * Print out data for this node.  (Consider        *    *
+            *    * making this a separate procedure.)              *    *
+            *    *=================================================*    *
+            */
+
+            /* Initialize the print strings to empty (different from NULL).
+            ** @cPrntStrng1 is used to 'double space' the output and
+            ** contains the necessary column connectors, but no data.
+            ** @cPrntStrng2 contains the actual data at the end of the
+            ** string.
+            */
+            SELECT @cPrntStrng1 = ""
+            SELECT @cPrntStrng2 = ""
+
+            /* Level 1 is the root node level.  All Jobs have a single
+            ** root task.  All other tasks are subordinate to this task.
+            ** No job may have more than one root task.
+            */
+            IF @iLevel = 1
+            BEGIN
+                /* Print data for the root node. */
+                SELECT @cPrntStrng1 = "",
+                       @cPrntStrng2 = "(" + @cObjectType + ") " + @vcName
+            END
+            ELSE /* Else part of (IF @iLevel = 1) */
+            BEGIN
+
+                /* Initialize loop variable to 2 since level one has
+                ** already been processed for printing.
+                */
+                SELECT @iLoop = 2
+
+                /* Look at the values on the stack at each level to
+                ** determine which symbol should be inserted into the
+                ** print string.
+                */
+                WHILE @iLoop &lt;= @iLevel
+                BEGIN
+
+                   /* While the loop variable is less than the current
+                   ** level, add the appropriate spacer to line up
+                   ** the printed output.
+                   */
+                   IF @iLoop &lt; @iLevel
+                   BEGIN
+
+                       /* Is there a sibling (another node which exists
+                       ** at the same level) on the stack?  If so, use
+                       ** one type of separator; otherwise, use another
+                       ** type of separator.
+                       */
+                       IF EXISTS(SELECT * FROM #Stack WHERE iLevel = @iLoop)
+                       BEGIN
+                           SELECT @cPrntStrng1 = rtrim(@cPrntStrng1) +
+                                   @cSibSpacer
+                           SELECT @cPrntStrng2 = rtrim(@cPrntStrng2) +
+                                   @cSibSpacer
+                       END
+                       ELSE
+                       BEGIN
+                           SELECT @cPrntStrng1 = rtrim(@cPrntStrng1) + @cSpacer
+                           SELECT @cPrntStrng2 = rtrim(@cPrntStrng2) + @cSpacer
+                       END
+                   END
+                   ELSE /* Else part of (IF @iLoop &lt; @iLevel) */
+                   BEGIN
+                       SELECT @cPrntStrng1 = rtrim(@cPrntStrng1) + @cBar
+                       SELECT @cPrntStrng2 = rtrim(@cPrntStrng2) +
+                               @cConnector + "(" + @cObjectType + ") " +
+                               @vcName
+                   END
+
+                   /* Increment the loop variable */
+                   SELECT @iLoop = @iLoop + 1
+
+                END /* While @iLoop &lt;= @iLevel */
+            END /* IF @iLevel = 1 */
+
+            /* Spaces are inserted into the string to separate the levels
+            ** into columns in the printed output.  Spaces, however, caused
+            ** a number of problems when attempting to concatenate the
+            ** two strings together.  To perform the concatenation, the
+            ** function rtrim was used to remove the end of the string.
+            ** This also removed the spaces we just added.  To aleviate
+            ** this problem, we used a period (.) wherever there was
+            ** supposed to be a space.  Now that we are ready to print
+            ** the line of text, we need to substitute real spaces
+            ** wherever there is a period in the string.  To do this,
+            ** we simply look for periods and substitute spaces.  This
+            ** has to be done in a loop since there is no mechanism to
+            ** make this substitution in the whole string at once.
+            */
+
+            /* Find the first period. */
+            SELECT @iDotIndex = charindex (".", @cPrntStrng1)
+
+            /* If a period exists, substitute a space for it and then
+            ** find the next period.
+            */
+            WHILE @iDotIndex &gt; 0
+            BEGIN
+                /* Substitute the space */
+                SELECT @cPrntStrng1 = stuff(@cPrntStrng1, @iDotIndex, 1, " ")
+
+                /* Find the next. */
+                SELECT @iDotIndex = charindex (".", @cPrntStrng1)
+            END
+
+            /* Do the same thing for the second print string. */
+            SELECT @iDotIndex = charindex (".", @cPrntStrng2)
+            WHILE @iDotIndex &gt; 0
+            BEGIN
+                SELECT @cPrntStrng2 = stuff(@cPrntStrng2, @iDotIndex, 1, " ")
+                SELECT @iDotIndex = charindex (".", @cPrntStrng2)
+            END
+
+            SELECT @vcDepends = NULL
+
+            IF @iInsTrigID &gt; 0
+                SELECT @vcDepends = OBJECT_NAME(@iInsTrigID) + " (Insert)"
+
+            IF @iUpdTrigID &gt; 0
+                IF @vcDepends IS NULL
+                    SELECT @vcDepends = OBJECT_NAME(@iUpdTrigID) + " (Update)"
+                ELSE
+                    SELECT @vcDepends = @vcDepends + ", " +
+                           OBJECT_NAME(@iUpdTrigID) + " (Update)"
+
+            IF @iDelTrigID &gt; 0
+                IF @vcDepends IS NULL
+                    SELECT @vcDepends = OBJECT_NAME(@iDelTrigID) + " (Delete)"
+                ELSE
+                    SELECT @vcDepends = @vcDepends + ", " +
+                           OBJECT_NAME(@iDelTrigID) + " (Delete)"
+
+             IF @vcDepends IS NOT NULL
+                 IF @cObjectType = "T"
+                     SELECT @cPrntStrng2 = @cPrntStrng2 +
+                               " (Trigger on table '" + @vcDepends + "')"
+                 ELSE
+                     SELECT @cPrntStrng2 = @cPrntStrng2 +
+                                       " (See Triggers: " + @vcDepends + ")"
+
+            /* Remove trailing blanks from the first print string.  */
+            SELECT @cPrntStrng1 = rtrim(@cPrntStrng1)
+            SELECT @cPrntStrng2 = rtrim(@cPrntStrng2)
+
+            /* Print the two strings. */
+            PRINT @cPrntStrng1
+            PRINT @cPrntStrng2
+
+            /* Remove the current entry from the stack (Pop) */
+            DELETE #Stack
+            WHERE  #Stack.iLevel = @iLevel
+            AND    #Stack.iItem = @iCurrent
+
+            /* Add (push) to the stack all the children of the current
+            ** node.
+            */
+            INSERT INTO #Stack
+            SELECT D.depid,
+                   @iLevel + 1
+            FROM   sysdepends D
+            WHERE  D.id = @iCurrent
+
+            /* If any were added, then we must descend another level. */
+            IF @@rowcount &gt; 0
+            BEGIN
+                SELECT @iLevel = @iLevel + 1
+            END
+
+        END
+        ELSE
+        BEGIN
+            /* We have reached a leaf node.  Move back to the previous
+            ** level and see what else is left to process.
+            */
+            SELECT @iLevel = @iLevel - 1
+        END
+
+    END /* While (@iLevel &gt; 0) */
+
+    PRINT " "
+
+    RETURN (0)
+
+/*------------------------ Error Handling --------------------------*/
+ErrorNotLocal:
+    /* 17460, Table must be in the current database. */
+    EXEC sp_getmessage 17460, @vcErrMsg OUT
+    PRINT @vcErrMsg
+    RETURN (1)
+
+ErrorNotFound:
+    /* 17461, Table is not in this database. */
+    EXEC sp_getmessage 17461, @vcErrMsg OUT
+    PRINT @vcErrMsg
+    PRINT " "
+
+    PRINT "Local object types and objecs are:"
+
+    SELECT "Object Type" = type,
+           "Object Name" = name
+    FROM   sysobjects
+    WHERE  type IN ("U","TR","P","V")
+    ORDER BY type, name
+
+    RETURN (1)
+
+END
+go
+
+grant execute on sp_dos to public
+go
+
+/* 
+ * If sybsystemprocs exists, we wish to use it.  If it fails, then we
+ * should be left in either master or the users defaultdb, both of which
+ * are probably what we want.
+ */
+
+use sybsystemprocs
+go
+
+/* Procedure sp_freedevice, owner dbo */
+IF OBJECT_ID('sp_freedevice') IS NOT NULL
+BEGIN
+
+    setuser 'dbo'
+
+    DROP PROCEDURE sp_freedevice
+    IF OBJECT_ID('sp_freedevice') IS NOT NULL
+        PRINT '&lt;&lt;&lt; FAILED TO DROP PROCEDURE sp_freedevice &gt;&gt;&gt;'
+    ELSE
+        PRINT '&lt;&lt;&lt; DROPPED PROCEDURE sp_freedevice &gt;&gt;&gt;'
+END
+go
+
+setuser 'dbo'
+go
+
+/*
+ * Name:            sp_freedevice
+ * Version:         1.1
+ * Author:          Unknown (if you know who it is/was let me know and I will modify this).
+ * Description:     Prints the current disk usage in a nice table for all of the devices on the system.
+ *                  Part of the FAQ ASE code package.  Latest version available from URL below.
+ * Source:          <A HREF="http://www.isug.com/Sybase_FAQ/ASE/section9.html">http://www.isug.com/Sybase_FAQ/ASE/section9.html</A>
+ * Maintainer:      David Owen (dowen@midsomer.org)
+ */
+
+create proc sp_freedevice
+@devname char(30) = null
+as
+
+  declare @showdev bit
+  declare @alloc   int
+
+  if @devname = null
+     select @devname = '%'
+           ,@showdev = 0
+  else
+     select @showdev = 1
+
+  select @alloc = low
+    from master.dbo.spt_values
+   where type   = 'E'
+     and number = 1
+
+  create table #freedev
+     (
+      name char(30)
+     ,size numeric(14,2)
+     ,used numeric(14,2)
+     )
+
+  insert #freedev
+  select dev.name
+        ,((dev.high - dev.low) * @alloc + 500000) / 1048576
+        ,convert(numeric(14,2), sum((usg.size * @alloc + 500000) / 1048576))
+    from master.dbo.sysdevices dev
+        ,master.dbo.sysusages  usg
+   where dev.low      &lt;= usg.size + usg.vstart - 1
+     and dev.high     &gt;= usg.size + usg.vstart - 1
+     and dev.cntrltype = 0
+   group by dev.name
+
+  insert #freedev
+  select name
+        ,convert(numeric(14,2), ((sd.high - sd.low) * @alloc + 500000) / 1048576)
+        ,0
+    from master.dbo.sysdevices sd
+   where sd.cntrltype = 0
+     and not exists (select 1
+                       from #freedev fd
+                      where fd.name = sd.name)
+
+  if @showdev = 1
+  begin
+      select devname = dev.name
+            ,size    = right(replicate(' ', 21) + convert(varchar(18),f.size)          + ' MB', 21)
+            ,used    = right(replicate(' ', 21) + convert(varchar(18),f.used)          + ' MB', 21)
+            ,free    = right(replicate(' ', 21) + convert(varchar(18),f.size - f.used) + ' MB', 21)
+        from master.dbo.sysdevices dev
+            ,#freedev f
+       where dev.name = f.name
+         and dev.name like @devname
+
+      select dbase = db.name
+            ,size  = right(replicate(' ', 21) + convert(varchar(18),
+                             (usg.size * @alloc + 500000) / 1048576
+                             ) + ' MB', 21)
+            ,usage = vl.name
+        from master.dbo.sysdatabases db
+            ,master.dbo.sysusages usg
+            ,master.dbo.sysdevices dev
+            ,master.dbo.spt_values vl
+       where db.dbid        = usg.dbid
+         and usg.segmap     = vl.number
+         and dev.low       &lt;= usg.size + usg.vstart - 1
+         and dev.high      &gt;= usg.size + usg.vstart - 1
+         and dev.status &amp; 2 = 2
+         and vl.type        = 'S'
+         and dev.name       = @devname
+  end
+  else
+  begin
+
+      select total   = right(replicate(' ', 21) + convert(varchar(18), sum(size))             + ' MB', 21)
+            ,used    = right(replicate(' ', 21) + convert(varchar(18), sum(used))             + ' MB', 21)
+            ,free    = right(replicate(' ', 21) + convert(varchar(18), sum(size) - sum(used)) + ' MB', 21)
+        from #freedev
+
+      select devname = dev.name
+            ,size    = right(replicate(' ', 21) + convert(varchar(18), f.size)          + ' MB', 21)
+            ,used    = right(replicate(' ', 21) + convert(varchar(18), f.used)          + ' MB', 21)
+            ,free    = right(replicate(' ', 21) + convert(varchar(18), f.size - f.used) + ' MB', 21)
+        from master.dbo.sysdevices dev
+            ,#freedev f
+       where dev.name = f.name
+  end
+go
+
+IF OBJECT_ID('sp_freedevice') IS NOT NULL
+    PRINT '&lt;&lt;&lt; CREATED PROCEDURE sp_freedevice &gt;&gt;&gt;'
+ELSE
+    PRINT '&lt;&lt;&lt; FAILED TO CREATE PROCEDURE sp_freedevice &gt;&gt;&gt;'
+go
+
+IF OBJECT_ID('sp_freedevice') IS NOT NULL
+BEGIN
+    GRANT EXECUTE ON sp_freedevice TO public
+END
+go
+use sybsystemprocs
+go
+
+if object_id('sp_helpoptions') is not null
+begin
+    drop procedure sp_helpoptions
+    if object_id('sp_helpoptions') is not null
+        print '&lt;&lt;&lt; Failed to drop procedure sp_helpoptions &gt;&gt;&gt;'
+    else
+        print '&lt;&lt;&lt; Dropped procedure sp_helpoptions &gt;&gt;&gt;'
+end
+go
+
+
+
+create procedure sp_helpoptions as
+
+-- initial design by Bret Halford (<A HREF="mailto:bret@sybase.com">bret@sybase.com</A>) 10 Jan 2000
+-- with assistance from Kimberly Russell
+-- relies only on @@options, developed on ASE 11.5.x Solaris
+
+-- This stored procedure displays a list of SET options and indicates
+-- for each option if the option is ON or OFF
+
+-- The @@options global variable contains bits that indicate
+-- whether certain of the SET command options are on or not.
+
+-- By observing the difference (if any) in @@options value when an
+-- option is on and off, a test can be derived for that condition
+
+-- Note that @@options is not documented in the manuals and its details
+-- are possibly subject to change without notice and may vary by platform.
+
+-- This procedure can probably be expanded to test for other SET command
+-- options as well.  If you come up with a test for any other SET option,
+-- please send it to me and I will add it to the procedure.
+
+declare @high_bits int
+declare @low_bits int
+select @high_bits = convert(int,substring(@@options,1,4))
+select @low_bits = convert(int,substring(@@options,5,4))
+
+if (@high_bits &amp; 268435456 = 268435456 )    print "showplan is on"
+else print "showplan is off"
+
+if (@low_bits &amp; 33554432 = 33554432) print "ansinull is on"
+else print "ansinull is off"
+
+if (@low_bits &amp; 536870912 = 536870912) print "ansi_permissions is on"
+else print "ansi_permissions is off"
+
+if (@high_bits &amp; -2147418112 = -2147418112) print "arithabort is on"
+else print "arithabort is off"
+
+if (@high_bits &amp; 1073741824 = 1073741824) print "arithignore is on"
+else print "arithignore is off"
+
+if (@high_bits &amp; 1073741824 = 1073741824) print "arithignore arith_overflow"
+else print "arithignore arith_overflow off"
+
+if (@high_bits &amp; 32 = 32) print "close on endtran is on"
+else print "close on endtran is off"
+
+if (@high_bits &amp; 32768 = 32768) print "nocount is on"
+else print "nocount is off"
+
+-- Note: if 'noexec' or 'parseonly' were on, this procedure could not run,
+-- so no test is necessary.
+print 'noexec is off'
+print 'parseonly is off.'
+
+go
+
+if object_id('sp_helpoptions') is not null
+begin
+    print '&lt;&lt;&lt; Created procedure sp_helpoptions &gt;&gt;&gt;'
+    grant execute on sp_helpoptions to public
+end
+else
+    print '&lt;&lt;&lt; Failed to create procedure sp_helpoptions &gt;&gt;&gt;'
+go
+
+use sybsystemprocs
+go
+
+drop procedure sp_lockconfig
+go
+
+-- sp_lockconfig, 'Lists data for lock promotions and index locking schemes'
+-- sp_lockconfig, '   if SYS_FLAG is non-null include system tables'
+
+
+create procedure sp_lockconfig (@SYS_FLAG  char (1) = NULL) as
+   set ansinull                      on
+   set flushmessage                  on
+   set nocount                       on
+   set string_rtruncation            on
+
+   print ' '
+
+   if (@@trancount = 0)
+      begin
+         set chained off
+
+         if (@@isolation &gt; 1)
+            begin
+               set transaction isolation level 1
+            end
+      end
+   else
+      begin
+         print '    sp_lockconfig CANNOT BE RUN FROM WITHIN A TRANSACTION.'
+
+         print ' '
+
+         return 1
+      end
+
+   declare @allcount  varchar (7),
+           @dpcount   varchar (7),
+           @drcount   varchar (7),
+           @sysval    smallint,
+           @tabtext   varchar (12)
+
+   create table #lockcfg
+     (sort      tinyint       not null,
+      type      char (8)      not null,
+      name      varchar (30)  not null,
+      levelx    varchar ( 5)  not null,
+      txt       varchar (33)  not null)
+
+   insert into #lockcfg
+      select 1,
+             'Table',
+             object_name (object),
+             'page',
+             substring (char_value, 1, 33)
+      from sysattributes
+      where class       = 5
+        and attribute   = 0
+        and object_type = 'T'
+
+   insert into #lockcfg
+      select 1,
+             'Table',
+             object_name (object),
+             'row',
+             substring (char_value, 1, 33)
+      from sysattributes
+      where class       = 5
+        and attribute   = 1
+        and object_type = 'T'
+
+   insert into #lockcfg
+      select 2,
+             'Database',
+             db_name (),
+             'page',
+             substring (char_value, 1, 33)
+      from master.dbo.sysattributes
+      where class       = 5
+        and attribute   = 0
+        and object_type = 'D'
+        and object      = db_id ()
+
+   insert into #lockcfg
+      select 2,
+             'Database',
+             db_name (),
+             'row',
+             substring (char_value, 1, 33)
+      from master.dbo.sysattributes
+      where class       = 5
+        and attribute   = 1
+        and object_type = 'D'
+        and object      = db_id ()
+
+   insert into #lockcfg
+      select 3,
+             'Server',
+             'default lock scheme',
+             '-',
+             substring (c.value2, 1, 10)
+      from master.dbo.sysconfigures f,
+           master.dbo.syscurconfigs c
+      where f.name    = 'lock scheme'
+        and f.parent &lt;&gt; 19
+        and f.config &lt;&gt; 19
+        and c.config  = f.config
+
+   insert into #lockcfg
+      select 3,
+             'Server',
+             '-',
+             'page',
+             'PCT = '
+             +  convert (varchar (11), pc.value)
+             +  ', LWM = '
+             +  convert (varchar (11), lc.value)
+             +  ', HWM = '
+             +  convert (varchar (11), hc.value)
+      from master.dbo.sysconfigures pf,
+           master.dbo.sysconfigures lf,
+           master.dbo.sysconfigures hf,
+           master.dbo.syscurconfigs pc,
+           master.dbo.syscurconfigs lc,
+           master.dbo.syscurconfigs hc
+      where pf.config  = pc.config
+        and pf.name    = 'page lock promotion PCT'
+        and pf.parent &lt;&gt; 19
+        and pf.config &lt;&gt; 19
+        and lf.config  = lc.config
+        and lf.name    = 'page lock promotion LWM'
+        and lf.parent &lt;&gt; 19
+        and lf.config &lt;&gt; 19
+        and hf.config  = hc.config
+        and hf.name    = 'page lock promotion HWM'
+        and hf.parent &lt;&gt; 19
+        and hf.config &lt;&gt; 19
+
+   insert into #lockcfg
+      select 3,
+             'Server',
+             '-',
+             'row',
+             'PCT = '
+             +  convert (varchar (11), pc.value)
+             +  ', LWM = '
+             +  convert (varchar (11), lc.value)
+             +  ', HWM = '
+             +  convert (varchar (11), hc.value)
+      from master.dbo.sysconfigures pf,
+           master.dbo.sysconfigures lf,
+           master.dbo.sysconfigures hf,
+           master.dbo.syscurconfigs pc,
+           master.dbo.syscurconfigs lc,
+           master.dbo.syscurconfigs hc
+      where pf.config  = pc.config
+        and pf.name    = 'row lock promotion PCT'
+        and pf.parent &lt;&gt; 19
+        and pf.config &lt;&gt; 19
+        and lf.config  = lc.config
+        and lf.name    = 'row lock promotion LWM'
+        and lf.parent &lt;&gt; 19
+        and lf.config &lt;&gt; 19
+        and hf.config  = hc.config
+        and hf.name    = 'row lock promotion HWM'
+        and hf.parent &lt;&gt; 19
+        and hf.config &lt;&gt; 19
+
+   select TYPE        = type,
+          OBJECT      = substring (name, 1, 28),
+          'LEVEL'     = levelx,
+          'LOCK DATA' = txt
+   from #lockcfg
+   order by sort, name, levelx
+
+   print ' '
+
+   if (@SYS_FLAG IS NULL)
+      begin
+         select @sysval  = 3,
+                @tabtext = 'USER'
+      end
+   else
+      begin
+         select @sysval  = 1,
+                @tabtext = 'USER/SYSTEM'
+      end
+
+   select @allcount = ltrim (substring (convert (char (10),
+                                                 convert (money,
+                                                          count (*)),
+                                                 1),
+                                        1,
+                                        7))
+   from sysobjects
+   where (sysstat &amp; 15)    in (@sysval, 3)
+     and (sysstat2 &amp; 8192)  = 8192
+
+   select @dpcount = ltrim (substring (convert (char (10),
+                                                convert (money,
+                                                         count (*)),
+                                                1),
+                                       1,
+                                       7))
+   from sysobjects
+   where (sysstat &amp; 15)     in (@sysval, 3)
+     and (sysstat2 &amp; 16384)  = 16384
+
+   select @drcount = ltrim (substring (convert (char (10),
+                                                convert (money,
+                                                         count (*)),
+                                                1),
+                                       1,
+                                       7))
+   from sysobjects
+   where (sysstat &amp; 15)     in (@sysval, 3)
+     and (sysstat2 &amp; 32768)  = 32768
+
+   if ((@allcount &lt;&gt; '0')  and  (@dpcount = '0')  and  (@drcount = '0'))
+      begin
+         print '    ALL %1! TABLES USE ALLPAGES LOCKING.', @tabtext
+      end
+   else if ((@allcount = '0')  and  (@dpcount &lt;&gt; '0')  and  (@drcount = '0'))
+      begin
+         print '    ALL %1! TABLES USE DATAPAGES LOCKING.', @tabtext
+      end
+   else if ((@allcount = '0')  and  (@dpcount = '0')  and  (@drcount &lt;&gt; '0'))
+      begin
+         print '    ALL %1! TABLES USE DATAROWS LOCKING.', @tabtext
+      end
+   else
+      begin
+         if (@allcount = '0')
+            begin
+               print '    THERE ARE NO %1! TABLES WITH ALLPAGES LOCKING.', @tabtext
+            end
+         else
+            begin
+               print '    THERE ARE %1! %2! TABLES WITH ALLPAGES LOCKING.',
+                     @allcount, @tabtext
+
+               print ' '
+
+               select 'TABLE' = name,
+                      OWNER   = user_name (uid)
+               from sysobjects
+               where (sysstat &amp; 15)    in (@sysval, 3)
+                 and (sysstat2 &amp; 8192)  = 8192
+               order by 'TABLE', OWNER
+            end
+
+         print ' '
+
+         if (@dpcount = '0')
+            begin
+               print '    THERE ARE NO %1! TABLES WITH DATAPAGES LOCKING.',
+                     @tabtext
+            end
+         else
+            begin
+               print '    THERE ARE %1! %2! TABLES WITH DATAPAGES LOCKING.',
+                     @dpcount, @tabtext
+
+               print ' '
+
+                  select 'TABLE' = space (30),
+                         OWNER   = space (30)
+                  where 1 = 2
+               union
+                  select substring (name  +  ' *',
+                                    1,
+                                    30),
+                         user_name (uid)
+                  from sysobjects
+                  where (sysstat &amp; 15)     in (@sysval, 3)
+                    and (sysstat2 &amp; 16384)  = 16384
+                    and (sysstat2 &amp; 131072) = 131072
+               union
+                  select name,
+                         user_name (uid)
+                  from sysobjects
+                  where (sysstat &amp; 15)      in (@sysval, 3)
+                    and (sysstat2 &amp; 16384)   = 16384
+                    and (sysstat2 &amp; 131072) &lt;&gt; 131072
+               order by 'TABLE', OWNER
+            end
+
+         print ' '
+
+         if (@drcount = '0')
+            begin
+               print '    THERE ARE NO %1! TABLES WITH DATAROWS LOCKING.',
+                     @tabtext
+            end
+         else
+            begin
+               print '    THERE ARE %1! %2! TABLES WITH DATAROWS LOCKING.',
+                     @drcount, @tabtext
+
+               print ' '
+
+                  select 'TABLE' = space (30),
+                         OWNER   = space (30)
+                  where 1 = 2
+               union
+                  select substring (name  +  ' *',
+                                    1,
+                                    30),
+                         user_name (uid)
+                  from sysobjects
+                  where (sysstat &amp; 15)      in (@sysval, 3)
+                    and (sysstat2 &amp; 32768)   = 32768
+                    and (sysstat2 &amp; 131072)  = 131072
+               union
+                  select name,
+                         user_name (uid)
+                  from sysobjects
+                  where (sysstat &amp; 15)      in (@sysval, 3)
+                    and (sysstat2 &amp; 32768)   = 32768
+                    and (sysstat2 &amp; 131072) &lt;&gt; 131072
+               order by 'TABLE', OWNER
+            end
+      end
+
+   print ' '
+go
+sp_procxmode sp_lockconfig, anymode
+go
+use sybsystemprocs
+go
+/*
+ * DROP PROC dbo.sp_servermap
+ */
+IF OBJECT_ID('dbo.sp_servermap') IS NOT NULL
+BEGIN
+    DROP PROC dbo.sp_servermap
+    PRINT '&lt;&lt;&lt; DROPPED PROC dbo.sp_servermap &gt;&gt;&gt;'
+END
+go
+
+create proc sp_servermap (@selection varchar(10) = "ABCDEF")
+as
+
+/* produces 6 "reports" against all possible data in
+   master..sysdatabases
+   master..sysdevices
+   master..sysusages
+
+   sp_servermap help
+   produces a list of the six reports.
+   A subset of the complete set of reports can be requested by passing
+   an argument that consists of a string containing the letters of the
+   desired report.
+
+   This procedure was developed on 4.9.1 server. It will run on 4.8
+   and 10.0 servers, but it has not been verified that the results
+   produced are correct.
+*/
+
+declare @atitle varchar(40),
+        @btitle varchar(40),
+        @ctitle varchar(40),
+        @dtitle varchar(40),
+        @etitle varchar(40),
+        @ftitle varchar(40),
+        @stars varchar(40),
+        @xstars varchar(40)
+
+set nocount on
+
+select @atitle = "A - DATABASE SEGMENT MAP",
+       @btitle = "B - DATABASE INFORMATION",
+       @ctitle = "C - DEVICE ALLOCATION MAP",
+       @dtitle = "D - DEVICE NUMBER, DEFAULT &amp; SPACE USAGE",
+       @etitle = "E - DEVICE LOCATION",
+       @ftitle = "F - MIRRORED DEVICES",
+       @selection = upper(@selection),
+       @stars = replicate("*",40)
+
+if @selection = "HELP" begin
+  print @atitle
+  print @btitle
+  print @ctitle
+  print @dtitle
+  print @etitle
+  print @ftitle
+  print ""
+  print "select any combination of reports by entering a string of"
+  print "report letters as the argument to sp_servermap:"
+  print "      sp_servermap acd"
+  print "will select reports A,C and D."
+  print "calling sp_servermap with no argument will produce all reports"
+ return
+ end
+
+select @@servername, "Current Date/Time" = getdate()
+select "Version" = @@version
+
+if charindex("A",@selection) &gt; 0
+begin
+print ""
+print @atitle
+select @xstars = substring(@stars,1,datalength(@atitle))
+print @xstars
+
+select db=substring(db.name,1,15),db.dbid,
+       usg.segmap,
+       segs = substring(" U",sign(usg.segmap/8)+1,1) +
+              substring(" L",(usg.segmap &amp; 4)/4+1,1) +
+      substring(" D",(usg.segmap &amp; 2)/2+1,1) +
+              substring(" S",(usg.segmap &amp; 1)+1,1),
+       "device fragment"=substring(dev.name,1,15),
+       "start (pg)" = usg.vstart,"size (MB)" = str(usg.size/512.,7,2)
+from master.dbo.sysusages usg,
+     master.dbo.sysdevices dev,
+     master.dbo.sysdatabases db
+where vstart between low and high
+  and cntrltype = 0
+  and db.dbid = usg.dbid
+order by db.dbid, usg.lstart
+
+print ""
+print"Segment Codes:"
+print "U=User-defined segment on this device fragment"
+print "L=Database Log may be placed on this device fragment"
+print "D=Database objects may be placed on this device fragment by DEFAULT"
+print "S=SYSTEM objects may be placed on this device fragment"
+print ""
+end
+
+if charindex("B",@selection) &gt; 0
+begin
+print ""
+print @btitle
+select @xstars = substring(@stars,1,datalength(@btitle))
+print @xstars
+
+select db=substring(db.name,1,15),
+       db.dbid,
+       "size (MB)" = str(sum(usg.size)/512.,7,2),
+       "db status codes " = substring(" A",(status &amp; 4)/4+1,1) +
+                     substring(" B",(status &amp; 8)/8+1,1) +
+                     substring(" C",(status &amp; 16)/16+1,1) +
+                     substring(" D",(status &amp; 32)/32+1,1) +
+                     substring(" E",(status &amp; 256)/256+1,1) +
+                     substring(" F",(status &amp; 512)/512+1,1) +
+                     substring(" G",(status &amp; 1024)/1024+1,1) +
+                     substring(" H",(status &amp; 2048)/2048+1,1) +
+                     substring(" I",(status &amp; 4096)/4096+1,1) +
+                     substring(" J",(status &amp; 16384)/16384+1,1) +
+                     substring(" K",(status &amp; 64)/64+1,1) +
+                     substring(" L",(status &amp; 128)/128+1,1) +
+                     substring(" M",(status2 &amp; 1)/1+1,1) +
+                     substring(" N",(status2 &amp; 2)/2+1,1) +
+                     substring(" O",(status2 &amp; 4)/4+1,1) +
+                     substring(" P",(status2 &amp; 8)/8+1,1) +
+                     substring(" Q",(status2 &amp; 16)/16+1,1) +
+                     substring(" R",(status2 &amp; 32)/32+1,1),
+       "created" = convert(char(9),crdate,6) + " " +
+                   convert(char(5),crdate,8),
+       "dump tran" = convert(char(9),dumptrdate,6) + " " +
+                 convert(char(5),dumptrdate,8)
+from master.dbo.sysdatabases db,
+     master.dbo.sysusages usg
+where db.dbid =usg.dbid
+group by db.dbid
+order by db.dbid
+
+print ""
+print "Status Code Key"
+print ""
+print "Code       Status"
+print "----       ----------------------------------"
+print " A         select into/bulk copy allowed"
+print " B         truncate log on checkpoint"
+print " C         no checkpoint on recovery"
+print " D         db in load-from-dump mode"
+print " E         db is suspect"
+print " F         ddl in tran"
+print " G         db is read-only"
+print " H         db is for dbo use only"
+print " I         db in single-user mode"
+print " J         db name has been changed"
+print " K         db is in recovery"
+print " L         db has bypass recovery set"
+print " M         abort tran on log full"
+print " N         no free space accounting"
+print " O         auto identity"
+print " P         identity in nonunique index"
+print " Q         db is offline"
+print " R         db is offline until recovery completes"
+print ""
+end
+
+if charindex("C",@selection) &gt; 0
+begin
+print ""
+print @ctitle
+select @xstars = substring(@stars,1,datalength(@ctitle))
+print @xstars
+
+select "device fragment"=substring(dev.name,1,15),
+       "start (pg)" = usg.vstart,"size (MB)" = str(usg.size/512.,7,2),
+       db=substring(db.name,1,15),
+       lstart,
+       segs = substring(" U",sign(usg.segmap/8)+1,1) +
+              substring(" L",(usg.segmap &amp; 4)/4+1,1) +
+              substring(" D",(usg.segmap &amp; 2)/2+1,1) +
+              substring(" S",(usg.segmap &amp; 1)+1,1)
+from master.dbo.sysusages usg,
+     master.dbo.sysdevices dev,
+     master.dbo.sysdatabases db
+where usg.vstart between dev.low and dev.high
+  and dev.cntrltype = 0
+  and db.dbid = usg.dbid
+group by dev.name, usg.vstart, db.name
+having db.dbid = usg.dbid
+order by dev.name, usg.vstart
+
+
+print ""
+print "Segment Codes:"
+print "U=USER-definedsegment on this device fragment"
+print "L=Database LOG may be placed on this device fragment"
+print "D=Database objects may be placed on this device fragment by DEFAULT"
+print "S=SYSTEM objects may be placed on this device fragment"
+print ""
+end
+
+if charindex("D",@selection) &gt; 0
+begin
+print ""
+print @dtitle
+select @xstars = substring(@stars,1,datalength(@dtitle))
+print @xstars
+
+declare @vsize int
+select @vsize = low
+from master.dbo.spt_values
+where type="E"
+   and number = 3
+
+select device = substring(name,1,15),
+       vdevno = convert(tinyint,substring(convert(binary(4),low),@vsize,1)),
+       "default disk?" = "    " + substring("NY",(status &amp; 1)+1,1),
+       "total (MB)" = str(round((high-low)/512.,2),7,2),
+       used = str(round(isnull(sum(size),0)/512.,2),7,2),
+       free = str(round(abs((high-low-isnull(sum(size),0))/512.),2),7,2)
+from master.dbo.sysusages,
+     master.dbo.sysdevices
+where vstart between low and high
+ and cntrltype=0
+ group by all name
+    having cntrltype=0
+order by vdevno
+end
+
+if charindex("E",@selection) &gt; 0
+begin
+print ""
+print @etitle
+select @xstars = substring(@stars,1,datalength(@etitle))
+print @xstars
+
+select device = substring(name,1,15),
+       location = substring(phyname,1,60)
+from master.dbo.sysdevices
+where cntrltype=0
+end
+
+if charindex("F",@selection) &gt; 0
+begin
+if exists (select 1
+           from master.dbo.sysdevices
+           where status &amp; 64 = 64)
+begin
+
+print ""
+print @ftitle
+select @xstars = substring(@stars,1,datalength(@ftitle))
+print @xstars
+
+select device = substring(name,1,15),
+       pri =" " + substring("* **",(status/256)+1,1),
+       sec = " " + substring(" ***",(status/256)+1,1),
+       serial = "   " + substring(" *",(status &amp; 32)/32+1,1),
+       "mirror" = substring(mirrorname,1,35),
+       reads = "   " + substring(" *",(status &amp; 128)/128+1,1)
+from master.dbo.sysdevices
+where cntrltype=0
+ and status &amp; 64 = 64
+end
+else
+begin
+print ""
+print "NO DEVICES ARE MIRRORED"
+end
+end
+
+set nocount off
+
+
+go
+IF OBJECT_ID('dbo.sp_servermap') IS NOT NULL
+BEGIN
+    PRINT '&lt;&lt;&lt; CREATED PROC dbo.sp_servermap &gt;&gt;&gt;'
+    grant execute on dbo.sp_servermap to sa_role
+END
+ELSE
+    PRINT '&lt;&lt;&lt; FAILED CREATING PROC dbo.sp_servermap &gt;&gt;&gt;'
+gouse sybsystemprocs
+go
+
+IF OBJECT_ID('dbo.sp_spaceused_table') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.sp_spaceused_table
+    IF OBJECT_ID('dbo.sp_spaceused_table') IS NOT NULL
+        PRINT '&lt;&lt;&lt; FAILED TO DROP dbo.sp_spaceused_table &gt;&gt;&gt;'
+    ELSE
+        PRINT '&lt;&lt;&lt; DROPPED PROC dbo.sp_spaceused_table &gt;&gt;&gt;'
+END
+go
+
+create procedure sp_spaceused_table
+@list_indices  int = 0
+as
+declare @type         smallint,      -- the object type
+        @msg          varchar(250),  -- message output
+        @dbname       varchar(30),   -- database name
+        @tabname      varchar(30),   -- table name
+        @length       int,
+        @object_id    int
+
+set nocount on
+
+if @@trancount = 0
+begin
+    set chained off
+end
+
+set transaction isolation level 1
+
+create table #pagecounts
+   (
+    name        varchar(45)   null,
+    iname       varchar(45)   null,
+    low         int           null,
+    rowtotal    int           null,
+    reserved    numeric(20,9) null,
+    data        numeric(20,9) null,
+    index_size  numeric(20,9) null,
+    unused      numeric(20,9) null
+   )
+
+select @object_id = min(id)
+  from sysobjects
+ where type = 'U'
+   and name not like "%pagecount%"
+
+while (@object_id is not null)
+begin
+    /*
+    **  We want a particular object.
+    */
+    insert #pagecounts
+    select  name       = o.name,
+            iname      = i.name,
+            low        = d.low,
+            rowtotal   = rowcnt(i.doampg),
+            reserved   = convert(numeric(20,9),
+                                 (reserved_pgs(i.id, i.doampg) +
+                                  reserved_pgs(i.id, i.ioampg))),
+            data       = convert(numeric(20,9), data_pgs(i.id, i.doampg)),
+            index_size = convert(numeric(20,9), data_pgs(i.id, i.ioampg)),
+            unused = convert(numeric(20,9),
+                             ((reserved_pgs(i.id, i.doampg) +
+                               reserved_pgs(i.id, i.ioampg)) -
+                               (data_pgs(i.id, i.doampg) +
+                                data_pgs(i.id, i.ioampg))))
+      from sysobjects o
+          ,sysindexes i
+          ,master.dbo.spt_values d
+     where i.id     = @object_id
+       and o.id     = @object_id
+       and i.id     = o.id
+       and d.number = 1
+       and d.type   = 'E'
+
+    select @object_id = min(id)
+      from sysobjects
+     where type = 'U'
+       and id   &gt; @object_id
+       and name not like "%pagecount%"
+
+end
+
+select @length = max(datalength(iname))
+  from #pagecounts
+
+if (@list_indices = 1)
+begin
+
+    if (@length &gt; 20)
+    begin
+        select  index_name = iname,
+                size = convert(char(10), convert(varchar(11),
+                       convert(numeric(11,0),
+                               index_size / 1024 *
+                               low)) + ' KB'),
+                reserved = convert(char(10),
+                           convert(varchar(11),
+                           convert(numeric(11,0),
+                                   reserved / 1024 *
+                                   low)) + ' KB'),
+                unused = convert(char(10), convert(varchar(11),
+                         convert(numeric(11,0), unused / 1024 *
+                                        low)) + ' KB')
+        from #pagecounts
+
+    end
+    else
+    begin
+        select  index_name = convert(char(20), iname),
+                size = convert(char(10), convert(varchar(11),
+                       convert(numeric(11,0),
+                                        index_size / 1024 *
+                                        low)) + ' KB'),
+                reserved = convert(char(10),
+                                   convert(varchar(11),
+                                           convert(numeric(11,0),
+                                                   reserved / 1024 *
+                                                   low)) + ' KB'),
+                unused = convert(char(10), convert(varchar(11),
+                         convert(numeric(11,0), unused / 1024 *
+                                        low)) + ' KB')
+        from #pagecounts
+    end
+end
+
+if (@length &gt; 20)
+begin
+    select distinct name,
+           rowtotal = convert(char(11), sum(rowtotal)),
+           reserved = convert(char(15), convert(varchar(11),
+                      convert(numeric(11,0), sum(reserved) *
+                                             (low / 1024))) + ' KB'),
+           data = convert(char(15), convert(varchar(11),
+                  convert(numeric(11,0), sum(data) * (low / 1024)))
+                   + ' KB'),
+           index_size = convert(char(15), convert(varchar(11),
+                    convert(numeric(11,0), sum(index_size) *
+                    (low / 1024))) + ' KB'),
+           unused = convert(char(15), convert(varchar(11),
+                    convert(numeric(11,0), sum(unused) *
+                    (low / 1024))) + ' KB')
+      from #pagecounts
+     group by name
+end
+else
+begin
+    select distinct name = convert(char(20), name),
+           rowtotal = convert(char(11), sum(rowtotal)),
+           reserved = convert(char(15), convert(varchar(11),
+                   convert(numeric(11,0), sum(reserved) *
+                   (low / 1024))) + ' KB'),
+           data = convert(char(15), convert(varchar(11),
+                   convert(numeric(11,0), sum(data) * (low / 1024)))
+                   + ' KB'),
+           index_size = convert(char(15), convert(varchar(11),
+                    convert(numeric(11,0), sum(index_size) *
+                    (low / 1024))) + ' KB'),
+           unused = convert(char(15), convert(varchar(11),
+                    convert(numeric(11,0), sum(unused) *
+                    (low / 1024))) + ' KB')
+      from #pagecounts
+     group by name
+end
+
+return (0)
+go
+
+IF OBJECT_ID('dbo.sp_spaceused_table') IS NOT NULL
+    PRINT '&lt;&lt;&lt; CREATED PROC dbo.sp_spaceused_table &gt;&gt;&gt;'
+ELSE
+    PRINT '&lt;&lt;&lt; FAILED TO CREATE PROC dbo.sp_spaceused_table &gt;&gt;&gt;'
+go
+use sybsystemprocs
+go
+
+if object_id('sp_whodo') is not null
+begin
+    drop procedure sp_whodo
+    if object_id('sp_whodo') is not null
+        print '&lt;&lt;&lt; Failed to drop procedure sp_whodo &gt;&gt;&gt;'
+    else
+        print '&lt;&lt;&lt; Dropped procedure sp_whodo &gt;&gt;&gt;'
+end
+go
+
+create procedure sp_whodo @loginame varchar(30) = NULL
+as
+
+  declare @low     int
+         ,@high    int
+         ,@spidlow int
+         ,@spidhigh int
+
+  select @low      = 0
+        ,@high     = 32767
+        ,@spidlow  = 0
+        ,@spidhigh = 32767
+
+  if @loginame is not NULL
+  begin
+      select @low  = suser_id(@loginame)
+            ,@high = suser_id(@loginame)
+
+      if @low is NULL
+      begin
+          if @loginame like "[0-9]%"
+          begin
+              select @spidlow  = convert(int, @loginame)
+                    ,@spidhigh = convert(int, @loginame)
+                    ,@low      = 0
+                    ,@high     = 32767
+          end
+          else
+          begin
+               print "Login %1! does not exist.", @loginame
+               return (1)
+          end
+      end
+  end
+
+  select spid
+        ,status
+        ,substring(suser_name(suid),1,12)           loginame
+        ,hostname
+        ,convert(char(3),  blocked)                 blk
+        ,convert(char(7),  isnull(time_blocked, 0)) blk_sec
+        ,convert(char(16), program_name)            program
+        ,convert(char(7),  db_name(dbid))           dbname
+        ,convert(char(16), cmd)                     cmd
+        ,convert(char(6),  cpu)                     cpu
+        ,convert(char(7),  physical_io)             io
+        ,convert(char(16), isnull(tran_name, ""))   tran_name
+    from master..sysprocesses
+   where suid &gt;= @low
+     and suid &lt;= @high
+     and spid&gt;= @spidlow
+     and spid &lt;= @spidhigh
+
+  return (0)
+
+go
+
+if object_id('sp_whodo') is not null
+begin
+    print '&lt;&lt;&lt; Created procedure sp_whodo &gt;&gt;&gt;'
+    grant execute on sp_whodo to public
+end
+else
+    print '&lt;&lt;&lt; Failed to create procedure sp_whodo &gt;&gt;&gt;'
+go
+
+use master
+go
+
+if object_id('sp_whodo') is not null
+begin
+    drop procedure sp_whodo
+    if object_id('sp_whodo') is not null
+        print '&lt;&lt;&lt; Failed to drop procedure sp_whodo &gt;&gt;&gt;'
+    else
+        print '&lt;&lt;&lt; Dropped procedure sp_whodo &gt;&gt;&gt;'
+end
+go
+
+create procedure sp_whodo @loginame varchar(30) = NULL
+as
+
+  declare @low     int
+         ,@high    int
+         ,@spidlow int
+         ,@spidhigh int
+
+  select @low      = 0
+        ,@high     = 32767
+        ,@spidlow  = 0
+        ,@spidhigh = 32767
+
+  if @loginame is not NULL
+  begin
+
+      select @low = suser_id(@loginame)
+            ,@high = suser_id(@loginame)
+
+      if @low is NULL
+      begin
+          if @loginame like "[0-9]%"
+          begin
+              select @spidlow  = convert(int, @loginame)
+                    ,@spidhigh = convert(int, @loginame)
+                    ,@low      = 0
+                    ,@high     = 32767
+          end
+          else
+          begin
+              print "No login exists with the supplied name."
+              return (1)
+          end
+      end
+  end
+
+  select
+         spid
+        ,status
+        ,substring(suser_name(suid),1,12) loginame
+        ,hostname
+        ,convert(char(3),  blocked)       blk
+        ,convert(char(16), program_name)  program
+        ,convert(char(7),  db_name(dbid)) dbname
+        ,convert(char(16), cmd)           cmd
+        ,convert(char(6),  cpu)           cpu
+        ,convert(char(7),  physical_io)   io
+    from master..sysprocesses
+   where suid &gt;= @low
+     and suid &lt;= @high
+     and spid &gt;= @spidlow
+     and spid &lt;= @spidhigh
+
+  return (0)
+go
+
+if object_id('sp_whodo') is not null
+begin
+    print '&lt;&lt;&lt; Created procedure sp_whodo &gt;&gt;&gt;'
+    grant execute on sp_whodo to public
+else
+    print '&lt;&lt;&lt; Failed to create procedure sp_whodo &gt;&gt;&gt;'
+end
+goCreate procedure sp_whodoneit
+as
+Create table #usr_locks(
+   spid int, dbid smallint, id int)
+Insert Into #usr_locks(spid,dbid,id)
+   Select distinct spid,dbid,id
+   From master..syslocks
+Select
+   str(procs.spid,4) as "Spid",
+   substring(isnull(suser_name(procs.suid),"Sybase"),1,12) as "User",
+   hostname as "Host",
+   substring(cmd,1,6) as "Cmd",
+   convert(varchar(5),procs.cpu) as "Cpu",
+   convert(varchar(7),physical_io) as "I/O",
+   convert(varchar(3),blocked) as "Blk",
+   convert(varchar(10),db_name(ul.dbid)) as "DB Name",
+   ul.id as "Object Id",
+   getdate() as "Date"
+From master..sysprocesses procs, #usr_locks ul
+Where procs.spid *= ul.spid
+#!/bin/csh -f
+
+isql -U&lt;dbusr&gt; -P&lt;dbpw&gt; -S&lt;dbsvr&gt; -w265 $*
+#!/bin/csh
+# ########################################################################
+# #
+# #                         SCCS Keyword Header
+# #                         -------------------
+# #
+# #           Module Name  :  update_stats.csh
+# #           Version      :  1.8
+# #           Last Modified:  2/16/98 at 17:19:38
+# #           Extracted    :  2/16/98 at 17:19:39
+# #           Archived as  :  &lt;host&gt;:/u/sybase/SCCS/s.update_stats.csh
+# #
+# ########################################################################
+
+
+
+
+
+# upd_stats.csh
+# ------------------
+#
+# Shell to update the distribution pages for each table in a database.
+#
+# Requires sqlsa (script w/ the proper isql login for dbo of a database)
+# ex:
+#     #!/bin/csh -f
+#     isql -U&lt;dbusr&gt; -P&lt;dbpw&gt; -S&lt;dbsvr&gt; -w265 $*
+#     exit($$status)
+#
+# Author:  FJ Lundy, 2/96
+
+
+
+ARGS:
+  set progname = `basename $0`
+  if ($#argv != 2) then
+        goto USAGE
+  endif
+  set dbdb          = $1
+  set parallel_jobs = $2
+
+
+
+INIT:
+  # Declare intermediate files
+  set filebase    = /tmp/$progname:r.-D$dbdb
+  set cmdfile     = $filebase.sql
+  set awkfile     = $filebase.awk
+  set tblfile     = $filebase.tbl
+  set workflag    = $filebase.working
+  set logfile     = $filebase.log
+  set runningflag = $filebase.running
+
+  # Check for another running copy of this process
+  if ( -f $runningflag ) goto ERROR
+
+  # Set the running flag to prevent multiple copies of
+  onintr DONE
+
+  # Clean up from previous runs
+  rm -f $filebase.* &gt;&amp; /dev/null
+
+  # Set the 'running flag' (this step must FOLLOW the 'clean-up from previous
+  #  runs' step!
+  touch $runningflag
+
+  # Which OS are we running on?
+  set os = `uname`
+  switch ($os)
+        case  'IRIX':
+        case  'IRIX64':
+        case  'HP-UX':
+                set splitFlag = '-l'
+                breaksw
+        case  'Linux':
+        case  'SunOS':
+                set splitFlag = '-'
+                breaksw
+        default:
+                echo 'ERROR:  $progname- Unsupported Os($os). Aborting'
+                exit(-1)
+  endsw
+
+
+
+MAIN:
+  # Start the Log
+  rm -f $logfile
+  echo '$0 $*'                                       &gt; $logfile
+  echo 'NOTE:  $progname- (`date`) BEGIN $progname' &gt;&gt; $logfile
+
+
+  # Create the awk command file.
+  cat &lt;&lt; EOJ &gt; $awkfile
+        \$0 !~ /^\$/    {
+                tblname = \$1
+                printf('declare @msg varchar(255), @dt_start datetime, @dt_end datetime\n')
+                printf('select @msg = \'Updating Statistics for: Db(%s)\'\n', '$dbdb')
+                printf('print  @msg\n')
+                printf('select @dt_start = getdate()\n')
+                printf('update statistics %s\n', tblname)
+                printf('exec sp_recompile '%s'\n', tblname)
+                printf('select @dt_end = getdate()\n')
+                printf('select @msg = \'Table(%s)\'\n', tblname)
+                printf('print  @msg\n')
+                printf('select @msg = \'\tstart(\' + convert(varchar, @dt_start) + \')\'\n')
+                printf('print  @msg\n')
+                printf('select @msg = \'\t  end(\' + convert(varchar, @dt_end) + \')\'\n')
+                printf('print  @msg\n')
+                printf('print \'\'\n')
+                printf('go\n\n')
+        }
+EOJ
+
+
+  # Create a list of tables to update the stats for
+  sqlsa &lt;&lt; EOJ | tail +3 | sed 's/^[   ]*//g' | cut -f1 -d\   &gt; $tblfile
+        set nocount on
+        use $dbdb
+go
+        select   u.name + '.' + o.name 'Table',
+                 sum((reserved_pgs(i.id, i.doampg) + reserved_pgs(i.id, i.ioampg)) * 2) 'Kb'
+        from     sysindexes i, sysobjects o, sysusers u
+        where    (o.id = i.id) and (o.uid = u.uid) and (o.type = 'U' or o.type = 'S')
+        group by u.name, o.name
+        order by Kb desc
+go
+EOJ
+
+exit(0)
+  # Split the files into equal-sized chunks based on the passed
+  # parameter for the number of parallelized jobs
+  @ ct = 0
+  foreach tbl (`cat $tblfile`)
+        @ i = $ct % $parallel_jobs
+        echo '$tbl' &gt;&gt; $tblfile.$i
+        @ ct = $ct + 1
+  end
+
+
+  # For each of the created table lists:
+  #     1) create TSQL, 2) set a work flag 3) background the job
+  @ i = 0
+  set all_work_flags = ''
+  foreach file ( $tblfile.* )
+        # Create the T-SQL command file
+        @ i = $i + 1
+        echo 'set nocount on'     &gt; $cmdfile.$i
+        echo 'use $dbdb'         &gt;&gt; $cmdfile.$i
+        echo 'go'                &gt;&gt; $cmdfile.$i
+        awk -f $awkfile $file    &gt;&gt; $cmdfile.$i
+
+        # Spawn a subshell and remove the working flag when done
+        # Log output to a log file commonto all threads.  This can possibly cause
+        # lost information in the log file if all the threads come crashing in
+        # at once.  Oh well...
+        set all_work_flags = ( $all_work_flags $workflag.$i )
+        touch $workflag.$i
+        (sqlsa &lt; $cmdfile.$i &gt;&gt;&amp; $logfile ; rm -f $workflag.$i) &amp;
+  end
+
+
+  # Loop until all of the spawned processes are finished (as indicated by the
+  # absence of working flags
+  while ( 1 )
+        set num_working = `ls $workflag.* | wc -l`
+        if ( $num_working == 0 ) break
+        sleep 10
+  end   # end-while: wait for work to finish
+
+
+
+DONE:
+  rm $awkfile $cmdfile.* $tblfile $tblfile.*
+  rm $runningflag
+  echo 'NOTE:  $progname- (`date`) END $progname' &gt;&gt; $logfile
+  cat $logfile
+  exit(0)
+
+
+
+USAGE:
+  echo ''
+  echo 'USAGE   : $progname &lt;db&gt; &lt;# of parallel jobs&gt;'
+  echo '          Updates the distribution pages for each user and system table in'
+  echo '          the specified database.'
+  echo 'REQUIRES: sqlsa'
+  echo ''
+  exit(-1)
+
+
+
+ERROR:
+  echo ''
+  echo 'ERROR:  $progname- This process is already running for $dbdb. Aborting'
+  echo ''
+  exit(-2)
+
+# EOJ
+</PRE>
+<DIV ALIGN=CENTER>
+<SMALL>
+<P><HR WIDTH=1900 NOSHADE><BR>
+ <A HREF="../part1/">Part1</A> -  <A HREF="../part2/">Part2</A> -  <A HREF="../part3/">Part3</A> -  <A HREF="../part4/">Part4</A> -  <A HREF="../part5/">Part5</A> -  <A HREF="../part6/">Part6</A> -  <A HREF="../part7/">Part7</A> -  <A HREF="../part8/">Part8</A> -  <A HREF="../part9/">Part9</A> -  <A HREF="../part10/">Part10</A> -  <A HREF="../part11/">Part11</A> -  <A HREF="../part12/">Part12</A> -  <A HREF="../part13/">Part13</A> -  <A HREF="../part14/">Part14</A> -  <A HREF="../part15/">Part15</A> -  <A HREF="../part16/">Part16</A> -  <A HREF="../part17/">Part17</A> -  Part18 -  <A HREF="../part19/">Part19</A></SMALL>
+<P>
+<div align="center">
+
+<center>
+<form method="post" action="rateit.php">
+<table border="1" cellpadding="0" cellspacing="0" width="150" bgcolor="#ffcccc" style="WIDTH: 150px">
+<tr><td width="100%">
+<div align="center">
+<table border="0" cellpadding="2" width="100%" bgcolor="#ffcccc">
+<tr><td width="100%" height="14">
+<p align="center"><font face="Arial">Rate this FAQ</font></p>
+</td></tr>
+<tr><td width="100%" height="14">
+<p align="center">
+<INPUT TYPE=HIDDEN NAME="pid" VALUE="databases/sybase-faq/part18/index.html">
+<select size="1" name="D1" style="COLOR: darkmagenta; BACKGROUND-COLOR: cornsilk">
+<option selected value="0">N/A</option>
+<option value="1">Worst</option>
+<option value="2">Weak</option>
+<option value="3">OK</option>
+<option value="4">Good</option>
+<option value="5">Great</option>
+</select>
+</p>
+</td></tr>
+<tr><td width="100%" height="27">
+<p align="center">
+<IMG onclick="mystr='/frate.php?pid='+pid.value+'&vote='+D1.value;
+Popup=window.open(mystr,'Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=380,height=270,left=230,top=43'); 
+ return false;" height=28 src="/images/vote.gif" alt="Vote" width=83 border=0 ></p>
+</td></tr>
+</table>
+</div>
+</td></tr>
+</table>
+<font size="-1" face="Arial"><br><a href="/topRated.html">Current Top-Rated FAQs</a><br></font>
+</form>
+</center>
+
+</div>
+
+<div align="center">
+<center>
+<table border="0" cellpadding="4" cellspacing="4" width="100%">
+<tr><td width="100%" bgcolor="#D6D6C0">
+<script language="JavaScript"><!--
+edc("/faqquestion.php?faqid=databases/sybase-faq/part18/index.html"," ");
+// --></script>
+<p><font face="Arial"><a name="ct">Are you an expert in this area?</a> Share your knowledge and earn expert points by giving answers or rating people's questions and answers! This section of FAQS.ORG is not sanctioned in any way by FAQ authors or maintainers.</font></p>
+<p><font face="Arial">Questions strongly related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-6730.html">How can I display the table sizes of ALL tables in a database?   </a> by Caspar (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9594.html">how to use nested cursors in a stored procedure in ASE ? is there any template to use !...</a> by nino (12/18/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3265.html">to connect sybase and c++,how to connect and access the data </a> by kumaran (9/2/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6741.html">how do u tell the last time update statistics has been run on a table (11.0.3) </a> by yujo (10/31/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11075.html">I need to Execute an SP & set its output to the insert statement. This will be occured for...</a> by rose (1/14/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9435.html">I wanted to know EXACT technical details about what ACTUALLY happens when u fire a simple...</a> by anu (12/15/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-8395.html">Is there anyway to start dataserver in ASE 11.9.2 with only the master and tempdb online...</a> by steve_2000g (11/28/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-854.html">i get an error on the "convert" when i try to run this line of code, why is this?   print...</a> by shugarhi (7/14/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-11834.html">Hi  &nbsp; We're using Sybase ASE 12.0 running on SUN 4500 Cluster server. We cannot...</a> by KK (1/26/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-6297.html">I am creating a stored proc to create a report of dependencies. &nbsp;We are creating...</a> by RR (10/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7388.html">How is this hazardous if we do not close a cursor? </a> by amar (11/11/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-9827.html">How can i reduce my tempdb size once i have increased it by creating a device also? </a> by rajs (12/23/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12835.html">how can i transfer a table from cybase to db2? &nbsp;please sendme step by step method if...</a> by maulik (2/9/2004)</font></li>
+<li><font face="Arial"><a href="/qa/qa-3213.html">My database is in bypass recovery mode. How do I put it in normal mode? </a> by Lach (9/1/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-1435.html">Hi ,  &nbsp;We are using Sybase ASE 11.9.2 with SCO Unix 7.1.1 &nbsp;as the operating ...</a> by gowri (7/27/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-2412.html">were is a database that will bring up  a person address without there last name </a> by travis (8/15/2003)</font></li>
+</ul>
+<p><font face="Arial">Questions somewhat related to this FAQ:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/qa-2221.html">Guys!   See the Sybase query below: select convert(float,substring(&lt;field1&gt;,3,...</a> by pathfinder (8/12/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-7790.html">What are the side-effects of turning-on the built-in auditing capabilities of sybase? </a> by Choy (11/17/2003)</font></li>
+<li><font face="Arial"><a href="/qa/qa-12136.html">When ever i execute select property('PROCESSCPU') i get the value 189 and whenever i...</a> by anilkumarsh (1/29/2004)</font></li>
+</ul>
+<p><font face="Arial">Other questions awaiting answers:</font></p>
+<ul>
+<li><font face="Arial"><a href="/qa/related.html">10088 questions</a> related to other FAQs<br></font></li>
+<li><font face="Arial"><a href="/qa/unrelated.html">1765 general questions</a></font></li>
+<li><font face="Arial"><a href="/qa/answered.html">4091 answered questions</a><br></font></li>
+</ul>
+</td></tr></table> <br></center></div>
+<HR NOSHADE SIZE=2 WIDTH=450>
+[ <a href="/faqs/">Usenet FAQs</a> | <a href="/faqs/faqsearch.html">Search</a> | <a href="/contrib/">Web FAQs</a> | <a href="/docs/">Documents</a> | <a href="/rfcs/">RFC Index</a> ]
+<BR><HR NOSHADE SIZE=2 WIDTH=450>
+<P>
+<ADDRESS>
+Send corrections/additions to the FAQ Maintainer: <BR>dowen@midsomer.org (David Owen)
+</ADDRESS>
+<P>
+<SMALL>
+<STRONG>Last Update February 12 2004 @ 00:28 AM</STRONG>
+<BR>
+</SMALL>
+</DIV>
+</BODY>
+</HTML>
+

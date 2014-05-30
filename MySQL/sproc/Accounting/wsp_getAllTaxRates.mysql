@@ -1,0 +1,59 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAllTaxRates;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAllTaxRates ()
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         April, 2010
+**   Description:  retrieves all tax rates
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+BEGIN
+
+DECLARE at_dateNow DATETIME;
+SET at_dateNow = NOW(); 
+
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+SELECT union_all_Lists.countryId, 
+       union_all_Lists.countryName, 
+       union_all_Lists.jurisdictionId, 
+       union_all_Lists.jurisdictionName,
+       union_all_Lists.taxRate 
+FROM (
+
+SELECT countryId
+          ,countryName
+          ,NULL AS jurisdictionId
+          ,NULL AS jurisdictionName
+          ,taxRate
+      FROM CountryTaxRate
+     WHERE (dateExpired IS NULL OR dateExpired >= at_dateNow OR dateExpired = '00000000')
+       AND dateStarted <= at_dateNow
+
+UNION ALL
+ 
+SELECT c.countryId
+          ,c.countryName
+          ,j.jurisdictionId
+          ,j.jurisdictionName
+          ,j.taxRate
+      FROM CountryTaxRate c, JurisdictionTaxRate j
+     WHERE c.countryId = j.countryId
+       AND (j.dateExpired IS NULL OR j.dateExpired >= at_dateNow OR j.dateExpired = '00000000')
+       AND j.dateStarted <= at_dateNow
+
+) union_all_Lists 
+
+ORDER BY union_all_Lists.countryId, union_all_Lists.jurisdictionId;
+
+END;;
+DELIMITER ;

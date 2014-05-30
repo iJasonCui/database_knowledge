@@ -1,0 +1,113 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_adminReverseSubscrPurchase;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_adminReverseSubscrPurchase (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  November 26, 2004
+**   Description:  reverses  subscription purchase for user
+**
+**
+** REVISION(S):
+**   Author: Marc Henderson
+**   Date: February 02 2005
+**   Description: fixed bugs - proc obviously never tested prior to this
+**
+**   Author: Mike Stairs
+**   Date: July 7, 2005
+**   Description: pass in card processor
+**
+**   Author: Andy Tran
+**   Date: December, 2007
+**   Description: negate duration - proc obviously never tested prior to this
+**
+**   Author: Yan Liu 
+**   Date: April, 2008
+**   Description: add subscriptioOfferDetailId 
+**
+**   Author: Andy Tran 
+**   Date: April, 2010
+**   Description: added taxCountryId and taxJurisdictionId
+**
+******************************************************************************/
+   at_userId           DECIMAL(12,0),
+   at_xactionId        DECIMAL(12,0),
+   at_refXactionId     DECIMAL(12,0),
+   at_contentId        SMALLINT,
+   at_xactionTypeId    TINYINT,
+   at_cardProcessor    CHAR(1),
+   at_adminUserId      INT,
+   at_adminNote        VARCHAR(255),
+   at_subOfferDetailId SMALLINT
+)
+proc_label:BEGIN
+   
+DECLARE at_dateNow            DATETIME;
+DECLARE at_cost               DECIMAL(10, 2);
+DECLARE at_costUSD            DECIMAL(5, 2);
+DECLARE at_tax                DECIMAL(10, 2);
+DECLARE at_taxUSD             DECIMAL(5, 2);
+DECLARE at_currencyId         TINYINT;
+DECLARE at_offerDetailId      SMALLINT;
+DECLARE at_purchaseTypeId     TINYINT;
+DECLARE at_billingLocationId  SMALLINT;
+DECLARE at_duration           SMALLINT;
+DECLARE at_creditCardId       INT;
+DECLARE at_subscriptionTypeId SMALLINT;
+DECLARE at_durationUnits      CHAR(1);
+DECLARE at_taxCountryId       SMALLINT;
+DECLARE at_taxJurisdictionId  INT;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+SELECT cost, costUSD, tax, taxUSD, creditCardId, currencyId, subscriptionOfferDetailId, billingLocationId, purchaseTypeId, taxCountryId, taxJurisdictionId 
+     INTO at_cost, at_costUSD, at_tax, at_taxUSD, at_creditCardId, at_currencyId, at_offerDetailId, at_billingLocationId, at_purchaseTypeId, at_taxCountryId, at_taxJurisdictionId 
+     FROM Purchase
+    WHERE xactionId = at_refXactionId ;
+
+IF (FOUND_ROWS() > 0) THEN 
+   IF (at_offerDetailId IS NULL) THEN
+      SELECT cost, costUSD, tax, taxUSD 
+                  INTO at_cost, at_costUSD, at_tax, at_taxUSD 
+                  FROM PurchaseSubscriptionDetail 
+                 WHERE xactionId = at_refXactionId 
+                   AND subscriptionOfferDetailId = at_subOfferDetailId ;
+   END IF;
+
+          -- if reversal not passed through card processor, generate new xactionId and set cardProcessor = null 
+   IF (at_xactionId = -1) THEN 
+      SET at_cardProcessor = NULL;
+      CALL wsp_XactionId (at_xactionId);
+      IF !(at_xactionId > 0) THEN
+         LEAVE proc_label;
+      END IF;
+   END IF;
+           
+   SELECT duration, durationUnits, subscriptionTypeId
+            INTO at_duration, at_durationUnits, at_subscriptionTypeId 
+            FROM SubscriptionTransaction
+           WHERE xactionId = at_refXactionId
+             AND subscriptionOfferDetailId = at_subOfferDetailId ;
+
+   IF (at_subscriptionTypeId IS NULL) THEN  
+      SET at_subscriptionTypeId = 1;
+   END IF;
+
+   IF (at_duration IS NULL) THEN 
+      SET at_duration = 1;
+   END IF;
+
+   IF (at_durationUnits IS NULL) THEN 
+      SET at_durationUnits = 'M'; 
+   END IF;
+   
+   CALL wsp_transAdminReverseSubsPurchase (at_userId, at_xactionId, at_refXactionId, at_contentId, at_xactionTypeId, at_cardProcessor, 
+   					   at_adminUserId, at_adminNote, at_subOfferDetailId, at_creditCardId, at_subscriptionTypeId, 
+					   at_duration, at_dateNow, at_durationUnits, at_purchaseTypeId, at_billingLocationId, at_currencyId, 
+					   at_cost, at_costUSD, at_tax, at_taxUSD, at_taxCountryId, at_taxJurisdictionId);
+
+END IF;
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

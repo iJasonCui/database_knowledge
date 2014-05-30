@@ -1,0 +1,53 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getSubPurchaseCost;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getSubPurchaseCost (
+
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Yan Liu
+**   Date:         April 2008
+**   Description:  Retrieve Subscripiton Purchase Cost.
+**
+** REVISION(S): 
+**   Author:     Jeff Yang 
+**   Date:        July 22 2008 
+**   Description: Return tax as well for refund
+**
+******************************************************************************/
+   at_xactionId                 DECIMAL(12, 0),
+   at_subscriptionOfferDetailId SMALLINT
+)
+BEGIN
+   DECLARE at_cost        DECIMAL(10, 2);
+   DECLARE at_tax         DECIMAL(10, 2);
+   DECLARE at_subDetailId SMALLINT;
+
+   IF (SELECT 1 FROM Purchase WHERE xactionId = at_xactionId) IS NOT NULL THEN 
+         SELECT at_cost = cost,
+                at_tax = tax,
+                at_subDetailId = subscriptionOfferDetailId 
+           FROM Purchase
+          WHERE xactionId = at_xactionId;
+
+         IF (at_subDetailId IS NULL) THEN 
+               IF (SELECT 1 FROM PurchaseSubscriptionDetail 
+                          WHERE xactionId = at_xactionId
+                            AND subscriptionOfferDetailId = at_subscriptionOfferDetailId) IS NOT NULL THEN 
+                  SELECT cost, tax INTO at_cost, at_tax 
+                       FROM PurchaseSubscriptionDetail
+                      WHERE xactionId = at_xactionId
+                        AND subscriptionOfferDetailId = at_subscriptionOfferDetailId;
+
+                  SELECT at_cost, at_tax;
+	       END IF;
+         ELSE
+               IF (at_subscriptionOfferDetailId = at_subDetailId) THEN 
+                     SELECT at_cost, at_tax;
+               END IF;
+         END IF;
+   END IF;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

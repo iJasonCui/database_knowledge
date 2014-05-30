@@ -1,0 +1,32 @@
+select name from master..sysdatabases where name not in ('master', 'model', 'tempdb', 'sybsystemdb', 'sybsystemprocs', 'sybsyntax')
+\do
+
+\echo "#=========================================#"
+\echo #1
+\echo "#-----------------------------------------#"
+set nocount on
+use #1
+go
+
+if OBJECT_ID('rs_lastcommit') IS NOT NULL
+begin
+set rowcount 1
+select  
+        
+       PrimaryDBID = origin, 
+       LatencyInSec = datediff(ss, origin_time, dest_commit_time),
+       LastXactOriginTime = convert(varchar(40), origin_time, 109),
+       LastXactDestCommitTime = convert(varchar(40), dest_commit_time, 109)
+from   #1..rs_lastcommit       
+where origin > 0
+order by origin_time desc
+set rowcount 0
+end
+else begin
+print "there is no rs_lastcommit"     
+end
+go
+
+\done
+
+

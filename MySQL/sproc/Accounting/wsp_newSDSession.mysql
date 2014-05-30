@@ -1,0 +1,45 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newSDSession;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newSDSession (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         June 1, 2009
+**   Description:  Record new SD session (consume)
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_userId             DECIMAL(12,0)
+,at_eventId            DECIMAL(12,0)
+,at_xactionTypeId      TINYINT
+,at_contentId          SMALLINT
+)
+BEGIN
+
+DECLARE at_passTypeId         SMALLINT;
+DECLARE at_passes             SMALLINT;
+
+-- set passTypeId
+
+SELECT t.passTypeId INTO at_passTypeId
+  FROM SDBalance b, SDPassType t
+ WHERE b.userId = at_userId
+   AND b.passTypeId = t.passTypeId
+ORDER BY t.ordinal ASC LIMIT 1;
+
+IF at_passTypeId IS NOT NULL THEN 
+   -- set other attributes (for SD consume)
+   SET at_passes = -1;
+
+   CALL wsp_newSDTransaction(at_userId, at_eventId, at_passTypeId, at_passes, at_xactionTypeId, at_contentId);
+
+END IF;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

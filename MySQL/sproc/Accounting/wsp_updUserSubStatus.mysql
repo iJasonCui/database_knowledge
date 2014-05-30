@@ -1,0 +1,42 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_updUserSubStatus;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_updUserSubStatus (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Yan Liu 
+**   Date:  April 18, 2008 
+**   Description:  updates user account subscription info
+**
+**
+** REVISION(S):
+**   Author: 
+**   Date: 
+**   Description: 
+**
+******************************************************************************/
+   at_userId                    DECIMAL(12,0),
+   at_subscriptionOfferDetailId SMALLINT,
+   at_subscriptionStatus        CHAR(1),
+   at_autoRenew                 CHAR(1),
+   at_dateNow                   DATETIME
+)
+     
+BEGIN
+   
+      IF (SELECT 1 FROM UserSubscriptionAccount 
+              WHERE userId = at_userId 
+                AND subscriptionOfferDetailId = at_subscriptionOfferDetailId) IS NOT NULL THEN 
+
+         UPDATE UserSubscriptionAccount
+            SET subscriptionStatus  = at_subscriptionStatus,
+                autoRenew = at_autoRenew,
+                dateModified = at_dateNow
+          WHERE userId = at_userId
+            AND subscriptionOfferDetailId = at_subscriptionOfferDetailId;
+
+      END IF;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

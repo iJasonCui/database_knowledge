@@ -1,0 +1,77 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getMyLists;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getMyLists (
+ at_userId DECIMAL(12,0) ,
+ at_targetUserId DECIMAL (12,0)
+)
+BEGIN
+    SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;
+   
+SELECT union_all_Lists.id, 
+         union_all_Lists.type, 
+         union_all_Lists.dateCreated, 
+         union_all_Lists.smileNoteId1,
+	 union_all_Lists.smileNoteId2
+   FROM (
+ 
+    SELECT targetUserId as id,'H' as type,null as dateCreated,0 as smileNoteId1,0 as smileNoteId2
+    FROM Hotlist
+    WHERE userId = at_userId 
+	AND targetUserId = at_targetUserId 
+
+    UNION ALL
+
+    SELECT userId as id,'SR' as type,dateCreated as dateCreated,smileNoteId1 as smileNoteId1,smileNoteId2 as smileNoteId2
+    FROM Smile -- (INDEX XAK1Smile)
+    WHERE targetUserId = at_userId 
+	AND seen != 'T' 
+	AND userId = at_targetUserId 
+
+    UNION ALL
+
+    SELECT userId as id,'PR' as type,dateCreated as dateCreated,0 as smileNoteId1,0 as smileNoteId2
+    FROM Pass -- ( INDEX XAK1Pass)
+    WHERE targetUserId = at_userId 
+	AND userId = at_targetUserId 
+	AND seen != 'T' 
+       AND IFNULL(messageOnHoldStatus,'A') != 'H'
+
+    UNION ALL
+
+    SELECT targetUserId as id,'SS' as type,dateCreated as dateCreated,smileNoteId1 as smileNoteId1,smileNoteId2 as smileNoteId2
+    FROM Smile
+    WHERE userId = at_userId 
+	AND seen != 'F' 
+	AND targetUserId = at_targetUserId 
+
+    UNION ALL
+
+    SELECT targetUserId as id,'PS' as type,dateCreated as dateCreated,0 as smileNoteId1,0 as smileNoteId2
+    FROM Pass
+    WHERE userId = at_userId 
+	AND targetUserId = at_targetUserId 
+
+    UNION ALL
+
+    SELECT targetUserId as id,'BL' as type,null as dateCreated,0 as smileNoteId1,0 as smileNoteId2
+    FROM Blocklist
+    WHERE userId = at_userId 
+	AND targetUserId = at_targetUserId 
+
+    UNION ALL
+
+    SELECT userId as id,'VM' as type,null as dateCreated,0 as smileNoteId1,0 as smileNoteId2
+    FROM ViewedMe  -- (INDEX XAK1ViewedMe)
+    WHERE targetUserId = at_userId 
+	AND userId = at_targetUserId 
+
+    UNION ALL
+
+    SELECT targetUserId as id,'HR' as type,null as dateCreated,0 as smileNoteId1,0 as smileNoteId2
+    FROM Hotlist
+    WHERE targetUserId = at_userId 
+	AND userId = at_targetUserId
+)  union_all_Lists;
+
+END;;
+DELIMITER ;

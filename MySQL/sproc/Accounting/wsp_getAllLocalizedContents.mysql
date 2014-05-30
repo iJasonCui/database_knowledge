@@ -1,0 +1,34 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAllLocalizedContents;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAllLocalizedContents (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Mike Stairs
+**   Date:  May 21, 2003
+**   Description:  retrieves all package descriptions
+**
+** REVISION(S):
+**   Author:  Yan Liu
+**   Date:  Janunary 28 2009
+**   Description: append dynamicalFlag to result set.
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+)
+
+BEGIN  
+   SELECT localeId,
+          contentId,
+          contentText,
+          dynamicalFlag
+     FROM LocaleContent
+   ORDER BY localeId ;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

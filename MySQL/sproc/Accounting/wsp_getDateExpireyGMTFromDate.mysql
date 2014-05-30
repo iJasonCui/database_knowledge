@@ -1,0 +1,37 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getDateExpireyGMTFromDate;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getDateExpireyGMTFromDate (
+/******************************************************************************
+**
+** CREATION:
+**   Author:  Marc Henderson
+**   Date:  January 21, 2005
+**   Description:  updates user account subscription info - REVISION of wsp_updUserSubscriptionAccount proc by Mike Stairs
+**
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+at_duration              INT,
+at_durationUnitCode      INT,
+at_fromDate              DATETIME
+)
+BEGIN
+     
+DECLARE at_dateExpirey DATETIME;
+IF at_durationUnitCode = 0 THEN -- 0 means minutes
+   SET at_dateExpirey = TIMESTAMPADD(MINUTE, at_duration,at_fromDate);
+ELSEIF at_durationUnitCode = 1 THEN -- 1 means hours
+   SET at_dateExpirey = TIMESTAMPADD(HOUR,at_duration,at_fromDate);
+ELSE -- anything else for the at_durationUnitCode defaults to days
+   SET at_dateExpirey = TIMESTAMPADD(DAY,at_duration,at_fromDate);
+END IF;
+
+SELECT at_dateExpirey;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

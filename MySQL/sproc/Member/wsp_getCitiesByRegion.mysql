@@ -1,0 +1,27 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getCitiesByRegion;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getCitiesByRegion (
+/***********************************************************************
+**
+** CREATION:
+**   Author:  Mirjana Cetojevic
+**   Date:  February 23, 2004
+**   Description:  Returns city list with IVR phone numbers for given region
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+at_region VARCHAR(16)
+)
+BEGIN
+
+     SELECT city, phone, totalusers
+       FROM byphone
+      WHERE region = at_region
+      ORDER BY cityorder ASC ;
+
+END;;
+DELIMITER ;

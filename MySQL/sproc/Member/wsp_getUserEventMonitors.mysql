@@ -1,0 +1,35 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getUserEventMonitors;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getUserEventMonitors (
+/***********************************************************************
+**
+** CREATION:
+**   Author:        Andy Tran
+**   Date:          April, 2006
+**   Description:   Retrieves user event monitor by specific date period
+**
+** REVISION(S):
+**   Author: Sean Dwyer 
+**   Date: Jan 26, 2009
+** Description: added messagOnHoldStatus
+**
+*************************************************************************/
+ at_dateFrom DATETIME
+,at_dateTo   DATETIME
+)
+BEGIN
+    SELECT m.userEventId
+          ,e.userId
+          ,e.eventTypeId
+          ,m.reviewedFlag
+          ,m.adminUserId
+          ,m.dateCreated
+          ,u.messageOnHoldStatus
+      FROM UserEvent e, UserEventMonitor m, user_info u
+     WHERE e.userEventId = m.userEventId
+       AND m.dateCreated >= at_dateFrom
+       AND m.dateCreated <= at_dateTo
+       AND u.user_id=e.userId ;
+    
+END;;
+DELIMITER ;

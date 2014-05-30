@@ -1,0 +1,44 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newBillToMobileResponse;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newBillToMobileResponse (
+
+/*******************************************************************
+**
+** CREATION:
+**   Author:      Andy Tran
+**   Date:        April 2011 
+**   Description: Inserts row into BillToMobileResponse.
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*******************************************************************/
+
+    at_xactionId  DECIMAL(12,0)
+   ,at_response   VARCHAR(1000)
+)
+BEGIN
+
+DECLARE at_dateNow DATETIME;
+
+SET at_dateNow = UTC_TIMESTAMP();
+
+INSERT INTO BillToMobileResponse (
+         xactionId
+        ,response
+        ,dateCreated
+        ,dateModified
+    )
+    VALUES (
+         at_xactionId
+        ,at_response
+        ,at_dateNow
+        ,at_dateNow
+    );
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

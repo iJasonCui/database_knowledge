@@ -1,0 +1,34 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getAccountFlagByUserId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getAccountFlagByUserId (
+ /***********************************************************************
+**
+** CREATION:
+**   Author:  Jeff Yang 
+**   Date:  June 7 2008
+**   Description:  Retrieves Account Flags
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+*************************************************************************/
+
+at_userId DECIMAL(12,0)
+)
+
+BEGIN
+	SELECT
+	userId,
+	reasonContentId,
+	reviewed,
+    adminUserId,
+	dateCreated
+	FROM AccountFlag
+	WHERE userId = at_userId  and reviewed <> 'Y'
+	ORDER BY dateCreated;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

@@ -1,0 +1,14 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getCouponStatus;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getCouponStatus (
+   at_userId DECIMAL(12, 0),
+   at_couponNumber DECIMAL(12, 0)
+)
+BEGIN
+   SELECT status
+   FROM CouponRedemption 
+   WHERE userId = at_userId and couponNumber=at_couponNumber;
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

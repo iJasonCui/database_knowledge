@@ -1,0 +1,29 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_getCitiesByCountryId;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_getCitiesByCountryId (
+/******************************************************************
+**
+** CREATION:
+**   Author: Travis McCauley
+**   Date: May 2004
+**   Description: Selects all qualifying cities for the countryId supplied
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+at_countryId int
+)
+BEGIN
+
+     SELECT City.cityId, jurisdictionId, secondJurisdictionId, cityName, latitudeRad, longitudeRad, tz.legacyName, loc_m
+       FROM City LEFT JOIN Timezone tz on tz.timezoneId = City.timezoneId 
+                 LEFT JOIN Country on City.countryId = Country.countryId 
+       WHERE City.countryId = at_countryId 
+         and Country.countryId = at_countryId
+         and City.population >= Country.minPopulation ;
+
+END;;
+DELIMITER ;

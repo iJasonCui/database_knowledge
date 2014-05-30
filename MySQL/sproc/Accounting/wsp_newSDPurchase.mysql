@@ -1,0 +1,82 @@
+DELIMITER ;;
+DROP PROCEDURE IF EXISTS  wsp_newSDPurchase;
+CREATE DEFINER='root'@'10.10.26.21' PROCEDURE wsp_newSDPurchase (
+/******************************************************************************
+**
+** CREATION:
+**   Author:       Andy Tran
+**   Date:         June 1, 2009
+**   Description:  Purchase SD passes for user
+**
+** REVISION(S):
+**   Author:
+**   Date:
+**   Description:
+**
+******************************************************************************/
+ at_xactionId          DECIMAL(12,0)
+,at_userId             DECIMAL(12,0)
+,at_cardId             INT
+,at_passDetailId       SMALLINT
+,at_passes             SMALLINT
+,at_cost               DECIMAL(10,2)
+,at_tax                DECIMAL(10,2)
+,at_costUSD            DECIMAL(5,2)
+,at_taxUSD             DECIMAL(5,2)
+,at_xactionTypeId      TINYINT
+,at_contentId          SMALLINT
+,at_adminUserId        INT
+,at_paymentNumber      VARCHAR(40)
+,at_cardProcessor      CHAR(1)
+)
+label_this:BEGIN
+
+DECLARE at_dateNow            DATETIME;
+DECLARE at_dateExpiry         DATETIME;
+DECLARE at_purchaseTypeId     TINYINT;
+DECLARE at_billingLocationId  SMALLINT;
+DECLARE at_currencyId         TINYINT;
+DECLARE at_passTypeId         SMALLINT;
+DECLARE at_balance            SMALLINT;
+
+-- stop if xactionId is invalid
+IF at_xactionId <= 0 THEN 
+   LEAVE label_this;
+END IF;
+
+-- get at_dateNow
+SET at_dateNow = UTC_TIMESTAMP();
+
+-- get number of passes by passDetailId
+-- if passes are not passed in
+IF at_passes <= 0 AND at_cost > 0 THEN 
+   SELECT credits INTO at_passes FROM PurchaseOfferDetail WHERE purchaseOfferDetailId = at_passDetailId;
+   IF at_passes <= 0 THEN 
+      LEAVE label_this;
+   END IF;
+END IF;
+
+-- get current balance
+CALL  wsp_getSDBalance(at_userId, at_balance);
+
+-- update new balance
+SET at_balance = at_balance + at_passes;
+
+-- get billingLocationId from userId
+SELECT billingLocationId INTO at_billingLocationId FROM UserAccount WHERE userId = at_userId;
+
+-- get currencyId from billingLocationId
+SELECT currencyId INTO at_currencyId FROM BillingLocation WHERE billingLocationId = at_billingLocationId;
+
+-- set other defaults (for SD purchase)
+SET at_dateExpiry = '2052-12-31 00:00:00';
+SET at_purchaseTypeId = 18;
+SET at_passTypeId = 1;
+
+CALL wsp_transNewSDPurchase (at_xactionId,at_userId,at_cardId,at_passDetailId,at_passes,at_cost,at_tax,at_costUSD,at_taxUSD,at_xactionTypeId,at_contentId,at_adminUserId
+     			    ,at_paymentNumber,at_cardProcessor,at_dateNow,at_dateExpiry,at_purchaseTypeId,at_billingLocationId,at_currencyId,at_passTypeId,at_balance);
+
+
+/* ### DEFNCOPY: END OF DEFINITION */
+END;;
+DELIMITER ;

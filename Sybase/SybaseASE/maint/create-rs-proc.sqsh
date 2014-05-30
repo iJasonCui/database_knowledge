@@ -1,0 +1,386 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]
+then
+   echo "Usage: "${0}" <serverName> <repServer> "
+   exit 1
+else
+   serverName=${1}
+   repServer=${2}
+fi
+
+Password=`cat $HOME/.sybpwd | grep -w ${serverName} | awk '{print $2}'`
+CurrentDate=`date '+%Y%m%d_%H%M%S'`
+LogFile=./output/${0}.${serverName}.${CurrentDate}
+
+date > ${LogFile}
+
+sqsh -Ucron_sa -S${serverName} -P${Password} << EOQ1 >> ${LogFile}
+
+select name from master..sysdatabases where name like "%view"
+
+\do
+   \echo "use #1"
+   use #1
+   go
+   select db_name()
+   go
+   checkpoint
+   go
+
+IF OBJECT_ID('dbo.rs_check_repl_stat') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.rs_check_repl_stat
+    IF OBJECT_ID('dbo.rs_check_repl_stat') IS NOT NULL
+        PRINT '<<< FAILED DROPPING PROCEDURE dbo.rs_check_repl_stat >>>'
+    ELSE
+        PRINT '<<< DROPPED PROCEDURE dbo.rs_check_repl_stat >>>'
+END
+go
+
+/* Create the procedure which checks replicate status */
+create procedure rs_check_repl_stat 
+        @rs_repl_name varchar(255)
+as
+        declare @current_status smallint
+        select @current_status = sysstat
+                from sysobjects
+                where id=object_id(@rs_repl_name)
+        if (@current_status & -32768) = -32768
+                select 1
+        else
+                select 0
+
+go
+IF OBJECT_ID('dbo.rs_check_repl_stat') IS NOT NULL
+    PRINT '<<< CREATED PROCEDURE dbo.rs_check_repl_stat >>>'
+ELSE
+    PRINT '<<< FAILED CREATING PROCEDURE dbo.rs_check_repl_stat >>>'
+go
+EXEC sp_procxmode 'dbo.rs_check_repl_stat','unchained'
+go
+GRANT EXECUTE ON dbo.rs_check_repl_stat TO public
+go
+
+IF OBJECT_ID('dbo.rs_get_lastcommit') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.rs_get_lastcommit
+    IF OBJECT_ID('dbo.rs_get_lastcommit') IS NOT NULL
+        PRINT '<<< FAILED DROPPING PROCEDURE dbo.rs_get_lastcommit >>>'
+    ELSE
+        PRINT '<<< DROPPED PROCEDURE dbo.rs_get_lastcommit >>>'
+END
+go
+
+/* Create the procedure to get the last commit for all origins. */
+create procedure rs_get_lastcommit
+as
+        select origin, origin_qid, secondary_qid
+                from rs_lastcommit
+
+go
+IF OBJECT_ID('dbo.rs_get_lastcommit') IS NOT NULL
+    PRINT '<<< CREATED PROCEDURE dbo.rs_get_lastcommit >>>'
+ELSE
+    PRINT '<<< FAILED CREATING PROCEDURE dbo.rs_get_lastcommit >>>'
+go
+EXEC sp_procxmode 'dbo.rs_get_lastcommit','unchained'
+go
+
+IF OBJECT_ID('dbo.rs_initialize_threads') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.rs_initialize_threads
+    IF OBJECT_ID('dbo.rs_initialize_threads') IS NOT NULL
+        PRINT '<<< FAILED DROPPING PROCEDURE dbo.rs_initialize_threads >>>'
+    ELSE
+        PRINT '<<< DROPPED PROCEDURE dbo.rs_initialize_threads >>>'
+END
+go
+/* Create the procedure to update the table. */
+create procedure rs_initialize_threads
+        @rs_id          int
+as
+        delete from rs_threads where id = @rs_id
+        insert into rs_threads values (@rs_id, 0, "", "", "", "")
+
+go
+IF OBJECT_ID('dbo.rs_initialize_threads') IS NOT NULL
+    PRINT '<<< CREATED PROCEDURE dbo.rs_initialize_threads >>>'
+ELSE
+    PRINT '<<< FAILED CREATING PROCEDURE dbo.rs_initialize_threads >>>'
+go
+EXEC sp_procxmode 'dbo.rs_initialize_threads','unchained'
+go
+GRANT EXECUTE ON dbo.rs_initialize_threads TO public
+go
+
+IF OBJECT_ID('dbo.rs_marker') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.rs_marker
+    IF OBJECT_ID('dbo.rs_marker') IS NOT NULL
+        PRINT '<<< FAILED DROPPING PROCEDURE dbo.rs_marker >>>'
+    ELSE
+        PRINT '<<< DROPPED PROCEDURE dbo.rs_marker >>>'
+END
+go
+
+/* Create the procedure which marks the log when a subscription is created. */
+
+create procedure rs_marker 
+        @rs_api varchar(255)
+as
+        /* Setup the bit that reflects a SQL Server replicated object. */
+        declare @rep_constant   smallint
+        select @rep_constant = -32768
+
+        /* First make sure that this procedure is marked as replicated! */
+        if not exists (select sysstat
+                        from sysobjects
+                        where name = 'rs_marker'
+                                and type = 'P'
+                                and sysstat & @rep_constant != 0)
+        begin
+                print "Have your DBO execute 'sp_setreplicate' on the procedure 'rs_marker'"
+                return(1)
+        end
+
+        /*
+        ** There is nothing else to do in this procedure. It's execution
+        ** should have been logged into the transaction log and picked up
+        ** by the SQL Server LTM.
+        */
+
+go
+IF OBJECT_ID('dbo.rs_marker') IS NOT NULL
+    PRINT '<<< CREATED PROCEDURE dbo.rs_marker >>>'
+ELSE
+    PRINT '<<< FAILED CREATING PROCEDURE dbo.rs_marker >>>'
+go
+EXEC sp_procxmode 'dbo.rs_marker','unchained'
+go
+GRANT EXECUTE ON dbo.rs_marker TO public
+go
+
+IF OBJECT_ID('dbo.rs_ticket') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.rs_ticket
+    IF OBJECT_ID('dbo.rs_ticket') IS NOT NULL
+        PRINT '<<< FAILED DROPPING PROCEDURE dbo.rs_ticket >>>'
+    ELSE
+        PRINT '<<< DROPPED PROCEDURE dbo.rs_ticket >>>'
+END
+go
+
+/*
+** Name: rs_ticket
+**   Form rs_ticket parameter in canonical format and call
+**        rs_marker "rs_ticket 'rs_ticket_param'"
+**
+** Parameter
+**   head1: the first header. Default is "ticket"
+**   head2: the second header. Default is null.
+**   head3: the third header. Default is null.
+**   head4: the last header. Default is null.
+**
+** rs_ticket parameter Canonical Form
+**   rs_ticket_param ::= <section> | <rs_ticket_param>;<section>
+**   section         ::= <tagxxx>=<value>
+**   tag             ::= V | H | PDB | EXEC | B | DIST | DSI | RDB | ...
+**   Version value   ::= integer
+**   Header value    ::= string of varchar(10)
+**   DB value        ::= database name
+**   Byte value      ::= integer
+**   Time value      ::= hh:mm:ss.ddd
+**
+** Note:
+**   1. Don't mark rs_ticket for replication.
+**   2. Headers must be 10 character or less.
+**   3. For more than 4 headers, passing something like
+**        "four;H5=five;H6=six..."
+**   4. Don't pass too many headers. rs_ticket_param must be less 255.
+**   5. Don't put any single or double quotation mark in header.
+**   6. Keep header simple to avoid confusing Repserver parser.
+*/
+create procedure rs_ticket
+@head1 varchar(10) = "ticket",
+@head2 varchar(10) = null,
+@head3 varchar(10) = null,
+@head4 varchar(50) = null
+as
+begin
+set nocount on
+
+declare @cmd    varchar(255),
+        @c_time datetime
+
+select @cmd = "V=1;H1=" + @head1
+if @head2 != null select @cmd = @cmd + ";H2=" + @head2
+if @head3 != null select @cmd = @cmd + ";H3=" + @head3
+if @head4 != null select @cmd = @cmd + ";H4=" + @head4
+
+-- @cmd = "rs_ticket 'V=1;H1=ticket;PDB(name)=hh:mm:ss.ddd'"
+select @c_time = getdate()
+select @cmd = "rs_ticket '" + @cmd + ";PDB(" + db_name() + ")="
+            + convert(varchar(8),@c_time,8) + "." + right("00"
+            + convert(varchar(3),datepart(ms,@c_time)),3) + "'"
+
+-- print "exec rs_marker %1!", @cmd
+exec rs_marker @cmd
+end
+
+go
+IF OBJECT_ID('dbo.rs_ticket') IS NOT NULL
+    PRINT '<<< CREATED PROCEDURE dbo.rs_ticket >>>'
+ELSE
+    PRINT '<<< FAILED CREATING PROCEDURE dbo.rs_ticket >>>'
+go
+EXEC sp_procxmode 'dbo.rs_ticket','unchained'
+go
+GRANT EXECUTE ON dbo.rs_ticket TO public
+go
+
+IF OBJECT_ID('dbo.rs_ticket_report') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.rs_ticket_report
+    IF OBJECT_ID('dbo.rs_ticket_report') IS NOT NULL
+        PRINT '<<< FAILED DROPPING PROCEDURE dbo.rs_ticket_report >>>'
+    ELSE
+        PRINT '<<< DROPPED PROCEDURE dbo.rs_ticket_report >>>'
+END
+go
+
+/*
+** Name: rs_ticket_report
+**   Append PDB timestamp to rs_ticket_param.
+**   DSI calls rs_ticket_report if DSI_RS_TICKET_REPORT in on.
+**
+** Parameter
+**   rs_ticket_param: rs_ticket parameter in canonical form.
+**
+** rs_ticket_param Canonical Form
+**   rs_ticket_param ::= <section> | <rs_ticket_param>;<section>
+**   section         ::= <tagxxx>=<value>
+**   tag             ::= V | H | PDB | EXEC | B | DIST | DSI | RDB | ...
+**   Version value   ::= integer
+**   Header value    ::= string of varchar(10)
+**   DB value        ::= database name
+**   Byte value      ::= integer
+**   Time value      ::= hh:mm:ss.ddd
+**
+** Note:
+**   1. Don't mark rs_ticket_report for replication.
+**   2. DSI calls rs_ticket_report iff DSI_RS_TICKET_REPORT in on.
+**   3. This is an example stored procedure that demonstrates how to
+**      add RDB timestamp to rs_ticket_param.
+**   4. One should customize this function for parsing and inserting
+**      timestamp to tables.
+*/
+create procedure rs_ticket_report
+@rs_ticket_param varchar(255)
+as
+begin
+set nocount on
+
+declare @n_param varchar(255),
+        @c_time  datetime
+
+-- @n_param = "@rs_ticket_param;RDB(name)=hh:mm:ss.ddd"
+select @c_time = getdate()
+select @n_param = @rs_ticket_param + ";RDB(" + db_name() + ")="
+                + convert(varchar(8), @c_time, 8) + "." + right("00"
+                + convert(varchar(3),datepart(ms,@c_time)) ,3)
+
+-- print @n_param
+end
+
+go
+IF OBJECT_ID('dbo.rs_ticket_report') IS NOT NULL
+    PRINT '<<< CREATED PROCEDURE dbo.rs_ticket_report >>>'
+ELSE
+    PRINT '<<< FAILED CREATING PROCEDURE dbo.rs_ticket_report >>>'
+go
+EXEC sp_procxmode 'dbo.rs_ticket_report','unchained'
+go
+GRANT EXECUTE ON dbo.rs_ticket_report TO public
+go
+
+IF OBJECT_ID('dbo.rs_update_lastcommit') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.rs_update_lastcommit
+    IF OBJECT_ID('dbo.rs_update_lastcommit') IS NOT NULL
+        PRINT '<<< FAILED DROPPING PROCEDURE dbo.rs_update_lastcommit >>>'
+    ELSE
+        PRINT '<<< DROPPED PROCEDURE dbo.rs_update_lastcommit >>>'
+END
+go
+/* Create the procedure to update the table. */
+create procedure rs_update_lastcommit
+        @origin         int,
+        @origin_qid     binary(36),
+        @secondary_qid  binary(36),
+        @origin_time    datetime
+as
+        update rs_lastcommit
+                set origin_qid = @origin_qid, secondary_qid = @secondary_qid,
+                        origin_time = @origin_time,
+                        dest_commit_time = getdate()
+                where origin = @origin
+        if (@@rowcount = 0)
+        begin
+                insert rs_lastcommit (origin, origin_qid, secondary_qid,
+                                origin_time, dest_commit_time,
+                                pad1, pad2, pad3, pad4, pad5, pad6, pad7, pad8)
+                        values (@origin, @origin_qid, @secondary_qid,
+                                @origin_time, getdate(),
+                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
+        end
+
+go
+IF OBJECT_ID('dbo.rs_update_lastcommit') IS NOT NULL
+    PRINT '<<< CREATED PROCEDURE dbo.rs_update_lastcommit >>>'
+ELSE
+    PRINT '<<< FAILED CREATING PROCEDURE dbo.rs_update_lastcommit >>>'
+go
+EXEC sp_procxmode 'dbo.rs_update_lastcommit','unchained'
+go
+GRANT EXECUTE ON dbo.rs_update_lastcommit TO public
+go
+
+IF OBJECT_ID('dbo.rs_update_threads') IS NOT NULL
+BEGIN
+    DROP PROCEDURE dbo.rs_update_threads
+    IF OBJECT_ID('dbo.rs_update_threads') IS NOT NULL
+        PRINT '<<< FAILED DROPPING PROCEDURE dbo.rs_update_threads >>>'
+    ELSE
+        PRINT '<<< DROPPED PROCEDURE dbo.rs_update_threads >>>'
+END
+go
+/* Create the procedure to update the table. */
+create procedure rs_update_threads
+        @rs_id          int,
+        @rs_seq         int
+as
+        update rs_threads set seq = @rs_seq where id = @rs_id
+
+go
+IF OBJECT_ID('dbo.rs_update_threads') IS NOT NULL
+    PRINT '<<< CREATED PROCEDURE dbo.rs_update_threads >>>'
+ELSE
+    PRINT '<<< FAILED CREATING PROCEDURE dbo.rs_update_threads >>>'
+go
+EXEC sp_procxmode 'dbo.rs_update_threads','unchained'
+go
+GRANT EXECUTE ON dbo.rs_update_threads TO public
+go
+
+\done
+
+
+go
+
+EOQ1
+
+
+exit 0
+
+

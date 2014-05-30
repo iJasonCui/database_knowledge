@@ -1,0 +1,9 @@
+Msg 911, Level 11, State 2:
+Server 'opsdb1p', Line 1:
+Attempt to locate entry in sysdatabases for database 'MonitorJob' by name failed - no entry found under that name. Make sure that name is entered properly.
+Msg 911, Level 11, State 2:
+Server 'opsdb1p', Line 1:
+Attempt to locate entry in sysdatabases for database 'MonitorJob' by name failed - no entry found under that name. Make sure that name is entered properly.
+Msg 2812, Level 16, State 5:
+Server 'opsdb1p', Line 1:
+Stored procedure 'sp_whoo' not found. Specify owner.objectname or use sp_help to check whether the object exists (sp_help may produce lots of output).

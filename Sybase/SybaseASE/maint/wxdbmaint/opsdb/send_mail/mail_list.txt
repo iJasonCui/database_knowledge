@@ -1,0 +1,52 @@
+#
+# Lavalife Inc.
+# Ihar Kazhamiaka
+# May 2004
+#
+# mail_list.txt
+#
+# This file is used by the script 'send_mail.sh' as a default mail list.
+# There are three columns (fields, words) in its structure:
+# 	1 - name of a task, usually a script name;
+# 	2 - message type, used to differentiate messages;
+#	3 - e-mail address of a recipient.
+# The fileds may be delimited by tab or space.
+#
+# Both 'task' and 'message type' are passed as parameters to send_mail.sh
+# to determine the list of corresponding mail recipients.
+#
+check_ase_log.sh		failure		databasemanagementteam@lavalife.com
+check_ase_log.sh		notification	databasemanagementteam@lavalife.com
+run_sql.sh			failure 	databasemanagementteam@lavalife.com
+run_sql.sh			success 	databasemanagementteam@lavalife.com
+run_proc.sh			failure 	databasemanagementteam@lavalife.com
+run_proc.sh			success 	databasemanagementteam@lavalife.com
+dump_copy_load_run.sh		success		databasemanagementteam@lavalife.com
+dump_copy_load_run.sh		failure		databasemanagementteam@lavalife.com
+
+cron-load-TrackingLoad.sh	failure         databasemanagementteam@lavalife.com
+cron-load-TrackingLoad.sh	failure         ana.radu@lavalife.com
+cron-load-TrackingLoad.sh	success         ana.radu@lavalife.com
+
+arch_Mobile.sh			success		databasemanagementteam@lavalife.com
+arch_Mobile.sh			failure		databasemanagementteam@lavalife.com
+arch_Mobile.sh			success		anthony.mcnamee@lavalife.com
+arch_Mobile.sh			failure		anthony.mcnamee@lavalife.com
+
+# next line is for Ihar Kazhamiaka's cell phone
+arch_Profile.sh			failure		databasemanagementteam@lavalife.com
+arch_Profile.sh			failure		anthony.mcnamee@lavalife.com
+# next line is for Anthony McNamee's cell phone
+arch_Profile.sh			failure		6472262595@txt.bellmobility.ca
+
+arch_Jump.sh			failure		databasemanagementteam@lavalife.com
+
+arch_Session.sh			failure		databasemanagementteam@lavalife.com
+
+reorg_task			failure 	databasemanagementteam@lavalife.com
+reorg_task			success 	databasemanagementteam@lavalife.com
+
+sp_who 				success		databasemanagementteam@lavalife.com
+dumpdb_MonitorBackupP		success		databasemanagementteam@lavalife.com
+example.sh			success		databasemanagementteam@lavalife.com
+example.sh			failure		databasemanagementteam@lavalife.com

@@ -1,0 +1,164 @@
+===============================================================
+BRP 1st level replication set up
+===============================================================
+
+step 1:
+
+[NAMING CONVENTION]
+
+1: [table rep def] prad_a_profile_dating which is {DB short name}_{full table name}. "prad" means "Profile_ad".
+2: [db rep def]    Profile_ad  which is {full_db_name}
+3: [db sub]        w151dbp03_Profile_ad which is {full_server_name}_{full_db_name}
+4: [table sub]     03prad_a_profile_dating  {short_server_name}{DB short name}_{full table name}
+
+step 1: create table level replication definition (already existed)
+
+[rep2p]://{1}# create replication definition 
+
+step 2: modify copy_load.sh
+
+step 3: [w151dbp03]: create database Profile_ad_view with same size as the primary db with dbo use only
+
+step 4:
+[w151dbp03]: create database Profile_ad_mini with smaller size (512MB data and 512MB log) than the primary db with dbo use only
+             
+step 5: 
+rs_init to add db connection (regular)
+[repserver@webtheta:~/REP-12_6/install]$ /opt/etc/repserver126/REP-12_6/install/rs_init -r /opt/etc/repserver126/REP-12_6/init/logs/resource.Profile_ad_view.msa
+
+USE Profile_ar_view
+go
+IF USER_ID('rep5p_maint_user') IS NOT NULL
+BEGIN
+    EXEC sp_dropuser 'rep5p_maint_user'
+    IF USER_ID('rep5p_maint_user') IS NOT NULL
+        PRINT '<<< FAILED DROPPING USER rep5p_maint_user >>>'
+    ELSE
+        PRINT '<<< DROPPED USER rep5p_maint_user >>>'
+END
+go
+
+EXEC sp_addalias 'rep5p_maint_user','dbo'
+
+step 6: comment out the cron of dump tran on Profile_ai and then dump database Profile_ai on webdb28p and scp to w151dbp03 without loading
+
+step 7: insert one row into reptest
+
+step 8: suspend log transfer from webdb29p.Profile_ai and wait until rep system quisce
+
+step 9: suspend connection to webdb28p.Profile_ai
+
+step 10: #### creating table rep def
+
+define subscription "03prai_Blocklist" for "5pai_Blocklist" with replicate at "w151dbp03"."Profile_ai_view"
+define subscription "03prai_Hotlist" for "5pai_Hotlist" with replicate at "w151dbp03"."Profile_ai_view"
+define subscription "03prai_Pass" for "5pai_Pass" with replicate at "w151dbp03"."Profile_ai_view"
+define subscription "03prai_RepTest" for "5pai_RepTest" with replicate at "w151dbp03"."Profile_ai_view"
+define subscription "03prai_SavedSearch" for "5pai_SavedSearch" with replicate at "w151dbp03"."Profile_ai_view"
+define subscription "03prai_Smile" for "5pai_Smile" with replicate at "w151dbp03"."Profile_ai_view"
+define subscription "03prai_a_backgreeting_intimate" for "5pai_a_backgreeting_intimate" with replicate at "w151dbp03"."Profile_ai_view"
+define subscription "03prai_a_intimate" for "5pai_a_intimate" with replicate at "w151dbp03"."Profile_ai_view"
+define subscription "03prai_a_mompictures_intimate" for "5pai_a_mompictures_intimate" with replicate at "w151dbp03"."Profile_ai_view"
+define subscription "03prai_a_profile_intimate" for "5pai_a_profile_intimate" with replicate at "w151dbp03"."Profile_ai_view"
+define subscription "03prai_ProfileMedia" for "5pai_ProfileMedia" with replicate at "w151dbp03"."Profile_ai_view"
+
+#### check /activate (take a while) / validate subscription
+
+step 11: suspend connection to w151dbp03.Profile_ad_view 
+
+step 12: resume log transfer from webdb29p.Profile_ai
+
+step 13: load db into w151dbp03..Profile_ai_view
+
+step 14: dump last tran on warm standby and scp into w151dbp03 and load into w151dbp03..Profile_ai_view (online database)
+
+step 15: resume connection to webdb28p.Profile_ai (check crontab dump tran on webdb28p)
+
+step 16: fix rep_maint_user on w151dbp03..Profile_ai_view and then 
+
+step 17: [rep5p]: resume connection to w151dbp03.Profile_ai_view and then TEST IT
+
+step 18: once pass the test
+
+step 19: suspend connection to msa dbs --suspend connection to w151dbp03.Profile_ad_view
+
+step 20: rename the msa db and create a mini db same as the previous name .
+
+USE master
+go
+EXEC sp_dboption 'Profile_ar_view','single user',true
+go
+USE Profile_ar_view
+go
+CHECKPOINT
+go
+EXEC sp_renamedb 'Profile_ar_view','Profile_ar'
+go
+USE master
+go
+EXEC sp_dboption 'Profile_ar','single user',false
+go
+USE Profile_ar
+go
+CHECKPOINT
+go
+
+
+step 21: migrate rs tables and procs into mini db using db artisan
+
+step 22: create view on mini db linking to msa db 
+
+select "create view " + name + " as select * from Profile_ad.." + name 
+from sysobjects where type= 'U' and name not like "rs%"
+
+step 23: add rep mainty user into mini db -- EXEC sp_addalias 'rep5p_maint_user','dbo'
+
+step 24: resume connection to w151dbp03.Profile_ad_view and TEST IT
+
+step 25: clean up rs tables and procs on msa db (the big one) and TEST IT
+
+USE Profile_ad
+go
+DROP TABLE dbo.rs_dbversion
+go
+DROP TABLE dbo.rs_lastcommit
+go
+DROP TABLE dbo.rs_threads
+go
+
+USE Profile_ad
+go
+DROP PROCEDURE dbo.rs_check_repl_stat
+DROP PROCEDURE dbo.rs_get_lastcommit
+DROP PROCEDURE dbo.rs_initialize_threads
+DROP PROCEDURE dbo.rs_marker
+DROP PROCEDURE dbo.rs_ticket_report
+DROP PROCEDURE dbo.rs_update_lastcommit
+DROP PROCEDURE dbo.rs_update_threads
+go
+
+
+=======================================================
+manually add rep agent instead of using rs_init
+=======================================================
+step 1:
+[webgamma: rep2p_RSSD] exec sp_config_rep_agent rep2p_RSSD, 'enable', 'rep2p', 'rep2p_ra', 'have2go'
+
+step 2:
+[rep2p] alter connection to webgamma.rep2p_RSSD set log transfer on
+
+==========================================================
+drop rep def
+==========================================================
+[webgamma: rep2p_RSSD] select "drop replication definition " +  objname from rs_objects where objname not like "rs%"
+
+=========================================================
+drop subscription
+=========================================================
+[webgamma: rep2p_RSSD] 
+SELECT 'drop subscription "' + s.subname + '" for "' + o.objname + '" with replicate at "' + d.dsname + '"."' + d.dbname + '" without purge' 
+FROM   rep3d_RSSD..rs_subscriptions s, rep3d_RSSD..rs_databases d, rep3d_RSSD..rs_objects o
+WHERE  s.objid = o.objid and s.dbid = d.dbid
+
+==========================================================
+
