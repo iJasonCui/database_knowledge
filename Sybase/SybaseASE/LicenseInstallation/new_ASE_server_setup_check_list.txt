@@ -255,7 +255,10 @@ CREATE TABLE dbo.sysloginsSource
     procid      int        null
 )
 */
+
+
 --ASE 15
+/*
 CREATE TABLE dbo.sysloginsSource
 (
     suid          int            NOT NULL,
@@ -291,6 +294,67 @@ CREATE TABLE dbo.sysloginrolesSource
     srid   smallint NOT NULL,
     status smallint NOT NULL
 )
+*/
+
+--ASE 15.7
+CREATE TABLE dbo.sysloginsSource
+(
+    suid          int            NOT NULL,
+    status        smallint       NOT NULL,
+    accdate       datetime       NOT NULL,
+    totcpu        int            NOT NULL,
+    totio         int            NOT NULL,
+    spacelimit    int            NOT NULL,
+    timelimit     int            NOT NULL,
+    resultlimit   int            NOT NULL,
+    dbname        varchar(30)    NULL,
+    name          varchar(30)    NOT NULL,
+    password      varbinary(128) NULL,
+    language      varchar(30)    NULL,
+    pwdate        datetime       NULL,
+    audflags      int            NULL,
+    fullname      varchar(30)    NULL,
+    srvname       varchar(30)    NULL,
+    logincount    smallint       NULL,
+    procid        int            NULL,
+    lastlogindate datetime       NULL,
+    crdate        datetime       NULL,
+    locksuid      int            NULL,
+    lockreason    int            NULL,
+    lockdate      datetime       NULL,
+	lpid          int            NULL,
+    crsuid        int            NULL
+)
+LOCK DATAROWS
+go
+
+CREATE TABLE dbo.sysloginrolesSource
+(
+    suid   smallint NOT NULL,
+    srid   smallint NOT NULL,
+    status smallint NOT NULL,
+	predid int      NULL
+)
+go
+
+use tempdb
+go
+
+CREATE TABLE dbo.syssrvrolesSource
+(
+    srid       int            NOT NULL,
+    name       varchar(30)    NOT NULL,
+    password   varbinary(128) NULL,
+    pwdate     datetime       NULL,
+    status     smallint       NULL,
+    logincount smallint       NULL,
+    locksuid   int            NULL,
+    lockreason int            NULL,
+    lockdate   datetime       NULL
+)
+LOCK DATAROWS
+go
+
 --======================
 --source
 --=======================
@@ -300,7 +364,8 @@ select  * from  master..syslogins where suid > = 3
 insert tempdb..sysloginrolesSource
 select * from  master..sysloginroles where suid > = 3
 
---generate the scripts from DB artisan
+insert tempdb..syssrvrolesSource
+SELECT * from master..syssrvroles where srid >= 30
 
 --==================
 --dest
@@ -311,6 +376,27 @@ select * from tempdb..sysloginsSource where suid > = 3
 insert master..sysloginroles
 select * from tempdb..sysloginrolesSource where suid > = 3
 
+insert master..syssrvroles
+SELECT * from tempdb..syssrvrolesSource where srid >= 30
+
+select * from master..syssrvroles
+
+--delete from master..syssrvroles where srid >= 30
+/*
+-- 
+-- TABLE INSERT STATEMENTS
+-- 
+INSERT INTO dbo.syssrvrolesSource ( srid, name, password, pwdate, status, logincount, locksuid, lockreason, lockdate ) 
+		 VALUES ( 32, 'qa_read_only', 0x8D058E5593E77855A0577EEF47AA8F50509779B2F6AD84EA84C1D58711D3, '01/24/2011 05:08:37.270 PM', 0, 0, NULL, NULL, NULL ) 
+go
+INSERT INTO dbo.syssrvrolesSource ( srid, name, password, pwdate, status, logincount, locksuid, lockreason, lockdate ) 
+		 VALUES ( 33, 'qtrade_balancer', 0xC007B85432EC2803A2B9DB2BE057A4003441EDF8EDBAAA4E2487C68C5739DB5A531635DB17747DDD15FF, '12/10/2012 12:32:22.770 PM', 0, 0, NULL, NULL, NULL ) 
+go
+INSERT INTO dbo.syssrvrolesSource ( srid, name, password, pwdate, status, logincount, locksuid, lockreason, lockdate ) 
+		 VALUES ( 34, 'sa_serverprivs_role', NULL, NULL, NULL, NULL, NULL, NULL, NULL ) 
+go
+
+*/
 select * from  master..sysloginroles where suid > = 3 and suid < 23
 --delete from  master..sysloginroles where suid > = 3 and suid < 23
 --delete from  master..syslogins where suid > = 3
