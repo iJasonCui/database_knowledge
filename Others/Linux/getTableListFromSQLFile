@@ -1,0 +1,2 @@
+ # this command will get the list of table used in the sql file
+ cat tmpQATestDataWADE.sql | sed 's/ /\n/g' | sed '/^$/d' | sed 's/)//g' |  grep "CRM.." | sort -u > temptable
