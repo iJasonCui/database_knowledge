@@ -1,2 +1,5 @@
  # this command will get the list of table used in the sql file
+ # simply use sed to replace all spaces with newlines, strip out the empty lines (again with sed), 
+ # then sort with the -u (uniquify) flag to remove duplicates, as in this example:
+
  cat tmpQATestDataWADE.sql | sed 's/ /\n/g' | sed '/^$/d' | sed 's/)//g' |  grep "CRM.." | sort -u > temptable
