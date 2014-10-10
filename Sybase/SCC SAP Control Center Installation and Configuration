@@ -1,0 +1,31 @@
+SCC(SAP Control Center ) Installation and Configuration
+
+Created by Jason Cui, last modified on Jun 17, 2014 
+
+1. Download SCC (SAP Control Center)
+   Go to SAP Support Portal (https://websmp203.sap-ag.de/sybase/support)
+   Login as yourself 
+   The following steps may change due to the renovation of SAP support portal
+   Click the link "software downloads and licenses key"
+   And then click the tag of “software download”
+   By default, it will navigate to “Installations and Upgrades” -> A-Z Index -> “A” -> “SAP Adaptive Server Enterprise”  
+   and then pick “ASE 16.0” and “Installation” (and then any platform you have licensed)
+   SCC 3.3 is the version that SAP recommended by June 2014.
+   select the one you want to download and add it into "the download basket"
+   Go to "my download basket" and double click the file name, and then it will download the file into your local computer
+
+2. Install SCC software (SAP Control Center)
+   Go to your local download directory
+   unzip the downloaded file
+   go to the sub-directory that SCC has been extracted into
+   run "setup" as the "ADMINISTRATOR".
+   follow the GUI of SCC installation step by step.
+
+3. Start SCC server on Windows
+   start "scc" server as a windows service
+
+4. How to use SCC
+   open a browser such as Google Chrome, Firefox or Internet Explorer
+   enter the URL "https://localhost:8283/scc/#"
+   Login as "sccadmin" with the password you have setup
+   

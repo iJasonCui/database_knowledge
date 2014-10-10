@@ -52,50 +52,9 @@ go
 -- TABLE INSERT STATEMENTS
 --
 INSERT INTO dbo.SQLServerProfile ( SQLServerId, SQLServerName, HostName, PortNumber ) 
-		 VALUES ( 20, 'webdb20p', 'webdb20p', 4100 ) 
+		 VALUES ( 20, '[SERVER_NAME1]', '[SERVER_NAME1]', 4100 ) 
 go
 INSERT INTO dbo.SQLServerProfile ( SQLServerId, SQLServerName, HostName, PortNumber ) 
-		 VALUES ( 21, 'webdb21p', 'webdb21p', 4100 ) 
+		 VALUES ( 21, '[SERVER_NAME2]', '[SERVER_NAME2]', 4100 ) 
 go
-INSERT INTO dbo.SQLServerProfile ( SQLServerId, SQLServerName, HostName, PortNumber ) 
-		 VALUES ( 22, 'webdb22p', 'webdb22p', 4100 ) 
-go
-INSERT INTO dbo.SQLServerProfile ( SQLServerId, SQLServerName, HostName, PortNumber ) 
-		 VALUES ( 23, 'webdb23p', 'webdb23p', 4100 ) 
-go
-INSERT INTO dbo.SQLServerProfile ( SQLServerId, SQLServerName, HostName, PortNumber ) 
-		 VALUES ( 24, 'webdb24p', 'webdb24p', 4100 ) 
-go
-INSERT INTO dbo.SQLServerProfile ( SQLServerId, SQLServerName, HostName, PortNumber ) 
-		 VALUES ( 25, 'webdb25p', 'webdb25p', 4100 ) 
-go
-INSERT INTO dbo.SQLServerProfile ( SQLServerId, SQLServerName, HostName, PortNumber ) 
-		 VALUES ( 27, 'webdb27p', 'webdb27p', 4100 ) 
-go
-INSERT INTO dbo.SQLServerProfile ( SQLServerId, SQLServerName, HostName, PortNumber ) 
-		 VALUES ( 28, 'webdb28p', 'webdb28p', 4100 ) 
-go
-INSERT INTO dbo.SQLServerProfile ( SQLServerId, SQLServerName, HostName, PortNumber ) 
-		 VALUES ( 29, 'webdb29p', 'webdb29p', 4100 ) 
-go
-INSERT INTO dbo.SQLServerProfile ( SQLServerId, SQLServerName, HostName, PortNumber ) 
-		 VALUES ( 30, 'webdb30p', 'webdb30p', 4100 ) 
-go
-INSERT INTO dbo.SQLServerProfile ( SQLServerId, SQLServerName, HostName, PortNumber ) 
-		 VALUES ( 31, 'webdb31p', 'webdb31p', 4100 ) 
-go
-INSERT INTO dbo.SQLServerProfile ( SQLServerId, SQLServerName, HostName, PortNumber ) 
-		 VALUES ( 1001, 'webdb0g', 'webdb0g', 4100 ) 
-go
-INSERT INTO dbo.SQLServerProfile ( SQLServerId, SQLServerName, HostName, PortNumber ) 
-		 VALUES ( 1002, 'webdb0t', 'webdb0g', 7200 ) 
-go
-INSERT INTO dbo.SQLServerProfile ( SQLServerId, SQLServerName, HostName, PortNumber ) 
-		 VALUES ( 1003, 'webdb1g', 'webdb1g', 4100 ) 
-go
-INSERT INTO dbo.SQLServerProfile ( SQLServerId, SQLServerName, HostName, PortNumber ) 
-		 VALUES ( 1004, 'webdb1d', 'webdb1g', 7100 ) 
-go
-INSERT INTO dbo.SQLServerProfile ( SQLServerId, SQLServerName, HostName, PortNumber ) 
-		 VALUES ( 1005, 'webdb0r', 'webdb0r', 4100 ) 
-go
+

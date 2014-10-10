@@ -1,0 +1,269 @@
+Use Guideline For Shell Scripts
+
+Format and Documentation
+Header
+Trap Section
+Environment Variable
+Optionional - Get Database Connection Info and Define Variables
+ISQL Switches
+Optionional - Define Function
+Optionional - Main CodeLine
+Optionional - Email Notification
+Mandatory - Proper Exit Code
+Template
+
+Header
+Enter the shell that will be used (bash or sh)
+Follow the shell with documentation of the script and usage history
+#!/bin/bash
+#==================================================================================================
+# ScriptName  : Enter the name of the script here
+#
+# Description : Description of the purpose of the script and any useful information
+#
+# Revision    : YYYY-MM-DD      User        Description
+#               ==========      =======     ======================================================
+# Section is self explanatory. This section maintains a history and description of any changes done
+# in the script, by whom and date changed.
+#
+#==================================================================================================
+ 
+Trap Section
+We use a lot of temp files to maintain intermediary data and track logs/statuses of scripts. In order not to leave temporary files hanging around a trap is set at the start of the script
+ 
+trap 'rm /tmp/*.$$ 1>/dev/null 2>&1' EXIT INT QUIT KILL TERM
+Environment Variable
+Always source environment variable to have a consistent environment when running scripts even if the script does not go to database
+#--------------------------------------------------------
+# Source Environment Variable
+#--------------------------------------------------------
+. ${HOME}/.bash_profile
+ 
+Optionional - Get Database Connection Info and Define Variables
+If the script is going to database we the name of the user and fetch password from password file
+SQLUSR=database_user
+PASSWD=`cat passwordfile | grep -w ${SERVER_NAME} | grep -w ${SQLUSR} | awk '{print $3}'`
+MAIL_LIST="${SYBMAINT}/send_mail/mail_list.txt"
+MAIL_SCRIPT="${SYBMAINT}/send_mail/send_mail.sh"
+RUN_DATE=`date +%Y%m%d%H%M`
+MAIL_FILE="$0.mail"
+MAIL_FLAG=1
+ERROR_CODE=0
+MAIL_LIST - contains configuration file with the email recipients that should be notified if the script is successful or failed
+MAIL_SCRIPT - Location of the script that sends notification
+MAIL_FILE - Usually the name of the script appended by .mail
+MAIL_FLAG - 1 enable notification 0 disable
+ERROR_CODE - used for tracking the status of the script for errors.
+ 
+ISQL Switches
+isql -U${SQLUSR}  -P${PASSWD} -S${SERVER_NAME}  -w300 -Q -X --conceal
+Switches
+Description
+-w	Defines the screen width for isql output
+-Q	Switch that Enables the HAFAILOVER property. This means that the connection will failover in the event the instance it runs on initiates failover
+-X	Initiates the login connection to the server with client-side password encryption
+--conceal	
+Obfuscates input in an ISQL session. The optionalwildcard will be used as a prompt. This means that if a user does a ps on the isql process
+the password will not be revealed even if it was typed in the command
+sybasease@sq5vpldb001:/home/sybasease/scripts/maint>$ ps -ef |grep isql
+503       2566 26101  0 09:44 pts/5    00:00:00 isql -Usa -Sprod_support -? --conceal
+
+Optionional - Define Function
+ 
+#--------------------------------------------------------
+# Description of function
+#--------------------------------------------------------
+function_name()
+{
+isql -U${SQLUSR}  -P${PASSWD} -S${SERVER_NAME}  -w300 -Q -X --conceal << EOF > /tmp/sql01.$$ 2>&1
+select getdate()
+go
+ 
+exit
+EOF
+## Check if ISQL was successful
+##
+if [ $? = 0 ]; then
+   egrep -w "error|ERROR|failed|FAILED|Msg|Server" /tmp/sql01.$$ >/tmp/err01.$$
+   if [ -s /tmp/err01.$$ ]; then
+      echo " "
+      echo "ERROR:  SQL errors detected in ISQL output from function function_name"
+      return 1
+   else
+      return 0
+   fi
+else
+   echo " "
+   echo "ERROR:  Unable to ISQL into server ${SERVER_NAME} from function function_name"
+   return 1
+fi
+}
+ 
+Optionional - Main CodeLine
+ 
+########################
+##     MAIN           ##
+########################
+echo "---------------------------------------------------------------"  > ${MAIL_FILE}
+echo "# STEP 1 - Execute Function to xxxxxxxxxxxxxxxxxxx             "  >> ${MAIL_FILE}
+echo "---------------------------------------------------------------" >> ${MAIL_FILE}
+echo "***************************************************************" >> ${MAIL_FILE}
+echo "* SERVER IDENTIFICATION : ${SERVER_NAME}                       " >> ${MAIL_FILE}
+echo "***************************************************************" >> ${MAIL_FILE}
+function_name # function call
+RC=$?
+if [ $RC != 0 ]; then
+    echo "Error Running Function to xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx "  >> ${MAIL_FILE}
+    ERROR_CODE=$RC
+    cat /tmp/sql01.$$                                                  >> ${MAIL_FILE}
+else
+    DATE_TIME=`date`
+    echo "Task successfully completed       "                          >> ${MAIL_FILE}
+    echo "******************************************************"      >> ${MAIL_FILE}
+    cat /tmp/sql01.$$  >> ${MAIL_FILE}
+    echo "******************************************************"      >> ${MAIL_FILE}
+    ERROR_CODE=0
+fi
+ 
+Optionional - Email Notification
+ 
+echo "---------------------------------------------------------------" >> ${MAIL_FILE}
+echo "# Step 2 - Write Email Message                                 " >> ${MAIL_FILE}
+echo "---------------------------------------------------------------" >> ${MAIL_FILE}
+echo "===============================================================" >> ${MAIL_FILE}
+echo ''                                                                >> ${MAIL_FILE}
+if [ ${ERROR_CODE} -eq 0 ]; then
+    echo "$0 succeeded at `date`."                                     >> ${MAIL_FILE}
+else
+    echo "$0 failed at `date`."                                        >> ${MAIL_FILE}
+fi
+# compose the message type
+if [ ${ERROR_CODE} -eq 0 ]; then
+        MESSAGE_TYPE='success'
+else
+        MESSAGE_TYPE='failure'
+fi
+# send mail
+if [ \( \( ${ERROR_CODE} -ne 0 \) -a \( ${MAIL_FLAG} -eq 0 \) \) -o \( ${MAIL_FLAG} -gt 0 \) ]
+then
+        # ... invoke the mail script
+        ${MAIL_SCRIPT} ${MAIL_FILE} $0 ${MESSAGE_TYPE} ${MAIL_LIST}
+        MAIL_ERROR=$?
+fi
+Mandatory - Proper Exit Code
+exit ${ERROR_CODE}
+ 
+Template
+ 
+#!/bin/bash
+#==================================================================================================
+# ScriptName  : Enter the name of the script here
+#
+# Description : Description of the purpose of the script and any useful information
+#
+# Revision    : YYYY-MM-DD      User        Description
+#               ==========      =======     ======================================================
+# Section is self explanatory. This section maintains a history and description of any changes done
+# in the script, by whom and date changed.
+#
+#==================================================================================================
+trap 'rm /tmp/*.$$ 1>/dev/null 2>&1' EXIT INT QUIT KILL TERM
+ 
+ 
+#--------------------------------------------------------
+# Source Environment Variable
+#--------------------------------------------------------
+. ${HOME}/.bash_profile
+ 
+ 
+SQLUSR=database_user
+PASSWD=`cat passwordfile | grep -w ${SERVER_NAME} | grep -w ${SQLUSR} | awk '{print $3}'`
+MAIL_LIST="${SYBMAINT}/send_mail/mail_list.txt"
+MAIL_SCRIPT="${SYBMAINT}/send_mail/send_mail.sh"
+RUN_DATE=`date +%Y%m%d%H%M`
+MAIL_FILE="$0.mail"
+MAIL_FLAG=1
+ERROR_CODE=0
+ 
+ 
+#--------------------------------------------------------
+# Description of function
+#--------------------------------------------------------
+function_name()
+{
+isql -U${SQLUSR}  -P${PASSWD} -S${SERVER_NAME}  -w300 -Q -X --conceal << EOF > /tmp/sql01.$$ 2>&1
+select getdate()
+go
+ 
+exit
+EOF
+## Check if ISQL was successful
+##
+if [ $? = 0 ]; then
+   egrep -w "error|ERROR|failed|FAILED|Msg|Server" /tmp/sql01.$$ >/tmp/err01.$$
+   if [ -s /tmp/err01.$$ ]; then
+      echo " "
+      echo "ERROR:  SQL errors detected in ISQL output from function function_name"
+      return 1
+   else
+      return 0
+   fi
+else
+   echo " "
+   echo "ERROR:  Unable to ISQL into server ${SERVER_NAME} from function function_name"
+   return 1
+fi
+}
+ 
+ 
+########################
+##     MAIN           ##
+########################
+echo "---------------------------------------------------------------"  > ${MAIL_FILE}
+echo "# STEP 1 - Execute Function to xxxxxxxxxxxxxxxxxxx             " >> ${MAIL_FILE}
+echo "---------------------------------------------------------------" >> ${MAIL_FILE}
+echo "***************************************************************" >> ${MAIL_FILE}
+echo "* SERVER IDENTIFICATION : ${SERVER_NAME}                       " >> ${MAIL_FILE}
+echo "***************************************************************" >> ${MAIL_FILE}
+function_name # function call
+RC=$?
+if [ $RC != 0 ]; then
+    echo "Error Running Function to xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx "  >> ${MAIL_FILE}
+    ERROR_CODE=$RC
+    cat /tmp/sql01.$$                                                  >> ${MAIL_FILE}
+else
+    DATE_TIME=`date`
+    echo "Task successfully completed       "                          >> ${MAIL_FILE}
+    echo "******************************************************"      >> ${MAIL_FILE}
+    cat /tmp/sql01.$$  >> ${MAIL_FILE}
+    echo "******************************************************"      >> ${MAIL_FILE}
+    ERROR_CODE=0
+fi
+ 
+ 
+ 
+echo "---------------------------------------------------------------" >> ${MAIL_FILE}
+echo "# Step 2 - Write Email Message                                 " >> ${MAIL_FILE}
+echo "---------------------------------------------------------------" >> ${MAIL_FILE}
+echo "===============================================================" >> ${MAIL_FILE}
+echo ''                                                                >> ${MAIL_FILE}
+if [ ${ERROR_CODE} -eq 0 ]; then
+    echo "$0 succeeded at `date`."                                     >> ${MAIL_FILE}
+else
+    echo "$0 failed at `date`."                                        >> ${MAIL_FILE}
+fi
+# compose the message type
+if [ ${ERROR_CODE} -eq 0 ]; then
+        MESSAGE_TYPE='success'
+else
+        MESSAGE_TYPE='failure'
+fi
+# send mail
+if [ \( \( ${ERROR_CODE} -ne 0 \) -a \( ${MAIL_FLAG} -eq 0 \) \) -o \( ${MAIL_FLAG} -gt 0 \) ]
+then
+        # ... invoke the mail script
+        ${MAIL_SCRIPT} ${MAIL_FILE} $0 ${MESSAGE_TYPE} ${MAIL_LIST}
+        MAIL_ERROR=$?
+fi
+ 
+exit ${ERROR_CODE}

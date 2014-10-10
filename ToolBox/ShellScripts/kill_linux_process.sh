@@ -29,5 +29,3 @@ do
 done < ${PROCESS_TO_BE_KILL}
 
 exit 0
-
-
