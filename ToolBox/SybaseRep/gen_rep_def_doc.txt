@@ -1,0 +1,82 @@
+
+Use replication definitions to improve the performance of the replication system in a warm standby environment. The script that we used have been slight modified
+from the original to copy the replication definition to another folder with our custom naming convention
+gen_repdefs –> gen_repdefs.sh
+Usage: gen_repdefs.sh -Uusername -Ppassword [-Sservername] [-Ddatabase]
+ [-Aprefix] [-Zsuffix]
+ [-Csearchable_columns]
+ [-Llogical_ds.logical_db] -- warm standby logical connection
+ [-M] -- rep minimal columns
+ [-I | -N] -- Replicate Identity as Identity or Numeric
+ Default: Identity
+ [-Oownername] -- Owner qualified tables
+ [-UC] -- Uppercase All Columns
+ [-W1:2:3] -- Send standby options
+ NOTE: send standby is required with MSA
+ -W1: send standby (same as send standby all columns)
+ -W2: send standby all columns
+ -W3: send standby replication definition columns
+ [-TC | -TA] -- Text/Image Rep if Changed/Always Rep
+ Default: replicate_if_changed
+ [-Y] -- Allow 255 width for table and column names (ASE/RS 15)
+ [-TS] -- replicate timestamp column (RS 15.1)
+ [-G1:0] -- dynamic sql: 1= on, 0 = off (RS 15.1)
+ [-Rrs_address_column]
+ [-Finclude_tablename_file]
+ [-Xexclude_tablename_file]
+ [tablename [table_name]...]
+ [tablename [table_name]...]
+
+The following example will create a replication definition for SystemActivity
+
+cd sybasease@LINUX_SRV_NAME:/mnt/R5/scripts/replication>$
+./gen_repdefs.sh -Usa -P<password> -S<ServerName> -DUSER_DB2 -AAL_ -Z_repdef -LlogicalSRV.USER_DB2 -M -W1 -Y -TS SystemActivity
+
+-A Prefix with database name. Opted to use short name such as AL for USER_DB2.
+-Z Suffix - this will be repdef
+-L logical_ds.logical_db - In this case it is logicalSRV.<DatabaseName>
+-M rep minimal columns .
+                        When you use the replicate minimal columns clause, replicated update and delete transactions include only the required columns.
+            Values for unchanged columns can be omitted from update commands. Omitting the unnecessary columns reduces the size of messages
+            delivered through the replication system and requires Adaptive Server to do less work.
+-W1 send standby (same as send standby all columns)
+-Y  Allow 255 width for table and column names (ASE/RS 15)
+-TS replicate timestamp column (RS 15.1) This will allow us to create repdefs for tables with timestamp columns
+tablename - name of the table for which we are creating repdef
+
+
+The the replication definition is stored in the location /mnt/R5/scripts/replication/repdefs
+There are two files created
+<PrefixDB>_<TableName>_repdef.droprepdefs - Has statement to drop the replication definition
+<PrefixDB>_<TableName>_repdef.createrepdefs - Has statement to created replication definition
+
+Suggested PreFix
+Database Name   PreFix
+
+Create Replication Definitions for All Tables in DB
+With MSA it is recommended to create Replication Definition for all tables for high transaction databases. Below is a list of commands to create this for USER_DB2
+, USER_DB1 and USER_DB3. Other than the name of the script, the only difference between this and the previous script is we now pass the list of tables for which w
+e are running repdefs. The list was created excluding tables with text columns. The option passed is -Finputfile
+File format : DB_repdef_list.txt
+./gen_repdefs.sh -Usa -P******* -SPRIMARY_DB_SRV -DUSER_DB1 -AUSER_DB1_ -Z_repdef -LlogicalSRV.USER_DB1 -M -W2 -Y -TS -FUSER_DB1_repdef_list.txt
+Each run creates four files
+logicalSRV.USER_DB1.createrepdefs - replication definition
+logicalSRV.USER_DB1.noprimarykey - list tables with no primary key or unique index
+logicalSRV.USER_DB1.droprepdefs - drop rep def statements (reverse of create)
+logicalSRV.USER_DB1.setrep - set rep table
+
+./gen_repdefs.sh -Usa -P******* -SPRIMARY_DB_SRV -DUSER_DB2 -AAL_ -Z_repdef -LlogicalSRV.USER_DB2 -M -W2 -Y -TS -FUSER_DB2_repdef_list.txt
+logicalSRV.USER_DB2.createrepdefs
+logicalSRV.USER_DB2.noprimarykey
+logicalSRV.USER_DB2.droprepdefs
+logicalSRV.USER_DB2.setrep
+./gen_repdefs.sh -Usa -P******* -SPRIMARY_DB_SRV -DUSER_DB3 -AUSER_DB3_ -Z_repdef -LlogicalSRV.USER_DB3 -M -W2 -Y -TS -FUSER_DB3_repdef_list.txt
+logicalSRV.USER_DB3.createrepdefs
+logicalSRV.USER_DB3.noprimarykey
+logicalSRV.USER_DB3.droprepdefs
+logicalSRV.USER_DB3.setrep
+
+Now created Replication Definitions with logincal_SRV.<DB>.createrepdefs file
+isql -Usa -SREP_SRV -i logicalSRV.USER_DB1.createrepdefs -o logicalSRV.USER_DB1.createrepdefs.log
+isql -Usa -SREP_SRV -i logicalSRV.USER_DB3.createrepdefs -o logicalSRV.USER_DB3.createrepdefs.log
+isql -Usa -SREP_SRV -i logicalSRV.USER_DB2.createrepdefs -o logicalSRV.USER_DB2.createrepdefs.log
