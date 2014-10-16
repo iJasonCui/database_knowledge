@@ -76,6 +76,9 @@ logicalSRV.USER_DB3.noprimarykey
 logicalSRV.USER_DB3.droprepdefs
 logicalSRV.USER_DB3.setrep
 
+./gen_repdefs.and.subs.sh -Usa -S[PRIMARY_DB_SRV] -P[password] -D[DB_NAME] -LlogicalSRV.CRM -M -TC -TS -Y -ACRM_ -Z_repdef -FCRM_Repdef.cfg
+
+
 Now created Replication Definitions with logincal_SRV.<DB>.createrepdefs file
 isql -Usa -SREP_SRV -i logicalSRV.USER_DB1.createrepdefs -o logicalSRV.USER_DB1.createrepdefs.log
 isql -Usa -SREP_SRV -i logicalSRV.USER_DB3.createrepdefs -o logicalSRV.USER_DB3.createrepdefs.log
