@@ -49,9 +49,9 @@ line234=`echo $line150 - $line233  | bc`
 line236=$line234
 line260=$line236
 
-echo "Line 101: "$T4Box14_line101       		> ${OUTPUT_FILE}
-echo "Line 117: "$UCCB_line117          		>> ${OUTPUT_FILE}
-echo "Line 121: "$INTREST_line121       		>> ${OUTPUT_FILE}
+echo "Line 101: "$T4Box14_line101                       > ${OUTPUT_FILE}
+echo "Line 117: "$UCCB_line117                          >> ${OUTPUT_FILE}
+echo "Line 121: "$INTREST_line121                       >> ${OUTPUT_FILE}
 echo "Line 150: "$line150                       >> ${OUTPUT_FILE}
 echo "Line 206: "$PensionAdjustBox52            >> ${OUTPUT_FILE}
 echo "Line 208: "$RRSP_line208                  >> ${OUTPUT_FILE}
@@ -68,24 +68,22 @@ echo "#----------------------------------------" >> ${OUTPUT_FILE}
 echo "Go to Schedule 1" >> ${OUTPUT_FILE}
 
 col300=10822
-col308=$CPP 
-col312=$EI 
+col308=$CPP
+col312=$EI
 ## col367=2 * 2191
 col367=$childrenAmount
 ##canada employment
-col363=1095 
-col364=1285 
+col363=1095
+col364=1285
 echo "line 78"
 ## fitness amount
-col365=`echo  2*500 | bc` 
+col365=`echo  2*500 | bc`
 echo "line 82"
 ## art amount
-col370=`echo  2*500 | bc` 
+col370=`echo  2*500 | bc`
 ##col368=10000 ## home renovation expense schedule 12 only for 2009
 ## caregiver amount schedule 5 changjiu only for now; kairong tax year 2011
-col315=`echo  2*4402 | bc`  
-
-echo "line 84"
+col315=`echo  2*4402 | bc`
 
 if [ "$combineFlag" -eq 1 ] ## CONBINED
 then
@@ -99,9 +97,12 @@ else
     col303=0
 fi
 
+
 ##calculate the Line18
-col335=`echo  $col300 + $col303 + $col367 + $col308 + $col312 + $col363 + $col364 + $col365 + $col315 + $col370 | bc` 
-col338=`echo  $col335*0.15 | bc`
+col335=`echo  $col300 + $col303 + $col367 + $col308 + $col312 + $col363 + $col364 + $col365 + $col315 + $col370 | bc`
+col338=`echo "scale=2; $col335*0.15" | bc `
+
+echo $col338
 
 ##donation
 col340=$Donation
@@ -113,21 +114,26 @@ else
     col345=$col340
 fi
 
-col346=`echo  $col345*0.15    | bc`
+col346=$(echo "scale=2; $col345*0.15" | bc)
 col347=`echo  $col340-$col345 | bc`
-col348=`echo  $col347*0.29    | bc`
+col348=$(echo "scale=2; $col347*0.29" | bc)
 col349=`echo  $col346+$col348 | bc`
 col350=`echo  $col338+$col349 | bc`
 
-##DECLARE $LINE36 numeric(12,2)
-if [ "$col260" -le 42707 ] 
+col260=$(echo "scale=0; $col260*1" | bc )
+
+echo $col260
+
+if [ "$col260" -le "42707" ]
 then
-    LINE39=`echo $col260 * 0.15 | bc `
+    LINE39=`echo "scale=2; $col260*0.15" | bc `
 fi
 
-if [ "$col260" -gt 42707 ] && [ "$col260" -le 85414 ] 
+echo $LINE39
+
+if [ "$col260" -gt 42707 ] && [ "$col260" -le 85414 ]
 then
-    LINE39=`echo 6406 + ($col260 - 42707) * 0.22 | bc `
+    LINE39=$(echo "scale=2; 6406 + ($col260 - 42707)*0.22" | bc )
 fi
 
 if [ "$col260" -gt 85414 ] && [ "$col260" -le 132406 ]
@@ -139,15 +145,15 @@ LINE35=`echo $col260 - 85414 | bc `
 LINE37=`echo ($col260 - 85414) * 0.26) | bc `
 LINE39=`echo 15802 + $LINE37 | bc `
 
-if [ "$col260" -gt  127021 ] 
+if [ "$col260" -gt  127021 ]
 then
     LINE39=`echo 28020 + ($col260 - 132406) * 0.29 | bc `
 
     ## calculate the Line 38
     col420=$LINE39 - $col350
-    
-    if [ "$col420" -lt 0 ] 
-    then 
+
+    if [ "$col420" -lt 0 ]
+    then
         col420=0
     fi
 fi
@@ -162,7 +168,7 @@ echo "Line 365: "$col365 >> ${OUTPUT_FILE}
 echo "Line 370: "$col370 >> ${OUTPUT_FILE}
 echo "Line 315: "$col315 >> ${OUTPUT_FILE}
 echo "Line 335: "$col335 >> ${OUTPUT_FILE}
-##LINE 29 
+##LINE 29
 echo "Line 338: "$col338 >> ${OUTPUT_FILE}
 echo "Line 340: "$col340 >> ${OUTPUT_FILE}
 echo "Line 345: "$col345 >> ${OUTPUT_FILE}
